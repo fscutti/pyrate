@@ -1,7 +1,7 @@
 --- 
 # This is a pyrate job configuration file for data preparation.
-# It will not produce plots but only transform a file format,
-# eventually executing some event selection.
+# It will not produce plots or add variables, but only transform 
+# a file format, eventually executing some event selection.
 # It is written in yaml: https://en.wikipedia.org/wiki/YAML
 
 # -----------------------------------------------------------
@@ -11,7 +11,8 @@
 # (sequence_tag). This corresponds to the need to group e.g.
 # different channels in WaveDump, or different MC simulated
 # samples related to the same process, respectively. These
-# tags are optional.
+# tags are optional. Group tags will specify inputs which 
+# will be merged in the output.
 # -----------------------------------------------------------
 input_format:    WaveDump
 input_path:      my/input/path
@@ -42,12 +43,13 @@ Sample1:
 
 
 # -----------------------------------------------------------
-# Variables
+# Variables/Selection
 # -----------------------------------------------------------
 # The order used for the variables does not matter. Each of 
-# the variable names corresponds to the name of an algorithm
-# dedicated to its computation. The variable hyerarchy is 
-# constructed internally when defining the algorithms.
+# the variable names corresponds to some information
+# already available in the input. No new variables are 
+# computed at this stage!!! Some selection might be required
+# specifying the ntuple "flavour".
 # -----------------------------------------------------------
 variables: var1, var2, var3, var4
 selection: var1 > 45, var2 < var1 * 2, var3==True
