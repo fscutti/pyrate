@@ -39,37 +39,44 @@ events_interval:
 # Variables declared in the variables field will be plotted.
 # Variables invoked for the first time in the selection will
 # be computed without the need to declare them before-hand.
-# The correct order is sorted out internally.
+# The correct order is sorted out internally. If a variable 
+# has been computed upstream at any level of region nesting 
+# for a particular event, it will not be recomputed.
 # Identical weights of dependent regions will NOT be reapplied.
 # Plotted variables and weights are only computed for the 
-# subset of events specified in the selection.
-# Sub-regions are a selection subset of parent ones. 
-# In order for any chain of regions to be scheduled by the job
-# at least one of its subregions (itself included) should 
-# declare at least a variable to be plotted.
+# subset of events specified in the selection. Sub-regions 
+# are a selection subset of parent ones. In order for any 
+# chain of regions to be scheduled by the job at least one 
+# of its subregions (itself included) should declare at least 
+# a variable to be plotted. By default, the code will plot
+# all declared region (make_plot = True).
 # -----------------------------------------------------------
 region1: 
-  selection:      var1>8, var2<var1, var3==True
-  weights:        weight1, weight2
-  plot_variables: var1, var2, var3
+  selection:    var1>8, var2<var1, var3==True
+  weights:      weight1, weight2
+  variables:    var1, var2, var3
+  plot_options: "..."
 
   region1_A: 
-    selection:      var4>10, var4<var1, var1>90
-    weights:        weight1, weight3
-    plot_variables: var3, var4, weight3
+    selection:    var4>10, var4<var1, var1>90
+    weights:      weight1, weight3
+    variables:    var3, var4, weight3
+    plot_options: "..."
 
   regions1_B: 
-    selection:      var4>10, var4<var1, var1>90
-    plot_variables: var3, var4, weight1
-
+    selection:    var4>10, var4<var1, var1>90
+    variables:    var3, var4, weight1
+    plot_options: "..."
 
 
 region2: 
   selection: var10>8, var2<var1, var3==True
+  make_plot: False
 
   region2_A: 
-    selection:      var4>10, var4<var1, var1>90
-    plot_variables: var3, var4
+    selection:    var4>10, var4<var1, var1>90
+    variables:    var3, var4
+    plot_options: "..."
 
 
 # EOF
