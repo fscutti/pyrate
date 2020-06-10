@@ -1,0 +1,47 @@
+--- 
+# This is a pyrate job configuration file for reconstruction 
+# jobs. Input and output file formats are the same at this
+# stage. This will add information to the ntuple and eventually
+# execute some selection. No plots will be produced.
+# It is written in yaml: https://en.wikipedia.org/wiki/YAML
+
+# -----------------------------------------------------------
+# General Job specifications
+# -----------------------------------------------------------
+# Files can be grouped in parallel (group tag) or in sequence
+# (sequence_tag). But at this stage there should be no need
+# to use group tags and information of one event is assumed
+# to be gathered all in the same file. Auxiliary input might
+# be needed for this stage: e.g. apply calibration, digitise
+# waveforms etc.
+# -----------------------------------------------------------
+input_format:    ROOT
+input_path:      my/input/path
+aux_input:       my/auxiliary/input/path
+output_path:     my/output/path
+sequence_tag:    Sample1, Sample2, Sample3
+events_interval: 
+   -  0
+   - -1  
+
+# -----------------------------------------------------------
+# Input specifications
+# -----------------------------------------------------------
+# Specifications should be kept to a minimum at this stage,
+# as we can already assume a fairly rigid structure of the 
+# input.
+# -----------------------------------------------------------
+# ...     
+
+# -----------------------------------------------------------
+# Variables
+# -----------------------------------------------------------
+# The order used for the variables does not matter. Each of 
+# the variable names corresponds to the name of an algorithm
+# dedicated to its computation. The variable hyerarchy is 
+# constructed internally when defining the algorithms.
+# -----------------------------------------------------------
+variables: var1, var2, var3, var4
+selection: var1 > 45, var2 < var1 * 2, var3==True
+
+# EOF
