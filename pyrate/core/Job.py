@@ -1,1 +1,1 @@
-"""Main Job class"""
+""" This class will handle a set of configurations """
