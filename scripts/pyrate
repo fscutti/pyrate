@@ -1,0 +1,28 @@
+#!/usr/bin/env python3
+import argparse
+import yaml
+
+parser = argparse.ArgumentParser(description="Command line options for pyrate")
+
+parser.add_argument("--no_loop","-nl", action="store", default=False, help="do not run the event loop")
+
+# required
+# ----------
+parser.add_argument("--config", "-c",  help="input configuration file/s",  nargs="+", required=True)
+parser.add_argument("--input",  "-i",  help="input file/s including path", nargs="+", required=False)
+parser.add_argument("--output", "-o",  help="input file/s including path", nargs="+", required=False)
+
+# optional
+# ----------
+parser.add_argument("--emin", "-emin", default= 0, type=int, help="minimum event index")
+parser.add_argument("--emax", "-emax", default=-1, type=int, help="maximum event index")
+
+parser.add_argument("--nevents", "-n", default=1, type=int, help="maximum event index")
+
+args = parser.parse_args()
+
+if __name__ == "__main__":
+   for config_file in args.config:
+       stream = open(config_file,"r")
+       dictionary = yaml.full_load(stream)
+       print(dictionary)
