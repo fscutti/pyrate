@@ -4,25 +4,14 @@ import yaml
 
 parser = argparse.ArgumentParser(description="Command line options for pyrate")
 
-parser.add_argument("--no_loop","-nl", action="store", default=False, help="do not run the event loop")
-
-# required
-# ----------
-parser.add_argument("--config", "-c",  help="input configuration file/s",  nargs="+", required=True)
-parser.add_argument("--input",  "-i",  help="input file/s including path", nargs="+", required=False)
-parser.add_argument("--output", "-o",  help="input file/s including path", nargs="+", required=False)
-
-# optional
-# ----------
-parser.add_argument("--emin", "-emin", default= 0, type=int, help="minimum event index")
-parser.add_argument("--emax", "-emax", default=-1, type=int, help="maximum event index")
-
-parser.add_argument("--nevents", "-n", default=1, type=int, help="maximum event index")
+# required job configuration file. Could be a list of several.
+parser.add_argument("--job_config", "-j",  help="job configuration file/s",  nargs="+", required=True)
 
 args = parser.parse_args()
 
 if __name__ == "__main__":
-   for config_file in args.config:
-       stream = open(config_file,"r")
+   for jconfig in args.job_config:
+       stream = open(jconfig,"r")
        dictionary = yaml.full_load(stream)
-       print(dictionary)
+       for k,v in dictionary.items():
+           print(k,v)

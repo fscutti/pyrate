@@ -1,0 +1,17 @@
+--- 
+paths: 
+      config: my/config/path
+      input:  my/input/path
+      output: my/output/path
+
+files: 
+      config: my_config_file
+      input:  my_input_file
+      output: my_output_file
+
+emin: 0
+emax: -1
+
+nevents: 1
+
+# EOF
