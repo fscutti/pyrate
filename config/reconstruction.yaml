@@ -15,14 +15,7 @@
 # be needed for this stage: e.g. apply calibration, digitise
 # waveforms etc.
 # -----------------------------------------------------------
-input_format:    ROOT
-input_path:      my/input/path
 aux_input:       my/auxiliary/input/path
-output_path:     my/output/path
-sequence_tag:    Sample1, Sample2, Sample3
-events_interval: 
-   -  0
-   - -1  
 
 # -----------------------------------------------------------
 # Input specifications

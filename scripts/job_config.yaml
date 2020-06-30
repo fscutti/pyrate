@@ -1,17 +1,25 @@
 --- 
 paths: 
-      config: my/config/path
-      input:  my/input/path
-      output: my/output/path
+      config: /Users/fscutti/pyrate/config
+      input:  /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData
+      output: /Users/fscutti/pyrate/myNotebooks/myOutput
 
+# ------------------------------------------
+# In the input, strings separated by a comma 
+# are interpreted as files gathered in the 
+# same block. They are read in parallel 
+# event by event.
+# ------------------------------------------
 files: 
-      config: my_config_file
-      input:  my_input_file
-      output: my_output_file
+      config: analysis
+      input:  ["*"]
+      output: test
 
 emin: 0
 emax: -1
 
 nevents: 1
+
+use_nodes: false
 
 # EOF
