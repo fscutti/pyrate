@@ -1,4 +1,8 @@
 --- 
+
+# ------------------------------------------
+# These paths are used to look for inputs.
+# ------------------------------------------
 paths: 
       config: /Users/fscutti/pyrate/config
       input:  /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData
@@ -15,11 +19,24 @@ files:
       input:  ["*"]
       output: test
 
+# ------------------------------------------
+# If given, this flag represents the event
+# slice size processed by separate Runs. 
+# This flag has priority over emin and emax.
+# ------------------------------------------
+nevents: 1
+
+# ------------------------------------------
+# These two flags represent the event number
+# considered as a start and stop of the job.
+# ------------------------------------------
 emin: 0
 emax: -1
 
-nevents: 1
-
+# ------------------------------------------
+# Process separate runs in parallel using a
+# cluster system.
+# ------------------------------------------
 use_nodes: false
 
 # EOF
