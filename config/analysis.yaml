@@ -27,6 +27,20 @@
 # -----------------------------------------------------------
 # ...     
 
+
+# -----------------------------------------------------------
+# Names
+# -----------------------------------------------------------
+# Names of the objects that need to be computed. The order
+# does not matter.
+# -----------------------------------------------------------
+names:
+  - var8: 
+         - alg:   Alg1
+         - attr1: var2:Alg2
+         - attr2: var3:Alg8
+         - attr3: "This is a string"
+
 # -----------------------------------------------------------
 # Analysis regions
 # -----------------------------------------------------------
@@ -51,6 +65,7 @@ region1:
   weights:      weight1, weight2
   variables:    var1, var2, var3
   plot_options: "..."
+  tree_options: "..."
 
   region1_A: 
     selection:    var4>10, var4<var1, var1>90
