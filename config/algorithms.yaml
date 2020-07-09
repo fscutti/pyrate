@@ -1,0 +1,15 @@
+---
+
+names:
+  - var1:Alg1:
+         - attr1: var2:Alg2
+         - attr2: var3:Alg8
+         - attr3: true
+
+  - var2: 
+         - alg: Alg2
+         - attr1: var4:Alg9
+         - attr3: false
+
+
+
