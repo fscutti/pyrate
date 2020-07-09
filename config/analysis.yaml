@@ -29,23 +29,23 @@
 
 
 # -----------------------------------------------------------
-# Names
+# Variables
 # -----------------------------------------------------------
-# Names of the objects that need to be computed. The order
-# does not matter. The variables listed could be even plots
-# or algorithms.
+# Names of the objects that need to be evaluated. The order
+# does not matter. Variables can also be used to retrieve 
+# objects from the input files.
 # -----------------------------------------------------------
 variables:
-  - var8: 
-         - alg:   Alg1
-         - attr1: var2
-         - attr2: var6
-         - attr3: "This is a string"
+   var8: 
+         alg:   Alg1
+         attr1: var2
+         attr2: var6
+         attr3: "This is a string"
 
 plots:
-  - plot1:
-         - attr1: true
-         - attr2: false
+   plot1:
+         attr1: true
+         attr2: false
 
 
 # -----------------------------------------------------------
@@ -67,29 +67,31 @@ plots:
 # a variable to be plotted. By default, the code will plot
 # all declared region (make_plot = True).
 # -----------------------------------------------------------
-region1: 
-  selection:    var1>8, var2<var1, var3==True
-  weights:      weight1, weight2
-  plot1:        var1, var5, var8
-  plot2:        var1, var11, var2
-  tree1:        var6, var7
+regions: 
 
-  region1_A: 
-    selection:    var4>10, var4<var1, var1>90
-    weights:      weight1, weight3
-    plots:        "..."
-
-  regions1_B: 
-    selection:    var4>10, var4<var1, var1>90
-    plots:        "..."
-
-
-region2: 
-  selection: var10>8, var2<var1, var3==True
-  plots:     "..."
-
-  region2_A: 
-    selection: var4>10, var4<var1, var1>90
-    plots:     "..."
+         region1:
+                selection:    var1>8, var2<var1, var3==True
+                weights:      weight1, weight2
+                plot1:        var1, var5, var8
+                plot2:        var1, var11, var2
+                tree1:        var6, var7
+                
+                region1_A: 
+                  selection:    var4>10, var4<var1, var1>90
+                  weights:      weight1, weight3
+                  plots:        "..."
+                
+                regions1_B: 
+                  selection:    var4>10, var4<var1, var1>90
+                  plots:        "..."
+       
+       
+         region2: 
+           selection: var10>8, var2<var1, var3==True
+           plots:     "..."
+         
+           region2_A: 
+             selection: var4>10, var4<var1, var1>90
+             plots:     "..."
 
 # EOF

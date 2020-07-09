@@ -1,23 +1,28 @@
 --- 
 
-# ------------------------------------------
-# These paths are used to look for inputs.
-# ------------------------------------------
-paths: 
-      config: /Users/fscutti/pyrate/config
-      input:  /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData
-      output: /Users/fscutti/pyrate/myNotebooks/myOutput
+config:
+      path: /Users/fscutti/pyrate/config
+      files: analysis
 
-# ------------------------------------------
-# In the input, strings separated by a comma 
-# are interpreted as files gathered in the 
-# same block. They are read in parallel 
-# event by event.
-# ------------------------------------------
-files: 
-      config: analysis
-      input:  ["*"]
-      output: test
+input: 
+      path:
+        - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData
+        - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetOutput
+      files:
+        - Channel1*
+        - Channel2*
+
+output:
+      path: /Users/fscutti/pyrate/myNotebooks/myOutput
+      files:
+        output1:
+          - region1:plot1:var1
+          - region1:plot2
+          - region1_A
+        output2:
+          - "*"
+
+
 
 # ------------------------------------------
 # If given, this flag represents the event
