@@ -1,58 +1,9 @@
 --- 
-# This is a pyrate job configuration file for analysis
-# jobs. It will execute a selection on a number of existing 
-# variables or user defined ones. It will produce plots
-# for different selection regions. These might depend on 
-# each other or not.
-# It is written in yaml: https://en.wikipedia.org/wiki/YAML
-
-# -----------------------------------------------------------
-# General Job specifications
-# -----------------------------------------------------------
-# Files can be grouped in parallel (group tag) or in sequence
-# (sequence_tag). But at this stage there should be no need
-# to use group tags and information of one event is assumed
-# to be gathered all in the same file. Auxiliary input should
-# not be needed at this stage.
-# -----------------------------------------------------------
-
-
-
-# -----------------------------------------------------------
-# Input specifications
-# -----------------------------------------------------------
-# Specifications should be kept to a minimum at this stage,
-# as we can already assume a fairly rigid structure of the 
-# input.
-# -----------------------------------------------------------
-# ...     
-
-
-# -----------------------------------------------------------
-# Variables
-# -----------------------------------------------------------
-# Names of the objects that need to be evaluated. The order
-# does not matter. Variables can also be used to retrieve 
-# objects from the input files.
-# -----------------------------------------------------------
-variables:
-   var8: 
-         alg:   Alg1
-         attr1: var2
-         attr2: var6
-         attr3: "This is a string"
-
-plots:
-   plot1:
-         attr1: true
-         attr2: false
-
-
 # -----------------------------------------------------------
 # Analysis regions
 # -----------------------------------------------------------
 # Regions might be independent from each other or not. 
-# Variables declared in the variables field will be plotted.
+# Variables declared in the plot/s fields
 # Variables invoked for the first time in the selection will
 # be computed without the need to declare them before-hand.
 # The correct order is sorted out internally. If a variable 
@@ -64,8 +15,7 @@ plots:
 # are a selection subset of parent ones. In order for any 
 # chain of regions to be scheduled by the job at least one 
 # of its subregions (itself included) should declare at least 
-# a variable to be plotted. By default, the code will plot
-# all declared region (make_plot = True).
+# a variable to be plotted.
 # -----------------------------------------------------------
 regions: 
 
@@ -94,4 +44,24 @@ regions:
              selection: var4>10, var4<var1, var1>90
              plots:     "..."
 
+
+
+# -----------------------------------------------------------
+# Variables
+# -----------------------------------------------------------
+# Names of the objects that need to be evaluated. The order
+# does not matter. Variables can also be used to retrieve 
+# objects from the input files.
+# -----------------------------------------------------------
+variables:
+   var8: 
+         alg:   Alg1
+         attr1: var2
+         attr2: var6
+         attr3: "This is a string"
+
+plots:
+   plot1:
+         attr1: true
+         attr2: false
 # EOF
