@@ -1,30 +1,54 @@
 --- 
+# -----------------------------------------------------------
+# Multiple paths can be specified, eventually including the 
+# file name if no ambiguity would arise. Files can be 
+# specified using part of their names. Names given in the 
+# list refer to files which are read independently.
+# If comma-separated items are given, these will be read in 
+# the same event. 
+# The nevents flag can be any integer number implying the
+# loop will run up to that value, or the range can be 
+# explicitly specified. If nevents: 0 it is implied that the
+# job is not an event loop (e.g. limit calculation).
+# -----------------------------------------------------------
 input: 
       path:
-        - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData
-        - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetOutput
+        - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData1
+        - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData2
       files:
-        - Channel1*
-        - Channel2*
+        - MuonChannel1*, MuonChannel2*
+        - OtherRun* 
       nevents: 
          emin: 0
          emax: -1
 
+
+# -----------------------------------------------------------
+# Several configuration files can be specified separated with
+# a comma.
+# -----------------------------------------------------------
 config:
       path: /Users/fscutti/pyrate/config
       files: analysis
 
 
+# -----------------------------------------------------------
+# The possibility is given to specify several output files 
+# and their content. The content has to refer to objects
+# declared in the configuration file in the region field. 
+# The object specification is inclusive of all its 
+# non-specified sub-fields.
+# -----------------------------------------------------------
 output:
       path: /Users/fscutti/pyrate/myNotebooks/myOutput
       files:
         output1:
-          - region1:plot1:var1
-          - region1:plot2
-          - region1_A
+          - regions:region1:plot1:var1
+          - regions:region1:plot2
         output2:
+          - regions:region1_A
+        output3:
           - "*"
-
 
 use_nodes: false
 
