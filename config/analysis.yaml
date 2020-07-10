@@ -18,13 +18,18 @@
 # a variable to be plotted.
 # -----------------------------------------------------------
 regions: 
-
          region1:
                 selection:    var1>8, var2<var1, var3==True
                 weights:      weight1, weight2
-                plot1:        var1, var5, var8
-                plot2:        var1, var11, var2
-                tree1:        var6, var7
+                plots:        
+                     plot1: 
+                          var1: nbins, xmin, xmax
+                          var5: nbins, xmin, xmax
+                          var8: nbins, xmin, xmax
+                     plot2: 
+                          var1,var3:  nbinsx, xmin, xmax, nbinsy, ymin, ymax
+                          var6,var7:  nbinsx, xmin, xmax, nbinsy, ymin, ymax
+                trees: tree1, tree2       
                 
                 region1_A: 
                   selection:    var4>10, var4<var1, var1>90
@@ -64,4 +69,9 @@ plots:
    plot1:
          attr1: true
          attr2: false
+
+trees:
+   tree1: var1, var2, var3, ...
+   tree2: var11, var8, var9, ...
+
 # EOF

@@ -13,11 +13,11 @@
 # -----------------------------------------------------------
 input: 
       path:
-        - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData1
-        - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData2
+        - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData
       files:
-        - MuonChannel1*, MuonChannel2*
-        - OtherRun* 
+        - wave0, wave1, wave2
+        - Run0
+        - Run1
       nevents: 
          emin: 0
          emax: -1
@@ -29,7 +29,7 @@ input:
 # -----------------------------------------------------------
 config:
       path: /Users/fscutti/pyrate/config
-      files: analysis
+      files: analysis, reconstruction
 
 
 # -----------------------------------------------------------
@@ -43,10 +43,11 @@ output:
       path: /Users/fscutti/pyrate/myNotebooks/myOutput
       files:
         output1:
-          - regions:region1:plot1:var1
-          - regions:region1:plot2
+          - regions:region1:plots:plot1:var1
+          - regions:region1:plots
         output2:
           - regions:region1_A
+          - regions:region1:trees:tree1
         output3:
           - "*"
 
