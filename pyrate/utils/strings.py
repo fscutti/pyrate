@@ -3,6 +3,9 @@
 #def find_tags(name, tags = []):
 #    for t in tags
 
+def remove_duplicates(l):
+    return list(dict.fromkeys(l))
+
 def get_items(s):
     return s.replace(" ","").split(",")
 
@@ -17,8 +20,6 @@ def remove_tag_from_name(name, tag):
     else:         return name.replace(tag,"")
 
 
-def remove_duplicates(l):
-    return list(dict.fromkeys(l))
 
 
 

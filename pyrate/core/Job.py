@@ -15,11 +15,11 @@ class Job:
         """
          
         # list of run files {name:[files]}
-        input_file_list = self.get_file_list()          
+        input_file_list = self.get_file_list()
+        input_events    = self.get_run_events()
         self.runs = {r:[f for f in input_file_list if r in f.split("/")[-1]] 
                 for r in self.get_run_names(input_file_list)}
-
-        print(self.config["input"]["nevents"])
+        self.runs.update(input_events)
         # list of outputs
         # list of algorithms
         # 
@@ -41,10 +41,23 @@ class Job:
         """
         input_run_names = []
         for f in input_file_list:
-            for group in self.config["input"]["files"]:
+            for group in self.config["input"]["files"]: 
                 input_run_names.extend(s.remove_tag_from_name(f,t)
-                        for t in s.get_items(group) if t in f)
+                    for t in s.get_items(group) if t in f)
         return s.remove_duplicates(input_run_names)
+
+    def get_run_events(self):
+        """ Events are referred to a run.
+        """
+        if type(self.config["input"]["nevents"]) is dict: 
+            return self.config["input"]["nevents"]
+        elif self.config["input"]["nevents"]>0: 
+            return {"emin":0, "emax":self.config["input"]["nevents"]-1}
+        else: 
+            return {"emin":0, "emax":0}
+
+   
+
 
 
 
