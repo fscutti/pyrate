@@ -1,4 +1,5 @@
-""" This class is the core of the execution """
+""" This class is the core of the execution.
+"""
 
 
 class Run:

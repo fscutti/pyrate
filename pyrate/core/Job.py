@@ -16,31 +16,34 @@ class Job:
          
         # list of run files {name:[files]}
         input_file_list = self.get_file_list()          
-        self.runs = {r:[f for f in input_file_list if r in f.split("/")[-1]] for r in self.get_run_names(input_file_list)}
+        self.runs = {r:[f for f in input_file_list if r in f.split("/")[-1]] 
+                for r in self.get_run_names(input_file_list)}
 
-
+        print(self.config["input"]["nevents"])
         # list of outputs
         # list of algorithms
         # 
-
+        print(self.runs)
 
     def get_file_list(self):
-        """ Get list of input files.
+        """ Get list of input files. N.B. duplicates are removed!
         """
         input_file_list = []
         for path in self.config["input"]["path"]:
-            input_file_list.extend(os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f)))
+            for t in s.remove_duplicates(s.get_items_from_list(self.config["input"]["files"])):
+                input_file_list.extend(os.path.join(path, f) 
+                        for f in os.listdir(path) if os.path.isfile(os.path.join(path, f)) and t in f)
         return input_file_list
 
 
     def get_run_names(self, input_file_list):
-        """ The run name is everything but the name of the file.
+        """ The run name is everything but the name of the file minus its extension.
         """
         input_run_names = []
         for f in input_file_list:
             for group in self.config["input"]["files"]:
-                input_run_names.extend(s.remove_tag_from_name(f,t) for t in s.get_items(group) if t in f)
-        
+                input_run_names.extend(s.remove_tag_from_name(f,t)
+                        for t in s.get_items(group) if t in f)
         return s.remove_duplicates(input_run_names)
 
 
