@@ -11,25 +11,36 @@
 # explicitly specified. If nevents: 0 it is implied that the
 # job is not an event loop (e.g. limit calculation).
 # -----------------------------------------------------------
-input: 
-      path:
-        - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData
-      files:
-        - wave0, wave1, wave2
-        - Run0
-        - Run1
-      nevents: 
-         emin: 0
-         emax: -1
+inputs: 
+     input1:
+       samples:  Jan,Feb
+       group:    wave0,wave1,wave2
+       nevents: 
+              emin: 0
+              emax: -1
+       path:
+          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/
+
+
+     input2:
+       samples:  source
+       nevents: 
+              emin: 0
+              emax: -1
+       path:
+          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/
+
 
 
 # -----------------------------------------------------------
 # Several configuration files can be specified separated with
 # a comma.
 # -----------------------------------------------------------
-config:
+configs:
+  analysis:
       path: /Users/fscutti/pyrate/config
-      files: analysis, reconstruction
+  reconstruction:
+      path: /Users/fscutti/pyrate/config
 
 
 # -----------------------------------------------------------
@@ -39,17 +50,21 @@ config:
 # The object specification is inclusive of all its 
 # non-specified sub-fields.
 # -----------------------------------------------------------
-output:
-      path: /Users/fscutti/pyrate/myNotebooks/myOutput
-      files:
-        output1:
-          - regions:region1:plots:plot1:var1
-          - regions:region1:plots
-        output2:
-          - regions:region1_A
-          - regions:region1:trees:tree1
-        output3:
-          - "*"
+outputs:
+  output1:
+    path: /Users/fscutti/pyrate/myNotebooks/myOutput
+    objects:
+            - regions:region1:plots:plot1:var1
+            - regions:region1:plots
+  output2:
+    path: /Users/fscutti/pyrate/myNotebooks/myOutput
+    objects:
+            - regions:region1_A
+            - regions:region1:trees:tree1
+  output3:
+    path: /Users/fscutti/pyrate/myNotebooks/myOutput
+    objects:
+            - "*"
 
 use_nodes: false
 
