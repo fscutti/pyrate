@@ -14,7 +14,7 @@
 inputs: 
      input1:
        samples:  Jan,Feb
-       group:    wave0,wave1,wave2
+       group:    wave0,wave1
        nevents: 
               emin: 0
               emax: -1
@@ -37,10 +37,12 @@ inputs:
 # a comma.
 # -----------------------------------------------------------
 configs:
-  analysis:
+  config1:
       path: /Users/fscutti/pyrate/config
-  reconstruction:
+      name: analysis
+  config2:
       path: /Users/fscutti/pyrate/config
+      name: reconstruction
 
 
 # -----------------------------------------------------------
