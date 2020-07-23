@@ -1,0 +1,91 @@
+--- 
+# -----------------------------------------------------------
+# Objects
+# -----------------------------------------------------------
+# Example of object configuration file. The definition of 
+# these objects can be distributed across as many files as 
+# preferred.
+# -----------------------------------------------------------
+
+# -----------------------------------------------------------
+# Variables. They depend on an algorithm to be computed and
+# eventually on some variables computed upstream. This general
+# philosophy applies to other objects as well e.g. to plots.
+# -----------------------------------------------------------
+variables:
+   var100: 
+         alg:   LimitCalculator
+         attr1: var2 
+         attr2: var6
+         attr3: "h_myHistName"
+
+# -----------------------------------------------------------
+# Plots. When they are defined under the "regions" field they
+# will be constructed with respect to that specific selection.
+# This does not necessarily mean that an event loop will be
+# scheduled, as regions histograms might already be available
+# in the input file that is read. Therefore, whether the loop
+# will be executed depends on the input read configuration AND
+# the required output.
+# Some plots might be graphs required for limit setting. In
+# this case the algorithm computing the limit fit is given to
+# the plot definition and the input might just be histograms
+# from a file.
+# -----------------------------------------------------------
+plots:
+   regions:
+     region1:
+           plot1:
+                  var1: nbins, xmin, xmax
+                  var2: nbins, xmin, xmax
+           plot2:
+                  var9,var1: nbinsx, xmin, xmax, nbinsy, ymin, ymax
+                  var2,var9: nbinsx, xmin, xmax, nbinsy, ymin, ymax
+   plot1:
+       alg:     myStandardPlot
+       myattr1: "This is my attribute"
+       myattr2: "myHistName"
+
+   plot4:
+       alg:     LimitGraph
+       myattr1: "This could be the config of a limit plot"
+       myattr2: "myHistName"
+       attr1:   var100
+
+# -----------------------------------------------------------
+# Trees.
+# -----------------------------------------------------------
+trees:
+   regions:
+     region1:
+           tree1: var1, var2, var3, ...
+
+
+
+# -----------------------------------------------------------
+# Histograms. They behave exactly like plots with the 
+# different that, if a plot is scheduled an histogram is 
+# automatically created, but the requirement of an histogram
+# does not assume a plot will be made.
+# -----------------------------------------------------------
+histograms:
+   regions:
+     region1:
+           hist1:
+                  var1: nbins, xmin, xmax
+                  var2: nbins, xmin, xmax
+           hist2:
+                  var10,var11: nbinsx, xmin, xmax, nbinsy, ymin, ymax
+                  var5,var8:   nbinsx, xmin, xmax, nbinsy, ymin, ymax
+   hist1:
+       alg:     myStandardHist
+       myattr1: "This is my attribute"
+       myattr2: "myHistName"
+
+   hist9:
+       alg:     LimitGraph
+       myattr1: "This could be the config of a limit plot"
+       myattr2: "myHistName"
+       attr1:   var100
+
+# EOF

@@ -2,10 +2,8 @@
 # -----------------------------------------------------------
 # Analysis regions
 # -----------------------------------------------------------
-# Regions might be independent from each other or not. 
-# Variables declared in the plot/s fields
-# Variables invoked for the first time in the selection will
-# be computed without the need to declare them before-hand.
+# Regions might be independent from each other or not. Only
+# the variables required will be scheduled for computation.
 # The correct order is sorted out internally. If a variable 
 # has been computed upstream at any level of region nesting 
 # for a particular event, it will not be recomputed.
@@ -13,65 +11,27 @@
 # Plotted variables and weights are only computed for the 
 # subset of events specified in the selection. Sub-regions 
 # are a selection subset of parent ones. In order for any 
-# chain of regions to be scheduled by the job at least one 
-# of its subregions (itself included) should declare at least 
-# a variable to be plotted.
+# chain of regions to be scheduled by the job the creation
+# of an object requiring its selection needs to be made.
 # -----------------------------------------------------------
 regions: 
          region1:
                 selection:    var1>8, var2<var1, var3==True
                 weights:      weight1, weight2
-                plots:        
-                     plot1: 
-                          var1: nbins, xmin, xmax
-                          var5: nbins, xmin, xmax
-                          var8: nbins, xmin, xmax
-                     plot2: 
-                          var1,var3:  nbinsx, xmin, xmax, nbinsy, ymin, ymax
-                          var6,var7:  nbinsx, xmin, xmax, nbinsy, ymin, ymax
-                trees: tree1, tree2       
                 
                 region1_A: 
-                  selection:    var4>10, var4<var1, var1>90
-                  weights:      weight1, weight3
-                  plots:        "..."
+                           selection:    var4>10, var4<var1, var1>90
+                           weights:      weight1, weight3
                 
                 regions1_B: 
-                  selection:    var4>10, var4<var1, var1>90
-                  plots:        "..."
+                           selection:    var4>10, var4<var1, var1>90
        
        
          region2: 
-           selection: var10>8, var2<var1, var3==True
-           plots:     "..."
-         
-           region2_A: 
-             selection: var4>10, var4<var1, var1>90
-             plots:     "..."
+                 selection: var10>8, var2<var1, var3==True
+                 
+                 region2_A: 
+                            selection: var4>10, var4<var1, var1>90
 
-
-
-# -----------------------------------------------------------
-# Variables
-# -----------------------------------------------------------
-# Names of the objects that need to be evaluated. The order
-# does not matter. Variables can also be used to retrieve 
-# objects from the input files.
-# -----------------------------------------------------------
-variables:
-   var8: 
-         alg:   Alg1
-         attr1: var2
-         attr2: var6
-         attr3: "This is a string"
-
-plots:
-   plot1:
-         attr1: true
-         attr2: false
-
-trees:
-   tree1: var1, var2, var3, ...
-   tree2: var11, var8, var9, ...
 
 # EOF

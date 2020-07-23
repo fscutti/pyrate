@@ -38,10 +38,15 @@ class Job:
 
         self.configs   = {}
         for name,attr in self.config["configs"].items():
+            
             self.configs[name] = {"files":[]}
+            
             for f in FN.find_files(attr["path"]): self.configs[name]["files"].extend(f for n in ST.get_items(attr["names"]) if n in f and f.lower().endswith(".yaml"))
+            
             for f in self.configs[name]["files"]: self.configs[name].update(yaml.full_load(open(f,"r")))
-                    
+         
+
+        print(self.configs)
         self.outputs   = self.config["outputs"]
 
 

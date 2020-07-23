@@ -13,8 +13,8 @@
 # -----------------------------------------------------------
 inputs: 
      input1:
-       samples:  Jan,Feb
-       group:    wave0,wave1
+       samples:  Jan, Feb
+       group:    wave0, wave1
        nevents: 
               emin: 0
               emax: -1
@@ -38,11 +38,11 @@ inputs:
 # -----------------------------------------------------------
 configs:
   config1:
-      path: /Users/fscutti/pyrate/config
-      name: analysis
+      path:  /Users/fscutti/pyrate/config
+      names: analysis
   config2:
-      path: /Users/fscutti/pyrate/config
-      name: reconstruction
+      path:  /Users/fscutti/pyrate/config
+      names: objects
 
 
 # -----------------------------------------------------------
@@ -56,17 +56,16 @@ outputs:
   output1:
     path: /Users/fscutti/pyrate/myNotebooks/myOutput
     objects:
-            - regions:region1:plots:plot1:var1
-            - regions:region1:plots
+            - plots:regions:region1:plot1:var1
+            - plots:regions:region1:plot2
   output2:
     path: /Users/fscutti/pyrate/myNotebooks/myOutput
     objects:
-            - regions:region1_A
-            - regions:region1:trees:tree1
+            - plots:plot1
   output3:
     path: /Users/fscutti/pyrate/myNotebooks/myOutput
     objects:
-            - "*"
+            - trees:regions:region1
 
 use_nodes: false
 

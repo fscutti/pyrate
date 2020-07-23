@@ -3,7 +3,7 @@
 import os
 
 def modus_ponens(p,q):
-    """ Implements the modus ponens logic table.
+    """ Implements the modus ponens logic table: p -> q
     """
     if p: return q
     else: return not p
@@ -17,6 +17,7 @@ def find_files(paths):
     """ Find all files under a list of paths. It also sorts the list.
     """
     files = []
+    if not isinstance(paths,list): paths = [paths]
     for p in paths: files.extend(os.path.join(p,f) for f in os.listdir(p) if os.path.isfile(os.path.join(p,f)))
     files.sort()
     return files
