@@ -33,18 +33,24 @@ variables:
 # from a file.
 # -----------------------------------------------------------
 plots:
-   regions:
-     region1:
-           plot1:
-                  var1: nbins, xmin, xmax
-                  var2: nbins, xmin, xmax
-           plot2:
-                  var9,var1: nbinsx, xmin, xmax, nbinsy, ymin, ymax
-                  var2,var9: nbinsx, xmin, xmax, nbinsy, ymin, ymax
    plot1:
        alg:     myStandardPlot
        myattr1: "This is my attribute"
        myattr2: "myHistName"
+       regions:
+           region1:
+                 var1: nbins, xmin, xmax
+                 var2: nbins, xmin, xmax
+
+   plot2:
+       alg:     myStandard2DPlot
+       myattr1: "This is my attribute"
+       myattr2: "myHistName"
+       regions:
+            region1:
+                  var9,var1: nbinsx, xmin, xmax, nbinsy, ymin, ymax
+                  var2,var9: nbinsx, xmin, xmax, nbinsy, ymin, ymax
+
 
    plot4:
        alg:     LimitGraph

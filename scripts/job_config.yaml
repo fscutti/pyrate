@@ -56,12 +56,13 @@ outputs:
   output1:
     path: /Users/fscutti/pyrate/myNotebooks/myOutput
     objects:
-            - plots:regions:region1:plot1:var1
-            - plots:regions:region1:plot2
+            - plots:plot1:regions:region1:var1
+            - plots:plot2:regions:region1
   output2:
     path: /Users/fscutti/pyrate/myNotebooks/myOutput
     objects:
-            - plots:plot1
+            - plots:plot4
+            - plots:plot1:regions
   output3:
     path: /Users/fscutti/pyrate/myNotebooks/myOutput
     objects:
