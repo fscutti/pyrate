@@ -20,7 +20,8 @@ inputs:
               emax: -1
        path:
           - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/
-
+       color:     red
+       linestyle: 1
 
      input2:
        samples:  source
