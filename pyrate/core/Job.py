@@ -4,7 +4,7 @@ in purpose and structure.
 """
 import os
 import yaml
-from itertools import groupby, dropwhile
+from itertools import groupby
 
 from utils import strings as ST
 from utils import functions as FN
@@ -45,18 +45,17 @@ class Job:
             
             for f in self.configs[name]["files"]: self.configs[name].update(yaml.full_load(open(f,"r")))
          
+        self.outputs   = {}
+        for name,attr in self.config["outputs"].items():
 
-        print(self.configs)
-        self.outputs   = self.config["outputs"]
+            self.outputs[name] = {"files":[]}
+            
+            self.outputs[name]["files"] = os.path.join(attr["path"],name)
 
-
-
-
-
-
+            self.outputs[name].update(attr)
 
         
-        self.use_nodes = self.config["use_nodes"] 
+        #self.use_nodes = self.config["use_nodes"] 
 
 
     def load(self):
