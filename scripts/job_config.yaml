@@ -64,10 +64,11 @@ outputs:
     objects:
             - plots:plot4
             - plots:plot1:regions
+            - trees:tree2:regions:region2
   output3:
     path: /Users/fscutti/pyrate/myNotebooks/myOutput
     objects:
-            - trees:regions:region1
+            - trees:tree1:regions
 
 use_nodes: false
 

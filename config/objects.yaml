@@ -14,10 +14,10 @@
 # -----------------------------------------------------------
 variables:
    var100: 
-         alg:   LimitCalculator
-         attr1: var2 
-         attr2: var6
-         attr3: "h_myHistName"
+         algorithm: LimitCalculator
+         dependency:
+              attr1: var2 
+              attr2: var6
 
 # -----------------------------------------------------------
 # Plots. When they are defined under the "regions" field they
@@ -34,7 +34,7 @@ variables:
 # -----------------------------------------------------------
 plots:
    plot1:
-       alg:     myStandardPlot
+       algorithm: myStandardPlot
        myattr1: "This is my attribute"
        myattr2: "myHistName"
        regions:
@@ -43,7 +43,7 @@ plots:
                  var2: nbins, xmin, xmax
 
    plot2:
-       alg:     myStandard2DPlot
+       algorithm: myStandard2DPlot
        myattr1: "This is my attribute"
        myattr2: "myHistName"
        regions:
@@ -53,45 +53,50 @@ plots:
 
 
    plot4:
-       alg:     LimitGraph
+       algorithm: LimitGraph
        myattr1: "This could be the config of a limit plot"
        myattr2: "myHistName"
-       attr1:   var100
+       dependency:
+            attr1:   var100
 
 # -----------------------------------------------------------
 # Trees.
 # -----------------------------------------------------------
 trees:
-   regions:
-     region1:
-           tree1: var1, var2, var3, ...
+   tree1:
+       algorithm: TreeMaker 
+       attr1: "My attribute"
+       regions:
+            region1: var1, var2, var3, ...
+            region2: var1, var11, var111, ...
 
 
 
 # -----------------------------------------------------------
 # Histograms. They behave exactly like plots with the 
-# different that, if a plot is scheduled an histogram is 
+# difference that, if a plot is scheduled an histogram is 
 # automatically created, but the requirement of an histogram
 # does not assume a plot will be made.
 # -----------------------------------------------------------
 histograms:
-   regions:
-     region1:
-           hist1:
-                  var1: nbins, xmin, xmax
-                  var2: nbins, xmin, xmax
-           hist2:
-                  var10,var11: nbinsx, xmin, xmax, nbinsy, ymin, ymax
-                  var5,var8:   nbinsx, xmin, xmax, nbinsy, ymin, ymax
    hist1:
-       alg:     myStandardHist
+       algorithm: myStandardHist
        myattr1: "This is my attribute"
        myattr2: "myHistName"
+       regions:
+         region1:
+               hist1:
+                      var1: nbins, xmin, xmax
+                      var2: nbins, xmin, xmax
+               hist2:
+                      var10,var11: nbinsx, xmin, xmax, nbinsy, ymin, ymax
+                      var5,var8:   nbinsx, xmin, xmax, nbinsy, ymin, ymax
 
    hist9:
-       alg:     LimitGraph
+       algorithm: LimitGraph
        myattr1: "This could be the config of a limit plot"
        myattr2: "myHistName"
-       attr1:   var100
+       dependency:
+            attr1:   var100
 
 # EOF
