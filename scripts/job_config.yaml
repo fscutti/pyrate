@@ -70,6 +70,6 @@ outputs:
     objects:
             - trees:tree1:regions
 
-use_nodes: false
+# use_nodes: false
 
 # EOF
