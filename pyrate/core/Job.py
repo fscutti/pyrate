@@ -58,13 +58,6 @@ class Job:
         #self.use_nodes = self.config["use_nodes"] 
 
 
-    def load(self):
-        """ Initialise Run objects.
-        """
-        #run = Run(name = "TEST")
-        pass
-
-
 
     def load(self):
         """ Initialise Run objects.

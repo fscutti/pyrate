@@ -28,10 +28,10 @@ regions:
        
        
          region2: 
-                 selection: var10>8, var2<var1, var3==True
+                selection: var10>8, var2<var1, var3==True
                  
-                 region2_A: 
-                            selection: var4>10, var4<var1, var1>90
+                region2_A: 
+                           selection: var4>10, var4<var1, var1>90
 
 
 # EOF
