@@ -27,8 +27,8 @@ class Job:
             self.inputs[name] = {"files":[]}
             
             # Find all relevant files using the list of paths and filtering with the sample and channel tags.
-            for f in FN.find_files(attr["path"]): self.inputs[name]["files"].extend(f for s in ST.get_items(attr["samples"]) if s in f 
-                            and FN.modus_ponens( FN.has_key("group",attr), any(c in f for c in ST.get_items(attr.get("group",False)))))
+            for f in FN.find_files(attr["path"]): self.inputs[name]["files"].extend(f for s in ST.get_items(attr["samples"]) if s in ST.get_tags(f) 
+                            and FN.modus_ponens( FN.has_key("group",attr), any(c in ST.get_tags(f) for c in ST.get_items(attr.get("group",False)))))
             
             # Group files using the first part of their names.
             self.inputs[name]["files"] = [list(f) for j, f in groupby(self.inputs[name]["files"], lambda a: a.partition("_")[0])]
@@ -41,7 +41,7 @@ class Job:
             
             self.configs[name] = {"files":[]}
             
-            for f in FN.find_files(attr["path"]): self.configs[name]["files"].extend(f for n in ST.get_items(attr["names"]) if n in f and f.lower().endswith(".yaml"))
+            for f in FN.find_files(attr["path"]): self.configs[name]["files"].extend(f for n in ST.get_items(attr["names"]) if n in ST.get_tags(f) and f.lower().endswith(".yaml"))
             
             for f in self.configs[name]["files"]: self.configs[name].update(yaml.full_load(open(f,"r")))
          
@@ -53,8 +53,10 @@ class Job:
             self.outputs[name]["files"] = os.path.join(attr["path"],name)
 
             self.outputs[name].update(attr)
-
         
+        print(self.inputs)
+        print(self.configs)
+        print(self.outputs)
         #self.use_nodes = self.config["use_nodes"] 
 
 
