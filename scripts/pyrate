@@ -21,4 +21,5 @@ if __name__ == "__main__":
        stream     = open(jconfig,"r")
        dictionary = yaml.full_load(stream)
        job        = Job(dictionary)
+       job.setup()
        job.launch()
