@@ -2,10 +2,11 @@
 """
 
 class Algorithm:
-    __slots__ = ("_is_done", "store")
-    def __init__(self):
+    __slots__ = ("name", "store", "_is_done")
+    def __init__(self, name, store):
+        self.name = name
+        self.store = store
         self._is_done = False
-        self.store = {}
 
     def execute(self, config):
         """ Override this method to define algorithms.
