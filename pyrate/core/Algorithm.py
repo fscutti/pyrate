@@ -2,13 +2,14 @@
 """
 
 class Algorithm:
+    __slots__ = ("_is_done", "store")
     def __init__(self):
         self._is_done = False
         self.store = {}
 
-    def execute(self, edict):
+    def execute(self, config):
         """ Override this method to define algorithms.
-            edict is a dictionary.
+            config is a dictionary.
         """
         pass
 
