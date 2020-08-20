@@ -1,15 +1,30 @@
-""" Store class """
+""" Store class.
+"""
+import sys
+import importlib
 
-def Store:
-    def __init__(self):
-        self._transient = {}
-        self._permanent = {}
-    
-    def put(self, name, item, mode="TRAN"):
-        if mode=="PERM":    self._permanent[name] = item
-        elif mode=="TRAN":  self._transient[name] = item
+class Store:
+    def __init__(self,name,run):
+        self.name = name
+        self.run  = None
+        self.objects   = {}
+        #self._inputs  = {}
+        #self._outputs = {}
     
     def get(self, name):
-        if name in self._transient:   return self._transient[name] 
-        elif name in self._permanent: return self._permanent[name] 
-        else: print("Some error message")
+        """ try/except method
+        """
+        try:
+            return self.objects[name]
+        except:
+            self.run.call(name,self) 
+            return self.objects[name]
+
+
+
+
+
+
+
+
+
