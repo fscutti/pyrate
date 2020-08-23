@@ -2,36 +2,21 @@
 # -----------------------------------------------------------
 # Analysis regions
 # -----------------------------------------------------------
-# Regions might be independent from each other or not. Only
-# the variables required will be scheduled for computation.
-# The correct order is sorted out internally. If a variable 
-# has been computed upstream at any level of region nesting 
-# for a particular event, it will not be recomputed.
-# Identical weights of dependent regions will NOT be reapplied.
-# Plotted variables and weights are only computed for the 
-# subset of events specified in the selection. Sub-regions 
-# are a selection subset of parent ones. In order for any 
-# chain of regions to be scheduled by the job the creation
-# of an object requiring its selection needs to be made.
-# -----------------------------------------------------------
-regions: 
-         region1:
-                selection:    var1>8, var2<var1, var3==True
-                weights:      weight1, weight2
-                
-                region1_A: 
-                           selection:    var4>10, var4<var1, var1>90
-                           weights:      weight1, weight3
-                
-                regions1_B: 
-                           selection:    var4>10, var4<var1, var1>90
-       
-       
-         region2: 
-                selection: var10>8, var2<var1, var3==True
-                 
-                region2_A: 
-                           selection: var4>10, var4<var1, var1>90
-
+objects: 
+    region1:
+        status: execute
+        algorithm: 
+            name: Region
+            selection: var1>8, var2<var1, var3==True
+            weights: weight1, weight2
+  
+    region1_A: 
+        status: execute
+        algorithm: 
+            name: Region 
+            selection: var4>10, var4<var1, var1>90
+            weights: weight1, weight3
+            contained_in: region1
+      
 
 # EOF
