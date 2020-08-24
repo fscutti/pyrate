@@ -12,24 +12,25 @@
 # job is not an event loop (e.g. limit calculation).
 # -----------------------------------------------------------
 inputs: 
-     input1:
-       samples:  Jan, Feb
-       group:    wave0, wave1
-       nevents: 
-              emin: 0
-              emax: -1
-       path:
-          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/
-       color:     red
-       linestyle: 1
-
-     input2:
-       samples:  source
-       nevents: 
-              emin: 0
-              emax: -1
-       path:
-          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/
+    data:
+        samples: Jan, Feb
+        group: wave0, wave1
+        nevents: 
+            emin: 0
+            emax: -1
+        path:
+           - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/
+        color: black
+        linestyle: 1
+   
+    MC:
+        samples: Photon
+        nevents: 
+            emin: 0
+            emax: -1
+        color: red
+        path:
+            - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetSim/
 
 
 
@@ -38,12 +39,12 @@ inputs:
 # a comma.
 # -----------------------------------------------------------
 configs:
-  config1:
-      path:  /Users/fscutti/pyrate/config
-      names: analysis
-  config2:
-      path:  /Users/fscutti/pyrate/config
-      names: objects
+    config1:
+       path:  /Users/fscutti/pyrate/config
+       names: analysis
+    config2:
+       path:  /Users/fscutti/pyrate/config
+       names: objects
 
 
 # -----------------------------------------------------------
@@ -54,22 +55,23 @@ configs:
 # non-specified sub-fields.
 # -----------------------------------------------------------
 outputs:
-  output1:
-    path: /Users/fscutti/pyrate/myNotebooks/myOutput
-    objects:
-            - plots:plot1:regions:region1:var1
-            - plots:plot2:regions:region1
-  output2:
-    path: /Users/fscutti/pyrate/myNotebooks/myOutput
-    objects:
-            - plots:plot4
-            - plots:plot1:regions
-            - trees:tree2:regions:region2
-  output3:
-    path: /Users/fscutti/pyrate/myNotebooks/myOutput
-    objects:
-            - trees:tree1:regions
+    output1:
+        path: /Users/fscutti/pyrate/myNotebooks/myOutput
+        objects:
+          - stackplot1D:region1:var1
+          - stackplot1D:region1_A
+          - plot2D
 
+   output2:
+       path: /Users/fscutti/pyrate/myNotebooks/myOutput
+       objects:
+          - tree1
+
+   output3:
+       path: /Users/fscutti/pyrate/myNotebooks/myOutput
+       objects:
+           - trees:tree1:regions
+  
 # use_nodes: false
 
 # EOF

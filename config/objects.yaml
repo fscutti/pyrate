@@ -7,7 +7,27 @@ objects:
      # -----------------------------------------------------------
      # Variables
      # -----------------------------------------------------------
+     basePMT1:
+         algorithm: 
+             name: Baseline
+         waveform: wfPMT1
+     
+     basePMT2:
+         algorithm:
+             name: Baseline
+         waveform: wfPMT2
 
+     chargePMT1:
+         algorithm: 
+             name: Charge
+             window: 100
+         baseline: basePMT1
+     
+     chargePMT2:
+         algorithm:
+             name: Charge
+             window: 300
+         baseline: basePMT2
 
      # -----------------------------------------------------------
      # Plots
@@ -19,6 +39,9 @@ objects:
              region1:
                  var1: nbins, xmin, xmax
                  var2: nbins, xmin, xmax
+             region1_A:
+                 var34: nbins, xmin, xmax
+                 var9: nbins, xmin, xmax
          histograms: filledHists
      
      
@@ -35,7 +58,6 @@ objects:
      # Histograms
      # -----------------------------------------------------------
      readHists:
-         status: initialise
          algorithm: 
              name: ReadHists
      
