@@ -13,27 +13,22 @@ objects:
      # Plots
      # -----------------------------------------------------------
      stackplot1D:
-         status: initialise, finalise
          algorithm: 
              name: Make1DPlot
-             makestack: True
+             makeratio: True
              region1:
                  var1: nbins, xmin, xmax
                  var2: nbins, xmin, xmax
-         dependency:
-             histograms: filledHists
+         histograms: filledHists
      
      
-     stackplot2D:
-         status: finalise
+     plot2D:
          algorithm: 
              name: Make2DPlot
-             makestack: True
              region1:
                  var10,var11: nbinsx, xmin, xmax, nbinsy, ymin, ymax
                  var5,var8: nbinsx, xmin, xmax, nbinsy, ymin, ymax
-         dependency:
-             histograms: filledHists
+         histograms: filledHists
      
      
      # -----------------------------------------------------------
@@ -46,22 +41,18 @@ objects:
      
      
      filledHists:
-         status: initialise, execute, finalise
          algorithm: 
              name: FillHists
-         dependency:
-             histograms: readHists
+         histograms: readHists
      
      
      # -----------------------------------------------------------
      # Trees
      # -----------------------------------------------------------
      tree1:
-         status: initialise, execute, finalise
          algorithm: 
              name: TreeMaker 
              attr1: "My attribute"
-         dependency:
-             variables: var1, var2, var9
+         variables: var1, var2, var9
      
 # EOF

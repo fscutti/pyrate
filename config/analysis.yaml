@@ -4,7 +4,6 @@
 # -----------------------------------------------------------
 objects: 
     region1:
-        status: execute
         algorithm: 
             name: Region
             selection: var1>8, var2<var1, var3==True
@@ -16,8 +15,7 @@ objects:
             name: Region 
             selection: var4>10, var4<var1, var1>90
             weights: weight1, weight3
-        dependency:
-            contained_in: region1
+        contained_in: region1
       
 
 # EOF
