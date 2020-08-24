@@ -2,14 +2,15 @@
 # -----------------------------------------------------------
 # Multiple paths can be specified, eventually including the 
 # file name if no ambiguity would arise. Files can be 
-# specified using part of their names. Names given in the 
-# list refer to files which are read independently.
-# If comma-separated items are given, these will be read in 
+# specified using part of their names. Names given in 
+# samples refer to tags in the file names which will be read 
+# sequentially. Tags specified in group are tags which are searched
+# for at the beginning of the file name to group several files under
 # the same event. 
 # The nevents flag can be any integer number implying the
 # loop will run up to that value, or the range can be 
 # explicitly specified. If nevents: 0 it is implied that the
-# job is not an event loop (e.g. limit calculation).
+# job is not an event loop (e.g. plotting).
 # -----------------------------------------------------------
 inputs: 
     data:
@@ -66,12 +67,5 @@ outputs:
        path: /Users/fscutti/pyrate/myNotebooks/myOutput
        objects:
           - tree1
-
-   output3:
-       path: /Users/fscutti/pyrate/myNotebooks/myOutput
-       objects:
-           - trees:tree1:regions
-  
-# use_nodes: false
 
 # EOF
