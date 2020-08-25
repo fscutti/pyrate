@@ -2,26 +2,37 @@
 """
 
 class Algorithm:
-    __slots__ = ["name", "store", "_is_done"]
+    __slots__ = ["name", "_store"]
     def __init__(self, name, store):
         self.name = name
         self._store = _store
-        self._is_done = False
 
-    def execute(self, config = None):
+    def initialise(self, config = None, dep = None):
         """ Override this method to define algorithms.
-            config is a dictionary.
+            config is a dictionary. 
         """
         pass
-
-    def conditions(self):
-        return self._is_done
-
-    def stop(self):
-        self._is_done = True
+    
+    def execute(self, config = None, dep = None):
+        """ Override this method to define algorithms.
+            config is a dictionary. 
+        """
+        pass
+    
+    def finalise(self, config = None, dep = None):
+        """ Override this method to define algorithms.
+            config is a dictionary. 
+        """
+        pass
 
     def get(self, name):
         return self._store.get(name)
     
+    def put(self, name, obj):
+        return self._store.put(name, obj)
+    
+    def isready(self, name):
+        return self._store.isready(name)
+    
 
-
+# EOF
