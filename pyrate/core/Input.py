@@ -63,12 +63,17 @@ class Input:
 
     def get_next_event(self):
 
-        self._ev_idx += 1
-        for g, files in self.groups.items(): 
+        for g, files in self.groups.items():
             if files[self._f_idx].get_next_event() < 0:
                 if self._next_files() < 0:
                     self._ev_idx = -1
                     return self._ev_idx
+                else: 
+                    self._ev_idx += 1
+                    return self._ev_idx
+
+        self._ev_idx += 1
+
         return self._ev_idx
 
 
