@@ -3,9 +3,15 @@
 """
 #import inspect
 
+import sys
+import importlib
+
+import timeit
+
 import pyrate.variables
 import pyrate.trees
 import pyrate.plots
+import pyrate.histograms
 
 from pyrate.core.Store import Store
 from pyrate.core.Input import Input
@@ -42,9 +48,43 @@ class Run:
         store = Store(name=self.name, run=self)
         self.objconfigs = self.configs["global"]["objects"]
         
-        """ 
+        self.required_config = {}  
         required_objects = FN.flatten([[o for o in attr["objects"]] for name, attr in self.outputs.items()])
+
+        print(required_objects)
+
+        self.algorithms = {}
+        for r in required_objects:
+            self.add(self.objconfigs[r]["algorithm"]["name"], store)
         
+        #print(algorithms)
+        
+        store.set_state("initialise")
+        self.loop(required_objects, "initialise")
+
+
+        #self.assign_config(required_objects)
+        """
+        start = timeit.default_timer()
+
+        for name, attr in self.inputs.items():
+            I = Input(name, attr)
+            I.load()
+
+            h = I.get_object("PMT1_charge_waveform_muon") 
+
+            while I.get_next_event() >= 0:
+                pass
+ 
+        stop = timeit.default_timer()
+        
+        print('Time: ', stop - start)  
+        """
+
+
+
+
+        """ 
         self.objorder = {}
         for o in required_objects:
             self._build_chain(o.split(":")[0])
@@ -52,31 +92,71 @@ class Run:
         
         #pretty(self.objorder)
 
-        """
-        algorithms = {}
-        for name, attr in self.outputs.items():
-            for objname in attr["objects"]:
-                if not self.objconfigs[objname]["algorithm"] in algorithms:
-                    self.add(self.objconfigs[objname]["algorithm"], algorithms, store)
-        
-        for name,attr in self.algorithms.items():
-            attr.execute()
-        """
 
         #print(self.store.algorithms)
         #for name, attr in self.inputs.items():
         #    self.inputs[name]["instance"] = Input(name, attr)
-        print(self.inputs)
+        #print(self.inputs)
 
-    
-        for name, attr in self.inputs.items():
-            I = Input(name, attr)
-            I.load()
-            
-            while I.get_next_event() >= 0:
-                pass
-            print(I.get_ev_idx())
-    
+
+    def loop(self, objects, state):
+        """ Loop over required objects to resolve them.
+        """
+        for o in objects:
+            self.call(o, state) 
+
+
+    def call(self, obj, state):
+        """ Calls an algorithm.
+        """
+        self.add_name(obj, self.objconfigs[obj])
+        getattr(self.algorithms[self.objconfigs[obj]["algorithm"]["name"]], state)(self.objconfigs[obj])
+
+
+
+    def check(self):
+        """ Check if objects are ready.
+        """
+        pass
+
+
+
+    def assign_config(self, objects):
+        """ Modify configuration of object based on restricted selection in the job configuration.
+        """
+        
+        modifications = [FN.nested(o.split(":")) for o in objects if ":" in o]
+
+        print(modifications)
+
+        newconfig = {}
+        for d in modifications:
+            k = list(d)[0]
+            if not FN.has_key(k, newconfig): 
+                newconfig[k] = d[k]
+            else: 
+                newconfig[k] = FN.merge(newconfig[k], d[k])
+                #newconfig[k] =  newconfig[k] and d[k] 
+
+        print(newconfig) 
+        """ 
+        for name, attr in newconfig.items():
+            if name in self.objconfigs:
+                self.objconfigs[name]["algorithm"] = FN.intersect(self.objconfigs[name]["algorithm"], attr)
+                #FN.merge(self.objconfigs[name]["algorithm"], attr)
+                #FN.merge(attr, self.objconfigs[name]["algorithm"])
+                print()
+                print()
+                print(name, self.objconfigs[name]["algorithm"])
+                print(name, attr)
+                print()
+                print()
+
+        """ 
+
+        
+
+
     def load(self):
         pass
 
@@ -87,11 +167,37 @@ class Run:
         pass
     
 
-    def add(self, name, algorithms, store):
+    def add(self, name, store):
         """ Adds instances of algorithms dynamically.
         """
-        if not name in algorithms:
-            algorithms.update({name:getattr(importlib.import_module(m),m.split(".")[-1])(name, store) for m in sys.modules if name in m})
+        if not name in self.algorithms:
+            self.algorithms.update({name:getattr(importlib.import_module(m),m.split(".")[-1])(name, store) for m in sys.modules if name in m})
+        print("This is the required name of alg: ", name)
+        print(self.algorithms)
+   
+
+
+    def add_name(self, obj, config):
+        """ Adds name of object to its configuration.
+        """
+        if not FN.has_key("name", config):
+            config["name"] = obj
+
+
+
+
+    def update(self, objname, store, state):
+        """ Updates value of object on the store.
+        """
+        if objname in self.objconfigs:
+            print("This is the objname", objname)
+            print("This is the required algorithm", self.objconfigs[objname]["algorithm"]["name"])
+            self.add(self.objconfigs[objname]["algorithm"]["name"], store)
+            self.call(objname, state)
+
+        else:
+            print("Object not in configuration")
+
 
 
     """
@@ -114,38 +220,6 @@ class Run:
             
             else: print("ERROR")
     """
-
-
-    def call(self, objname, store):
-        pass
-        """
-        if objname in self.objconfigs:
-            if not self.objconfigs[objname]["algorithm"] in self.algorithms:
-                self.addalg(self.objconfigs[objname]["algorithm"], store)
-            store.objects[objname] = self.algorithms[self.objconfigs[objname]["algorithm"]].execute(SOME CONFIG)
-        """
-
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
