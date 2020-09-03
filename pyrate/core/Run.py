@@ -59,17 +59,18 @@ class Run:
         
         #print(algorithms)
         
-        store.set_state("initialise")
-        self.loop(required_objects, "initialise")
+        self.loop(store, required_objects, "initialise")
 
 
         #self.assign_config(required_objects)
-        """
+        #"""
         start = timeit.default_timer()
-
+        
+        self.input_inst = {}
         for name, attr in self.inputs.items():
             I = Input(name, attr)
             I.load()
+            self.input_inst["current"] = I
 
             h = I.get_object("PMT1_charge_waveform_muon") 
 
@@ -79,7 +80,7 @@ class Run:
         stop = timeit.default_timer()
         
         print('Time: ', stop - start)  
-        """
+        #"""
 
 
 
@@ -99,17 +100,20 @@ class Run:
         #print(self.inputs)
 
 
-    def loop(self, objects, state):
-        """ Loop over required objects to resolve them.
+    def loop(self, store, objects, state):
+        """ Loop over required objects to resolve them. Skips completed ones.
         """
+        store.set_state(state)
         for o in objects:
-            self.call(o, state) 
+            if not store.get(o,"STATUS"):
+                self.call(o, state) 
 
 
     def call(self, obj, state):
         """ Calls an algorithm.
         """
         self.add_name(obj, self.objconfigs[obj])
+        print("Calling algorithm: ",self.objconfigs[obj]["algorithm"]["name"], state, "for object: ", obj)
         getattr(self.algorithms[self.objconfigs[obj]["algorithm"]["name"]], state)(self.objconfigs[obj])
 
 

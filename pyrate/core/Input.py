@@ -129,6 +129,9 @@ class Input:
         """ Look for the object in the entire input. Initialises readers if they were not.
             Only one group should be sufficient to retrieve the object. Exceptions should
             be treated at the input and not at the readers level.
+            
+            ToDo: introduce option to retrieve object from specific g_idx in correnspondence
+            with input group name.
         """
         if FN.has_key(name, self.istore):
             return self.istore[name]
@@ -143,8 +146,10 @@ class Input:
                 if FN.has_key(name, self.istore):
                     return self.istore[name]
 
-  
+      
     #def get_event(self,idx):
+    #    """ To to event with selected index and move current event index at that point.
+    #    """
 
 
 

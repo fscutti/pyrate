@@ -26,13 +26,13 @@ class Algorithm:
         pass
 
     def get(self, name, opt="TRAN"):
+        """ Retrieves object from the store.
+        """
         return self._store.get(name, opt)
     
-    def put(self, name, obj, opt="TRAN"):
-        return self._store.put(name, obj, opt)
+    def put(self, name, obj, opt="TRAN", is_ready=False):
+        """ Puts object on the store. If ready, it sets its status.
+        """
+        return self._store.put(name, obj, opt, is_ready)
     
-    def isready(self, name):
-        return self._store.isready(name)
-    
-
 # EOF
