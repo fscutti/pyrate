@@ -30,9 +30,9 @@ class Algorithm:
         """
         return self._store.get(name, opt)
     
-    def put(self, name, obj, opt="TRAN", is_ready=False):
+    def put(self, name, obj, opt="TRAN"):
         """ Puts object on the store. If ready, it sets its status.
         """
-        return self._store.put(name, obj, opt, is_ready)
+        return self._store.put(name, obj, opt)
     
 # EOF

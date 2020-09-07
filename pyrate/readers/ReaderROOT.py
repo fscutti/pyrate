@@ -6,11 +6,11 @@ import numpy as np
 from pyrate.utils import functions as FN
 
 class ReaderROOT:
-    __slots__ = ["f","treename","_tree","_nevents","_is_loaded","_idx","istore"]
-    def __init__(self, f, treename = None, istore = None):
+    __slots__ = ["f","treename","_tree","_nevents","_is_loaded","_idx","store"]
+    def __init__(self, f, treename = None, store = None):
         self.f = f
         self.treename = treename
-        self.istore = istore
+        self.store = store
         self._is_loaded = False
 
     def load(self):
@@ -62,15 +62,28 @@ class ReaderROOT:
 
     def get_object(self, name):
         if "PMT1_charge_waveform_" in name: self._get_hist(name)
-    
+        elif "energy" in name: self._get_waveform(name)
+   
+
     def _get_hist(self, name):
+        """ Grabs histograms from the input file and puts them on the permanent store.
+        """
          
         h = self.f.Get(name)
 
-        if h:  
-            if FN.has_key(name, self.istore): 
-                self.istore[name].Add(h)
+        if h: 
+            if not self.store.check(name,"PERM"):
+                print("This is after the check")
+                self.store.put(name,h,"PERM")
+                print("The hist is put on the store")
             else:
-                self.istore[name] = h
-   
+                print("Trying to update the histogram")
+                self.store.get(name,"PERM").Add(h)
+                print("Histogram is updated")
+            
 
+    def _get_waveform(self, name):
+         
+        energy = self._tree.edepScint
+
+        self.store.put(name,energy,"TRAN")

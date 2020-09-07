@@ -8,48 +8,38 @@ class Store:
     def __init__(self,name,run):
         self.name = name
         self._run = run
-        self.objects = {"PERM":{}, "TRAN":{}, "STATUS":{}}
-        self._state = None
+        self.objects = {"PERM":{}, "TRAN":{}, "READY":{}}
         #self._inputs  = {}
         #self._outputs = {}
 
-    def set_state(self, state):
-        """ Passes to the Store the state of the run.
+    def check(self, name, opt="TRAN"):
+        """ Checks if object is in the store.
         """
-        self._state = state
+        return name in self.objects[opt]
 
-    def put(self, name, obj, opt="TRAN", is_ready=False):
+    def put(self, name, obj, opt="TRAN", force=False):
         """ Objects should be put on the store only once!
         """
-
-        if FN.has_key(name, self.objects[opt]):
+        
+        # Maybe this check can be removed but just to be careful for now...
+        if self.check(name, opt) and not force:
             print("ERROR: objects should only be put on the store once")
             return
         
         self.objects[opt][name] = obj
         
-        if is_ready:
-            self.objects["STATUS"][name] = True
-
-
     def get(self, name, opt="TRAN"):
         """ try/except method
         """
         try:
-
-            return copy(self.objects[opt][name])
+            return self.objects[opt][name]
         
         except KeyError:
 
-            if not opt=="STATUS":
-                self._run.update(name,self,self._state) 
-                return copy(self.objects[opt][name])
+            self._run.update(name,self) 
+            return self.objects[opt][name]
 
-            else: 
-                return False
-    
     def clear(self, opt="TRAN"):
         self.objects[opt] = {}
-
-
+    
 # EOF

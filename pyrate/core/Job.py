@@ -33,10 +33,10 @@ class Job:
             
             # Find all relevant files using the list of paths and filtering with the sample and channel tags.
             for f in FN.find_files(attr["path"]): self.job["inputs"][name]["files"].extend(f for s in ST.get_items(attr["samples"]) if s in ST.get_tags(f)
-                and FN.modus_ponens( FN.has_key("group",attr), any(c in ST.get_tags(f) for c in ST.get_items(attr.get("group",False)))))
+                and FN.modus_ponens( "group" in attr, any(c in ST.get_tags(f) for c in ST.get_items(attr.get("group",False)))))
             
             # Group files using the first part of their names.
-            self.job["inputs"][name]["files"] = [list(f) for j, f in groupby(self.job["inputs"][name]["files"], lambda a: a.partition("_")[0] if FN.has_key("group",attr) else None)]
+            self.job["inputs"][name]["files"] = [list(f) for j, f in groupby(self.job["inputs"][name]["files"], lambda a: a.partition("_")[0] if "group" in attr else None)]
             
             # Add all remaining attributes.
             self.job["inputs"][name].update(attr)

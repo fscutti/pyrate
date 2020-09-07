@@ -5,10 +5,11 @@ from pyrate.readers.ReaderROOT import ReaderROOT
 from pyrate.utils import functions as FN
 
 class Input:
-    def __init__(self, name, iterable=(), **kwargs):
-        self.__dict__.update(iterable, **kwargs)
+    #def __init__(self, name, store):
+    def __init__(self, name, store, iterable=(), **kwargs):
         self.name = name
-        self.istore = {}
+        self.store = store
+        self.__dict__.update(iterable, **kwargs)
     
     def load(self):
 
@@ -17,10 +18,14 @@ class Input:
         self._is_finished = False
         
         self.groups = {}
+        
+        print("Name of input: ", self.name)
+        print("attributes: ", self.__dict__)
+        #print("Input files: ", self.files)
 
         for g_idx, g_files in enumerate(self.files):
             self.groups[g_idx] = g_files
-            self._init_reader(g_idx, self._f_idx, self.istore)
+            self._init_reader(g_idx, self._f_idx, self.store)
         
         self._nfiles = len(g_files)
         
@@ -43,7 +48,7 @@ class Input:
                 self._f_idx += 1
                 
                 for g_idx in self.groups:
-                    self._init_reader(g_idx, self._f_idx, self.istore)
+                    self._init_reader(g_idx, self._f_idx, self.store)
             
             else: 
                 self._f_idx = -1
@@ -56,7 +61,7 @@ class Input:
                 self._f_idx -= 1
                 
                 for g_idx in self.groups:
-                    self._init_reader(g_idx, self._f_idx, self.istore)
+                    self._init_reader(g_idx, self._f_idx, self.store)
             
             else: 
                 self._f_idx = -1
@@ -67,7 +72,7 @@ class Input:
 
 
 
-    def _init_reader(self, g_idx, f_idx, istore):
+    def _init_reader(self, g_idx, f_idx, store):
         """ Instantiate different readers here. If the instance exists nothing is done.
             This function transforms a string into a reader.
         """
@@ -77,7 +82,7 @@ class Input:
             f = self.groups[g_idx][f_idx]
 
             if f.endswith(".root"): 
-               reader = ReaderROOT(f,self.tree,istore)
+               reader = ReaderROOT(f,self.tree,store)
             
             elif f.endswith(".dat"): 
                 pass
@@ -133,18 +138,19 @@ class Input:
             ToDo: introduce option to retrieve object from specific g_idx in correnspondence
             with input group name.
         """
-        if FN.has_key(name, self.istore):
-            return self.istore[name]
-
-        else:
-            for g_idx, g_readers in self.groups.items():
-                for f_idx in range(self._nfiles):
-                    self._init_reader(g_idx, f_idx, self.istore)
-                    
-                    g_readers[f_idx].get_object(name)
-
-                if FN.has_key(name, self.istore):
-                    return self.istore[name]
+        """
+        for g_idx, g_readers in self.groups.items():
+            for f_idx in range(self._nfiles):
+                self._init_reader(g_idx, f_idx, self.store)
+                
+                g_readers[f_idx].get_object(name)
+        """
+            
+        for g_idx, g_readers in self.groups.items():
+                self._init_reader(g_idx, self._f_idx, self.store)
+                
+                g_readers[self._f_idx].get_object(name)
+                break
 
       
     #def get_event(self,idx):

@@ -59,27 +59,45 @@ class Run:
         
         #print(algorithms)
         
-        self.loop(store, required_objects, "initialise")
 
+        self.state = "initialise"
+        
+        self.current_input = None
+
+        for name, attr in self.inputs.items():
+            self.current_input = Input(name, store, attr)
+            self.current_input.load()
+            self.loop(store, required_objects)
+        
+            store.clear("TRAN")
 
         #self.assign_config(required_objects)
         #"""
+
+        #print(self.current_input)
+
         start = timeit.default_timer()
         
-        self.input_inst = {}
+
+
+        self.state = "execute"
+        self.current_input = None
         for name, attr in self.inputs.items():
-            I = Input(name, attr)
-            I.load()
-            self.input_inst["current"] = I
+            self.current_input = Input(name, store, attr)
+            self.current_input.load()
 
-            h = I.get_object("PMT1_charge_waveform_muon") 
-
-            while I.get_next_event() >= 0:
-                pass
+            while self.current_input.get_next_event() >= 0:
+                self.loop(store, required_objects)
+                store.clear("TRAN")
  
         stop = timeit.default_timer()
         
         print('Time: ', stop - start)  
+        
+        
+        
+        
+        
         #"""
 
 
@@ -100,21 +118,21 @@ class Run:
         #print(self.inputs)
 
 
-    def loop(self, store, objects, state):
+    def loop(self, store, objects):
         """ Loop over required objects to resolve them. Skips completed ones.
         """
-        store.set_state(state)
+        #store.set_state(state)
         for o in objects:
-            if not store.get(o,"STATUS"):
-                self.call(o, state) 
+            #if not store.get(o,"NEXT_STATE"):
+            self.call(o) 
 
 
-    def call(self, obj, state):
+    def call(self, obj):
         """ Calls an algorithm.
         """
         self.add_name(obj, self.objconfigs[obj])
-        print("Calling algorithm: ",self.objconfigs[obj]["algorithm"]["name"], state, "for object: ", obj)
-        getattr(self.algorithms[self.objconfigs[obj]["algorithm"]["name"]], state)(self.objconfigs[obj])
+        print("Calling algorithm: ",self.objconfigs[obj]["algorithm"]["name"], self.state, "for object: ", obj)
+        getattr(self.algorithms[self.objconfigs[obj]["algorithm"]["name"]], self.state)(self.objconfigs[obj])
 
 
 
@@ -136,7 +154,7 @@ class Run:
         newconfig = {}
         for d in modifications:
             k = list(d)[0]
-            if not FN.has_key(k, newconfig): 
+            if not k in newconfig: 
                 newconfig[k] = d[k]
             else: 
                 newconfig[k] = FN.merge(newconfig[k], d[k])
@@ -184,25 +202,29 @@ class Run:
     def add_name(self, obj, config):
         """ Adds name of object to its configuration.
         """
-        if not FN.has_key("name", config):
+        if not "name" in config:
             config["name"] = obj
 
 
 
 
-    def update(self, objname, store, state):
+    def update(self, objname, store):
         """ Updates value of object on the store.
         """
-        if objname in self.objconfigs:
-            print("This is the objname", objname)
-            print("This is the required algorithm", self.objconfigs[objname]["algorithm"]["name"])
+        try:
+            self.call(objname)
+
+        except KeyError:
+            pass
+
+        try:
             self.add(self.objconfigs[objname]["algorithm"]["name"], store)
-            self.call(objname, state)
+            self.call(objname)
 
-        else:
-            print("Object not in configuration")
-
-
+        except KeyError:
+            print("This is a call to current input: ", objname)
+            self.current_input.get_object(objname)
+            #sys.exit()
 
     """
     def _build_chain(self, objname):

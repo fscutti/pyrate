@@ -10,35 +10,37 @@
 # The nevents flag can be any integer number implying the
 # loop will run up to that value, or the range can be 
 # explicitly specified. If nevents: 0 it is implied that the
-# job is not an event loop (e.g. plotting).
+# job is not an event loop (e.g. plotting). For different samples
+# the first tag of the name has to be the same for all files.
 # -----------------------------------------------------------
 inputs: 
-    data:
-        samples: Jan, Feb
-        group: wave0, wave1
-        nevents: 
-            emin: 0
-            emax: -1
-        path:
-           - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/
-        color: black
-        linestyle: 1
-   
-    MC:
-        samples: Photon
-        nevents: 
-            emin: 0
-            emax: -1
-        color: red
-        path:
-            - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetSim/
+   signal:
+       samples: muonPart2, muonPart1
+       group: sample1,sample2,sample3
+       nevents: 
+           emin: 0
+           emax: -1
+       path:
+          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetSim/
+       color: black
+       linestyle: 1
+       tree: nT
+
+   background:
+       samples: Neutron, Photon
+       nevents: 
+           emin: 0
+           emax: -1
+       color: red
+       tree: nT
+       path:
+           - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetSim/
 
 
-
-# -----------------------------------------------------------
-# Several configuration files can be specified separated with
-# a comma.
-# -----------------------------------------------------------
+## -----------------------------------------------------------
+## Several configuration files can be specified separated with
+## a comma.
+# ------------------------------------------------------------
 configs:
     config1:
        path:  /Users/fscutti/pyrate/config
@@ -59,13 +61,18 @@ outputs:
     output1:
         path: /Users/fscutti/pyrate/myNotebooks/myOutput
         objects:
-          - stackplot1D:region1:var1
-          - stackplot1D:region1_A
-          - plot2D
+            #- stackplot1D:binning:region1
+            #- stackplot1D:binning:region1:var1
+            #- stackplot1D:binning:region1:var2
+            #- stackplot1D:binning:region1_A
+            - stackplot1D
+            # - plot2D:someattr
+            # - plot2D:Pippa:Pippo
 
-   output2:
-       path: /Users/fscutti/pyrate/myNotebooks/myOutput
-       objects:
-          - tree1
+    output2:
+        path: /Users/fscutti/pyrate/myNotebooks/myOutput
+        objects:
+            #- tree1
+            - plot2D
 
 # EOF
