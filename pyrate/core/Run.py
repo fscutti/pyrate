@@ -60,6 +60,8 @@ class Run:
         #print(algorithms)
         
 
+        start = timeit.default_timer()
+        
         self.state = "initialise"
         
         self.current_input = None
@@ -75,33 +77,29 @@ class Run:
         #"""
 
         #print(self.current_input)
+        
+        if not store.objects["READY"]:
 
-        start = timeit.default_timer()
+            self.state = "execute"
+            self.current_input = None
+            for name, attr in self.inputs.items():
+                self.current_input = Input(name, store, attr)
+                self.current_input.load()
+            
+                while self.current_input.get_next_event() >= 0:
+                    self.loop(store, required_objects)
+                    store.clear("TRAN")
+        
+        # loop over output here!!!
+        store.clear("READY")
+        self.state = "finalise"
+        self.loop(store, required_objects)
         
 
-
-        self.state = "execute"
-        self.current_input = None
-        for name, attr in self.inputs.items():
-            self.current_input = Input(name, store, attr)
-            self.current_input.load()
-
-            while self.current_input.get_next_event() >= 0:
-                self.loop(store, required_objects)
-                store.clear("TRAN")
- 
         stop = timeit.default_timer()
         
         print('Time: ', stop - start)  
-        
-        
-        
-        
-        
         #"""
-
-
-
 
         """ 
         self.objorder = {}
@@ -123,8 +121,8 @@ class Run:
         """
         #store.set_state(state)
         for o in objects:
-            #if not store.get(o,"NEXT_STATE"):
-            self.call(o) 
+            if not store.check(o,"READY"):
+                self.call(o) 
 
 
     def call(self, obj):

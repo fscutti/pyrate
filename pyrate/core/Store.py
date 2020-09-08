@@ -1,16 +1,14 @@
 """ Store class.
 """
 
-from pyrate.utils import functions as FN
-from copy import copy
-
 class Store:
     def __init__(self,name,run):
         self.name = name
         self._run = run
         self.objects = {"PERM":{}, "TRAN":{}, "READY":{}}
-        #self._inputs  = {}
-        #self._outputs = {}
+        # PERM: objects which are persistent throughout the run.
+        # TRAN: objects which are volatile and removed after each input/event loop.
+        # READY: map holding the boolean status of objects which are ready for the finalise step.
 
     def check(self, name, opt="TRAN"):
         """ Checks if object is in the store.
