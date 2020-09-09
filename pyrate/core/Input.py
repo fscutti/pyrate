@@ -1,8 +1,8 @@
 """ Base class for reading input files. 
 """
-
 from pyrate.readers.ReaderROOT import ReaderROOT
 from pyrate.utils import functions as FN
+from pyrate.utils import strings as ST
 
 class Input:
     #def __init__(self, name, store):
@@ -17,15 +17,20 @@ class Input:
         self._ev_idx = 0
         self._is_finished = False
         
-        self.groups = {}
         
         print("Name of input: ", self.name)
         print("attributes: ", self.__dict__)
         #print("Input files: ", self.files)
+        
+        g_names = {0:"0"} 
+        if hasattr(self, 'group'):
+            for g_idx, g_name in enumerate(ST.get_items(self.group)):
+                g_names[g_idx] = g_name
 
+        self.groups = {}
         for g_idx, g_files in enumerate(self.files):
-            self.groups[g_idx] = g_files
-            self._init_reader(g_idx, self._f_idx, self.store)
+            self.groups[g_names[g_idx]] = g_files
+            self._init_reader(g_names[g_idx], self._f_idx, self.store)
         
         self._nfiles = len(g_files)
         
@@ -47,8 +52,8 @@ class Input:
             if self._f_idx < self._nfiles - 1:
                 self._f_idx += 1
                 
-                for g_idx in self.groups:
-                    self._init_reader(g_idx, self._f_idx, self.store)
+                for g_name in self.groups:
+                    self._init_reader(g_name, self._f_idx, self.store)
             
             else: 
                 self._f_idx = -1
@@ -60,8 +65,8 @@ class Input:
             if self._f_idx > 0:
                 self._f_idx -= 1
                 
-                for g_idx in self.groups:
-                    self._init_reader(g_idx, self._f_idx, self.store)
+                for g_name in self.groups:
+                    self._init_reader(g_name, self._f_idx, self.store)
             
             else: 
                 self._f_idx = -1
@@ -72,17 +77,18 @@ class Input:
 
 
 
-    def _init_reader(self, g_idx, f_idx, store):
+    def _init_reader(self, g_name, f_idx, store):
         """ Instantiate different readers here. If the instance exists nothing is done.
             This function transforms a string into a reader.
         """
+        r_name = "_".join([g_name,str(f_idx)])
 
-        if isinstance(self.groups[g_idx][f_idx],str):
+        if isinstance(self.groups[g_name][f_idx],str):
 
-            f = self.groups[g_idx][f_idx]
+            f = self.groups[g_name][f_idx]
 
             if f.endswith(".root"): 
-               reader = ReaderROOT(f,self.tree,store)
+               reader = ReaderROOT(r_name,f,self.tree,store)
             
             elif f.endswith(".dat"): 
                 pass
@@ -92,7 +98,7 @@ class Input:
         
             reader.load()
         
-            self.groups[g_idx][f_idx] = reader
+            self.groups[g_name][f_idx] = reader
 
 
 
@@ -100,7 +106,7 @@ class Input:
     def get_next_event(self):
         """ Move to the next event in the sequence.
         """
-        for g_idx, g_readers in self.groups.items():
+        for g_name, g_readers in self.groups.items():
 
             if g_readers[self._f_idx].get_next_event() < 0:
                 if self._move_readers("frw") < 0:
@@ -135,66 +141,21 @@ class Input:
             Only one group should be sufficient to retrieve the object. Exceptions should
             be treated at the input and not at the readers level.
             
-            ToDo: introduce option to retrieve object from specific g_idx in correnspondence
-            with input group name.
         """
-        """
-        for g_idx, g_readers in self.groups.items():
-            for f_idx in range(self._nfiles):
-                self._init_reader(g_idx, f_idx, self.store)
-                
-                g_readers[f_idx].get_object(name)
-        """
+        
+        n_tags = name.split("_")
+
+        for g_name, g_readers in self.groups.items():
             
-        for g_idx, g_readers in self.groups.items():
-                self._init_reader(g_idx, self._f_idx, self.store)
-                
-                g_readers[self._f_idx].get_object(name)
-                break
+            if len(self.groups)>1:
+                if not ST.check_tag(g_name, n_tags):
+                    continue
+
+            self._init_reader(g_name, self._f_idx, self.store)
+            
+            g_readers[self._f_idx].get_object(name)
 
       
-    #def get_event(self,idx):
-    #    """ To to event with selected index and move current event index at that point.
-    #    """
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -6,8 +6,9 @@ import numpy as np
 from pyrate.utils import functions as FN
 
 class ReaderROOT:
-    __slots__ = ["f","treename","_tree","_nevents","_is_loaded","_idx","store"]
-    def __init__(self, f, treename = None, store = None):
+    __slots__ = ["name","f","treename","_tree","_nevents","_is_loaded","_idx","store"]
+    def __init__(self, name, f, treename = None, store = None):
+        self.name = name
         self.f = f
         self.treename = treename
         self.store = store
