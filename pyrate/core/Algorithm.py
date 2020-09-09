@@ -26,12 +26,12 @@ class Algorithm:
         pass
 
     def get(self, name, opt="TRAN"):
-        """ Retrieves object from the store.
+        """ Retrieves object from the store. Possibly remove this method.
         """
         return self._store.get(name, opt)
     
     def put(self, name, obj, opt="TRAN"):
-        """ Puts object on the store. If ready, it sets its status.
+        """ Puts object on the store. If ready, it sets its status. Possibly remove this method.
         """
         return self._store.put(name, obj, opt)
     
