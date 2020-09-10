@@ -25,7 +25,7 @@ class Job:
         # Build global configuration
         # --------------------------
         
-        for name,attr in self.config["inputs"].items():
+        for name, attr in self.config["inputs"].items():
             
             # This dictionary contains all input information. The file list contains lists 
             # which can have more than one element in the case of multiple channels declared in the group.
@@ -42,7 +42,7 @@ class Job:
             self.job["inputs"][name].update(attr)
 
         self.job["configs"]["global"] = {"objects":{}}
-        for name,attr in self.config["configs"].items():
+        for name, attr in self.config["configs"].items():
             
             self.job["configs"][name] = {"files":[]}
             
@@ -53,7 +53,7 @@ class Job:
             self.job["configs"]["global"]["objects"].update(self.job["configs"][name]["objects"])
             
          
-        for name,attr in self.config["outputs"].items():
+        for name, attr in self.config["outputs"].items():
 
             self.job["outputs"][name] = {"files":[]}
             
@@ -70,8 +70,6 @@ class Job:
         self.runs["test"] = Run("test", self.job)
         self.runs["test"].setup()
 
-
-
     def launch(self):
         """ Launch Run objects. 
             ToDo: find a method to dispatch run objects.
@@ -80,4 +78,4 @@ class Job:
         for name,attr in self.runs.items():
             attr.launch()
 
-
+# EOF

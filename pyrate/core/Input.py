@@ -29,7 +29,6 @@ class Input(Reader):
         self._nfiles = len(g_files)
         self._is_loaded = True
         
-
     def _move_readers(self, option = "frw"):
         """ Advances the pointer to the next valid group of files
             and initialises a Reader class. This is "transforming"
@@ -65,8 +64,6 @@ class Input(Reader):
             """
             pass
 
-
-
     def _init_reader(self, g_name, f_idx):
         """ Instantiate different readers here. If the instance exists nothing is done.
             This function transforms a string into a reader.
@@ -90,7 +87,6 @@ class Input(Reader):
         
             self.groups[g_name][f_idx] = reader
 
-
     def next_event(self):
         """ Move to the next event in the sequence.
         """
@@ -109,13 +105,11 @@ class Input(Reader):
         self._idx += 1
         return self._idx
 
-
     def get_idx(self):
         if self._idx:
             return self._idx
         else:
             print("ERROR event index not defined")
-
 
     def get_object(self,name):
         

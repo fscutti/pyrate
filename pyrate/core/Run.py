@@ -20,18 +20,6 @@ from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
 
 
-def pretty(d, indent=0):
-    """ This function is just for testing purposes.
-    """
-    for key, value in d.items():
-       print('\t' * indent + str(key))
-       if isinstance(value, dict):
-          pretty(value, indent+1)
-       else:
-          print('\t' * (indent+1) + str(value))
-
-
-
 class Run:
     def __init__(self, name, iterable=(), **kwargs):
         self.__dict__.update(iterable, **kwargs)
@@ -78,7 +66,8 @@ class Run:
 
         #print(self.current_input)
         
-        if not store.objects["READY"]:
+        #"""
+        if not store.check("any","READY"):
 
             self.state = "execute"
             self.current_input = None
@@ -86,7 +75,7 @@ class Run:
                 self.current_input = Input(name, store, attr)
                 self.current_input.load()
             
-                while self.current_input.get_next_event() >= 0:
+                while self.current_input.next_event() >= 0:
                     self.loop(store, required_objects)
                     store.clear("TRAN")
         
@@ -94,6 +83,7 @@ class Run:
         store.clear("READY")
         self.state = "finalise"
         self.loop(store, required_objects)
+        #"""
         
 
         stop = timeit.default_timer()
@@ -107,7 +97,7 @@ class Run:
             self._build_chain(o.split(":")[0])
         """ 
         
-        #pretty(self.objorder)
+        #FN.pretty(self.objorder)
 
 
         #print(self.store.algorithms)
@@ -131,13 +121,6 @@ class Run:
         self.add_name(obj, self.objconfigs[obj])
         print("Calling algorithm: ",self.objconfigs[obj]["algorithm"]["name"], self.state, "for object: ", obj)
         getattr(self.algorithms[self.objconfigs[obj]["algorithm"]["name"]], self.state)(self.objconfigs[obj])
-
-
-
-    def check(self):
-        """ Check if objects are ready.
-        """
-        pass
 
 
 
@@ -175,12 +158,6 @@ class Run:
         """ 
 
         
-
-
-    def load(self):
-        pass
-
-
     def launch(self):
         """ Implement input/output loop.
         """ 
@@ -205,9 +182,11 @@ class Run:
 
 
 
-
     def update(self, objname, store):
-        """ Updates value of object on the store.
+        """ Updates value of object on the store. 
+            To Do: possibly enforce the presence of objects on the store
+            at this stage before calling the algorithm. Although this might
+            slow things down.
         """
         try:
             self.call(objname)

@@ -2,8 +2,8 @@
 """
 
 class Reader:
-    __slots__=["name","store","_idx","_nevents","_is_loaded"]
-    def __init__(self,name,store):
+    __slots__=["name", "store", "_idx", "_nevents", "_is_loaded"]
+    def __init__(self, name, store):
         self.name = name
         self.store = store
         self._idx = 0 
@@ -62,6 +62,5 @@ class Reader:
         """ Setup conditions to handle the event in segments at any call of next event.
         """
         pass
-
 
 # EOF

@@ -23,18 +23,15 @@ class Store:
         else:
             return len(self._objects[opt])
 
-
     def put(self, name, obj, opt="TRAN", force=False):
         """ Objects should be put on the store only once!
         """
-        
         # Maybe this check can be removed but just to be careful for now...
         if self.check(name, opt) and not force:
             print("ERROR: objects should only be put on the store once")
             return
         
         self._objects[opt][name] = obj
-
 
     def get(self, name, opt="TRAN"):
         """ try/except method
@@ -45,7 +42,6 @@ class Store:
         except KeyError:
             self._run.update(name,self) 
             return self._objects[opt][name]
-
 
     def clear(self, opt="TRAN"):
         self._objects[opt] = {}
