@@ -5,15 +5,24 @@ class Store:
     def __init__(self,name,run):
         self.name = name
         self._run = run
-        self.objects = {"PERM":{}, "TRAN":{}, "READY":{}}
-        # PERM: objects which are persistent throughout the run.
-        # TRAN: objects which are volatile and removed after each input/event loop.
-        # READY: map holding the boolean status of objects which are ready for the finalise step.
+        self._objects = {"PERM":{}, "TRAN":{}, "READY":{}}
+        """
+        PERM: 
+            objects which are persistent throughout the run.
+        TRAN: 
+            objects which are volatile and removed after each input/event loop.
+        READY: 
+            map holding the boolean status of objects which are ready for the finalise step.
+        """
 
-    def check(self, name, opt="TRAN"):
+    def check(self, name="any", opt="TRAN"):
         """ Checks if object is in the store.
         """
-        return name in self.objects[opt]
+        if name!="any":
+            return name in self._objects[opt]
+        else:
+            return len(self._objects[opt])
+
 
     def put(self, name, obj, opt="TRAN", force=False):
         """ Objects should be put on the store only once!
@@ -24,20 +33,21 @@ class Store:
             print("ERROR: objects should only be put on the store once")
             return
         
-        self.objects[opt][name] = obj
-        
+        self._objects[opt][name] = obj
+
+
     def get(self, name, opt="TRAN"):
         """ try/except method
         """
         try:
-            return self.objects[opt][name]
+            return self._objects[opt][name]
         
         except KeyError:
-
             self._run.update(name,self) 
-            return self.objects[opt][name]
+            return self._objects[opt][name]
+
 
     def clear(self, opt="TRAN"):
-        self.objects[opt] = {}
+        self._objects[opt] = {}
     
 # EOF
