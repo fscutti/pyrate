@@ -9,11 +9,6 @@ def modus_ponens(p,q):
     if p: return q
     else: return not p
 
-#def has_key(k,d):
-#    """ Checks if dictionary has key.
-#    """
-#    return k in d
-
 def find_files(paths):
     """ Find all files under a list of paths. It also sorts the list.
     """
@@ -44,6 +39,17 @@ def get_copy(o,copy):
         return copy(o)
     else:
         return o
+
+def pretty(d, indent=0):
+    """ Prints dictionary with pre-defined intentation.
+    """
+    for key, value in d.items():
+       print('\t' * indent + str(key))
+       if isinstance(value, dict):
+          pretty(value, indent+1)
+       else:
+          print('\t' * (indent+1) + str(value))
+
 
 def merge(a, b, path=None):
     """ Merges dictionary b into dictionary a.

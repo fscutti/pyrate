@@ -4,33 +4,26 @@ import ROOT as R
 import numpy as np
 
 from pyrate.utils import functions as FN
+from pyrate.core.Reader import Reader
 
-class ReaderROOT:
-    __slots__ = ["name","f","treename","_tree","_nevents","_is_loaded","_idx","store"]
-    def __init__(self, name, f, treename = None, store = None):
-        self.name = name
+class ReaderROOT(Reader):
+    __slots__ = ["f","treename","_tree"]
+    def __init__(self, name, store, f, treename = None):
+        super().__init__(name, store)
         self.f = f
         self.treename = treename
-        self.store = store
-        self._is_loaded = False
 
     def load(self):
         self.f = R.TFile.Open(self.f)
         if self.treename:
             self._tree = self.f.Get(self.treename)
-            self._nevents = self._tree.GetEntries()
             self._idx = 0
             self._tree.GetEntry(self._idx)
         self._is_loaded = True
-    
-    def is_loaded(self):
-        return self._is_loaded
-    
-    def is_finished(self):
-        return self._idx == self._nevents - 1
+        self.get_n_events()
     
 
-    def get_next_event(self):
+    def next_event(self):
         """ If the next event reading will not be valid it outputs -1.
         """
         
@@ -53,13 +46,9 @@ class ReaderROOT:
         if self._nevents:
             return self._nevents 
         else: 
-            print("ERROR: tree not loaded")
+            assert self._tree, "ERROR: tree not loaded for reader {}".format(self.name)
+            self._nevents = self._tree.GetEntries()
 
-    def get_previous_event(self):
-        pass
-
-    def get_split_event(self):
-        pass
 
     def get_object(self, name):
         if "PMT1_charge_waveform_" in name: self._get_hist(name)
