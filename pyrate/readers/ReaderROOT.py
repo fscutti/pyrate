@@ -27,7 +27,7 @@ class ReaderROOT(Reader):
         """ If the next event reading will not be valid it outputs -1.
         """
         
-        if self._idx < self._nevents - 1: 
+        if self._idx < self._n_events - 1: 
             self._idx += 1
             self._tree.GetEntry(self._idx)
             return self._idx
@@ -43,11 +43,11 @@ class ReaderROOT(Reader):
     
     
     def get_n_events(self):
-        if self._nevents:
-            return self._nevents 
+        if self._n_events:
+            return self._n_events 
         else: 
             assert self._tree, "ERROR: tree not loaded for reader {}".format(self.name)
-            self._nevents = self._tree.GetEntries()
+            self._n_events = self._tree.GetEntries()
 
 
     def get_object(self, name):

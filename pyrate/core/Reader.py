@@ -2,12 +2,12 @@
 """
 
 class Reader:
-    __slots__=["name", "store", "_idx", "_nevents", "_is_loaded"]
+    __slots__=["name", "store", "_idx", "_n_events", "_is_loaded"]
     def __init__(self, name, store):
         self.name = name
         self.store = store
         self._idx = 0 
-        self._nevents = None
+        self._n_events = None
         self._is_loaded = False
     
     def is_loaded(self):
@@ -18,8 +18,8 @@ class Reader:
     def is_finished(self):
         """ Checks if event pointer is at the end of the input.
         """
-        assert self._nevents, "ERROR: number of events not computed for reader {}".format(self.name)
-        return self._idx == self._nevents - 1 
+        assert self._n_events, "ERROR: number of events not computed for reader {}".format(self.name)
+        return self._idx == self._n_events - 1 
 
     def load(self):
         """ Open files and initialise members.
