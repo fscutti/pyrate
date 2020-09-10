@@ -21,7 +21,7 @@ class Store:
         if name!="any":
             return name in self._objects[opt]
         else:
-            return len(self._objects[opt])
+            return self._objects[opt]
 
     def put(self, name, obj, opt="TRAN", force=False):
         """ Objects should be put on the store only once!
