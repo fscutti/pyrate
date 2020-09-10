@@ -1,18 +1,16 @@
 --- 
-# -----------------------------------------------------------
-# Multiple paths can be specified, eventually including the 
-# file name if no ambiguity would arise. Files can be 
-# specified using part of their names. Names given in 
-# samples refer to tags in the file names which will be read 
-# sequentially. Tags specified in group are tags which are searched
-# for at the beginning of the file name to group several files under
-# the same event. 
-# The nevents flag can be any integer number implying the
-# loop will run up to that value, or the range can be 
-# explicitly specified. If nevents: 0 it is implied that the
-# job is not an event loop (e.g. plotting). For different samples
-# the first tag of the name has to be the same for all files.
-# -----------------------------------------------------------
+# -----------------------------------------------------------------------
+# Multiple paths can be specified, eventually including the file name if 
+# no ambiguity would arise. Files can be specified using part of their 
+# names. Names given in samples refer to tags in the file names which 
+# will be read sequentially. Tags specified in group are tags which are 
+# searched for at the beginning of the file name to group several files 
+# under the same event. The nevents flag can be any integer number 
+# implying the loop will run up to that value, or the range can be 
+# explicitly specified. If nevents: 0 it is implied that the job is not 
+# an event loop (e.g. plotting). For different samples the first tag of 
+# the name has to be the same for all files.
+# -----------------------------------------------------------------------
 inputs: 
    signal:
        samples: muonPart2, muonPart1
@@ -37,10 +35,9 @@ inputs:
            - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetSim/
 
 
-## -----------------------------------------------------------
-## Several configuration files can be specified separated with
-## a comma.
-# ------------------------------------------------------------
+# -----------------------------------------------------------------------
+# Several configuration files can be specified separated with a comma.
+# -----------------------------------------------------------------------
 configs:
     config1:
        path:  /Users/fscutti/pyrate/config
@@ -50,13 +47,12 @@ configs:
        names: objects
 
 
-# -----------------------------------------------------------
-# The possibility is given to specify several output files 
-# and their content. The content has to refer to objects
-# declared in the configuration file in the region field. 
-# The object specification is inclusive of all its 
-# non-specified sub-fields.
-# -----------------------------------------------------------
+# -----------------------------------------------------------------------
+# The possibility is given to specify several output files and their 
+# content. The content has to refer to objects declared in the 
+# configuration file in the region field. The object specification is 
+# inclusive of all its non-specified sub-fields.
+# -----------------------------------------------------------------------
 outputs:
     output1:
         path: /Users/fscutti/pyrate/myNotebooks/myOutput
