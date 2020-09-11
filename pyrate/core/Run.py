@@ -1,11 +1,8 @@
 """ This class controls the execution of algorithms
     as a single local instance. 
 """
-#import inspect
-
 import sys
 import importlib
-
 import timeit
 
 import pyrate.variables
@@ -15,6 +12,7 @@ import pyrate.histograms
 
 from pyrate.core.Store import Store
 from pyrate.core.Input import Input
+from pyrate.core.Output import Output
 
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
@@ -25,25 +23,26 @@ class Run:
         self.__dict__.update(iterable, **kwargs)
         self.name = name
 
-        
-        #print(self.outputs)
-        #print(self.configs)
-        
-    
     def setup(self):
         """ Instantiate relevant classes.
         """
         store = Store(name=self.name, run=self)
-        self.objconfigs = self.configs["global"]["objects"]
-        
-        self.required_config = {}  
-        required_objects = FN.flatten([[o for o in attr["objects"]] for name, attr in self.outputs.items()])
+        self.obj_configs = self.configs["global"]["objects"]
 
+        self.run_output = Output(self.name, store, self.outputs)
+        self.run_output.load()
+
+        #print(out)
+        #sys.exit() 
+        
+        #self.required_config = {}  
+        required_objects = FN.flatten([[o for o in attr["objects"]] for name, attr in self.outputs.items()])
+        
         print(required_objects)
 
         self.algorithms = {}
-        for r in required_objects:
-            self.add(self.objconfigs[r]["algorithm"]["name"], store)
+        for t in self.run_output.targets:
+            self.add(self.obj_configs[t]["algorithm"]["name"], store)
         
         #print(algorithms)
         
@@ -52,11 +51,11 @@ class Run:
         
         self.state = "initialise"
         
-        self.current_input = None
+        self.run_input = None
 
         for name, attr in self.inputs.items():
-            self.current_input = Input(name, store, attr)
-            self.current_input.load()
+            self.run_input = Input(name, store, attr)
+            self.run_input.load()
             self.loop(store, required_objects)
         
             store.clear("TRAN")
@@ -64,18 +63,18 @@ class Run:
         #self.assign_config(required_objects)
         #"""
 
-        #print(self.current_input)
+        #print(self.run_input)
         
         #"""
         if not store.check("any","READY"):
 
             self.state = "execute"
-            self.current_input = None
+            self.run_input = None
             for name, attr in self.inputs.items():
-                self.current_input = Input(name, store, attr)
-                self.current_input.load()
+                self.run_input = Input(name, store, attr)
+                self.run_input.load()
             
-                while self.current_input.next_event() >= 0:
+                while self.run_input.next_event() >= 0:
                     self.loop(store, required_objects)
                     store.clear("TRAN")
         
@@ -85,6 +84,7 @@ class Run:
         self.loop(store, required_objects)
         #"""
         
+
 
         stop = timeit.default_timer()
         
@@ -118,9 +118,9 @@ class Run:
     def call(self, obj):
         """ Calls an algorithm.
         """
-        self.add_name(obj, self.objconfigs[obj])
-        print("Calling algorithm: ",self.objconfigs[obj]["algorithm"]["name"], self.state, "for object: ", obj)
-        getattr(self.algorithms[self.objconfigs[obj]["algorithm"]["name"]], self.state)(self.objconfigs[obj])
+        self.add_name(obj, self.obj_configs[obj])
+        print("Calling algorithm: ",self.obj_configs[obj]["algorithm"]["name"], self.state, "for object: ", obj)
+        getattr(self.algorithms[self.obj_configs[obj]["algorithm"]["name"]], self.state)(self.obj_configs[obj])
 
 
 
@@ -144,13 +144,13 @@ class Run:
         print(newconfig) 
         """ 
         for name, attr in newconfig.items():
-            if name in self.objconfigs:
-                self.objconfigs[name]["algorithm"] = FN.intersect(self.objconfigs[name]["algorithm"], attr)
-                #FN.merge(self.objconfigs[name]["algorithm"], attr)
-                #FN.merge(attr, self.objconfigs[name]["algorithm"])
+            if name in self.obj_configs:
+                self.obj_configs[name]["algorithm"] = FN.intersect(self.obj_configs[name]["algorithm"], attr)
+                #FN.merge(self.obj_configs[name]["algorithm"], attr)
+                #FN.merge(attr, self.obj_configs[name]["algorithm"])
                 print()
                 print()
-                print(name, self.objconfigs[name]["algorithm"])
+                print(name, self.obj_configs[name]["algorithm"])
                 print(name, attr)
                 print()
                 print()
@@ -182,44 +182,44 @@ class Run:
 
 
 
-    def update(self, objname, store):
+    def update(self, obj_name, store):
         """ Updates value of object on the store. 
             To Do: possibly enforce the presence of objects on the store
             at this stage before calling the algorithm. Although this might
             slow things down.
         """
         try:
-            self.call(objname)
+            self.call(obj_name)
 
         except KeyError:
             pass
 
         try:
-            self.add(self.objconfigs[objname]["algorithm"]["name"], store)
-            self.call(objname)
+            self.add(self.obj_configs[obj_name]["algorithm"]["name"], store)
+            self.call(obj_name)
 
         except KeyError:
-            print("This is a call to current input: ", objname)
-            self.current_input.get_object(objname)
+            print("This is a call to current input: ", obj_name)
+            self.run_input.get_object(obj_name)
             #sys.exit()
 
     """
-    def _build_chain(self, objname):
+    def _build_chain(self, obj_name):
         
-        while not objname in self.objorder:
+        while not obj_name in self.objorder:
             
-            if "dependency" in self.objconfigs[objname]:
-                objs = FN.flatten([ST.get_items(attr) for name, attr in self.objconfigs[objname]["dependency"].items()])
+            if "dependency" in self.obj_configs[obj_name]:
+                objs = FN.flatten([ST.get_items(attr) for name, attr in self.obj_configs[obj_name]["dependency"].items()])
                 
                 if all([o in self.objorder for o in objs]):
-                    self.objorder[objname] = self.objconfigs[objname] 
+                    self.objorder[obj_name] = self.obj_configs[obj_name] 
                 
                 else:
                     for o in objs:
                         self._build_chain(o)
             
-            elif not objname in self.objorder: 
-                self.objorder[objname] = self.objconfigs[objname] 
+            elif not obj_name in self.objorder: 
+                self.objorder[obj_name] = self.obj_configs[obj_name] 
             
             else: print("ERROR")
     """
