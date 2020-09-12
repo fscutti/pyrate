@@ -19,12 +19,12 @@ class Writer:
         pass
 
     def load(self):
-        """ Open files and initialise members.
+        """ Initialises the targets. The file will be opened only when needed.
         """
         pass
     
     def put_object(self, name):
-        """ Write object in file.
+        """ Write object in file. Will open the file if not already open.
         """
         pass
     

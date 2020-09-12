@@ -34,7 +34,7 @@ class Store:
         self._objects[opt][name] = obj
 
     def get(self, name, opt="TRAN"):
-        """ try/except method
+        """ try/except among objects.
         """
         try:
             return self._objects[opt][name]

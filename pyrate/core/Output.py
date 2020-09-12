@@ -1,5 +1,7 @@
 """ Output base class. 
 """
+import os
+
 from pyrate.core.Writer import Writer
 
 from pyrate.utils import functions as FN
@@ -10,11 +12,13 @@ class Output(Writer):
         self.__dict__.update(iterable, **kwargs)
 
     def load(self):
-        print(self.__dict__) 
-        self.targets = FN.flatten([[o for o in attr["objects"]] for name, attr in self.outputs.items()])
+        
+        for name, attr in self.outputs.items():
+            f_name = os.path.join(name, attr["path"])
+            self._init_writer(f_name, attr["objects"])
+            self.targets.extend(attr["objects"])
 
 
-
-    def _init_writer(self):
+    def _init_writer(self, f_name, w_targets):
         pass
 # EOF

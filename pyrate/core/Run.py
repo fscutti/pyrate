@@ -29,22 +29,14 @@ class Run:
         store = Store(name=self.name, run=self)
         self.obj_configs = self.configs["global"]["objects"]
 
-        self.run_output = Output(self.name, store, self.outputs)
+        self.run_output = Output(self.name, store, outputs=self.outputs)
         self.run_output.load()
 
-        #print(out)
         #sys.exit() 
         
-        #self.required_config = {}  
-        required_objects = FN.flatten([[o for o in attr["objects"]] for name, attr in self.outputs.items()])
-        
-        print(required_objects)
-
         self.algorithms = {}
         for t in self.run_output.targets:
             self.add(self.obj_configs[t]["algorithm"]["name"], store)
-        
-        #print(algorithms)
         
 
         start = timeit.default_timer()
@@ -56,15 +48,13 @@ class Run:
         for name, attr in self.inputs.items():
             self.run_input = Input(name, store, attr)
             self.run_input.load()
-            self.loop(store, required_objects)
+            self.loop(store, self.run_output.targets)
         
             store.clear("TRAN")
 
         #self.assign_config(required_objects)
         #"""
 
-        #print(self.run_input)
-        
         #"""
         if not store.check("any","READY"):
 
@@ -75,16 +65,15 @@ class Run:
                 self.run_input.load()
             
                 while self.run_input.next_event() >= 0:
-                    self.loop(store, required_objects)
+                    self.loop(store, self.run_output.targets)
                     store.clear("TRAN")
         
         # loop over output here!!!
         store.clear("READY")
         self.state = "finalise"
-        self.loop(store, required_objects)
+        self.loop(store, self.run_output.targets)
         #"""
         
-
 
         stop = timeit.default_timer()
         

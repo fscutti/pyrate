@@ -1,10 +1,11 @@
 """ Base class for reading input files. 
 """
+from pyrate.core.Reader import Reader
+from pyrate.readers.ReaderROOT import ReaderROOT
+
 from pyrate.utils import functions as FN
 from pyrate.utils import strings as ST
 
-from pyrate.readers.ReaderROOT import ReaderROOT
-from pyrate.core.Reader import Reader
 
 class Input(Reader):
     def __init__(self, name, store, iterable=(), **kwargs):
@@ -68,9 +69,9 @@ class Input(Reader):
         """ Instantiate different readers here. If the instance exists nothing is done.
             This function transforms a string into a reader.
         """
-        r_name = "_".join([g_name,str(f_idx)])
-
         if isinstance(self.groups[g_name][f_idx],str):
+
+            r_name = "_".join([g_name,str(f_idx)])
 
             f = self.groups[g_name][f_idx]
 
@@ -114,8 +115,6 @@ class Input(Reader):
     def get_object(self,name):
         
         """ Look for the object in the entire input. Initialises readers if they were not.
-            Only one group should be sufficient to retrieve the object. Exceptions should
-            be treated at the input and not at the readers level.
         """
         
         n_tags = name.split("_")
