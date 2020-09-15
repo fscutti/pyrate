@@ -3,8 +3,10 @@
 import os
 
 from pyrate.core.Writer import Writer
+from pyrate.writers.WriterROOT import WriterROOT
 
 from pyrate.utils import functions as FN
+from pyrate.utils import strings as ST
 
 class Output(Writer):
     def __init__(self, name, store, iterable=(), **kwargs):
@@ -13,12 +15,34 @@ class Output(Writer):
 
     def load(self):
         
+        self.writers = {}
         for name, attr in self.outputs.items():
-            f_name = os.path.join(name, attr["path"])
-            self._init_writer(f_name, attr["objects"])
+            self._init_writer(name, attr["path"], attr["objects"])
             self.targets.extend(attr["objects"])
+        
+        self.targets = ST.remove_duplicates(self.targets)
+
+    def _init_writer(self, f_name, f_path, w_targets):
+
+        w_name = "_".join([self.name, f_name.split(".",1)[0]])
+
+        if not w_name in self.writers:
+
+            f = os.path.join(f_path, f_name)
+
+            if f.endswith(".root"):
+                writer = WriterROOT(w_name, self.store, f, w_targets)
+                self.writers[w_name] = writer
+            
+            elif f.endswith(".dat"):
+                pass
+            
+            writer.load()
+            
 
 
-    def _init_writer(self, f_name, w_targets):
-        pass
+
+
+
+
 # EOF

@@ -22,7 +22,8 @@ class Reader:
         return self._idx == self._n_events - 1 
 
     def load(self):
-        """ Open files and initialise members.
+        """ Initialises members and puts the reader in a state where something can 
+            already be read from some file (implies opening at least some files).
         """
         pass
     

@@ -19,7 +19,8 @@ class Writer:
         pass
 
     def load(self):
-        """ Initialises the targets. The file will be opened only when needed.
+        """ Initialises the targets. Also puts the writer 
+            in a state where something can be written on file (implies opening at least some files).
         """
         pass
     

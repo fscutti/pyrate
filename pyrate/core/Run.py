@@ -31,8 +31,8 @@ class Run:
 
         self.run_output = Output(self.name, store, outputs=self.outputs)
         self.run_output.load()
-
-        #sys.exit() 
+        print(self.run_output.targets)
+        sys.exit() 
         
         self.algorithms = {}
         for t in self.run_output.targets:
