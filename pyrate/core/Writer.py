@@ -24,7 +24,7 @@ class Writer:
         """
         pass
     
-    def put_object(self, name):
+    def write(self, name):
         """ Write object to file. Will open the file if not already open.
         """
         pass

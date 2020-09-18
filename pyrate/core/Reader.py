@@ -27,7 +27,7 @@ class Reader:
         """
         pass
     
-    def get_object(self, name):
+    def read(self, name):
         """ Gets object with given name. 
         Depending on the input format/configuration the name might be remapped to some other string.
         """

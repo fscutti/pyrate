@@ -27,7 +27,7 @@ class Input(Reader):
             self.groups[g_names[g_idx]] = g_files
             self._init_reader(g_names[g_idx], self._f_idx)
         
-        self._nfiles = len(g_files)
+        self._n_files = len(g_files)
         self._is_loaded = True
         
     def _move_readers(self, option = "frw"):
@@ -39,7 +39,7 @@ class Input(Reader):
 
         if option == "frw":
 
-            if self._f_idx < self._nfiles - 1:
+            if self._f_idx < self._n_files - 1:
                 self._f_idx += 1
                 
                 for g_name in self.groups:
@@ -112,7 +112,7 @@ class Input(Reader):
         else:
             print("ERROR event index not defined")
 
-    def get_object(self,name):
+    def read(self,name):
         
         """ Look for the object in the entire input. Initialises readers if they were not.
         """
@@ -127,6 +127,6 @@ class Input(Reader):
 
             self._init_reader(g_name, self._f_idx)
             
-            g_readers[self._f_idx].get_object(name)
+            g_readers[self._f_idx].read(name)
  
 # EOF

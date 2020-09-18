@@ -50,7 +50,7 @@ class ReaderROOT(Reader):
             self._n_events = self._tree.GetEntries()
 
 
-    def get_object(self, name):
+    def read(self, name):
         if "PMT1_charge_waveform_" in name: self._get_hist(name)
         elif "energy" in name: self._get_waveform(name)
    
@@ -62,13 +62,13 @@ class ReaderROOT(Reader):
         h = self.f.Get(name)
 
         if h: 
-            if not self.store.check(name,"PERM"):
+            if not self.store.check(name, "PERM"):
                 print("This is after the check")
-                self.store.put(name,h,"PERM")
+                self.store.put(name,h, "PERM")
                 print("The hist is put on the store")
             else:
                 print("Trying to update the histogram")
-                self.store.get(name,"PERM").Add(h)
+                self.store.get(name, "PERM").Add(h)
                 print("Histogram is updated")
             
 

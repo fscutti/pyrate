@@ -2,9 +2,9 @@
 """
 
 class Store:
-    def __init__(self,name,run):
-        self.name = name
+    def __init__(self,run):
         self._run = run
+        self.name = self._run.name
         self._objects = {"PERM":{}, "TRAN":{}, "READY":{}}
         """
         PERM: 
@@ -14,15 +14,17 @@ class Store:
         READY: 
             map holding the boolean status of objects which are ready for the finalise step.
         """
-
-    def check(self, name="any", opt="TRAN"):
-        """ Checks if object is in the store.
+    
+    def get(self, name, opt="TRAN"):
+        """ try/except among objects.
         """
-        if name!="any":
-            return name in self._objects[opt]
-        else:
-            return self._objects[opt]
-
+        try:
+            return self._objects[opt][name]
+        
+        except KeyError:
+            self._run.update(name,self) 
+            return self._objects[opt][name]
+    
     def put(self, name, obj, opt="TRAN", force=False):
         """ Objects should be put on the store only once!
         """
@@ -33,17 +35,20 @@ class Store:
         
         self._objects[opt][name] = obj
 
-    def get(self, name, opt="TRAN"):
-        """ try/except among objects.
+    def check(self, name="any", opt="TRAN"):
+        """ Checks if object is in the store.
         """
-        try:
-            return self._objects[opt][name]
-        
-        except KeyError:
-            self._run.update(name,self) 
-            return self._objects[opt][name]
+        if name!="any":
+            return name in self._objects[opt]
+        else:
+            return self._objects[opt]
 
     def clear(self, opt="TRAN"):
-        self._objects[opt] = {}
-    
+        """ Clears the store or portions of it.
+        """
+        if opt!="all":
+            self._objects[opt] = {}
+        else:
+            self._objects = {"PERM":{}, "TRAN":{}, "READY":{}}
+
 # EOF

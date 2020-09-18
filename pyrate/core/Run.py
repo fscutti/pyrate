@@ -30,10 +30,10 @@ class Run:
         # At this point the Run object should have self.input/config/output 
         # defined after being read from the configuration yaml file.
         # -----------------------------------------------------------------------
-        self.run_input = None
-        self.run_output = None
-        self.obj_configs = self.configs["global"]["objects"]
         self.state = None
+        self._in = None
+        self._out = None
+        self._config = self.configs["global"]["objects"]
 
     def launch(self):
         """ Implement input/output loop.
@@ -42,23 +42,22 @@ class Run:
         # The store object is the output of the launch function.
         # -----------------------------------------------------------------------
 
-        store = Store(name=self.name, run=self)
+        store = Store(self)
 
         # -----------------------------------------------------------------------
         # Initialise/load the output. Files are opened and ready to be written.
         # -----------------------------------------------------------------------
 
-        self.run_output = Output(self.name, store, outputs=self.outputs)
-        self.run_output.load()
+        self._out = Output(self.name, store, outputs=self.outputs)
+        self._out.load()
         
         # -----------------------------------------------------------------------
-        # Initialise algorithms corresponding to the declared object in the 
-        # output
+        # Initialise algorithms for the declared object in the output.
         # -----------------------------------------------------------------------
         
         self.algorithms = {}
-        for t in self.run_output.targets:
-            self.add(self.obj_configs[t]["algorithm"]["name"], store)
+        for t in self._out.targets:
+            self.add(self._config[t]["algorithm"]["name"], store)
 
         start = timeit.default_timer()
         
@@ -66,22 +65,19 @@ class Run:
         # Update the store in three steps: initialise, execute, finalise.
         # -----------------------------------------------------------------------
         
-        self.state = "initialise"
-        store = self.run(store)
+        store = self.run("initialise", store)
 
         if not store.check("any","READY"):
-            self.state = "execute"
-            store = self.run(store)
+            store = self.run("execute", store)
 
-        self.state = "finalise"
-        store = self.run(store)
+        store = self.run("finalise", store)
         
         # -----------------------------------------------------------------------
         # Write finalised objects to the output.
         # -----------------------------------------------------------------------
 
-        for o in self.run_output.targets:
-            self.run_output.put_object(o)
+        for o in self._out.targets:
+            self._out.write(o)
 
         stop = timeit.default_timer()
         
@@ -89,26 +85,30 @@ class Run:
 
         return store
 
-    def run(self, store):
+    def run(self, state, store):
         """ Run the loop function.
         """
+        self.state = state
 
         if self.state in ["initialise", "execute"]:
             for name, attr in self.inputs.items():
-                self.run_input = Input(name, store, attr)
-                self.run_input.load()
+                self._in = Input(name, store, attr)
+                self._in.load()
+
+                # The current input is put on the transient store
+                store.put("current_input", name, force=True)
                 
                 if self.state in ["execute"]:
-                    while self.run_input.next_event() >= 0:
-                        self.loop(store, self.run_output.targets)
+                    while self._in.next_event() >= 0:
+                        self.loop(store, self._out.targets)
 
                 else: 
-                    self.loop(store, self.run_output.targets)
+                    self.loop(store, self._out.targets)
 
         elif self.state in ["finalise"]:
 
             store.clear("READY")
-            self.loop(store, self.run_output.targets)
+            self.loop(store, self._out.targets)
 
         return store
 
@@ -124,8 +124,8 @@ class Run:
     def call(self, obj):
         """ Calls an algorithm.
         """
-        self.add_name(obj, self.obj_configs[obj])
-        getattr(self.algorithms[self.obj_configs[obj]["algorithm"]["name"]], self.state)(self.obj_configs[obj])
+        self.add_name(obj, self._config[obj])
+        getattr(self.algorithms[self._config[obj]["algorithm"]["name"]], self.state)(self._config[obj])
     
     def add_name(self, obj, config):
         """ Adds name of object to its configuration.
@@ -153,11 +153,11 @@ class Run:
             pass
 
         try:
-            self.add(self.obj_configs[obj_name]["algorithm"]["name"], store)
+            self.add(self._config[obj_name]["algorithm"]["name"], store)
             self.call(obj_name)
 
         except KeyError:
-            self.run_input.get_object(obj_name)
+            self._in.read(obj_name)
 
     def modify_config(self, objects):
         """ Modify configuration of object based on restricted selection in the job configuration.
@@ -179,13 +179,13 @@ class Run:
         print(newconfig) 
         """ 
         for name, attr in newconfig.items():
-            if name in self.obj_configs:
-                self.obj_configs[name]["algorithm"] = FN.intersect(self.obj_configs[name]["algorithm"], attr)
-                #FN.merge(self.obj_configs[name]["algorithm"], attr)
-                #FN.merge(attr, self.obj_configs[name]["algorithm"])
+            if name in self._config:
+                self._config[name]["algorithm"] = FN.intersect(self._config[name]["algorithm"], attr)
+                #FN.merge(self._config[name]["algorithm"], attr)
+                #FN.merge(attr, self._config[name]["algorithm"])
                 print()
                 print()
-                print(name, self.obj_configs[name]["algorithm"])
+                print(name, self._config[name]["algorithm"])
                 print(name, attr)
                 print()
                 print()
