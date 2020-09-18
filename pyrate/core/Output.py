@@ -39,10 +39,10 @@ class Output(Writer):
             
             writer.load()
             
+    def put_object(self, name):
 
-
-
-
-
+        for w_name, writer in self.writers.items():
+            if name in writer.targets:
+                writer.put_object(name)
 
 # EOF

@@ -24,96 +24,142 @@ class Run:
         self.name = name
 
     def setup(self):
-        """ Instantiate relevant classes.
+        """ Refining the input configuration.
         """
-        store = Store(name=self.name, run=self)
+        # -----------------------------------------------------------------------
+        # At this point the Run object should have self.input/config/output 
+        # defined after being read from the configuration yaml file.
+        # -----------------------------------------------------------------------
+        self.run_input = None
+        self.run_output = None
         self.obj_configs = self.configs["global"]["objects"]
+        self.state = None
+
+    def launch(self):
+        """ Implement input/output loop.
+        """ 
+        # -----------------------------------------------------------------------
+        # The store object is the output of the launch function.
+        # -----------------------------------------------------------------------
+
+        store = Store(name=self.name, run=self)
+
+        # -----------------------------------------------------------------------
+        # Initialise/load the output. Files are opened and ready to be written.
+        # -----------------------------------------------------------------------
 
         self.run_output = Output(self.name, store, outputs=self.outputs)
         self.run_output.load()
-        print(self.run_output.targets)
-        sys.exit() 
+        
+        # -----------------------------------------------------------------------
+        # Initialise algorithms corresponding to the declared object in the 
+        # output
+        # -----------------------------------------------------------------------
         
         self.algorithms = {}
         for t in self.run_output.targets:
             self.add(self.obj_configs[t]["algorithm"]["name"], store)
-        
 
         start = timeit.default_timer()
         
+        # -----------------------------------------------------------------------
+        # Update the store in three steps: initialise, execute, finalise.
+        # -----------------------------------------------------------------------
+        
         self.state = "initialise"
-        
-        self.run_input = None
+        store = self.run(store)
 
-        for name, attr in self.inputs.items():
-            self.run_input = Input(name, store, attr)
-            self.run_input.load()
-            self.loop(store, self.run_output.targets)
-        
-            store.clear("TRAN")
-
-        #self.assign_config(required_objects)
-        #"""
-
-        #"""
         if not store.check("any","READY"):
-
             self.state = "execute"
-            self.run_input = None
-            for name, attr in self.inputs.items():
-                self.run_input = Input(name, store, attr)
-                self.run_input.load()
-            
-                while self.run_input.next_event() >= 0:
-                    self.loop(store, self.run_output.targets)
-                    store.clear("TRAN")
-        
-        # loop over output here!!!
-        store.clear("READY")
+            store = self.run(store)
+
         self.state = "finalise"
-        self.loop(store, self.run_output.targets)
-        #"""
+        store = self.run(store)
         
+        # -----------------------------------------------------------------------
+        # Write finalised objects to the output.
+        # -----------------------------------------------------------------------
+
+        for o in self.run_output.targets:
+            self.run_output.put_object(o)
 
         stop = timeit.default_timer()
         
         print('Time: ', stop - start)  
-        #"""
 
-        """ 
-        self.objorder = {}
-        for o in required_objects:
-            self._build_chain(o.split(":")[0])
-        """ 
-        
-        #FN.pretty(self.objorder)
+        return store
 
+    def run(self, store):
+        """ Run the loop function.
+        """
 
-        #print(self.store.algorithms)
-        #for name, attr in self.inputs.items():
-        #    self.inputs[name]["instance"] = Input(name, attr)
-        #print(self.inputs)
+        if self.state in ["initialise", "execute"]:
+            for name, attr in self.inputs.items():
+                self.run_input = Input(name, store, attr)
+                self.run_input.load()
+                
+                if self.state in ["execute"]:
+                    while self.run_input.next_event() >= 0:
+                        self.loop(store, self.run_output.targets)
 
+                else: 
+                    self.loop(store, self.run_output.targets)
+
+        elif self.state in ["finalise"]:
+
+            store.clear("READY")
+            self.loop(store, self.run_output.targets)
+
+        return store
 
     def loop(self, store, objects):
         """ Loop over required objects to resolve them. Skips completed ones.
         """
-        #store.set_state(state)
         for o in objects:
             if not store.check(o,"READY"):
                 self.call(o) 
-
+        
+        store.clear("TRAN")
 
     def call(self, obj):
         """ Calls an algorithm.
         """
         self.add_name(obj, self.obj_configs[obj])
-        print("Calling algorithm: ",self.obj_configs[obj]["algorithm"]["name"], self.state, "for object: ", obj)
         getattr(self.algorithms[self.obj_configs[obj]["algorithm"]["name"]], self.state)(self.obj_configs[obj])
+    
+    def add_name(self, obj, config):
+        """ Adds name of object to its configuration.
+        """
+        if not "name" in config:
+            config["name"] = obj
 
 
+    def add(self, name, store):
+        """ Adds instances of algorithms dynamically.
+        """
+        if not name in self.algorithms:
+            self.algorithms.update({name:getattr(importlib.import_module(m),m.split(".")[-1])(name, store) for m in sys.modules if name in m})
 
-    def assign_config(self, objects):
+    def update(self, obj_name, store):
+        """ Updates value of object on the store. 
+            To Do: possibly enforce the presence of objects on the store
+            at this stage before calling the algorithm. Although this might
+            slow things down.
+        """
+        try:
+            self.call(obj_name)
+
+        except KeyError:
+            pass
+
+        try:
+            self.add(self.obj_configs[obj_name]["algorithm"]["name"], store)
+            self.call(obj_name)
+
+        except KeyError:
+            self.run_input.get_object(obj_name)
+
+    def modify_config(self, objects):
         """ Modify configuration of object based on restricted selection in the job configuration.
         """
         
@@ -145,78 +191,4 @@ class Run:
                 print()
 
         """ 
-
-        
-    def launch(self):
-        """ Implement input/output loop.
-        """ 
-        pass
-    
-
-    def add(self, name, store):
-        """ Adds instances of algorithms dynamically.
-        """
-        if not name in self.algorithms:
-            self.algorithms.update({name:getattr(importlib.import_module(m),m.split(".")[-1])(name, store) for m in sys.modules if name in m})
-        print("This is the required name of alg: ", name)
-        print(self.algorithms)
-   
-
-
-    def add_name(self, obj, config):
-        """ Adds name of object to its configuration.
-        """
-        if not "name" in config:
-            config["name"] = obj
-
-
-
-    def update(self, obj_name, store):
-        """ Updates value of object on the store. 
-            To Do: possibly enforce the presence of objects on the store
-            at this stage before calling the algorithm. Although this might
-            slow things down.
-        """
-        try:
-            self.call(obj_name)
-
-        except KeyError:
-            pass
-
-        try:
-            self.add(self.obj_configs[obj_name]["algorithm"]["name"], store)
-            self.call(obj_name)
-
-        except KeyError:
-            print("This is a call to current input: ", obj_name)
-            self.run_input.get_object(obj_name)
-            #sys.exit()
-
-    """
-    def _build_chain(self, obj_name):
-        
-        while not obj_name in self.objorder:
-            
-            if "dependency" in self.obj_configs[obj_name]:
-                objs = FN.flatten([ST.get_items(attr) for name, attr in self.obj_configs[obj_name]["dependency"].items()])
-                
-                if all([o in self.objorder for o in objs]):
-                    self.objorder[obj_name] = self.obj_configs[obj_name] 
-                
-                else:
-                    for o in objs:
-                        self._build_chain(o)
-            
-            elif not obj_name in self.objorder: 
-                self.objorder[obj_name] = self.obj_configs[obj_name] 
-            
-            else: print("ERROR")
-    """
-
-
-
-
-
-
-
-
+# EOF

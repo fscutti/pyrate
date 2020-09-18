@@ -76,6 +76,7 @@ class Job:
         """
         
         for name,attr in self.runs.items():
+            attr.setup()
             attr.launch()
 
 # EOF
