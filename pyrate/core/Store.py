@@ -1,5 +1,6 @@
 """ Store class.
 """
+from copy import copy
 
 class Store:
     def __init__(self,run):
@@ -14,6 +15,16 @@ class Store:
         READY: 
             map holding the boolean status of objects which are ready for the finalise step.
         """
+
+    def put(self, name, obj, opt="TRAN", replace=False):
+        """ Objects should be put on the store only once!
+        """
+        # Maybe this check can be removed but just to be careful for now...
+        if self.check(name, opt) and not replace:
+            print("ERROR: objects should only be put on the store once")
+            return
+        
+        self._objects[opt][name] = obj
     
     def get(self, name, opt="TRAN"):
         """ try/except among objects.
@@ -24,16 +35,11 @@ class Store:
         except KeyError:
             self._run.update(name,self) 
             return self._objects[opt][name]
-    
-    def put(self, name, obj, opt="TRAN", force=False):
-        """ Objects should be put on the store only once!
+   
+    def copy(self, name, opt="TRAN"):
+        """ Returns a copy of the object.
         """
-        # Maybe this check can be removed but just to be careful for now...
-        if self.check(name, opt) and not force:
-            print("ERROR: objects should only be put on the store once")
-            return
-        
-        self._objects[opt][name] = obj
+        return copy(self.get(name, opt))
 
     def check(self, name="any", opt="TRAN"):
         """ Checks if object is in the store.
