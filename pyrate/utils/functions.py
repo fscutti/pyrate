@@ -51,9 +51,8 @@ def pretty(d, indent=0):
           print('\t' * (indent+1) + str(value))
 
 
+"""
 def merge(a, b, path=None):
-    """ Merges dictionary b into dictionary a.
-    """
     if path is None: path = []
     for key in b:
         if key in a and not (a[key]=={} or b[key]=={}):
@@ -73,12 +72,9 @@ def merge(a, b, path=None):
         else:
             a[key] = b[key]
     return a 
-
-
-
+"""
+"""
 def intersect(a, b, path=None):
-    """ Merges dictionary b into dictionary a.
-    """
     if path is None: path = []
 
     # check here if any of the values of b is null.
@@ -106,22 +102,56 @@ def intersect(a, b, path=None):
         else:
             a[key] = b[key]
     return a 
-
-
 """
-def intersect(a, b, path=None):
+
+def merge(target, probe, path=None):
+    """ Merges probe into target.
+    """
     if path is None: path = []
-    for key in b:
-        if key in a:
-            if isinstance(a[key], dict) and isinstance(b[key], dict):
-                merge(a[key], b[key], path + [str(key)])
-            elif a[key] == b[key]:
+
+    for k in probe:
+        if k in target:
+
+            if isinstance(target[k], dict) and isinstance(probe[k], dict):
+                merge(target[k], probe[k], path + [str(k)])
+
+            elif target[k] == probe[k]:
                 pass # same leaf value
+
             else:
-                raise Exception('Conflict at %s' % '.'.join(path + [str(key)]))
+                raise Exception('Conflict at %s' % '.'.join(path + [str(k)]))
         else:
-            a[key] = b[key]
-    return a
-"""
+            target[k] = probe[k]
+    return target
+
+
+def intersect(probe, target):
+    """ Intersection of two nested dictionaries.
+    """
+    intersection = {}
+
+    if probe=={}:
+        intersection=target
+
+    else: 
+        for k in set(target).intersection(set(probe)):
+        
+            p = probe[k]
+            t = target[k]
+        
+            if isinstance(t, dict) and isinstance(p, dict):
+                if p=={}:
+                    intersection[k] = t
+                else:
+                    intersection[k] = intersect(p, t)
+            
+            elif not isinstance(t, dict) and p=={}:
+                intersection[k] = t
+        
+            elif t == p:
+                intersection[k] = t
+            else:
+                raise ValueError("values for common keys don't match")
+    return intersection
 
 #EOF

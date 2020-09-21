@@ -34,5 +34,14 @@ def get_tags(f):
     if "_" in f: f = f.split("_")
     return f
 
+def check_tag(s,l):
+    """ Checks if any string in the list l is contained in string s.
+    """
+    for i in l:
+        if s in i: 
+            return True
+    return False
+
+
 
 # EOF

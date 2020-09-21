@@ -51,6 +51,31 @@ class Run:
         self._out = Output(self.name, store, outputs=self.outputs)
         self._out.load()
         
+        print(self._out.targets)
+        
+        intersection = {}
+        for w_name, w in self._out.writers.items():
+            if hasattr(w,"w_targets"):
+                for wt in w.w_targets:
+                    l = wt.split(":")
+                    oname = l[0]
+                    
+                    print("----------") 
+                    print(oname, wt)
+                    print("----------") 
+                    
+                    o = FN.nested(l)[oname]
+                    c = self._config[oname]["algorithm"]
+                    inter = FN.intersect(o,c)
+                    
+                    c = FN.merge(c,inter)
+                    print("This is the intersection dictionary: ", inter)
+                    print("This is the merged dictionary: ", c)
+                    #print("These are the common items: ", inter)
+
+
+        sys.exit() 
+
         # -----------------------------------------------------------------------
         # Initialise algorithms for the declared object in the output.
         # -----------------------------------------------------------------------
@@ -58,6 +83,9 @@ class Run:
         self.algorithms = {}
         for t in self._out.targets:
             self.add(self._config[t]["algorithm"]["name"], store)
+        
+
+
 
         start = timeit.default_timer()
         
@@ -95,8 +123,8 @@ class Run:
                 self._in = Input(name, store, attr)
                 self._in.load()
 
-                # The current input is put on the transient store
-                store.put("current_input", name, force=True)
+                # The current input name is put on the transient store
+                store.put("current_input", name, replace=True)
                 
                 if self.state in ["execute"]:
                     while self._in.next_event() >= 0:
@@ -159,9 +187,9 @@ class Run:
         except KeyError:
             self._in.read(obj_name)
 
+
+    """
     def modify_config(self, objects):
-        """ Modify configuration of object based on restricted selection in the job configuration.
-        """
         
         modifications = [FN.nested(o.split(":")) for o in objects if ":" in o]
 
@@ -177,7 +205,6 @@ class Run:
                 #newconfig[k] =  newconfig[k] and d[k] 
 
         print(newconfig) 
-        """ 
         for name, attr in newconfig.items():
             if name in self._config:
                 self._config[name]["algorithm"] = FN.intersect(self._config[name]["algorithm"], attr)
@@ -189,6 +216,6 @@ class Run:
                 print(name, attr)
                 print()
                 print()
+    """
 
-        """ 
 # EOF

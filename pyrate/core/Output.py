@@ -16,11 +16,12 @@ class Output(Writer):
     def load(self):
         
         self.writers = {}
+        targets = []
         for name, attr in self.outputs.items():
             self._init_writer(name, attr["path"], attr["objects"])
-            self.targets.extend(attr["objects"])
+            targets.extend(attr["objects"])
         
-        self.targets = ST.remove_duplicates(self.targets)
+        self.build_targets(targets) 
 
     def _init_writer(self, f_name, f_path, w_targets):
 
