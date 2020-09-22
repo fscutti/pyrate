@@ -27,7 +27,7 @@ class Input(Reader):
             self.groups[g_names[g_idx]] = g_files
             self._init_reader(g_names[g_idx], self._f_idx)
 
-        self._n_files = len(g_files)
+        self._n_files = len(self.files)
         self._is_loaded = True
 
     def _move_readers(self, option="frw"):
