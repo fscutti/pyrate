@@ -10,7 +10,6 @@ objects:
             weights: weight1, weight2
   
     region1_A: 
-        status: execute
         algorithm: 
             name: Region 
             selection: var4>10, var4<var1, var1>90

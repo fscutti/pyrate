@@ -36,21 +36,24 @@ objects:
          algorithm: 
              name: Make1DPlot
              makeratio: True
-             region1:
-                 var1: nbins, xmin, xmax
-                 var2: nbins, xmin, xmax
-             region1_A:
-                 var34: nbins, xmin, xmax
-                 var9: nbins, xmin, xmax
+             binning:
+                 region1:
+                     var1: nbins, xmin, xmax
+                     var2: nbins, xmin, xmax
+                     var3: nbins, xmin, xmax
+                 region1_A:
+                     var34: nbins, xmin, xmax
+                     var9: nbins, xmin, xmax
          histograms: filledHists
      
      
      plot2D:
          algorithm: 
              name: Make2DPlot
-             region1:
-                 var10,var11: nbinsx, xmin, xmax, nbinsy, ymin, ymax
-                 var5,var8: nbinsx, xmin, xmax, nbinsy, ymin, ymax
+             binning:
+                 region1:
+                     var10,var11: nbinsx, xmin, xmax, nbinsy, ymin, ymax
+                     var5,var8: nbinsx, xmin, xmax, nbinsy, ymin, ymax
          histograms: filledHists
      
      
