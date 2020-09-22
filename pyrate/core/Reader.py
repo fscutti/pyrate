@@ -10,10 +10,10 @@ class Reader:
         self._n_events = None
         self._is_loaded = False
     
-    def is_loaded(self):
-        """ Returns loading status of the Reader.
-        """
-        return self._is_loaded
+    #def is_loaded(self):
+    #    """ Returns loading status of the Reader.
+    #    """
+    #    return self._is_loaded
     
     def is_finished(self):
         """ Checks if event pointer is at the end of the input.
