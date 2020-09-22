@@ -2,11 +2,12 @@
 """
 from copy import copy
 
+
 class Store:
-    def __init__(self,run):
+    def __init__(self, run):
         self._run = run
         self.name = self._run.name
-        self._objects = {"PERM":{}, "TRAN":{}, "READY":{}}
+        self._objects = {"PERM": {}, "TRAN": {}, "READY": {}}
         """
         PERM: 
             objects which are persistent throughout the run.
@@ -17,44 +18,40 @@ class Store:
         """
 
     def put(self, name, obj, opt="TRAN", replace=False):
-        """ Objects should be put on the store only once!
-        """
+        """Objects should be put on the store only once!"""
         # Maybe this check can be removed but just to be careful for now...
         if self.check(name, opt) and not replace:
             print("ERROR: objects should only be put on the store once")
             return
-        
+
         self._objects[opt][name] = obj
-    
+
     def get(self, name, opt="TRAN"):
-        """ try/except among objects.
-        """
+        """try/except among objects."""
         try:
             return self._objects[opt][name]
-        
+
         except KeyError:
-            self._run.update(name,self) 
+            self._run.update(name, self)
             return self._objects[opt][name]
-   
+
     def copy(self, name, opt="TRAN"):
-        """ Returns a copy of the object.
-        """
+        """Returns a copy of the object."""
         return copy(self.get(name, opt))
 
     def check(self, name="any", opt="TRAN"):
-        """ Checks if object is in the store.
-        """
-        if name!="any":
+        """Checks if object is in the store."""
+        if name != "any":
             return name in self._objects[opt]
         else:
             return self._objects[opt]
 
     def clear(self, opt="TRAN"):
-        """ Clears the store or portions of it.
-        """
-        if opt!="all":
+        """Clears the store or portions of it."""
+        if opt != "all":
             self._objects[opt] = {}
         else:
-            self._objects = {"PERM":{}, "TRAN":{}, "READY":{}}
+            self._objects = {"PERM": {}, "TRAN": {}, "READY": {}}
+
 
 # EOF
