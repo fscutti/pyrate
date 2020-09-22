@@ -14,7 +14,7 @@
 inputs: 
    signal:
        samples: muonPart2, muonPart1
-       group: sample1,sample2,sample3
+       group: sample1, sample2, sample3
        nevents: 
            emin: 0
            emax: -1
@@ -54,21 +54,21 @@ configs:
 # inclusive of all its non-specified sub-fields.
 # -----------------------------------------------------------------------
 outputs:
-    output1:
+    output1.root:
         path: /Users/fscutti/pyrate/myNotebooks/myOutput
         objects:
-            #- stackplot1D:binning:region1
-            #- stackplot1D:binning:region1:var1
-            #- stackplot1D:binning:region1:var2
-            #- stackplot1D:binning:region1_A
+            - stackplot1D:binning:region1
+            - stackplot1D:binning:region1:var1
+            - stackplot1D:binning:region1_A
             - stackplot1D
-            # - plot2D:someattr
-            # - plot2D:Pippa:Pippo
-
-    output2:
+            - plot2D
+            - plot2D:someattr
+    
+    output2.root:
         path: /Users/fscutti/pyrate/myNotebooks/myOutput
         objects:
-            #- tree1
+            - stackplot1D:binning:region1:var1
+            - plot2D
             - plot2D
 
 # EOF
