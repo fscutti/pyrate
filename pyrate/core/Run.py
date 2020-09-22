@@ -51,30 +51,9 @@ class Run:
         self._out = Output(self.name, store, outputs=self.outputs)
         self._out.load()
         
-        print(self._out.targets)
-        
-        intersection = {}
-        for w_name, w in self._out.writers.items():
-            if hasattr(w,"w_targets"):
-                for wt in w.w_targets:
-                    l = wt.split(":")
-                    oname = l[0]
-                    
-                    print("----------") 
-                    print(oname, wt)
-                    print("----------") 
-                    
-                    o = FN.nested(l)[oname]
-                    c = self._config[oname]["algorithm"]
-                    inter = FN.intersect(o,c)
-                    
-                    c = FN.merge(c,inter)
-                    print("This is the intersection dictionary: ", inter)
-                    print("This is the merged dictionary: ", c)
-                    #print("These are the common items: ", inter)
+        self.modify_config() 
 
-
-        sys.exit() 
+        #sys.exit() 
 
         # -----------------------------------------------------------------------
         # Initialise algorithms for the declared object in the output.
@@ -83,11 +62,8 @@ class Run:
         self.algorithms = {}
         for t in self._out.targets:
             self.add(self._config[t]["algorithm"]["name"], store)
-        
 
-
-
-        start = timeit.default_timer()
+        #start = timeit.default_timer()
         
         # -----------------------------------------------------------------------
         # Update the store in three steps: initialise, execute, finalise.
@@ -104,12 +80,12 @@ class Run:
         # Write finalised objects to the output.
         # -----------------------------------------------------------------------
 
-        for o in self._out.targets:
-            self._out.write(o)
+        for t in self._out.targets:
+            self._out.write(t)
 
-        stop = timeit.default_timer()
+        #stop = timeit.default_timer()
         
-        print('Time: ', stop - start)  
+        #print('Time: ', stop - start)  
 
         return store
 
@@ -143,36 +119,32 @@ class Run:
     def loop(self, store, objects):
         """ Loop over required objects to resolve them. Skips completed ones.
         """
-        for o in objects:
-            if not store.check(o,"READY"):
-                self.call(o) 
+        for obj_name in objects:
+            if not store.check(obj_name,"READY"):
+                self.call(obj_name) 
         
         store.clear("TRAN")
 
-    def call(self, obj):
+    def call(self, obj_name):
         """ Calls an algorithm.
         """
-        self.add_name(obj, self._config[obj])
-        getattr(self.algorithms[self._config[obj]["algorithm"]["name"]], self.state)(self._config[obj])
+        self.add_name(obj_name, self._config[obj_name])
+        getattr(self.algorithms[self._config[obj_name]["algorithm"]["name"]], self.state)(self._config[obj_name])
     
-    def add_name(self, obj, config):
+    def add_name(self, obj_name, config):
         """ Adds name of object to its configuration.
         """
         if not "name" in config:
-            config["name"] = obj
+            config["name"] = obj_name
 
-
-    def add(self, name, store):
+    def add(self, alg_name, store):
         """ Adds instances of algorithms dynamically.
         """
-        if not name in self.algorithms:
-            self.algorithms.update({name:getattr(importlib.import_module(m),m.split(".")[-1])(name, store) for m in sys.modules if name in m})
+        if not alg_name in self.algorithms:
+            self.algorithms.update({alg_name:getattr(importlib.import_module(m),m.split(".")[-1])(alg_name, store) for m in sys.modules if alg_name in m})
 
     def update(self, obj_name, store):
         """ Updates value of object on the store. 
-            To Do: possibly enforce the presence of objects on the store
-            at this stage before calling the algorithm. Although this might
-            slow things down.
         """
         try:
             self.call(obj_name)
@@ -187,35 +159,27 @@ class Run:
         except KeyError:
             self._in.read(obj_name)
 
+    def modify_config(self):
+        """ Modify original object configuration according to requirements in the job configuration.
+        """
+        intersection = {}
+        for w_name, w in self._out.writers.items():
+            if hasattr(w,"w_targets"):
+                for wt in w.w_targets:
+                    l = wt.split(":")
+                    obj_name = l[0]
+                    
+                    o = FN.nested(l)[obj_name]
+                    c = self._config[obj_name]["algorithm"]
+                    i = FN.intersect(o,c)
+                    
+                    if not obj_name in intersection:
+                        intersection[obj_name] = {}
 
-    """
-    def modify_config(self, objects):
+                    intersection[obj_name] = FN.merge(intersection[obj_name],i)
         
-        modifications = [FN.nested(o.split(":")) for o in objects if ":" in o]
-
-        print(modifications)
-
-        newconfig = {}
-        for d in modifications:
-            k = list(d)[0]
-            if not k in newconfig: 
-                newconfig[k] = d[k]
-            else: 
-                newconfig[k] = FN.merge(newconfig[k], d[k])
-                #newconfig[k] =  newconfig[k] and d[k] 
-
-        print(newconfig) 
-        for name, attr in newconfig.items():
-            if name in self._config:
-                self._config[name]["algorithm"] = FN.intersect(self._config[name]["algorithm"], attr)
-                #FN.merge(self._config[name]["algorithm"], attr)
-                #FN.merge(attr, self._config[name]["algorithm"])
-                print()
-                print()
-                print(name, self._config[name]["algorithm"])
-                print(name, attr)
-                print()
-                print()
-    """
+        for t in self._out.targets:
+            c = self._config[t]["algorithm"]
+            c.update(intersection[t])
 
 # EOF
