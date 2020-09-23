@@ -1,5 +1,7 @@
 """ Base class for reading input files. 
 """
+import sys
+
 from pyrate.core.Reader import Reader
 from pyrate.readers.ReaderROOT import ReaderROOT
 

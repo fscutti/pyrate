@@ -15,13 +15,24 @@ parser = argparse.ArgumentParser(description="Command line options for pyrate")
 parser.add_argument(
     "--job_config", "-j", help="job configuration file/s", nargs="+", required=True
 )
+parser.add_argument(
+    "--logging_level", "-l", help="logging level", required=False, default="INFO"
+)
 
 args = parser.parse_args()
 
 if __name__ == "__main__":
-    for jconfig in args.job_config:
-        stream = open(jconfig, "r")
-        dictionary = yaml.full_load(stream)
-        job = Job(dictionary)
+    for jc in args.job_config:
+
+        stream = open(jc, "r")
+
+        jconfig = yaml.full_load(stream)
+        jname = jc.split(".")[0]
+        log_level = args.logging_level
+
+        job = Job(jname, jconfig, log_level)
+
         job.setup()
         job.launch()
+
+# EOF

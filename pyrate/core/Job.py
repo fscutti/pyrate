@@ -1,9 +1,12 @@
-""" This class will handle a set of configurations 
-and launch several instances of a Run homogeneous
-in purpose and structure.
+""" This class will handle a set of configurations and launch several 
+instances of a Run homogeneous in purpose and structure.
 """
+
 import os
+import sys
 import yaml
+import logging
+
 from itertools import groupby
 
 from pyrate.utils import strings as ST
@@ -13,13 +16,24 @@ from pyrate.core.Run import Run
 
 
 class Job:
-    def __init__(self, config):
+    def __init__(self, name, config, log_level):
+        self.name = name
         self.config = config
+        self.log_level = log_level
 
     def setup(self):
-        """Build global Job configuration and instantiate Run objects."""
+        """Build global Job configuration and instantiate Run objects.
+        The keys of the following dictionary will be distributed to the Run.
+        """
 
-        self.job = {"inputs": {}, "configs": {}, "outputs": {}}
+        self.job = {"logger": None, "inputs": {}, "configs": {}, "outputs": {}}
+
+        # --------------------------
+        # Setup the logger
+        # --------------------------
+
+        self.job["logger"] = logging.getLogger("logger")
+        self.job["logger"].setLevel(getattr(logging, self.log_level))
 
         # --------------------------
         # Build global configuration
@@ -32,6 +46,7 @@ class Job:
             self.job["inputs"][name] = {"files": []}
 
             # Find all relevant files using the list of paths and filtering with the sample and channel tags.
+            # *************>>>>> ToDo: exit with error message if no files are found!!!
             for f in FN.find_files(attr["path"]):
                 self.job["inputs"][name]["files"].extend(
                     f
@@ -54,6 +69,11 @@ class Job:
                     lambda a: a.partition("_")[0] if "group" in attr else None,
                 )
             ]
+
+            if not self.job["inputs"][name]["files"]:
+                sys.exit(
+                    f"ERROR: no input files found for input {name} under path {attr['path']}"
+                )
 
             # Add all remaining attributes.
             self.job["inputs"][name].update(attr)
@@ -99,9 +119,13 @@ class Job:
         ToDo: find a method to dispatch run objects.
         """
 
+        sys.exit()
+
+        """
         for name, attr in self.runs.items():
             attr.setup()
             attr.launch()
+        """
 
 
 # EOF

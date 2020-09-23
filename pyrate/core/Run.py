@@ -4,6 +4,8 @@
 import sys
 import importlib
 import timeit
+import time
+import logging
 
 import pyrate.variables
 import pyrate.trees
@@ -34,6 +36,15 @@ class Run:
         self._out = None
         self._config = self.configs["global"]["objects"]
 
+        fileHandler = logging.FileHandler(
+            f"{self.name}.{time.strftime('%Y-%m-%d-%Hh%M')}.log", mode="w"
+        )
+        fileHandler.setFormatter(
+            logging.Formatter("[%(asctime)s %(name)-16s %(levelname)-7s]  %(message)s")
+        )
+
+        self.logger.addHandler(fileHandler)
+
     def launch(self):
         """Implement input/output loop."""
         # -----------------------------------------------------------------------
@@ -61,7 +72,7 @@ class Run:
         for t in self._out.targets:
             self.add(self._config[t]["algorithm"]["name"], store)
 
-        # start = timeit.default_timer()
+        start = timeit.default_timer()
 
         # -----------------------------------------------------------------------
         # Update the store in three steps: initialise, execute, finalise.
@@ -81,9 +92,9 @@ class Run:
         for t in self._out.targets:
             self._out.write(t)
 
-        # stop = timeit.default_timer()
+        stop = timeit.default_timer()
 
-        # print('Time: ', stop - start)
+        print('Time: ', stop - start)
 
         return store
 
@@ -107,6 +118,7 @@ class Run:
                     self.loop(store, self._out.targets)
 
         elif self.state in ["finalise"]:
+            print("finalise")
 
             store.clear("READY")
             self.loop(store, self._out.targets)
@@ -174,7 +186,7 @@ class Run:
                     c = self._config[obj_name]["algorithm"]
                     i = FN.intersect(o, c)
 
-                    if not obj_name in intersection:
+                    if obj_name not in intersection:
                         intersection[obj_name] = {}
 
                     intersection[obj_name] = FN.merge(intersection[obj_name], i)
