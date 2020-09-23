@@ -33,10 +33,8 @@ class Input(Reader):
         self._is_loaded = True
 
     def _move_readers(self, option="frw"):
-        """Advances the pointer to the next valid group of files
-        and initialises a Reader class. This is "transforming"
-        a string to a class so it will leave a class instance
-        as a trace of previous usage.
+        """Advances the pointer to the next valid group of files and initialises a Reader class.
+        This is "transforming" a string to a class so it will leave a class instance as a trace of previous usage.
         """
 
         if option == "frw":
@@ -114,7 +112,6 @@ class Input(Reader):
             print("ERROR event index not defined")
 
     def read(self, name):
-
         """Look for the object in the entire input. Initialises readers if they were not."""
 
         n_tags = name.split("_")
@@ -125,9 +122,15 @@ class Input(Reader):
                 if not ST.check_tag(g_name, n_tags):
                     continue
 
-            self._init_reader(g_name, self._f_idx)
+            if "ALL_FILES:" in name:
+                for f_idx in enumerate(g_readers):
 
-            g_readers[self._f_idx].read(name)
+                    self._init_reader(g_name, f_idx)
+                    g_readers[f_idx].read(name)
+            else:
+                self._init_reader(g_name, self._f_idx)
+
+                g_readers[self._f_idx].read(name)
 
 
 # EOF

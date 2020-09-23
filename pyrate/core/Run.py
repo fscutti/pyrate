@@ -51,6 +51,8 @@ class Run:
         # The store object is the output of the launch function.
         # -----------------------------------------------------------------------
 
+        start = timeit.default_timer()
+        
         store = Store(self)
 
         # -----------------------------------------------------------------------
@@ -62,8 +64,6 @@ class Run:
 
         self.modify_config()
 
-        # sys.exit()
-
         # -----------------------------------------------------------------------
         # Initialise algorithms for the declared object in the output.
         # -----------------------------------------------------------------------
@@ -71,8 +71,6 @@ class Run:
         self.algorithms = {}
         for t in self._out.targets:
             self.add(self._config[t]["algorithm"]["name"], store, self.logger)
-
-        start = timeit.default_timer()
 
         # -----------------------------------------------------------------------
         # Update the store in three steps: initialise, execute, finalise.
@@ -94,7 +92,7 @@ class Run:
 
         stop = timeit.default_timer()
 
-        print("Time: ", stop - start)
+        self.logger.info("Execution time: ", stop - start)
 
         return store
 
@@ -108,7 +106,7 @@ class Run:
                 self._in.load()
 
                 # The current input attribute dictionary is put on the transient store
-                store.put("current_input", {"name": name, "attr": attr}, replace=True)
+                store.put("CURRENT_INPUT", {"name": name, "attr": attr}, replace=True)
 
                 if self.state in ["execute"]:
                     while self._in.next_event() >= 0:
@@ -118,7 +116,6 @@ class Run:
                     self.loop(store, self._out.targets)
 
         elif self.state in ["finalise"]:
-            print("finalise")
 
             store.clear("READY")
             self.loop(store, self._out.targets)
