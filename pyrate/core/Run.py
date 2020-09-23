@@ -57,7 +57,7 @@ class Run:
         # Initialise/load the output. Files are opened and ready to be written.
         # -----------------------------------------------------------------------
 
-        self._out = Output(self.name, store, outputs=self.outputs)
+        self._out = Output(self.name, store, self.logger, outputs=self.outputs)
         self._out.load()
 
         self.modify_config()
@@ -70,7 +70,7 @@ class Run:
 
         self.algorithms = {}
         for t in self._out.targets:
-            self.add(self._config[t]["algorithm"]["name"], store)
+            self.add(self._config[t]["algorithm"]["name"], store, self.logger)
 
         start = timeit.default_timer()
 
@@ -94,7 +94,7 @@ class Run:
 
         stop = timeit.default_timer()
 
-        print('Time: ', stop - start)
+        print("Time: ", stop - start)
 
         return store
 
@@ -104,7 +104,7 @@ class Run:
 
         if self.state in ["initialise", "execute"]:
             for name, attr in self.inputs.items():
-                self._in = Input(name, store, attr)
+                self._in = Input(name, store, self.logger, attr)
                 self._in.load()
 
                 # The current input attribute dictionary is put on the transient store
@@ -151,7 +151,7 @@ class Run:
             self.algorithms.update(
                 {
                     alg_name: getattr(importlib.import_module(m), m.split(".")[-1])(
-                        alg_name, store
+                        alg_name, store, self.logger
                     )
                     for m in sys.modules
                     if alg_name in m

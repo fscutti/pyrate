@@ -3,11 +3,12 @@
 
 
 class Reader:
-    __slots__ = ["name", "store", "_idx", "_n_events", "_is_loaded"]
+    __slots__ = ["name", "store", "logger", "_idx", "_n_events", "_is_loaded"]
 
-    def __init__(self, name, store):
+    def __init__(self, name, store, logger):
         self.name = name
         self.store = store
+        self.logger = logger
         self._idx = 0
         self._n_events = None
         self._is_loaded = False

@@ -4,11 +4,12 @@ from pyrate.utils import strings as ST
 
 
 class Writer:
-    __slots__ = ["name", "store", "targets", "_is_loaded"]
+    __slots__ = ["name", "store", "logger", "targets", "_is_loaded"]
 
     def __init__(self, name, store):
         self.name = name
         self.store = store
+        self.logger = logger
 
     def is_loaded(self):
         """Returns loading status of the Writer"""

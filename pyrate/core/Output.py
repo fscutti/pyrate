@@ -10,8 +10,8 @@ from pyrate.utils import strings as ST
 
 
 class Output(Writer):
-    def __init__(self, name, store, iterable=(), **kwargs):
-        super().__init__(name, store)
+    def __init__(self, name, store, logger, iterable=(), **kwargs):
+        super().__init__(name, store, logger)
         self.__dict__.update(iterable, **kwargs)
 
     def load(self):

@@ -10,8 +10,8 @@ from pyrate.utils import strings as ST
 
 
 class Input(Reader):
-    def __init__(self, name, store, iterable=(), **kwargs):
-        super().__init__(name, store)
+    def __init__(self, name, store, logger, iterable=(), **kwargs):
+        super().__init__(name, store, logger)
         self.__dict__.update(iterable, **kwargs)
 
     def load(self):
@@ -78,7 +78,7 @@ class Input(Reader):
             f = self.groups[g_name][f_idx]
 
             if f.endswith(".root"):
-                reader = ReaderROOT(r_name, self.store, f, self.structure)
+                reader = ReaderROOT(r_name, self.store, self.logger, f, self.structure)
 
             elif f.endswith(".dat"):
                 pass

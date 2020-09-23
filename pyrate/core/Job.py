@@ -46,7 +46,6 @@ class Job:
             self.job["inputs"][name] = {"files": []}
 
             # Find all relevant files using the list of paths and filtering with the sample and channel tags.
-            # *************>>>>> ToDo: exit with error message if no files are found!!!
             for f in FN.find_files(attr["path"]):
                 self.job["inputs"][name]["files"].extend(
                     f
@@ -111,8 +110,10 @@ class Job:
         """ ToDo: find a criterion to split runs
         """
         self.runs = {}
-        self.runs["test"] = Run("test", self.job)
-        self.runs["test"].setup()
+        self.runs["test1"] = Run("test1", self.job)
+        self.runs["test1"].setup()
+        # self.runs["test2"] = Run("test2", self.job)
+        # self.runs["test2"].setup()
 
     def launch(self):
         """Launch Run objects.
