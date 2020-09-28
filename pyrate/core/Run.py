@@ -70,7 +70,7 @@ class Run:
 
         self.algorithms = {}
         for t in self._out.targets:
-            self.add(self._config[t]["algorithm"]["name"], store, self.logger)
+            self.add(self._config[t]["algorithm"]["name"], store)
 
         # -----------------------------------------------------------------------
         # Update the store in three steps: initialise, execute, finalise.
@@ -92,7 +92,7 @@ class Run:
 
         stop = timeit.default_timer()
 
-        self.logger.info("Execution time: ", stop - start)
+        #self.logger.info("Execution time: ", str(stop - start))
 
         return store
 
@@ -106,11 +106,12 @@ class Run:
                 self._in.load()
 
                 # The current input attribute dictionary is put on the transient store
-                store.put("CURRENT_INPUT", {"name": name, "attr": attr}, replace=True)
-
+                store.put("INPUT", {"name": name, "attr": attr}, replace=True)
+                
                 if self.state in ["execute"]:
-                    while self._in.next_event() >= 0:
-                        self.loop(store, self._out.targets)
+                    #while self._in.set_next_event() >= 0:
+                    #    self.loop(store, self._out.targets)
+                    pass
 
                 else:
                     self.loop(store, self._out.targets)
