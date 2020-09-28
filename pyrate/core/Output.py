@@ -33,7 +33,7 @@ class Output(Writer):
             f = os.path.join(f_path, f_name)
 
             if f.endswith(".root"):
-                writer = WriterROOT(w_name, self.store, f, w_targets)
+                writer = WriterROOT(w_name, self.store, self.logger, f, w_targets)
                 self.writers[w_name] = writer
 
             elif f.endswith(".dat"):

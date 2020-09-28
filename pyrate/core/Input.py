@@ -17,7 +17,10 @@ class Input(Reader):
     def load(self):
 
         self._f_idx = 0
-        self._idx = 0
+        # self._idx = 0
+
+        if not hasattr(self, "structure"):
+            self.structure = {}
 
         g_names = {0: "0"}
         if hasattr(self, "group"):
@@ -30,7 +33,62 @@ class Input(Reader):
             self._init_reader(g_names[g_idx], self._f_idx)
 
         self._n_files = len(self.files)
-        self._is_loaded = True
+        # self._is_loaded = True
+
+    def read(self, name):
+        """Look for the object in the entire input. Initialises readers if they were not."""
+
+        n_tags = name.split("_")
+
+        for g_name, g_readers in self.groups.items():
+
+            if len(self.groups) > 1:
+                if not ST.check_tag(g_name, n_tags):
+                    continue
+
+            if "INPUT:" in name:
+                for f_idx, reader in enumerate(g_readers):
+
+                    if isinstance(reader, str):
+                        self._init_reader(g_name, f_idx)
+
+                    g_readers[f_idx].read(name)
+            else:
+                self._init_reader(g_name, self._f_idx)
+
+                g_readers[self._f_idx].read(name)
+
+    def set_n_events(self):
+        """Reads number of events of the entire input."""
+        if not self._n_events:
+
+            self._n_events = 0
+            for g_name, g_readers in self.groups.items():
+                for f_idx, reader in enumerate(g_readers):
+
+                    if isinstance(reader, str):
+                        self._init_reader(g_name, f_idx)
+
+                    self._n_events += g_readers[f_idx].get_n_events()
+                if self._n_events:
+                    break
+
+    def set_next_event(self):
+        """Move to the next event in the sequence."""
+        for g_name, g_readers in self.groups.items():
+
+            if g_readers[self._f_idx].set_next_event() < 0:
+                if self._move_readers("frw") < 0:
+
+                    self._idx = -1
+                    return self._idx
+
+                else:
+                    self._idx += 1
+                    return self._idx
+
+        self._idx += 1
+        return self._idx
 
     def _move_readers(self, option="frw"):
         """Advances the pointer to the next valid group of files and initialises a Reader class.
@@ -87,50 +145,6 @@ class Input(Reader):
             reader.load()
 
             self.groups[g_name][f_idx] = reader
-
-    def next_event(self):
-        """Move to the next event in the sequence."""
-        for g_name, g_readers in self.groups.items():
-
-            if g_readers[self._f_idx].next_event() < 0:
-                if self._move_readers("frw") < 0:
-
-                    self._idx = -1
-                    return self._idx
-
-                else:
-                    self._idx += 1
-                    return self._idx
-
-        self._idx += 1
-        return self._idx
-
-    def get_idx(self):
-        if self._idx:
-            return self._idx
-        else:
-            print("ERROR event index not defined")
-
-    def read(self, name):
-        """Look for the object in the entire input. Initialises readers if they were not."""
-
-        n_tags = name.split("_")
-
-        for g_name, g_readers in self.groups.items():
-
-            if len(self.groups) > 1:
-                if not ST.check_tag(g_name, n_tags):
-                    continue
-
-            if "ALL_FILES:" in name:
-                for f_idx in enumerate(g_readers):
-
-                    self._init_reader(g_name, f_idx)
-                    g_readers[f_idx].read(name)
-            else:
-                self._init_reader(g_name, self._f_idx)
-
-                g_readers[self._f_idx].read(name)
 
 
 # EOF

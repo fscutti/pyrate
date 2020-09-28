@@ -5,7 +5,7 @@
 class Algorithm:
     __slots__ = ["name", "store", "logger"]
 
-    def __init__(self, name, store):
+    def __init__(self, name, store, logger):
         self.name = name
         self.store = store
         self.logger = logger

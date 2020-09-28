@@ -9,8 +9,8 @@ from pyrate.core.Algorithm import Algorithm
 class FillHists(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store):
-        super().__init__(name, store)
+    def __init__(self, name, store, logger):
+        super().__init__(name, store, logger)
 
     def initialise(self, config):
         # print("This is FillHists: ",self._store.objects)

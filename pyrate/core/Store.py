@@ -8,20 +8,22 @@ class Store:
         self._run = run
         self.name = self._run.name
         self._objects = {"PERM": {}, "TRAN": {}, "READY": {}}
-        """
-        PERM: 
-            objects which are persistent throughout the run.
-        TRAN: 
-            objects which are volatile and removed after each input/event loop.
-        READY: 
-            map holding the boolean status of objects which are ready for the finalise step.
-        """
+        # ------------------------------------------------------------------------------------
+        # PERM:
+        #     objects which are persistent throughout the run.
+        # TRAN:
+        #     objects which are volatile and removed after each input/event loop.
+        # READY:
+        #     map holding the boolean status of objects which are ready for the finalise step.
+        # ------------------------------------------------------------------------------------
 
     def put(self, name, obj, opt="TRAN", replace=False):
         """Objects should be put on the store only once!"""
         # Maybe this check can be removed but just to be careful for now...
         if self.check(name, opt) and not replace:
-            print("ERROR: objects should only be put on the store once")
+            self._run.logger.error(
+                f"ERROR: object {name} is already on the {opt} store."
+            )
             return
 
         self._objects[opt][name] = obj

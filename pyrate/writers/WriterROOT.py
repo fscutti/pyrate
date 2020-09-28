@@ -7,8 +7,8 @@ from pyrate.core.Writer import Writer
 class WriterROOT(Writer):
     __slots__ = ["f", "w_targets"]
 
-    def __init__(self, name, store, f, w_targets):
-        super().__init__(name, store)
+    def __init__(self, name, store, logger, f, w_targets):
+        super().__init__(name, store, logger)
         self.f = f
         self.w_targets = w_targets
 

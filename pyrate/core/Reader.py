@@ -9,58 +9,64 @@ class Reader:
         self.name = name
         self.store = store
         self.logger = logger
+        # Events are numbered from 0 to n-1.
         self._idx = 0
         self._n_events = None
-        self._is_loaded = False
+        # self._is_loaded = False
 
     # def is_loaded(self):
     #    """ Returns loading status of the Reader.
     #    """
     #    return self._is_loaded
 
-    def is_finished(self):
-        """Checks if event pointer is at the end of the input."""
-        assert (
-            self._n_events
-        ), "ERROR: number of events not computed for reader {}".format(self.name)
-        return self._idx == self._n_events - 1
+    # def is_finished(self):
+    #    """Checks if event pointer is at the end of the input."""
+    #    assert (
+    #        self._n_events
+    #    ), "ERROR: number of events not computed for reader {}".format(self.name)
+    #    return self._idx == self._n_events - 1
 
     def load(self):
-        """Initialises members and puts the reader in a state where something can
-        already be read from some file (implies opening at least some files).
-        """
+        """Initialises reader condition members and puts it in a 'read ready' condition."""
         pass
 
     def read(self, name):
-        """Gets object with given name.
-        Depending on the input format/configuration the name might be remapped to some other string.
-        """
-        pass
-
-    def get_n_events(self):
-        """Computes or returns total number of events."""
-        pass
+        """Gets object with given name. Event and global variables should be prepended a flag."""
+        if name.startswith("EVENT:"):
+            pass
+        elif name.startswith("INPUT:"):
+            pass
 
     def get_idx(self):
-        """Gets index of current event. Events are numbered from 0 to n-1."""
+        """Gets index of current event. """
+        return self._idx
+
+    def get_n_events(self):
+        """Returns total number of events."""
+        if self._n_events:
+            return self._n_events
+        else:
+            self.set_n_events()
+            return self._n_events
+
+    def set_idx(self, idx):
+        """Updates idx to defined value"""
         pass
 
-    def get_event(self, idx):
-        """Jumps to specific event index."""
+    def set_n_events(self):
+        """Computes total number of events."""
         pass
 
-    def next_event(self):
-        """Move to next valid event. If next event will not be valid it should return -1,
-        otherwise it returns the current event index.
-        """
+    def set_next_event(self):
+        """Updates idx to next event"""
         pass
 
-    def previous_event(self):
-        """Move to previous valid event."""
+    def set_previous_event(self):
+        """Sets idx to previous event."""
         pass
 
-    def split_event(self):
-        """Setup conditions to handle the event in segments at any call of next event."""
+    def set_split_event(self):
+        """Constructs idx conditions to handle event in segments."""
         pass
 
 

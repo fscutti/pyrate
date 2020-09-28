@@ -112,6 +112,7 @@ class Job:
         self.runs = {}
         self.runs["test1"] = Run("test1", self.job)
         self.runs["test1"].setup()
+        self.runs["test1"].launch()
         # self.runs["test2"] = Run("test2", self.job)
         # self.runs["test2"].setup()
 

@@ -6,7 +6,7 @@ from pyrate.utils import strings as ST
 class Writer:
     __slots__ = ["name", "store", "logger", "targets", "_is_loaded"]
 
-    def __init__(self, name, store):
+    def __init__(self, name, store, logger):
         self.name = name
         self.store = store
         self.logger = logger
