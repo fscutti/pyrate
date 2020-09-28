@@ -109,9 +109,9 @@ class Run:
                 store.put("INPUT", {"name": name, "attr": attr}, replace=True)
                 
                 if self.state in ["execute"]:
-                    #while self._in.set_next_event() >= 0:
-                    #    self.loop(store, self._out.targets)
-                    pass
+                    
+                    for idx in range(self._in.get_n_events()):
+                        self.loop(store, self._out.targets)
 
                 else:
                     self.loop(store, self._out.targets)
