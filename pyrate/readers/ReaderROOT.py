@@ -17,7 +17,6 @@ class ReaderROOT(Reader):
         self.f = R.TFile.Open(self.f)
         self._idx = 0
         self._trees = {}
-        # self._n_events = self.f.Get(self.structure["tree"]).GetEntries()
 
     def read(self, name):
 
@@ -45,7 +44,7 @@ class ReaderROOT(Reader):
                 }
                 self._trees[tree_path]["tree"].GetEntry(self._idx)
 
-            self._read_variable(self._trees[tree_path]["tree"], variable)
+            self._read_variable(name, self._trees[tree_path]["tree"], variable)
 
         elif name.startswith("INPUT:"):
             # if "PMT1_charge_waveform_" in name:
@@ -77,10 +76,10 @@ class ReaderROOT(Reader):
             else:
                 self.store.get(name, "PERM").Add(h)
 
-    def _read_variable(self, tree, name):
+    def _read_variable(self, name, tree, variable):
         """Reads a varable from a tree and puts it on the transient store."""
-
-        self.store.put(name, getattr(tree, name), "TRAN")
+        
+        self.store.put(name, getattr(tree, variable), "TRAN")
 
     def break_path(self, name, n):
         """Breaks a given path excluding the INPUT/EVENT prefix.
