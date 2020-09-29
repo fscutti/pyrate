@@ -10,11 +10,6 @@ import logging
 from colorama import Fore
 from tqdm import tqdm
 
-import pyrate.variables
-import pyrate.trees
-import pyrate.plots
-import pyrate.histograms
-
 from pyrate.core.Store import Store
 from pyrate.core.Input import Input
 from pyrate.core.Output import Output
