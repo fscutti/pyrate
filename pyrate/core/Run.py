@@ -7,6 +7,9 @@ import timeit
 import time
 import logging
 
+from colorama import Fore
+from tqdm import tqdm
+
 import pyrate.variables
 import pyrate.trees
 import pyrate.plots
@@ -45,6 +48,11 @@ class Run:
 
         self.logger.addHandler(fileHandler)
 
+        self.colors = {"initialise":{},"execute":{},"finalise":{}}
+        self.colors["initialise"]["input"] = "{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)
+        self.colors["execute"]["input"] = "{l_bar}%s{bar}%s{r_bar}" % (Fore.YELLOW, Fore.RESET)
+        self.colors["execute"]["event"] = "{l_bar}%s{bar}%s{r_bar}" % (Fore.WHITE, Fore.RESET)
+
     def launch(self):
         """Implement input/output loop."""
         # -----------------------------------------------------------------------
@@ -52,7 +60,7 @@ class Run:
         # -----------------------------------------------------------------------
 
         start = timeit.default_timer()
-        
+
         store = Store(self)
 
         # -----------------------------------------------------------------------
@@ -92,7 +100,7 @@ class Run:
 
         stop = timeit.default_timer()
 
-        #self.logger.info("Execution time: ", str(stop - start))
+        # self.logger.info("Execution time: ", str(stop - start))
 
         return store
 
@@ -100,17 +108,31 @@ class Run:
         """Run the loop function."""
         self.state = state
 
+        # -----------------------------------------------------------------------
+        # Loop outer layer.
+        # -----------------------------------------------------------------------
         if self.state in ["initialise", "execute"]:
-            for name, attr in self.inputs.items():
+            for name, attr in tqdm(
+                self.inputs.items(),
+                desc=f"Input loop: {self.state}",
+                bar_format=self.colors[self.state]["input"],
+            ):
                 self._in = Input(name, store, self.logger, attr)
                 self._in.load()
 
-                # The current input attribute dictionary is put on the transient store
+                # The current input attribute dictionary is put on the TRAN  store
                 store.put("INPUT", {"name": name, "attr": attr}, replace=True)
-                
+
+                # ---------------------------------------------------------------
+                # Loop inner layer.
+                # ---------------------------------------------------------------
                 if self.state in ["execute"]:
-                    
-                    for idx in range(self._in.get_n_events()):
+
+                    for idx in tqdm(
+                        range(self._in.get_n_events()),
+                        desc=f"Event loop: {self.state}",
+                        bar_format=self.colors[self.state]["event"],
+                    ):
                         self.loop(store, self._out.targets)
 
                 else:
