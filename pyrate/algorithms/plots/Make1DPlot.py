@@ -30,14 +30,17 @@ class Make1DPlot(Algorithm):
     def execute(self, config):
         # self.store.get("energy")
         # print("This is the MakePlot algorithm")
-        
+
         triggerTime = self.store.get("EVENT:SmallMuon:EventData:TriggerTime")
         ch0RawWaveform = self.store.get("EVENT:SmallMuon:Channel_0:RawWaveform")
         startTime = self.store.get("EVENT:RunMetadata:StartTime")
-        self.logger.info(f"This is the start time: {startTime} from {self.name} for {config['name']}")
+        self.logger.info(
+            f"This is the start time: {startTime} from {self.name} for {config['name']}"
+        )
 
     def finalise(self, config):
         # print("This is the MakePlot finalise method")
         pass
+
 
 # EOF

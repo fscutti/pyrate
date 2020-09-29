@@ -1,1 +1,1 @@
-from pyrate.histograms.FillHists import FillHists
+from pyrate.algorithms.histograms.FillHists import FillHists

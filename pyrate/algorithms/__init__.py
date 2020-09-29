@@ -1,6 +1,6 @@
 """Import algorithm modules here."""
 
-import pyrate.variables
-import pyrate.trees
-import pyrate.plots
-import pyrate.histograms
+import pyrate.algorithms.variables
+import pyrate.algorithms.trees
+import pyrate.algorithms.plots
+import pyrate.algorithms.histograms
