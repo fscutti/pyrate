@@ -11,11 +11,11 @@ class Writer:
         self.store = store
         self.logger = logger
 
-    #def is_loaded(self):
+    # def is_loaded(self):
     #    """Returns loading status of the Writer"""
     #    return self._is_loaded
 
-    #def is_finished(self):
+    # def is_finished(self):
     #    """All objects have been written."""
     #    pass
 

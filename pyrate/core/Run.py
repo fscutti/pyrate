@@ -48,10 +48,19 @@ class Run:
 
         self.logger.addHandler(fileHandler)
 
-        self.colors = {"initialise":{},"execute":{},"finalise":{}}
-        self.colors["initialise"]["input"] = "{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)
-        self.colors["execute"]["input"] = "{l_bar}%s{bar}%s{r_bar}" % (Fore.YELLOW, Fore.RESET)
-        self.colors["execute"]["event"] = "{l_bar}%s{bar}%s{r_bar}" % (Fore.WHITE, Fore.RESET)
+        self.colors = {"initialise": {}, "execute": {}, "finalise": {}}
+        self.colors["initialise"]["input"] = "{l_bar}%s{bar}%s{r_bar}" % (
+            Fore.BLUE,
+            Fore.RESET,
+        )
+        self.colors["execute"]["input"] = "{l_bar}%s{bar}%s{r_bar}" % (
+            Fore.YELLOW,
+            Fore.RESET,
+        )
+        self.colors["execute"]["event"] = "{l_bar}%s{bar}%s{r_bar}" % (
+            Fore.WHITE,
+            Fore.RESET,
+        )
 
     def launch(self):
         """Implement input/output loop."""

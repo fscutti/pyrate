@@ -23,7 +23,7 @@ class Output(Writer):
             targets.extend(attr["objects"])
 
         self.set_targets(targets)
-    
+
     def write(self, name):
 
         for w_name, writer in self.writers.items():
@@ -46,7 +46,6 @@ class Output(Writer):
                 pass
 
             writer.load()
-
 
 
 # EOF

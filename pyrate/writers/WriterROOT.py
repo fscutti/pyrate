@@ -25,7 +25,7 @@ class WriterROOT(Writer):
     def load(self):
         """"""
         self.f = R.TFile(self.f, "RECREATE")
-        self.build_targets(self.w_targets)
+        self.set_targets(self.w_targets)
 
     def write(self, name):
         """"""

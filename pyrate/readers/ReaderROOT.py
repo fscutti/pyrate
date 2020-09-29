@@ -65,10 +65,10 @@ class ReaderROOT(Reader):
         else:
             return -1
 
-    def _read_hist(self, name):
+    def _read_hist(self, name, hist):
         """Grabs histograms from the input file and puts them on the permanent store."""
 
-        h = self.f.Get(name)
+        h = self.f.Get(name, hist)
 
         if h:
             if not self.store.check(name, "PERM"):
@@ -78,7 +78,7 @@ class ReaderROOT(Reader):
 
     def _read_variable(self, name, tree, variable):
         """Reads a varable from a tree and puts it on the transient store."""
-        
+
         self.store.put(name, getattr(tree, variable), "TRAN")
 
     def break_path(self, name, n):

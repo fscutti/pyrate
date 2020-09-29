@@ -16,7 +16,7 @@ parser.add_argument(
     "--job_config", "-j", help="job configuration file/s", nargs="+", required=True
 )
 parser.add_argument(
-    "--logging_level", "-l", help="logging level", required=False, default="INFO"
+    "--logging_level", "-l", help="logging level", required=False, default="CRITICAL"
 )
 
 args = parser.parse_args()
