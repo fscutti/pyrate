@@ -47,8 +47,7 @@ class ReaderROOT(Reader):
             self._read_variable(name, self._trees[tree_path]["tree"], variable)
 
         elif name.startswith("INPUT:"):
-            # if "PMT1_charge_waveform_" in name:
-            #    self._read_hist(name)
+            # call self._read_hist(name, hist) here
             pass
 
     def set_n_events(self):
