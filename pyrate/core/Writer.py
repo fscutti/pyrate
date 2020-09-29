@@ -11,13 +11,13 @@ class Writer:
         self.store = store
         self.logger = logger
 
-    def is_loaded(self):
-        """Returns loading status of the Writer"""
-        return self._is_loaded
+    #def is_loaded(self):
+    #    """Returns loading status of the Writer"""
+    #    return self._is_loaded
 
-    def is_finished(self):
-        """All objects have been written."""
-        pass
+    #def is_finished(self):
+    #    """All objects have been written."""
+    #    pass
 
     def load(self):
         """Initialises the targets. Also puts the writer
@@ -29,7 +29,7 @@ class Writer:
         """Write object to file. Will open the file if not already open."""
         pass
 
-    def build_targets(self, l):
+    def set_targets(self, l):
         """Builds target objects from a list."""
         self.targets = ST.remove_duplicates([t.split(":", 1)[0] for t in l])
 

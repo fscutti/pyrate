@@ -22,7 +22,13 @@ class Output(Writer):
             self._init_writer(name, attr["path"], attr["objects"])
             targets.extend(attr["objects"])
 
-        self.build_targets(targets)
+        self.set_targets(targets)
+    
+    def write(self, name):
+
+        for w_name, writer in self.writers.items():
+            if name in writer.targets:
+                writer.write(name)
 
     def _init_writer(self, f_name, f_path, w_targets):
 
@@ -41,11 +47,6 @@ class Output(Writer):
 
             writer.load()
 
-    def write(self, name):
-
-        for w_name, writer in self.writers.items():
-            if name in writer.targets:
-                writer.write(name)
 
 
 # EOF

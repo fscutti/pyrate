@@ -12,6 +12,7 @@ from itertools import groupby
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
 
+#from pyrate.core.Logger import Logger
 from pyrate.core.Run import Run
 
 
@@ -34,6 +35,8 @@ class Job:
 
         self.job["logger"] = logging.getLogger("logger")
         self.job["logger"].setLevel(getattr(logging, self.log_level))
+        #self.job["logger"] = Logger("logger", self.log_level)
+        #self.job["logger"].setup()
 
         # --------------------------
         # Build global configuration
