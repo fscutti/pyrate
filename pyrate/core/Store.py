@@ -19,10 +19,9 @@ class Store:
 
     def put(self, name, obj, opt="TRAN", replace=False):
         """Objects should be put on the store only once!"""
-        # Maybe this check can be removed but just to be careful for now...
         if self.check(name, opt) and not replace:
-            self._run.logger.error(
-                f"ERROR: object {name} is already on the {opt} store."
+            self._run.logger.warning(
+                f"object {name} is already on the {opt} store."
             )
             return
 
@@ -34,8 +33,17 @@ class Store:
             return self._objects[opt][name]
 
         except KeyError:
+            pass
+        
+        try:
             self._run.update(name, self)
             return self._objects[opt][name]
+        
+        except KeyError:
+            self._run.logger.warning(
+                f"object {name} has not been found."
+            )
+            return None
 
     def copy(self, name, opt="TRAN"):
         """Returns a copy of the object."""
