@@ -124,8 +124,9 @@ class Run:
                 self._in = Input(name, store, self.logger, attr)
                 self._in.load()
 
-                # The current input attribute dictionary is put on the TRAN  store
-                store.put("INPUT", {"name": name, "attr": attr}, replace=True)
+                # The current input specifications are put on the TRAN store.
+                store.put("INPUT:name", name, replace=True)
+                store.put("INPUT:config", attr, replace=True)
 
                 # ---------------------------------------------------------------
                 # Loop inner layer.
@@ -145,6 +146,7 @@ class Run:
         elif self.state in ["finalise"]:
 
             store.clear("READY")
+            store.clear("TRAN")
             self.loop(store, self._out.targets)
 
         return store
