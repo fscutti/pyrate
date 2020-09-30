@@ -11,20 +11,20 @@ class Algorithm:
         self.logger = logger
 
     def initialise(self, config):
-        """Override this method to define algorithms.
-        config is a dictionary.
+        """Override this method to define algorithms. config is a dictionary.
+        At this stage the method know the current input.
         """
         pass
 
     def execute(self, config):
-        """Override this method to define algorithms.
-        config is a dictionary.
+        """Override this method to define algorithms. config is a dictionary.
+        At this stage the method know the current input and current event.
         """
         pass
 
     def finalise(self, config):
-        """Override this method to define algorithms.
-        config is a dictionary.
+        """Override this method to define algorithms. config is a dictionary.
+        The method is launched independently of the input or event.
         """
         pass
 
