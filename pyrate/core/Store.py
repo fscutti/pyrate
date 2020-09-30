@@ -20,9 +20,7 @@ class Store:
     def put(self, name, obj, opt="TRAN", replace=False):
         """Objects should be put on the store only once!"""
         if self.check(name, opt) and not replace:
-            self._run.logger.warning(
-                f"object {name} is already on the {opt} store."
-            )
+            self._run.logger.warning(f"object {name} is already on the {opt} store.")
             return
 
         self._objects[opt][name] = obj
@@ -34,14 +32,14 @@ class Store:
 
         except KeyError:
             pass
-        
+
         try:
             self._run.update(name, self)
             return self._objects[opt][name]
-        
+
         except KeyError:
             self._run.logger.warning(
-                f"object {name} has not been found."
+                f"object {name} has not been found on the {opt} store."
             )
             return None
 
