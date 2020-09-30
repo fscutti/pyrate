@@ -146,8 +146,9 @@ class Run:
         elif self.state in ["finalise"]:
 
             store.clear("READY")
-            store.clear("TRAN")
             self.loop(store, self._out.targets)
+
+        store.clear("TRAN")
 
         return store
 
@@ -156,8 +157,6 @@ class Run:
         for obj_name in objects:
             if not store.check(obj_name, "READY"):
                 self.call(obj_name)
-
-        store.clear("TRAN")
 
     def call(self, obj_name):
         """Calls an algorithm."""

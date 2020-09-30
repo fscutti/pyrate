@@ -3,18 +3,23 @@
 # Analysis regions
 # -----------------------------------------------------------
 objects: 
-    region1:
+    muonSelection:
         algorithm: 
             name: Region
-            selection: var1>8, var2<var1, var3==True
-            weights: weight1, weight2
+            selection: 
+                - chargeMuonCh1 >= 42
+                - chargeMuonCh0 >= 42
+            weights: 
+                - weightMuonCh0
+                - weightMuonCh1
+        requires: muonTrigger
   
-    region1_A: 
+    muonTrigger: 
         algorithm: 
             name: Region 
-            selection: var4>10, var4<var1, var1>90
-            weights: weight1, weight3
-        contained_in: region1
+            selection: 
+                - muonTriggeredChannels > 0
+            weights: null
       
 
 # EOF

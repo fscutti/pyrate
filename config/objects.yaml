@@ -7,27 +7,53 @@ objects:
      # -----------------------------------------------------------
      # Variables
      # -----------------------------------------------------------
-     basePMT1:
+     baseMuonCh0:
          algorithm: 
              name: Baseline
-         waveform: wfPMT1
-     
-     basePMT2:
-         algorithm:
-             name: Baseline
-         waveform: wfPMT2
+         baseline: EVENT:SmallMuon:Channel_0:Baseline
 
-     chargePMT1:
+     baseMuonCh1:
+         algorithm: 
+             name: Baseline
+         baseline: EVENT:SmallMuon:Channel_1:Baseline
+
+     waveformMuonCh0:
+         algorithm: 
+             name: Waveform
+             basesub: true
+         waveform: EVENT:SmallMuon:Channel_0:RawWaveform
+
+     waveformMuonCh1:
+         algorithm: 
+             name: Waveform
+             basesub: false
+         waveform: EVENT:SmallMuon:Channel_1:RawWaveform
+
+     chargeMuonCh0:
          algorithm: 
              name: Charge
-             window: 100
-         baseline: basePMT1
-     
-     chargePMT2:
-         algorithm:
+         waveform: waveformMuonCh0
+
+     chargeMuonCh1:
+         algorithm: 
              name: Charge
-             window: 300
-         baseline: basePMT2
+         waveform: waveformMuonCh1
+
+     muonTriggeredChannels:
+         algorithm: 
+             name: Trigger
+         triggeredch: EVENT:SmallMuon:EventData:TriggeredChannels
+     
+     weightMuonCh0:
+         algorithm: 
+             name: Weight
+         value: 1
+
+     weightMuonCh1:
+         algorithm: 
+             name: Weight
+         value: 2
+
 
      # -----------------------------------------------------------
      # Plots
@@ -37,47 +63,38 @@ objects:
              name: Make1DPlot
              makeratio: True
              binning:
-                 region1:
-                     var1: nbins, xmin, xmax
-                     var2: nbins, xmin, xmax
-                     var3: nbins, xmin, xmax
-                 region1_A:
-                     var34: nbins, xmin, xmax
-                     var9: nbins, xmin, xmax
-         histograms: filledHists
+                 muonSelection:
+                     chargeMuonCh0: 100, -10, 9999
+                     chargeMuonCh1: 100, -10, 9999
+                 muonDetector:
+                     muonTriggeredChannels: 10, 0, 10
      
-     
-     plot2D:
-         algorithm: 
-             name: Make2DPlot
-             binning:
-                 region1:
-                     var10,var11: nbinsx, xmin, xmax, nbinsy, ymin, ymax
-                     var5,var8: nbinsx, xmin, xmax, nbinsy, ymin, ymax
-         histograms: filledHists
+     #plot2D:
+     #    algorithm: 
+     #        name: Make2DPlot
+     #        binning:
+     #            region1:
+     #                var10,var11: nbinsx, xmin, xmax, nbinsy, ymin, ymax
+     #                var5,var8: nbinsx, xmin, xmax, nbinsy, ymin, ymax
+     #    histograms: filledHists
      
      
      # -----------------------------------------------------------
      # Histograms
      # -----------------------------------------------------------
-     readHists:
-         algorithm: 
-             name: ReadHists
-     
-     
-     filledHists:
-         algorithm: 
-             name: FillHists
-         histograms: readHists
+     #filledHists:
+     #    algorithm: 
+     #        name: FillHists
+     #    histograms: readHists
      
      
      # -----------------------------------------------------------
      # Trees
      # -----------------------------------------------------------
-     tree1:
-         algorithm: 
-             name: TreeMaker 
-             attr1: "My attribute"
-         variables: var1, var2, var9
+     #tree1:
+     #    algorithm: 
+     #        name: TreeMaker 
+     #        attr1: "My attribute"
+     #    variables: var1, var2, var9
      
 # EOF

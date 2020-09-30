@@ -1,7 +1,13 @@
-""" one-dimensional ROOT plot. 
+""" Make one-dimensional ROOT plot. The plot consists of a python dictionary 
+named after the object, where entries are dictionaries having input names as 
+keys and histograms as values.
 """
 
 from pyrate.core.Algorithm import Algorithm
+
+from pyrate.utils import strings as ST
+
+import ROOT as R
 
 
 class Make1DPlot(Algorithm):
@@ -11,35 +17,72 @@ class Make1DPlot(Algorithm):
         super().__init__(name, store, logger)
 
     def initialise(self, config):
-        # print("This is Make1DPlot: ", self.store.objects)
-        # print(config["name"])
-        # test = self.store.get(config["histograms"], "PERM")
-        # test2 = self.store.get("PMT1_charge_waveform_muon","PERM")
-        # test2.Print()
+        """Check if required histograms already exist in the input or the store.
+        If they do, retrieve them and declare the object as ready. This will
+        skip the execute step.
+        """
+        # ----------------------------------------------------------------------
+        # Creates the main data structure which is the output of the object.
+        # N.B.: do not call get on config["name"] if this does not already exist
+        # on the store. It will generate a recursion loop. Always check first.
+        # ----------------------------------------------------------------------
+        if not self.store.check(config["name"], "PERM"):
+            histograms = {}
+            self.store.put(config["name"], histograms, "PERM")
+        else:
+            histograms = self.store.get(config["name"], "PERM")
 
-        # if test:
-        #    test.Fill(5,1)
-        #    self.store.put(config["name"], test, "PERM")
-        #    print("The plot is ready")
+        for region, variable in config["algorithm"]["binning"].items():
+            for v_name, v_bins in variable.items():
 
-        # print(self._store.objects)
-        # for o,v in self.store.objects.items():
-        #    v.Print("all")
-        pass
+                h_name = "_".join(["hist", region, v_name])
+                i_name = self.store.get("INPUT:name")
+
+                obj_name = ":".join([i_name, h_name])
+
+                if not i_name in histograms:
+                    histograms[i_name] = {}
+
+                histograms[i_name][h_name] = None
+
+                # Only creates the object if it is not retrievable from the INPUT.
+                h = self.store.get(obj_name, "PERM")
+
+                empty_histograms = 0
+
+                if not h:
+                    empty_histograms += 1
+
+                    binning = ST.get_items(v_bins)
+
+                    h = R.TH1F(
+                        h_name,
+                        h_name,
+                        int(binning[0]),
+                        float(binning[1]),
+                        float(binning[2]),
+                    )
+
+                histograms[i_name][h_name] = h
+
+        # This is a criterion to tell the Run that the execute step can be avoided.
+        if not empty_histograms:
+            self.store.put(config["name"], "READY")
 
     def execute(self, config):
-        # self.store.get("energy")
-        # print("This is the MakePlot algorithm")
+        """Fills histograms."""
 
-        triggerTime = self.store.get("EVENT:SmallMuon:EventData:TriggerTime")
-        ch0RawWaveform = self.store.get("EVENT:SmallMuon:Channel_0:RawWaveform")
-        startTime = self.store.get("EVENT:RunMetadata:StartTime")
-        self.logger.info(
-            f"This is the start time: {startTime} from {self.name} for {config['name']}"
-        )
+        histograms = self.store.get(config["name"], "PERM")
+
+        for region, variable in config["algorithm"]["binning"].items():
+            for v_name, v_bins in variable.items():
+
+                h_name = "_".join(["hist", region, v_name])
+                i_name = self.store.get("INPUT:name")
+                histograms[i_name][h_name].Fill(2, 1)
 
     def finalise(self, config):
-        # print("This is the MakePlot finalise method")
+        """Makes the plot."""
         pass
 
 
