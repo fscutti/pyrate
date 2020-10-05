@@ -24,7 +24,7 @@ class Run:
         self.name = name
 
     def setup(self):
-        """Refining the input configuration."""
+        """First instance of 'private' members."""
         # -----------------------------------------------------------------------
         # At this point the Run object should have self.input/config/output
         # defined after being read from the configuration yaml file.
@@ -44,12 +44,17 @@ class Run:
         self.logger.addHandler(fileHandler)
 
         self.colors = {"initialise": {}, "execute": {}, "finalise": {}}
+
         self.colors["initialise"]["input"] = "{l_bar}%s{bar}%s{r_bar}" % (
             Fore.BLUE,
             Fore.RESET,
         )
         self.colors["execute"]["input"] = "{l_bar}%s{bar}%s{r_bar}" % (
             Fore.YELLOW,
+            Fore.RESET,
+        )
+        self.colors["finalise"]["input"] = "{l_bar}%s{bar}%s{r_bar}" % (
+            Fore.GREEN,
             Fore.RESET,
         )
         self.colors["execute"]["event"] = "{l_bar}%s{bar}%s{r_bar}" % (
@@ -71,18 +76,26 @@ class Run:
         # Initialise/load the output. Files are opened and ready to be written.
         # -----------------------------------------------------------------------
 
+        # io = {}
+        # io["inputs"] = self.inputs
+        # io["outputs"] = self.outputs
+
         self._out = Output(self.name, store, self.logger, outputs=self.outputs)
         self._out.load()
 
-        self.modify_config()
+        print(self._out.targets)
+
+        # self.modify_config()
 
         # -----------------------------------------------------------------------
         # Initialise algorithms for the declared object in the output.
         # -----------------------------------------------------------------------
 
         self.algorithms = {}
-        for t in self._out.targets:
-            self.add(self._config[t]["algorithm"]["name"], store)
+        for s, objects in self._out.targets.items():
+            for o in objects:
+                alg_name = self._config[o["config"]]["algorithm"]["name"]
+                self.add(alg_name, store)
 
         # -----------------------------------------------------------------------
         # Update the store in three steps: initialise, execute, finalise.
@@ -99,8 +112,8 @@ class Run:
         # Write finalised objects to the output.
         # -----------------------------------------------------------------------
 
-        for t in self._out.targets:
-            self._out.write(t)
+        # for t in self._out.targets:
+        #    self._out.write(t)
 
         stop = timeit.default_timer()
 
@@ -112,41 +125,48 @@ class Run:
         """Run the loop function."""
         self.state = state
 
-        # -----------------------------------------------------------------------
-        # Loop outer layer.
-        # -----------------------------------------------------------------------
-        if self.state in ["initialise", "execute"]:
-            for name, attr in tqdm(
-                self.inputs.items(),
-                desc=f"Input loop: {self.state}",
-                bar_format=self.colors[self.state]["input"],
-            ):
-                self._in = Input(name, store, self.logger, attr)
+        for i_name, t_attr in tqdm(
+            self._out.targets.items(),
+            desc=f"Input loop: {self.state}",
+            bar_format=self.colors[self.state]["input"],
+        ):
+            # The current input specifications are put on the TRAN store.
+            store.put("INPUT:name", i_name, replace=True)
+            store.put("INPUT:config", self.inputs[i_name], replace=True)
+
+            if self.state in ["initialise", "execute"]:
+
+                self._in = Input(i_name, store, self.logger, self.inputs[i_name])
                 self._in.load()
 
-                # The current input specifications are put on the TRAN store.
-                store.put("INPUT:name", name, replace=True)
-                store.put("INPUT:config", attr, replace=True)
-
+            if self.state == "initialise":
                 # ---------------------------------------------------------------
-                # Loop inner layer.
+                # Initialise
                 # ---------------------------------------------------------------
-                if self.state in ["execute"]:
+                self.loop(store, self._out.targets[i_name])
 
-                    for idx in tqdm(
-                        range(self._in.get_n_events()),
-                        desc=f"Event loop: {self.state}",
-                        bar_format=self.colors[self.state]["event"],
-                    ):
-                        self.loop(store, self._out.targets)
+            elif self.state == "execute":
+                # ---------------------------------------------------------------
+                # Execute
+                # ---------------------------------------------------------------
+                # To do: support event interval
+                for idx in tqdm(
+                    range(self._in.get_n_events()),
+                    desc=f"Event loop: {self.state}",
+                    bar_format=self.colors[self.state]["event"],
+                ):
+                    self.loop(store, self._out.targets[i_name])
 
-                else:
-                    self.loop(store, self._out.targets)
+            elif self.state == "finalise":
+                # ---------------------------------------------------------------
+                # Finalise
+                # ---------------------------------------------------------------
+                store.clear("READY")
 
-        elif self.state in ["finalise"]:
+                for obj in t_attr:
+                    self.loop(store, [obj])
 
-            store.clear("READY")
-            self.loop(store, self._out.targets)
+                    store.put(obj["name"], "READY")
 
         store.clear("TRAN")
 
@@ -154,21 +174,25 @@ class Run:
 
     def loop(self, store, objects):
         """Loop over required objects to resolve them. Skips completed ones."""
-        for obj_name in objects:
-            if not store.check(obj_name, "READY"):
-                self.call(obj_name)
+        for obj in objects:
+            self._config[obj["config"]]["name"] = obj["name"]
 
-    def call(self, obj_name):
+            if not store.check(obj["name"], "READY"):
+                self.call(obj["config"])
+
+    def call(self, obj_config):
         """Calls an algorithm."""
-        self.add_name(obj_name, self._config[obj_name])
+        # To do: exit to avoid recursion based on object name.
+        # Introduce list of called objects on the store.
         getattr(
-            self.algorithms[self._config[obj_name]["algorithm"]["name"]], self.state
-        )(self._config[obj_name])
+            self.algorithms[self._config[obj_config]["algorithm"]["name"]],
+            self.state,
+        )(self._config[obj_config])
 
-    def add_name(self, obj_name, config):
-        """Adds name of object to its configuration."""
-        if not "name" in config:
-            config["name"] = obj_name
+    # def add_name(self, obj_name, config):
+    #    """Adds name of object to its configuration."""
+    #    if not "name" in config:
+    #        config["name"] = obj_name
 
     def add(self, alg_name, store):
         """Adds instances of algorithms dynamically."""
@@ -198,8 +222,9 @@ class Run:
         except KeyError:
             self._in.read(obj_name)
 
+    """
     def modify_config(self):
-        """Modify original object configuration according to requirements in the job configuration."""
+        # Modify original object configuration according to requirements in the job configuration.
         intersection = {}
         for w_name, w in self._out.writers.items():
             if hasattr(w, "w_targets"):
@@ -219,6 +244,7 @@ class Run:
         for t in self._out.targets:
             c = self._config[t]["algorithm"]
             c.update(intersection[t])
+    """
 
 
 # EOF

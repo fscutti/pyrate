@@ -59,7 +59,7 @@ def pretty(d, indent=0):
             print("\t" * (indent + 1) + str(value))
 
 
-def merge(target, probe, path=None):
+def merge(target, probe, path=None, merge_list=False):
     """Merges probe into target."""
     if path is None:
         path = []
@@ -71,7 +71,15 @@ def merge(target, probe, path=None):
                 merge(target[k], probe[k], path + [str(k)])
 
             elif target[k] == probe[k]:
-                pass  # same leaf value
+                # same leaf value
+                pass
+
+            elif merge_list:
+                # if a conflict exist but values are lists merge them upon request
+                if isinstance(target[k], list) and isinstance(probe[k], list):
+                    target[k].extend(probe[k])
+
+                    target[k] = list(dict.fromkeys(target[k]))
 
             else:
                 raise Exception("Conflict at %s" % ".".join(path + [str(k)]))

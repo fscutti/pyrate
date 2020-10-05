@@ -17,12 +17,11 @@ class Output(Writer):
     def load(self):
 
         self.writers = {}
-        targets = []
         for name, attr in self.outputs.items():
             self._init_writer(name, attr["path"], attr["objects"])
-            targets.extend(attr["objects"])
+            self.add_targets(attr["objects"])
 
-        self.set_targets(targets)
+        self.set_targets()
 
     def write(self, name):
 
@@ -30,7 +29,7 @@ class Output(Writer):
             if name in writer.targets:
                 writer.write(name)
 
-    def _init_writer(self, f_name, f_path, w_targets):
+    def _init_writer(self, f_name, f_path, w_target_list):
 
         w_name = "_".join([self.name, f_name.split(".", 1)[0]])
 
@@ -39,7 +38,7 @@ class Output(Writer):
             f = os.path.join(f_path, f_name)
 
             if f.endswith(".root"):
-                writer = WriterROOT(w_name, self.store, self.logger, f, w_targets)
+                writer = WriterROOT(w_name, self.store, self.logger, f, w_target_list)
                 self.writers[w_name] = writer
 
             elif f.endswith(".dat"):

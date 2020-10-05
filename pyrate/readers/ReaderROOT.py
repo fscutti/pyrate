@@ -22,6 +22,7 @@ class ReaderROOT(Reader):
 
         if name.startswith("EVENT:"):
 
+            # To do: try to use a list here
             path, (
                 tree,
                 variable,

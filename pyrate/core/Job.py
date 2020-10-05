@@ -102,6 +102,22 @@ class Job:
 
             self.job["outputs"][name]["files"] = os.path.join(attr["path"], name)
 
+            for obj in attr["objects"]:
+                for o_name, o_attr in obj.items():
+
+                    if o_attr == "all":
+                        samples = ST.remove_duplicates(self.job["inputs"])
+                    else:
+                        samples = ST.get_items(obj[o_name])
+
+                    samples.sort()
+
+                    s_names = ",".join(samples)
+
+                obj[o_name] = samples
+
+                obj[":".join([o_name, s_names])] = obj.pop(o_name)
+
             self.job["outputs"][name].update(attr)
 
         # -----------------------
@@ -109,6 +125,7 @@ class Job:
         # -----------------------
         """ ToDo: find a criterion to split runs
         """
+
         self.runs = {}
         self.runs["test1"] = Run("test1", self.job)
         self.runs["test1"].setup()

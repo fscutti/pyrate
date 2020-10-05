@@ -26,35 +26,35 @@ class Make1DPlot(Algorithm):
         # N.B.: do not call get on config["name"] if this does not already exist
         # on the store. It will generate a recursion loop. Always check first.
         # ----------------------------------------------------------------------
-        if not self.store.check(config["name"], "PERM"):
-            histograms = {}
-            self.store.put(config["name"], histograms, "PERM")
-        else:
-            histograms = self.store.get(config["name"], "PERM")
+        # if not self.store.check(config["name"], "PERM"):
+        #    histograms = {}
+        #    self.store.put(config["name"], histograms, "PERM")
+        # else:
+        #    histograms = self.store.get(config["name"], "PERM")
+
+        i_name = self.store.get("INPUT:name")
 
         for region, variable in config["algorithm"]["binning"].items():
             for v_name, v_bins in variable.items():
 
                 h_name = "_".join(["hist", region, v_name])
-                i_name = self.store.get("INPUT:name")
 
                 obj_name = ":".join([i_name, h_name])
 
-                if not i_name in histograms:
-                    histograms[i_name] = {}
+                # if not i_name in histograms:
+                #    histograms[i_name] = {}
 
-                histograms[i_name][h_name] = None
+                # histograms[i_name][h_name] = None
 
                 # Only creates the object if it is not retrievable from the INPUT.
                 h = self.store.get(obj_name, "PERM")
 
-                empty_histograms = 0
+                # empty_histograms = 0
 
                 if not h:
-                    empty_histograms += 1
+                    # empty_histograms += 1
 
                     binning = ST.get_items(v_bins)
-
                     h = R.TH1F(
                         h_name,
                         h_name,
@@ -62,24 +62,30 @@ class Make1DPlot(Algorithm):
                         float(binning[1]),
                         float(binning[2]),
                     )
+                    self.store.put(obj_name, h, "PERM")
 
-                histograms[i_name][h_name] = h
+                # histograms[i_name][h_name] = h
 
         # This is a criterion to tell the Run that the execute step can be avoided.
-        if not empty_histograms:
-            self.store.put(config["name"], "READY")
+        # if not empty_histograms:
+        #    self.store.put(config["name"], "READY")
 
     def execute(self, config):
         """Fills histograms."""
+        # histograms = self.store.get(config["name"], "PERM")
 
-        histograms = self.store.get(config["name"], "PERM")
+        i_name = self.store.get("INPUT:name")
 
         for region, variable in config["algorithm"]["binning"].items():
             for v_name, v_bins in variable.items():
 
                 h_name = "_".join(["hist", region, v_name])
-                i_name = self.store.get("INPUT:name")
-                histograms[i_name][h_name].Fill(2, 1)
+                obj_name = ":".join([i_name, h_name])
+                obj_counter = ":".join([obj_name, "counter"])
+
+                if not self.store.check(obj_counter):
+                    self.store.put(obj_counter, "done")
+                    self.store.get(obj_name, "PERM").Fill(1, 1)
 
     def finalise(self, config):
         """Makes the plot."""
