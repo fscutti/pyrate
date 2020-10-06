@@ -27,7 +27,7 @@ class Make1DPlot(Algorithm):
         # N.B.: do not call get on config["name"] if this does not already exist
         # on the store. It will generate a recursion loop. Always check first.
         # ----------------------------------------------------------------------
-        i_name = self.store.get("INPUT:name")
+        i_name = self.store.get("INPUT:name", "PERM")
 
         for region, variable in config["algorithm"]["binning"].items():
             for v_name, v_bins in variable.items():
@@ -55,7 +55,7 @@ class Make1DPlot(Algorithm):
     def execute(self, config):
         """Fills histograms."""
 
-        i_name = self.store.get("INPUT:name")
+        i_name = self.store.get("INPUT:name", "PERM")
 
         for region, variable in config["algorithm"]["binning"].items():
             for v_name, v_bins in variable.items():
@@ -76,31 +76,32 @@ class Make1DPlot(Algorithm):
         inputs = ST.get_items(config["name"].split(":", -1)[-1])
 
         for region, variable in config["algorithm"]["binning"].items():
-
-            if not region in plots:
-                plots[region] = {}
-
             for v_name, v_bins in variable.items():
-                plots[region][v_name] = R.THStack(
-                    f"plot_{region}_{v_name}", f"plot_{region}_{v_name}"
-                )
+
+                p_name = f"plot_{region}_{v_name}"
+
+                plots[p_name] = R.THStack(p_name, p_name)
+
+                # ------------------------
+                # Fill the stack
+                # ------------------------
                 for i_name in inputs:
 
                     h_name = self.get_hist_name(region, v_name)
                     obj_name = self.get_object_name(i_name, h_name)
 
                     h = self.store.get(obj_name, "PERM")
-                    plots[region][v_name].Add(h)
-
-                plots[region][v_name].Draw()
+                    plots[p_name].Add(h)
 
         self.store.put(config["name"], plots, "PERM")
 
-    def get_hist_name(self, r, v):
-        return f"hist_{r}_{v}"
+    def get_hist_name(self, region, variable):
+        """Builds histogram name."""
+        return f"hist_{region}_{variable}"
 
-    def get_object_name(self, i, h):
-        return f"{i}:{h}"
+    def get_object_name(self, iname, histogram):
+        """Builds object name, which is how histograms are identified on the PERM store."""
+        return f"{iname}:{histogram}"
 
 
 # EOF

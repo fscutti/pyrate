@@ -114,8 +114,8 @@ class Run:
         # Write finalised objects to the output.
         # -----------------------------------------------------------------------
 
-        for obj_name in self.run_objects:
-            self._out.write(obj_name)
+        # for obj_name in self.run_objects:
+        #    self._out.write(obj_name)
 
         stop = timeit.default_timer()
 
@@ -139,8 +139,8 @@ class Run:
             if self.state in ["initialise", "execute"]:
 
                 # The current input specifications are put on the TRAN store.
-                store.put("INPUT:name", i_name, replace=True)
-                store.put("INPUT:config", self.inputs[i_name], replace=True)
+                store.put("INPUT:name", i_name, "PERM", replace=True)
+                store.put("INPUT:config", self.inputs[i_name], "PERM", replace=True)
 
                 self._in = Input(i_name, store, self.logger, self.inputs[i_name])
                 self._in.load()
@@ -163,6 +163,8 @@ class Run:
                     bar_format=self.colors[self.state]["event"],
                 ):
                     self.loop(store, self.run_targets[i_name])
+
+                    store.clear("TRAN")
 
             elif self.state == "finalise":
                 # ---------------------------------------------------------------

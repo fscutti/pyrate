@@ -30,10 +30,24 @@ class WriterROOT(Writer):
 
     def write(self, name):
         """"""
-        h = R.TH1F("ThisIsATestHist", "ThisIsATestHist", 100, 0, 100)
-        h.Fill(30, 2)
-        # self.store.get(name, "PERM")
-        self.f.WriteObject(h, name)
+        obj = self.store.get(name, "PERM")
+
+        if isinstance(obj, dict):
+            self._write_dirs(obj)
+
+        # self.f.WriteObject(h, name)
+
+    def _write_dirs(self, obj, path="/"):
+        for k, v in obj.items():
+            self.f.cd(path)
+            self.f.mkdir(k)
+            directory = path + k + "/"
+            self.f.cd(directory)
+            # if isinstance(v, dict):
+            #    self._write_dirs(v, path=directory)
+            # else:
+            #    self.f.WriteObject(v, directory+v.GetName())
+            self.f.WriteObject(v, directory + v.GetName())
 
 
 # EOF
