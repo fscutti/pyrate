@@ -6,6 +6,7 @@ keys and histograms as values.
 from pyrate.core.Algorithm import Algorithm
 
 from pyrate.utils import strings as ST
+from pyrate.utils import functions as FN
 
 import ROOT as R
 
@@ -26,30 +27,17 @@ class Make1DPlot(Algorithm):
         # N.B.: do not call get on config["name"] if this does not already exist
         # on the store. It will generate a recursion loop. Always check first.
         # ----------------------------------------------------------------------
-        # if not self.store.check(config["name"], "PERM"):
-        #    histograms = {}
-        #    self.store.put(config["name"], histograms, "PERM")
-        # else:
-        #    histograms = self.store.get(config["name"], "PERM")
-
         i_name = self.store.get("INPUT:name")
 
         for region, variable in config["algorithm"]["binning"].items():
             for v_name, v_bins in variable.items():
 
-                h_name = "_".join(["hist", region, v_name])
-
-                obj_name = ":".join([i_name, h_name])
-
-                # if not i_name in histograms:
-                #    histograms[i_name] = {}
-
-                # histograms[i_name][h_name] = None
+                h_name = self.get_hist_name(region, v_name)
+                obj_name = self.get_object_name(i_name, h_name)
+                # obj_name = ":".join([i_name, h_name])
 
                 # Only creates the object if it is not retrievable from the INPUT.
                 h = self.store.get(obj_name, "PERM")
-
-                # empty_histograms = 0
 
                 if not h:
                     # empty_histograms += 1
@@ -64,23 +52,16 @@ class Make1DPlot(Algorithm):
                     )
                     self.store.put(obj_name, h, "PERM")
 
-                # histograms[i_name][h_name] = h
-
-        # This is a criterion to tell the Run that the execute step can be avoided.
-        # if not empty_histograms:
-        #    self.store.put(config["name"], "READY")
-
     def execute(self, config):
         """Fills histograms."""
-        # histograms = self.store.get(config["name"], "PERM")
 
         i_name = self.store.get("INPUT:name")
 
         for region, variable in config["algorithm"]["binning"].items():
             for v_name, v_bins in variable.items():
 
-                h_name = "_".join(["hist", region, v_name])
-                obj_name = ":".join([i_name, h_name])
+                h_name = self.get_hist_name(region, v_name)
+                obj_name = self.get_object_name(i_name, h_name)
                 obj_counter = ":".join([obj_name, "counter"])
 
                 if not self.store.check(obj_counter):
@@ -89,7 +70,37 @@ class Make1DPlot(Algorithm):
 
     def finalise(self, config):
         """Makes the plot."""
-        pass
+
+        plots = {}
+
+        inputs = ST.get_items(config["name"].split(":", -1)[-1])
+
+        for region, variable in config["algorithm"]["binning"].items():
+
+            if not region in plots:
+                plots[region] = {}
+
+            for v_name, v_bins in variable.items():
+                plots[region][v_name] = R.THStack(
+                    f"plot_{region}_{v_name}", f"plot_{region}_{v_name}"
+                )
+                for i_name in inputs:
+
+                    h_name = self.get_hist_name(region, v_name)
+                    obj_name = self.get_object_name(i_name, h_name)
+
+                    h = self.store.get(obj_name, "PERM")
+                    plots[region][v_name].Add(h)
+
+                plots[region][v_name].Draw()
+
+        self.store.put(config["name"], plots, "PERM")
+
+    def get_hist_name(self, r, v):
+        return f"hist_{r}_{v}"
+
+    def get_object_name(self, i, h):
+        return f"{i}:{h}"
 
 
 # EOF

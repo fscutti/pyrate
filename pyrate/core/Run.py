@@ -76,14 +76,16 @@ class Run:
         # Initialise/load the output. Files are opened and ready to be written.
         # -----------------------------------------------------------------------
 
-        # io = {}
-        # io["inputs"] = self.inputs
-        # io["outputs"] = self.outputs
-
         self._out = Output(self.name, store, self.logger, outputs=self.outputs)
         self._out.load()
 
-        print(self._out.targets)
+        self.run_targets = self._out.get_targets()
+        self.run_objects = self._out.get_objects()
+
+        # print(self.run_targets)
+        # print(self.run_objects)
+
+        # sys.exit()
 
         # self.modify_config()
 
@@ -92,7 +94,7 @@ class Run:
         # -----------------------------------------------------------------------
 
         self.algorithms = {}
-        for s, objects in self._out.targets.items():
+        for s, objects in self.run_targets.items():
             for o in objects:
                 alg_name = self._config[o["config"]]["algorithm"]["name"]
                 self.add(alg_name, store)
@@ -112,8 +114,8 @@ class Run:
         # Write finalised objects to the output.
         # -----------------------------------------------------------------------
 
-        # for t in self._out.targets:
-        #    self._out.write(t)
+        for obj_name in self.run_objects:
+            self._out.write(obj_name)
 
         stop = timeit.default_timer()
 
@@ -125,16 +127,20 @@ class Run:
         """Run the loop function."""
         self.state = state
 
-        for i_name, t_attr in tqdm(
-            self._out.targets.items(),
+        if self.state in ["finalise"]:
+            store.clear("READY")
+
+        for i_name, objects in tqdm(
+            self.run_targets.items(),
             desc=f"Input loop: {self.state}",
             bar_format=self.colors[self.state]["input"],
         ):
-            # The current input specifications are put on the TRAN store.
-            store.put("INPUT:name", i_name, replace=True)
-            store.put("INPUT:config", self.inputs[i_name], replace=True)
 
             if self.state in ["initialise", "execute"]:
+
+                # The current input specifications are put on the TRAN store.
+                store.put("INPUT:name", i_name, replace=True)
+                store.put("INPUT:config", self.inputs[i_name], replace=True)
 
                 self._in = Input(i_name, store, self.logger, self.inputs[i_name])
                 self._in.load()
@@ -143,7 +149,8 @@ class Run:
                 # ---------------------------------------------------------------
                 # Initialise
                 # ---------------------------------------------------------------
-                self.loop(store, self._out.targets[i_name])
+                # To do: offload input at the end of loop?
+                self.loop(store, self.run_targets[i_name])
 
             elif self.state == "execute":
                 # ---------------------------------------------------------------
@@ -155,18 +162,25 @@ class Run:
                     desc=f"Event loop: {self.state}",
                     bar_format=self.colors[self.state]["event"],
                 ):
-                    self.loop(store, self._out.targets[i_name])
+                    self.loop(store, self.run_targets[i_name])
 
             elif self.state == "finalise":
                 # ---------------------------------------------------------------
                 # Finalise
                 # ---------------------------------------------------------------
-                store.clear("READY")
+                for obj in objects:
+                    if not store.check(obj["name"], "READY"):
 
-                for obj in t_attr:
-                    self.loop(store, [obj])
+                        self.loop(store, [obj])
 
-                    store.put(obj["name"], "READY")
+                        if not store.check(obj["name"], "PERM"):
+                            msg = f"finalise has been run for {obj['name']} but object has not been put on PERM store!!!"
+
+                            sys.exit(f"ERROR: {msg}")
+                            self.logger.error(msg)
+
+                        else:
+                            store.put(obj["name"], obj["name"], "READY")
 
         store.clear("TRAN")
 
@@ -188,11 +202,6 @@ class Run:
             self.algorithms[self._config[obj_config]["algorithm"]["name"]],
             self.state,
         )(self._config[obj_config])
-
-    # def add_name(self, obj_name, config):
-    #    """Adds name of object to its configuration."""
-    #    if not "name" in config:
-    #        config["name"] = obj_name
 
     def add(self, alg_name, store):
         """Adds instances of algorithms dynamically."""
