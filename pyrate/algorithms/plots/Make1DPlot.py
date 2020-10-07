@@ -2,6 +2,7 @@
 named after the object, where entries are dictionaries having input names as 
 keys and histograms as values.
 """
+import os
 
 from pyrate.core.Algorithm import Algorithm
 
@@ -29,44 +30,46 @@ class Make1DPlot(Algorithm):
         # ----------------------------------------------------------------------
         i_name = self.store.get("INPUT:name", "PERM")
 
-        for region, variable in config["algorithm"]["binning"].items():
-            for v_name, v_bins in variable.items():
+        for region, var_type in config["algorithm"]["regions"].items():
+            for v_type, variable in var_type.items():
+                for v_name, v_bins in variable.items():
 
-                h_name = self.get_hist_name(region, v_name)
-                obj_name = self.get_object_name(i_name, h_name)
-                # obj_name = ":".join([i_name, h_name])
+                    h_name = self.get_hist_name(region, v_name)
+                    obj_name = self.get_object_name(i_name, h_name)
+                    # obj_name = ":".join([i_name, h_name])
 
-                # Only creates the object if it is not retrievable from the INPUT.
-                h = self.store.get(obj_name, "PERM")
+                    # Only creates the object if it is not retrievable from the INPUT.
+                    h = self.store.get(obj_name, "PERM")
 
-                if not h:
-                    # empty_histograms += 1
+                    if not h:
+                        # empty_histograms += 1
 
-                    binning = ST.get_items(v_bins)
-                    h = R.TH1F(
-                        h_name,
-                        h_name,
-                        int(binning[0]),
-                        float(binning[1]),
-                        float(binning[2]),
-                    )
-                    self.store.put(obj_name, h, "PERM")
+                        binning = ST.get_items(v_bins)
+                        h = R.TH1F(
+                            h_name,
+                            h_name,
+                            int(binning[0]),
+                            float(binning[1]),
+                            float(binning[2]),
+                        )
+                        self.store.put(obj_name, h, "PERM")
 
     def execute(self, config):
         """Fills histograms."""
 
         i_name = self.store.get("INPUT:name", "PERM")
 
-        for region, variable in config["algorithm"]["binning"].items():
-            for v_name, v_bins in variable.items():
+        for region, var_type in config["algorithm"]["regions"].items():
+            for v_type, variable in var_type.items():
+                for v_name, v_bins in variable.items():
 
-                h_name = self.get_hist_name(region, v_name)
-                obj_name = self.get_object_name(i_name, h_name)
-                obj_counter = ":".join([obj_name, "counter"])
+                    h_name = self.get_hist_name(region, v_name)
+                    obj_name = self.get_object_name(i_name, h_name)
+                    obj_counter = ":".join([obj_name, "counter"])
 
-                if not self.store.check(obj_counter):
-                    self.store.put(obj_counter, "done")
-                    self.store.get(obj_name, "PERM").Fill(1, 1)
+                    if not self.store.check(obj_counter):
+                        self.store.put(obj_counter, "done")
+                        self.store.get(obj_name, "PERM").Fill(1, 1)
 
     def finalise(self, config):
         """Makes the plot."""
@@ -75,23 +78,27 @@ class Make1DPlot(Algorithm):
 
         inputs = ST.get_items(config["name"].split(":", -1)[-1])
 
-        for region, variable in config["algorithm"]["binning"].items():
-            for v_name, v_bins in variable.items():
+        for region, var_type in config["algorithm"]["regions"].items():
+            for v_type, variable in var_type.items():
+                for v_name, v_bins in variable.items():
 
-                p_name = f"plot_{region}_{v_name}"
+                    path = f"region/{region}/{v_type}"
+                    p_name = f"plot_{region}_{v_name}"
 
-                plots[p_name] = R.THStack(p_name, p_name)
+                    p_entry = os.path.join(path, p_name)
 
-                # ------------------------
-                # Fill the stack
-                # ------------------------
-                for i_name in inputs:
+                    plots[p_entry] = R.THStack(p_name, p_name)
 
-                    h_name = self.get_hist_name(region, v_name)
-                    obj_name = self.get_object_name(i_name, h_name)
+                    # ------------------------
+                    # Fill the stack
+                    # ------------------------
+                    for i_name in inputs:
 
-                    h = self.store.get(obj_name, "PERM")
-                    plots[p_name].Add(h)
+                        h_name = self.get_hist_name(region, v_name)
+                        obj_name = self.get_object_name(i_name, h_name)
+
+                        h = self.store.get(obj_name, "PERM")
+                        plots[p_entry].Add(h)
 
         self.store.put(config["name"], plots, "PERM")
 

@@ -34,6 +34,8 @@ class Run:
         self._out = None
         self._config = self.configs["global"]["objects"]
 
+        self._history = {}
+
         fileHandler = logging.FileHandler(
             f"{self.name}.{time.strftime('%Y-%m-%d-%Hh%M')}.log", mode="w"
         )
@@ -82,11 +84,6 @@ class Run:
         self.run_targets = self._out.get_targets()
         self.run_objects = self._out.get_objects()
 
-        # print(self.run_targets)
-        # print(self.run_objects)
-
-        # sys.exit()
-
         # self.modify_config()
 
         # -----------------------------------------------------------------------
@@ -105,17 +102,23 @@ class Run:
 
         store = self.run("initialise", store)
 
+        self.get_history(show=True)
+
         if not store.check("any", "READY"):
             store = self.run("execute", store)
 
+        self.get_history(show=True)
+
         store = self.run("finalise", store)
+
+        self.get_history(show=True)
 
         # -----------------------------------------------------------------------
         # Write finalised objects to the output.
         # -----------------------------------------------------------------------
 
-        # for obj_name in self.run_objects:
-        #    self._out.write(obj_name)
+        for obj_name in self.run_objects:
+            self._out.write(obj_name)
 
         stop = timeit.default_timer()
 
@@ -152,6 +155,8 @@ class Run:
                 # To do: offload input at the end of loop?
                 self.loop(store, self.run_targets[i_name])
 
+                store.clear("TRAN")
+
             elif self.state == "execute":
                 # ---------------------------------------------------------------
                 # Execute
@@ -184,26 +189,31 @@ class Run:
                         else:
                             store.put(obj["name"], obj["name"], "READY")
 
-        store.clear("TRAN")
-
         return store
 
     def loop(self, store, objects):
         """Loop over required objects to resolve them. Skips completed ones."""
         for obj in objects:
+
+            self._history[obj["name"]] = []
+            self._current_history = self._history[obj["name"]]
+
             self._config[obj["config"]]["name"] = obj["name"]
 
             if not store.check(obj["name"], "READY"):
-                self.call(obj["config"])
+                self.call(obj["config"], target_name=obj["name"])
 
-    def call(self, obj_config):
+    def call(self, obj_config, target_name="not a target"):
         """Calls an algorithm."""
-        # To do: exit to avoid recursion based on object name.
-        # Introduce list of called objects on the store.
-        getattr(
-            self.algorithms[self._config[obj_config]["algorithm"]["name"]],
-            self.state,
-        )(self._config[obj_config])
+        alg = self.algorithms[self._config[obj_config]["algorithm"]["name"]]
+
+        entry = f"{obj_config}:{alg.name}:TARGET({target_name})"
+
+        if entry in self._current_history:
+            sys.exit(f"ERROR:{entry} already executed")
+        else:
+            getattr(alg, self.state)(self._config[obj_config])
+            self._current_history.append(entry)
 
     def add(self, alg_name, store):
         """Adds instances of algorithms dynamically."""
@@ -218,20 +228,26 @@ class Run:
                 }
             )
 
-    def update(self, obj_name, store):
+    def update(self, obj_config, store):
         """Updates value of object on the store."""
         try:
-            self.call(obj_name)
+            self.call(obj_config)
 
         except KeyError:
             pass
 
         try:
-            self.add(self._config[obj_name]["algorithm"]["name"], store)
-            self.call(obj_name)
+            self.add(self._config[obj_config]["algorithm"]["name"], store)
+            self.call(obj_config)
 
         except KeyError:
-            self._in.read(obj_name)
+            self._in.read(obj_config)
+
+    def get_history(self, show=False):
+        """Returns the algorithm history."""
+        if show:
+            FN.pretty(self._history)
+        return self._history
 
     """
     def modify_config(self):

@@ -62,12 +62,14 @@ objects:
          algorithm: 
              name: Make1DPlot
              makeratio: True
-             binning:
+             regions:
                  muonSelection:
-                     chargeMuonCh0: 100, -10, 9999
-                     chargeMuonCh1: 100, -10, 9999
+                     channels: 
+                         chargeMuonCh0: 100, -10, 9999
+                         chargeMuonCh1: 100, -10, 9999
                  muonDetector:
-                     muonTriggeredChannels: 10, 0, 10
+                     event:
+                         muonTriggeredChannels: 10, 0, 10
      
      #plot2D:
      #    algorithm: 

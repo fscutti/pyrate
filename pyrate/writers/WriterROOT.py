@@ -12,42 +12,36 @@ class WriterROOT(Writer):
         self.f = f
         self.w_objects = w_objects
 
-    # def is_loaded(self):
-    #    """ Returns loading status of the Writer
-    #    """
-    #    return self._is_loaded
-
-    # def is_finished(self):
-    #    """
-    #    """
-    #    pass
-
     def load(self):
-        """"""
+        """Creates the file and set targets."""
         self.f = R.TFile(self.f, "RECREATE")
         self.set_objects(self.w_objects)
         self.set_targets()
 
     def write(self, name):
-        """"""
+        """Write an object to file. This can be represented by a structure
+        indicating the folder structure of the output yet to be created at this point.
+        """
         obj = self.store.get(name, "PERM")
 
         if isinstance(obj, dict):
             self._write_dirs(obj)
+        else:
+            self.f.WriteObject(obj, obj.GetName())
 
-        # self.f.WriteObject(h, name)
+    def _write_dirs(self, obj):
+        """Write dictionary of objects to file. The keys are the paths."""
+        for entry, o in obj.items():
 
-    def _write_dirs(self, obj, path="/"):
-        for k, v in obj.items():
-            self.f.cd(path)
-            self.f.mkdir(k)
-            directory = path + k + "/"
-            self.f.cd(directory)
-            # if isinstance(v, dict):
-            #    self._write_dirs(v, path=directory)
-            # else:
-            #    self.f.WriteObject(v, directory+v.GetName())
-            self.f.WriteObject(v, directory + v.GetName())
+            path = entry.rsplit("/", 1)[0]
+
+            self._make_dirs(path)
+            self.f.GetDirectory(path).WriteObject(o, o.GetName())
+
+    def _make_dirs(self, path):
+        """Creates the path required to write an object."""
+        if not self.f.GetDirectory(path):
+            self.f.mkdir(path)
 
 
 # EOF
