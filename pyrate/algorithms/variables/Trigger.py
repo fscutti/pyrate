@@ -11,7 +11,13 @@ class Trigger(Algorithm):
         super().__init__(name, store, logger)
 
     def execute(self, config):
-        pass
+
+        tmp = self.store.get(config["triggeredch"])
+
+        # do something here ...
+        # tmp = func(tmp)
+
+        self.store.put(config["name"], tmp)
 
 
 # EOF

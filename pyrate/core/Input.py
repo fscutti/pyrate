@@ -17,7 +17,6 @@ class Input(Reader):
     def load(self):
 
         self._f_idx = 0
-        # self._idx = 0
 
         if not hasattr(self, "structure"):
             self.structure = {}
@@ -33,7 +32,6 @@ class Input(Reader):
             self._init_reader(g_names[g_idx], self._f_idx)
 
         self._n_files = len(self.files)
-        # self._is_loaded = True
 
     def read(self, name):
         """Look for the object in the entire input. Initialises readers if they were not."""

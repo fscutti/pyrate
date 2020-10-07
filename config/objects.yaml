@@ -63,10 +63,10 @@ objects:
              name: Make1DPlot
              makeratio: True
              regions:
-                 muonSelection:
-                     channels: 
-                         chargeMuonCh0: 100, -10, 9999
-                         chargeMuonCh1: 100, -10, 9999
+                 #muonSelection:
+                 #    channels: 
+                 #        chargeMuonCh0: 100, -10, 9999
+                 #        chargeMuonCh1: 100, -10, 9999
                  muonDetector:
                      event:
                          muonTriggeredChannels: 10, 0, 10

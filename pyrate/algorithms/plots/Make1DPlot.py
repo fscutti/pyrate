@@ -69,7 +69,9 @@ class Make1DPlot(Algorithm):
 
                     if not self.store.check(obj_counter):
                         self.store.put(obj_counter, "done")
-                        self.store.get(obj_name, "PERM").Fill(1, 1)
+                        # var = self.store.get("EVENT:SmallMuon:EventData:TriggeredChannels")
+                        tmp = self.store.get(v_name)
+                        self.store.get(obj_name, "PERM").Fill(len(tmp), 1)
 
     def finalise(self, config):
         """Makes the plot."""

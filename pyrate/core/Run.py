@@ -102,16 +102,16 @@ class Run:
 
         store = self.run("initialise", store)
 
-        self.get_history(show=True)
+        # self.get_history(show=True)
 
         if not store.check("any", "READY"):
             store = self.run("execute", store)
 
-        self.get_history(show=True)
+        # self.get_history(show=True)
 
         store = self.run("finalise", store)
 
-        self.get_history(show=True)
+        # self.get_history(show=True)
 
         # -----------------------------------------------------------------------
         # Write finalised objects to the output.
@@ -162,11 +162,26 @@ class Run:
                 # Execute
                 # ---------------------------------------------------------------
                 # To do: support event interval
+                # if isinstance(self._in.nevents, dict):
+                #    if "emin" in self._in.nevents:
+                #        emin = self._in.nevents["emin"]
+
+                # emin =
+                # emax = self._in.nevents["emax"]
+
+                # self._in.set_idx(emin)
+
+                # To do: provide dynamic calculation of interval.
+                # some functionalities need to be added to the input class.
+                events = self._in.get_n_events()
+
                 for idx in tqdm(
-                    range(self._in.get_n_events()),
+                    range(events),
                     desc=f"Event loop: {self.state}",
                     bar_format=self.colors[self.state]["event"],
                 ):
+                    self._in.set_next_event()
+
                     self.loop(store, self.run_targets[i_name])
 
                     store.clear("TRAN")
@@ -201,19 +216,23 @@ class Run:
             self._config[obj["config"]]["name"] = obj["name"]
 
             if not store.check(obj["name"], "READY"):
-                self.call(obj["config"], target_name=obj["name"])
+                self.call(obj["config"], is_target=obj["name"])
 
-    def call(self, obj_config, target_name="not a target"):
+    def call(self, obj_config, is_target=""):
         """Calls an algorithm."""
         alg = self.algorithms[self._config[obj_config]["algorithm"]["name"]]
 
-        entry = f"{obj_config}:{alg.name}:TARGET({target_name})"
+        entry = f"{obj_config}:{alg.name}:TARGET({is_target})"
 
-        if entry in self._current_history:
-            sys.exit(f"ERROR:{entry} already executed")
-        else:
-            getattr(alg, self.state)(self._config[obj_config])
-            self._current_history.append(entry)
+        if not is_target:
+            self._config[obj_config]["name"] = obj_config
+
+        # if entry in self._current_history:
+        #    #sys.exit(f"ERROR:{entry} already executed")
+        #    pass
+        # else:
+        getattr(alg, self.state)(self._config[obj_config])
+        # self._current_history.append(entry)
 
     def add(self, alg_name, store):
         """Adds instances of algorithms dynamically."""
