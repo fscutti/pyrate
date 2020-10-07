@@ -3,28 +3,16 @@
 
 
 class Reader:
-    __slots__ = ["name", "store", "logger", "_idx", "_n_events", "_is_loaded"]
+    __slots__ = ["name", "store", "logger", "_idx", "_idx_min", "_idx_max", "_n_events"]
 
     def __init__(self, name, store, logger):
         self.name = name
         self.store = store
         self.logger = logger
-        # Events are numbered from 0 to n-1.
         self._idx = 0
+        self._idx_min = 0
+        self._idx_max = -1
         self._n_events = None
-        # self._is_loaded = False
-
-    # def is_loaded(self):
-    #    """ Returns loading status of the Reader.
-    #    """
-    #    return self._is_loaded
-
-    # def is_finished(self):
-    #    """Checks if event pointer is at the end of the input."""
-    #    assert (
-    #        self._n_events
-    #    ), "ERROR: number of events not computed for reader {}".format(self.name)
-    #    return self._idx == self._n_events - 1
 
     def load(self):
         """Initialises reader condition members and puts it in a 'read ready' condition."""
