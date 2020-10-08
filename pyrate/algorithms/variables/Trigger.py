@@ -11,7 +11,7 @@ class Trigger(Algorithm):
         super().__init__(name, store, logger)
 
     def execute(self, config):
-
+        # print("Calling: ", config["name"])
         tmp = self.store.get(config["triggeredch"])
 
         # do something here ...

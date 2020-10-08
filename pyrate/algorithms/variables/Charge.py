@@ -11,7 +11,10 @@ class Charge(Algorithm):
         super().__init__(name, store, logger)
 
     def execute(self, config):
-        pass
+        # print("Calling: ", config["name"])
+        charge = self.store.get(config["waveform"])
+        # print(self.store.get("INPUT:idx"))
+        self.store.put(config["name"], charge)
 
 
 # EOF

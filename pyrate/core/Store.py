@@ -57,9 +57,10 @@ class Store:
     def clear(self, opt="TRAN"):
         """Clears the store or portions of it."""
         if opt != "all":
-            self._objects[opt] = {}
+            self._objects[opt].clear()
         else:
-            self._objects = {"PERM": {}, "TRAN": {}, "READY": {}}
+            for opt in self._objects:
+                self._objects[opt].clear()
 
 
 # EOF

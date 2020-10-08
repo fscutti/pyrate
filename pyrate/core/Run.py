@@ -102,16 +102,16 @@ class Run:
 
         store = self.run("initialise", store)
 
-        # self.get_history(show=True)
+        self.get_history(show=True)
 
         if not store.check("any", "READY"):
             store = self.run("execute", store)
 
-        # self.get_history(show=True)
+        self.get_history(show=True)
 
         store = self.run("finalise", store)
 
-        # self.get_history(show=True)
+        self.get_history(show=True)
 
         # -----------------------------------------------------------------------
         # Write finalised objects to the output.
@@ -182,6 +182,8 @@ class Run:
                 ):
                     self._in.set_next_event()
 
+                    store.put("INPUT:idx", self._in.get_idx())
+
                     self.loop(store, self.run_targets[i_name])
 
                     store.clear("TRAN")
@@ -220,19 +222,18 @@ class Run:
 
     def call(self, obj_config, is_target=""):
         """Calls an algorithm."""
-        alg = self.algorithms[self._config[obj_config]["algorithm"]["name"]]
 
+        alg = self.algorithms[self._config[obj_config]["algorithm"]["name"]]
         entry = f"{obj_config}:{alg.name}:TARGET({is_target})"
 
         if not is_target:
             self._config[obj_config]["name"] = obj_config
 
-        # if entry in self._current_history:
-        #    #sys.exit(f"ERROR:{entry} already executed")
-        #    pass
-        # else:
-        getattr(alg, self.state)(self._config[obj_config])
-        # self._current_history.append(entry)
+        if entry in self._current_history:
+            sys.exit(f"ERROR:{entry} already executed")
+        else:
+            self._current_history.append(entry)
+            getattr(alg, self.state)(self._config[obj_config])
 
     def add(self, alg_name, store):
         """Adds instances of algorithms dynamically."""
@@ -251,6 +252,7 @@ class Run:
         """Updates value of object on the store."""
         try:
             self.call(obj_config)
+            return
 
         except KeyError:
             pass
@@ -258,9 +260,11 @@ class Run:
         try:
             self.add(self._config[obj_config]["algorithm"]["name"], store)
             self.call(obj_config)
+            return
 
         except KeyError:
             self._in.read(obj_config)
+            return
 
     def get_history(self, show=False):
         """Returns the algorithm history."""
