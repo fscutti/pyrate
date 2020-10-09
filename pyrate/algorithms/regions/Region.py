@@ -12,55 +12,80 @@ class Region(Algorithm):
         super().__init__(name, store, logger)
 
     def execute(self, config):
-        """Computes region weight. If selection criteria are
-        not satisfied the loop is interrupted.
+        """Computes region weight. If selection criteria are not satisfied the loop is interrupted.
+        If the region is a subset of another set of regions their cumulative weight is added to
+        the current.
+        *******************************************************************************************
+        WARNING: the weights overlap b/w subregions and their superset is NON CHECKED. It is the
+        user responsibility to avoid overlaps.
+        *******************************************************************************************
         """
 
-        AND = 1
-        and_selection = config["algorithm"]["selection"]
+        region = 1
 
-        for and_s in and_selection:
+        selection = []
+        if "selection" in config:
+            selection = config["selection"]
 
-            OR = 0
-            or_selection = and_s.split("||")
+        weights = []
+        if "weights" in config:
+            weights = config["weights"]
 
-            for or_s in or_selection:
+        supersets = []
+        if "is_subregion_of" in config:
+            supersets = config["is_subregion_of"]
 
-                variable_name, symbol, cut_value = self.get_selection(or_s)
-                variable_value = self.store.get(variable_name)
-
-                x, symbol, y = self.get_selection(or_s)
-
-                try:
-                    x = eval(x)
-
-                except NameError:
-                    x = self.store.get(x)
-
-                try:
-                    y = eval(y)
-
-                except NameError:
-                    y = self.store.get(y)
-
-                OR = eval(f"{x} {symbol} {y}")
-
-                if OR == 1:
-                    break
-
-            AND *= OR
-
-            if AND == 0:
-                break
-
-        region = AND
+        for s in supersets:
+            region *= self.store.get(s)
 
         if region:
-            weights = config["algorithm"]["weights"]
 
-            for w in weights:
-                weight_value = self.store.get(w)
-                region *= weight_value
+            AND = 1
+
+            and_selection = selection
+
+            for and_s in and_selection:
+
+                OR = 0
+                or_selection = and_s.split("||")
+
+                for or_s in or_selection:
+
+                    variable_name, symbol, cut_value = self.get_selection(or_s)
+                    variable_value = self.store.get(variable_name)
+
+                    x, symbol, y = self.get_selection(or_s)
+
+                    try:
+                        x = eval(x)
+
+                    except NameError:
+                        x = self.store.get(x)
+
+                    try:
+                        y = eval(y)
+
+                    except NameError:
+                        y = self.store.get(y)
+
+                    OR = eval(f"{x} {symbol} {y}")
+
+                    if OR == 1:
+                        break
+
+                AND *= OR
+
+                if AND == 0:
+                    break
+
+            region *= AND
+
+            if region:
+
+                for w in weights:
+
+                    weight_value = self.store.get(w)
+                    region *= weight_value
 
         self.store.put(config["name"], region)
 
