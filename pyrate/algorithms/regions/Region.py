@@ -41,7 +41,6 @@ class Region(Algorithm):
         if region:
 
             AND = 1
-
             and_selection = selection
 
             for and_s in and_selection:
@@ -58,13 +57,10 @@ class Region(Algorithm):
 
                     try:
                         x = eval(x)
-
                     except NameError:
                         x = self.store.get(x)
-
                     try:
                         y = eval(y)
-
                     except NameError:
                         y = self.store.get(y)
 

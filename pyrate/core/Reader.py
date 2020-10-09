@@ -39,7 +39,7 @@ class Reader:
 
     def set_idx(self, idx):
         """Updates idx to defined value"""
-        pass
+        self._idx = idx
 
     def set_n_events(self):
         """Computes total number of events."""

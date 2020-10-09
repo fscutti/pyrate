@@ -102,16 +102,16 @@ class Run:
 
         store = self.run("initialise", store)
 
-        self.get_history(show=True)
+        #self.get_history(show=True)
 
         if not store.check("any", "READY"):
             store = self.run("execute", store)
 
-        self.get_history(show=True)
+        #self.get_history(show=True)
 
         store = self.run("finalise", store)
 
-        self.get_history(show=True)
+        #self.get_history(show=True)
 
         # -----------------------------------------------------------------------
         # Write finalised objects to the output.
@@ -173,20 +173,26 @@ class Run:
 
                 # To do: provide dynamic calculation of interval.
                 # some functionalities need to be added to the input class.
+                
                 events = self._in.get_n_events()
+
+                #events = 10
 
                 for idx in tqdm(
                     range(events),
                     desc=f"Event loop: {self.state}",
                     bar_format=self.colors[self.state]["event"],
                 ):
-                    self._in.set_next_event()
-
                     store.put("EVENT:idx", self._in.get_idx())
 
                     self.loop(store, self.run_targets[i_name])
 
                     store.clear("TRAN")
+
+                    #self._in.set_next_event()
+
+                    self._in.set_idx(idx+1)
+
 
             elif self.state == "finalise":
                 # ---------------------------------------------------------------

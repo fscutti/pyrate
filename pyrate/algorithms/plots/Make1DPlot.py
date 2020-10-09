@@ -56,7 +56,7 @@ class Make1DPlot(Algorithm):
 
     def execute(self, config):
         """Fills histograms."""
-
+        print(self.store.get("EVENT:idx"))
         i_name = self.store.get("INPUT:name", "PERM")
 
         for region, var_type in config["algorithm"]["regions"].items():
