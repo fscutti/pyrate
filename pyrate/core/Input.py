@@ -34,7 +34,9 @@ class Input(Reader):
         self._n_files = len(self.files)
 
     def read(self, name):
-        """Look for the object in the entire input. Initialises readers if they were not."""
+        """Looks for the object in the entire input. Initialises readers if
+        they were not. Global objects are accessed with the INPUT: prefix while
+        event-related variables with the EVENT: one."""
 
         n_tags = name.split("_")
 
@@ -51,7 +53,8 @@ class Input(Reader):
                         self._init_reader(g_name, f_idx)
 
                     g_readers[f_idx].read(name)
-            else:
+
+            elif "EVENT:" in name:
                 self._init_reader(g_name, self._f_idx)
 
                 g_readers[self._f_idx].read(name)
@@ -71,6 +74,52 @@ class Input(Reader):
                 if self._n_events:
                     break
 
+    def set_idx(self, idx):
+
+        g = self.groups["0"]
+
+        if idx > self._idx:
+            verse = "frw"
+
+            while (idx - self._idx) > (
+                g[self._f_idx].get_n_events() - 1 - g[self._f_idx].get_idx()
+            ):
+
+                if self._move_readers(verse) > -1:
+
+                    # increment global index to match last index of previous file.
+                    self._idx += (
+                        g[self._f_idx - 1].get_n_events()
+                        - 1
+                        - g[self._f_idx - 1].get_idx()
+                    )
+
+                    # increment global index to match first index of next file.
+                    # To do: loop over readers here
+                    g[self._f_idx].set_idx(0)
+                    self._idx += 1
+
+                else:
+                    self.idx = -1
+
+                    return self._idx
+
+            if (idx - self._idx) <= (
+                g[self._f_idx].get_n_events() - 1 - g[self._f_idx].get_idx()
+            ):
+                # increment global index to match the gap.
+                # To do: loop over readers here
+                g[self._f_idx].set_idx((idx - self._idx))
+                self._idx = idx
+
+                return self._idx
+
+        elif idx < self._idx:
+            verse = "bkw"
+
+        else:
+            return self._idx
+
     def set_next_event(self):
         """Move to the next event in the sequence."""
         for g_name, g_readers in self.groups.items():
@@ -89,10 +138,11 @@ class Input(Reader):
         return self._idx
 
     def _move_readers(self, option="frw"):
-        """Advances the pointer to the next valid group of files and initialises a Reader class.
-        This is "transforming" a string to a class so it will leave a class instance as a trace of previous usage.
+        """Advances the file index to the next valid group of files  withing
+        the boundary of their number. This function is "transforming" a string
+        to a class (the individual reader instances) so it will leave a class
+        instance as a trace of previous usage.
         """
-
         if option == "frw":
 
             if self._f_idx < self._n_files - 1:
@@ -107,23 +157,21 @@ class Input(Reader):
             return self._f_idx
 
         elif option == "bkw":
-            """
+
             if self._f_idx > 0:
                 self._f_idx -= 1
 
                 for g_name in self.groups:
-                    self._init_reader(g_name, self._f_idx, self.store)
+                    self._init_reader(g_name, self._f_idx)
 
             else:
-                self._f_idx = -1
+                self._f_idx = 0
 
             return self._f_idx
-            """
-            pass
 
     def _init_reader(self, g_name, f_idx):
-        """Instantiate different readers here. If the instance exists nothing is done.
-        This function transforms a string into a reader.
+        """Instantiate different readers here. If the instance exists nothing
+        is done. This function transforms a string into a reader.
         """
         if isinstance(self.groups[g_name][f_idx], str):
 
