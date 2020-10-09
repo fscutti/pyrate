@@ -17,7 +17,7 @@ class Trigger(Algorithm):
         # do something here ...
         # tmp = func(tmp)
 
-        self.store.put(config["name"], tmp)
+        self.store.put(config["name"], len(tmp))
 
 
 # EOF

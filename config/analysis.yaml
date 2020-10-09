@@ -6,20 +6,20 @@ objects:
     muonSelection:
         algorithm: 
             name: Region
-            selection: 
-                - chargeMuonCh1 >= 42
-                - chargeMuonCh0 >= 42
-            weights: 
-                - weightMuonCh0
-                - weightMuonCh1
-        requires: muonTrigger
+        selection: 
+            - chargeMuonCh0 >= 8800000.0
+            - chargeMuonCh1 < 8704000.0 || chargeMuonCh1 >= 8705000.0
+        weights: 
+            - weightMuonCh0
+            - weightMuonCh1
+        is_subregion_of: 
+            - muonTrigger
   
     muonTrigger: 
         algorithm: 
             name: Region 
-            selection: 
-                - muonTriggeredChannels > 0
-            weights: null
+        selection: 
+            - muonTriggeredChannels > 0
       
 
 # EOF

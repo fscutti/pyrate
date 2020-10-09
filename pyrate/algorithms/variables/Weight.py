@@ -11,7 +11,12 @@ class Weight(Algorithm):
         super().__init__(name, store, logger)
 
     def execute(self, config):
-        pass
+        
+        weight = config["value"]
+        
+        # do some computation here
+
+        self.store.put(config["name"], weight)
 
 
 # EOF

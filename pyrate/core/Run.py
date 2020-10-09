@@ -182,7 +182,7 @@ class Run:
                 ):
                     self._in.set_next_event()
 
-                    store.put("INPUT:idx", self._in.get_idx())
+                    store.put("EVENT:idx", self._in.get_idx())
 
                     self.loop(store, self.run_targets[i_name])
 
@@ -213,7 +213,7 @@ class Run:
         for obj in objects:
 
             self._history[obj["name"]] = []
-            self._current_history = self._history[obj["name"]]
+            self._target_history = self._history[obj["name"]]
 
             self._config[obj["config"]]["name"] = obj["name"]
 
@@ -229,10 +229,10 @@ class Run:
         if not is_target:
             self._config[obj_config]["name"] = obj_config
 
-        if entry in self._current_history:
+        if entry in self._target_history:
             sys.exit(f"ERROR:{entry} already executed")
         else:
-            self._current_history.append(entry)
+            self._target_history.append(entry)
             getattr(alg, self.state)(self._config[obj_config])
 
     def add(self, alg_name, store):
