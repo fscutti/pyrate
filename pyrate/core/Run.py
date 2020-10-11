@@ -174,7 +174,10 @@ class Run:
                 # To do: provide dynamic calculation of interval.
                 # some functionalities need to be added to the input class.
                 
-                events = self._in.get_n_events()
+                #events = self._in.get_n_events()
+                #sys.exit(f"Total number of event: {events}")
+                
+                events = 130000
 
                 #events = 10
 
@@ -190,8 +193,12 @@ class Run:
                     store.clear("TRAN")
 
                     #self._in.set_next_event()
-
+                    print()
+                    print(f"Finished event: {idx}")
+                    print(f"Current even: {self._in.get_idx()}")
                     self._in.set_idx(idx+1)
+                    if self._in.get_idx() == -1:
+                        break
 
 
             elif self.state == "finalise":

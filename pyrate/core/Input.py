@@ -31,7 +31,7 @@ class Input(Reader):
             self.groups[g_names[g_idx]] = g_files
             self._init_reader(g_names[g_idx], self._f_idx)
 
-        self._n_files = len(self.files)
+        self._n_files = len(self.files[0])
 
     def read(self, name):
         """Looks for the object in the entire input. Initialises readers if
@@ -75,50 +75,88 @@ class Input(Reader):
                     break
 
     def set_idx(self, idx):
+        print("set_idx")
+        print(f"Current: {self._idx}")
+        print(f"Required: {idx}")
+        
+        if not self._n_events:
+            self.set_n_events()
 
-        g = self.groups["0"]
+        if idx > self._n_events - 1:
+            # ----------------------------------------
+            # Don't move outside boundaries
+            # ----------------------------------------
 
-        if idx > self._idx:
-            verse = "frw"
-
-            while (idx - self._idx) > (
-                g[self._f_idx].get_n_events() - 1 - g[self._f_idx].get_idx()
-            ):
-
-                if self._move_readers(verse) > -1:
-
-                    # increment global index to match last index of previous file.
-                    self._idx += (
-                        g[self._f_idx - 1].get_n_events()
-                        - 1
-                        - g[self._f_idx - 1].get_idx()
-                    )
-
-                    # increment global index to match first index of next file.
-                    # To do: loop over readers here
-                    g[self._f_idx].set_idx(0)
-                    self._idx += 1
-
-                else:
-                    self.idx = -1
-
-                    return self._idx
-
-            if (idx - self._idx) <= (
-                g[self._f_idx].get_n_events() - 1 - g[self._f_idx].get_idx()
-            ):
-                # increment global index to match the gap.
-                # To do: loop over readers here
-                g[self._f_idx].set_idx((idx - self._idx))
-                self._idx = idx
-
-                return self._idx
-
-        elif idx < self._idx:
-            verse = "bkw"
+            self._idx = -1
+            print("Cannot move beyond border")
+            return 
 
         else:
-            return self._idx
+            g = self.groups["0"]
+            
+            if idx > self._idx:
+                print(f"idx > self._idx: {idx} > {self._idx}")
+                # ----------------------------------------
+                # Moving forward
+                # ----------------------------------------
+                verse = "frw"
+            
+                while (idx - self._idx) > (
+                    g[self._f_idx].get_n_events() - 1 - g[self._f_idx].get_idx()
+                ):
+                    print(f"While: required idx {idx}") 
+                    print(f"While: current idx {self._idx}") 
+                    print(f"While: current f_idx {self._f_idx}") 
+                    if self._move_readers(verse) > -1:
+            
+                        # increment global index to match last index of previous file.
+                        self._idx += (
+                            g[self._f_idx - 1].get_n_events()
+                            - 1
+                            - g[self._f_idx - 1].get_idx()
+                        )
+            
+                        # increment global index to match first index of next file.
+                        # To do: loop over readers here
+                        g[self._f_idx].set_idx(0)
+                        self._idx += 1
+                        print(f"MoveValid: Readers moved to f_idx {self._f_idx}")
+                        print(f"MoveValid: Current reader has _idx {g[self._f_idx].get_idx()}")
+                        print(f"MoveValid: Current index {self._idx}")
+            
+                    else:
+                        print(f"MoveFailed: Readers stopped at index {self._f_idx} out of {self._n_files}")
+                        self._idx = -1
+                        return 
+            
+                if (idx - self._idx) <= (
+                    g[self._f_idx].get_n_events() - 1 - g[self._f_idx].get_idx()
+                ):
+                    print(f"Setting from file _idx {g[self._f_idx].get_idx()}") 
+                    # increment global index to match the gap.
+                    # To do: loop over readers here
+                    increment = g[self._f_idx].get_idx() + (idx - self._idx)
+                    g[self._f_idx].set_idx(increment)
+
+                    self._idx = idx
+                    print(f"Setting at f_idx {self._f_idx}") 
+                    print(f"Setting at f_idx with idx {g[self._f_idx].get_idx()}") 
+                    print(f"Setting at idx {self._idx}") 
+                    print(f"Setting to increment: {increment}")
+                    return 
+
+            elif idx < self._idx:
+                # ----------------------------------------
+                # Moving backwards
+                # ----------------------------------------
+                verse = "bkw"
+
+            else:
+                # ----------------------------------------
+                # Don't move
+                # ----------------------------------------
+                print(f"Don't move! {idx} > {self._idx}")
+                return self._idx
 
     def set_next_event(self):
         """Move to the next event in the sequence."""

@@ -125,7 +125,7 @@ class Job:
         # -----------------------
         """ ToDo: find a criterion to split runs
         """
-
+        print(self.job)
         self.runs = {}
         self.runs["test1"] = Run("test1", self.job)
         self.runs["test1"].setup()
