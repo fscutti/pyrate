@@ -102,16 +102,16 @@ class Run:
 
         store = self.run("initialise", store)
 
-        #self.get_history(show=True)
+        # self.get_history(show=True)
 
         if not store.check("any", "READY"):
             store = self.run("execute", store)
 
-        #self.get_history(show=True)
+        # self.get_history(show=True)
 
         store = self.run("finalise", store)
 
-        #self.get_history(show=True)
+        # self.get_history(show=True)
 
         # -----------------------------------------------------------------------
         # Write finalised objects to the output.
@@ -161,28 +161,47 @@ class Run:
                 # ---------------------------------------------------------------
                 # Execute
                 # ---------------------------------------------------------------
-                # To do: support event interval
-                # if isinstance(self._in.nevents, dict):
-                #    if "emin" in self._in.nevents:
-                #        emin = self._in.nevents["emin"]
 
-                # emin =
-                # emax = self._in.nevents["emax"]
+                emin = 0
+                emax = -1
 
-                # self._in.set_idx(emin)
+                nevents = self._in.get_n_events()
 
-                # To do: provide dynamic calculation of interval.
-                # some functionalities need to be added to the input class.
-                
-                #events = self._in.get_n_events()
-                #sys.exit(f"Total number of event: {events}")
-                
-                events = 130000
+                if hasattr(self._in, "nevents"):
 
-                #events = 10
+                    if not isinstance(self._in.nevents, dict):
+                        emax = self._in.nevents - 1
+
+                        # -------------------------------------------------------
+                        # if nevents == 0 skip the execute step
+                        # -------------------------------------------------------
+                        if emax == -1:
+                            return store
+
+                    else:
+                        if "emin" in self._in.nevents:
+                            emin = self._in.nevents["emin"]
+
+                        if "emax" in self._in.nevents:
+                            emax = self._in.nevents["emax"]
+
+                        # -------------------------------------------------------
+                        # if emax == -1 run until the end of the file
+                        # -------------------------------------------------------
+                        if emax == -1:
+                            emax = nevents - 1
+
+                if not emin <= emax <= nevents - 1:
+                    sys.exit(
+                        f"ERROR: required input range not valid. emin:{emin} <= emax:{emax} <= {nevents-1}"
+                    )
+
+                self._in.set_idx(emin)
+
+                erange = emax - emin + 1
 
                 for idx in tqdm(
-                    range(events),
+                    range(erange),
                     desc=f"Event loop: {self.state}",
                     bar_format=self.colors[self.state]["event"],
                 ):
@@ -192,14 +211,14 @@ class Run:
 
                     store.clear("TRAN")
 
-                    #self._in.set_next_event()
-                    print()
-                    print(f"Finished event: {idx}")
-                    print(f"Current even: {self._in.get_idx()}")
-                    self._in.set_idx(idx+1)
-                    if self._in.get_idx() == -1:
-                        break
+                    self._in.set_next_event()
 
+                    # print()
+                    # print(f"Finished event: {idx}")
+                    # print(f"Current even: {self._in.get_idx()}")
+                    # self._in.set_idx(idx + 1)
+                    # if self._in.get_idx() == -1:
+                    #    break
 
             elif self.state == "finalise":
                 # ---------------------------------------------------------------

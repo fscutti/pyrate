@@ -61,10 +61,9 @@ class ReaderROOT(Reader):
 
         if self._idx < self._n_events - 1:
             self._idx += 1
-            return 
         else:
             self._idx = -1
-            return 
+        return self._idx
 
     def _read_hist(self, name, hist):
         """Grabs histograms from the input file and puts them on the permanent store."""

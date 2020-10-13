@@ -3,15 +3,13 @@
 
 
 class Reader:
-    __slots__ = ["name", "store", "logger", "_idx", "_idx_min", "_idx_max", "_n_events"]
+    __slots__ = ["name", "store", "logger", "_idx", "_n_events"]
 
     def __init__(self, name, store, logger):
         self.name = name
         self.store = store
         self.logger = logger
         self._idx = 0
-        self._idx_min = 0
-        self._idx_max = -1
         self._n_events = None
 
     def load(self):
