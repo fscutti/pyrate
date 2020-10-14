@@ -166,7 +166,10 @@ class Run:
                 emax = -1
 
                 nevents = self._in.get_n_events()
-
+                
+                # ---------------------------------------------------------------
+                # Reading input events
+                # ---------------------------------------------------------------
                 if hasattr(self._in, "nevents"):
 
                     if not isinstance(self._in.nevents, dict):
@@ -185,11 +188,11 @@ class Run:
                         if "emax" in self._in.nevents:
                             emax = self._in.nevents["emax"]
 
-                        # -------------------------------------------------------
-                        # if emax == -1 run until the end of the file
-                        # -------------------------------------------------------
-                        if emax == -1:
-                            emax = nevents - 1
+                # ---------------------------------------------------------------
+                # if emax == -1 run until the end of the file
+                # ---------------------------------------------------------------
+                if emax == -1:
+                    emax = nevents - 1
 
                 if not emin <= emax <= nevents - 1:
                     sys.exit(
@@ -200,6 +203,9 @@ class Run:
 
                 erange = emax - emin + 1
 
+                # ---------------------------------------------------------------
+                # Event loop
+                # ---------------------------------------------------------------
                 for idx in tqdm(
                     range(erange),
                     desc=f"Event loop: {self.state}",
@@ -212,13 +218,6 @@ class Run:
                     store.clear("TRAN")
 
                     self._in.set_next_event()
-
-                    # print()
-                    # print(f"Finished event: {idx}")
-                    # print(f"Current even: {self._in.get_idx()}")
-                    # self._in.set_idx(idx + 1)
-                    # if self._in.get_idx() == -1:
-                    #    break
 
             elif self.state == "finalise":
                 # ---------------------------------------------------------------
