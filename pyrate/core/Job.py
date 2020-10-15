@@ -46,6 +46,8 @@ class Job:
             self.job["inputs"][name] = {"files": []}
 
             # Find all relevant files using the list of paths and filtering with the sample and channel tags.
+            # Tags are looked for by separating underscores. If one file features multiple tags it will be
+            # added multiple times here but duplicates will be removed at a later stage.
             for f in FN.find_files(attr["path"]):
                 self.job["inputs"][name]["files"].extend(
                     f
@@ -59,7 +61,10 @@ class Job:
                         ),
                     )
                 )
-
+             
+            self.job["inputs"][name]["files"] = ST.remove_duplicates(self.job["inputs"][name]["files"])
+                
+                
             # Group files using the first part of their names.
             self.job["inputs"][name]["files"] = [
                 list(f)
@@ -119,17 +124,17 @@ class Job:
                 obj[":".join([o_name, s_names])] = obj.pop(o_name)
 
             self.job["outputs"][name].update(attr)
-
+        
+        FN.pretty(self.job["inputs"])
         # -----------------------
         # Instantiate Run objects
         # -----------------------
         """ ToDo: find a criterion to split runs
         """
-        print(self.job)
         self.runs = {}
         self.runs["test1"] = Run("test1", self.job)
         self.runs["test1"].setup()
-        self.runs["test1"].launch()
+        #self.runs["test1"].launch()
         # self.runs["test2"] = Run("test2", self.job)
         # self.runs["test2"].setup()
 
