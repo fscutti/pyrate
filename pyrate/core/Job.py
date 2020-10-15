@@ -16,9 +16,10 @@ from pyrate.core.Run import Run
 
 
 class Job:
-    def __init__(self, name, config, log_level):
+    def __init__(self, name, config, nevents, log_level):
         self.name = name
         self.config = config
+        self.nevents = nevents
         self.log_level = log_level
 
     def setup(self):
@@ -40,6 +41,9 @@ class Job:
         # --------------------------
 
         for name, attr in self.config["inputs"].items():
+
+            if self.nevents:
+                attr["nevents"] = int(self.nevents)
 
             # This dictionary contains all input information. The file list contains lists
             # which can have more than one element in the case of multiple channels declared in the group.
@@ -63,11 +67,13 @@ class Job:
                         ),
                     )
                 )
-            # removing duplicates from the list of files. At this stage no groups are built yet.             
-            self.job["inputs"][name]["files"] = ST.remove_duplicates(self.job["inputs"][name]["files"])
-            print(self.job["inputs"][name]["files"]) 
-                
-            # Group files using the first part of their names.
+            # removing duplicates from the list of files. At this stage no groups are built yet.
+            self.job["inputs"][name]["files"] = ST.remove_duplicates(
+                self.job["inputs"][name]["files"]
+            )
+            print(self.job["inputs"][name]["files"])
+
+            # Group files using the first tag found in their name.
             self.job["inputs"][name]["files"] = [
                 list(f)
                 for j, f in groupby(
@@ -126,17 +132,20 @@ class Job:
                 obj[":".join([o_name, s_names])] = obj.pop(o_name)
 
             self.job["outputs"][name].update(attr)
-        
+
         FN.pretty(self.job["inputs"])
         # -----------------------
         # Instantiate Run objects
         # -----------------------
         """ ToDo: find a criterion to split runs
         """
+
+        #if self.nevents:
+
         self.runs = {}
         self.runs["test1"] = Run("test1", self.job)
-        self.runs["test1"].setup()
-        #self.runs["test1"].launch()
+        # self.runs["test1"].setup()
+        # self.runs["test1"].launch()
         # self.runs["test2"] = Run("test2", self.job)
         # self.runs["test2"].setup()
 
@@ -144,14 +153,9 @@ class Job:
         """Launch Run objects.
         ToDo: find a method to dispatch run objects.
         """
-
-        sys.exit()
-
-        """
         for name, attr in self.runs.items():
             attr.setup()
             attr.launch()
-        """
 
 
 # EOF

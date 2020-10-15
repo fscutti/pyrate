@@ -30,7 +30,7 @@ class Input(Reader):
         for g_idx, g_files in enumerate(self.files):
             self.groups[g_names[g_idx]] = g_files
             self._init_reader(g_names[g_idx], self._f_idx)
-
+        
         self._n_files = len(self.files[0])
 
     def read(self, name):
@@ -38,15 +38,16 @@ class Input(Reader):
         they were not. Global objects are accessed with the INPUT: prefix while
         event-related variables with the EVENT: one."""
 
-        n_tags = name.split("_")
-
         for g_name, g_readers in self.groups.items():
 
-            if len(self.groups) > 1:
-                if not ST.check_tag(g_name, n_tags):
+            # if a group variable is required then transform the name
+            if "GROUP:" in name:
+                req_g_name = name.split(":")
+                
+                if not g_name==req_g_name[2]:
                     continue
 
-            if "INPUT:" in name:
+            if name.startswith("INPUT:"):
                 for f_idx, reader in enumerate(g_readers):
 
                     if isinstance(reader, str):
@@ -54,16 +55,16 @@ class Input(Reader):
 
                     g_readers[f_idx].read(name)
 
-            elif "EVENT:" in name:
+            elif name.startswith("EVENT:"):
                 self._init_reader(g_name, self._f_idx)
-
                 g_readers[self._f_idx].read(name)
 
     def set_n_events(self):
         """Reads number of events of the entire input."""
         if not self._n_events:
 
-            self._n_events = 0
+            self._n_events, g_n_events = 0, 0
+
             for g_name, g_readers in self.groups.items():
                 for f_idx, reader in enumerate(g_readers):
 
@@ -71,8 +72,15 @@ class Input(Reader):
                         self._init_reader(g_name, f_idx)
 
                     self._n_events += g_readers[f_idx].get_n_events()
-                if self._n_events:
-                    break
+                
+                if not g_n_events:
+                    g_n_events = self._n_events
+                else:
+                    if not g_n_events == self._n_events:
+                        sys.exit(f"ERROR: inconsistent nevents for {self.name} groups")
+                
+                self._n_events = 0
+            self._n_events = g_n_events
 
     def set_idx(self, idx):
         #print("set_idx")
@@ -93,7 +101,7 @@ class Input(Reader):
 
         else:
             # use this reader as a reference
-            g = self.groups["0"]
+            g = list(self.groups)[0]
 
             if idx > self._idx:
                 #print(f"idx > self._idx: {idx} > {self._idx}")
@@ -121,7 +129,7 @@ class Input(Reader):
                         # To do: loop over readers here
 
                         for g_name, g_readers in self.groups.items():
-                            g_readers[self._f_idx].set_idx(0):
+                            g_readers[self._f_idx].set_idx(0)
 
                         #g[self._f_idx].set_idx(0)
 
@@ -149,7 +157,7 @@ class Input(Reader):
                     increment = g[self._f_idx].get_idx() + (idx - self._idx)
 
                     for g_name, g_readers in self.groups.items():
-                        g_readers[self._f_idx].set_idx(increment):
+                        g_readers[self._f_idx].set_idx(increment)
 
                     #g[self._f_idx].set_idx(increment)
                     

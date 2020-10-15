@@ -38,6 +38,8 @@ def get_tags(f):
         f = f.split(".")[0]
     if "_" in f:
         f = f.split("_")
+    if ":" in f:
+        f = f.split(":")
     return f
 
 

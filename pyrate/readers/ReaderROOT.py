@@ -19,14 +19,18 @@ class ReaderROOT(Reader):
         self._trees = {}
 
     def read(self, name):
-
         if name.startswith("EVENT:"):
+
+            if "GROUP:" in name:
+                k, n = 3, 2
+            else:
+                k, n = 1, 2
 
             # To do: try to use a list here
             path, (
                 tree,
                 variable,
-            ) = self.break_path(name, 2)
+            ) = self.break_path(name, k, n)
 
             tree_path = path + tree
 
@@ -78,16 +82,15 @@ class ReaderROOT(Reader):
 
     def _read_variable(self, name, tree, variable):
         """Reads a varable from a tree and puts it on the transient store."""
-
         self.store.put(name, getattr(tree, variable), "TRAN")
 
-    def break_path(self, name, n):
+    def break_path(self, name, k, n):
         """Breaks a given path excluding the INPUT/EVENT prefix.
         NB: Always retrieve elements of tuple as (1, 2, ..., n,)."""
 
         t = name.split(":")
 
-        return "".join([f + "/" for f in t[1 : len(t) - n]]), tuple(t[-n:])
+        return "".join([f + "/" for f in t[k : len(t) - n]]), tuple(t[-n:])
 
 
 # EOF

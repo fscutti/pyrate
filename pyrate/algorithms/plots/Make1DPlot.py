@@ -61,7 +61,7 @@ class Make1DPlot(Algorithm):
         for region, var_type in config["algorithm"]["regions"].items():
             for v_type, variable in var_type.items():
                 for v_name, v_bins in variable.items():
-                    
+
                     weight = self.store.get(region)
 
                     if weight:
@@ -69,7 +69,7 @@ class Make1DPlot(Algorithm):
                         h_name = self.get_hist_name(region, v_name)
                         obj_name = self.get_object_name(i_name, h_name)
                         obj_counter = ":".join([obj_name, "counter"])
-                        
+
                         if not self.store.check(obj_counter):
                             self.store.put(obj_counter, "done")
                             variable = self.store.get(v_name)

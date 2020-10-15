@@ -29,6 +29,9 @@ class Run:
         # At this point the Run object should have self.input/config/output
         # defined after being read from the configuration yaml file.
         # -----------------------------------------------------------------------
+        self.emin = 0
+        self.emax = -1
+
         self.state = None
         self._in = None
         self._out = None
@@ -162,46 +165,43 @@ class Run:
                 # Execute
                 # ---------------------------------------------------------------
 
-                emin = 0
-                emax = -1
-
                 nevents = self._in.get_n_events()
-                
+
                 # ---------------------------------------------------------------
                 # Reading input events
                 # ---------------------------------------------------------------
                 if hasattr(self._in, "nevents"):
 
                     if not isinstance(self._in.nevents, dict):
-                        emax = self._in.nevents - 1
+                        self.emax = self._in.nevents - 1
 
                         # -------------------------------------------------------
                         # if nevents == 0 skip the execute step
                         # -------------------------------------------------------
-                        if emax == -1:
+                        if self.emax == -1:
                             return store
 
                     else:
                         if "emin" in self._in.nevents:
-                            emin = self._in.nevents["emin"]
+                            self.emin = self._in.nevents["emin"]
 
                         if "emax" in self._in.nevents:
-                            emax = self._in.nevents["emax"]
+                            self.emax = self._in.nevents["emax"]
 
                 # ---------------------------------------------------------------
                 # if emax == -1 run until the end of the file
                 # ---------------------------------------------------------------
-                if emax == -1:
-                    emax = nevents - 1
+                if self.emax == -1:
+                    self.emax = nevents - 1
 
-                if not emin <= emax <= nevents - 1:
+                if not self.emin <= self.emax <= nevents - 1:
                     sys.exit(
-                        f"ERROR: required input range not valid. emin:{emin} <= emax:{emax} <= {nevents-1}"
+                        f"ERROR: required input range not valid. emin:{self.emin} <= emax:{self.emax} <= {nevents-1}"
                     )
 
-                self._in.set_idx(emin)
+                self._in.set_idx(self.emin)
 
-                erange = emax - emin + 1
+                erange = self.emax - self.emin + 1
 
                 # ---------------------------------------------------------------
                 # Event loop

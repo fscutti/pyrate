@@ -18,8 +18,13 @@ class Reader:
 
     def read(self, name):
         """Gets object with given name. Event and global variables should be prepended a flag."""
+
+        if "GROUP:" in name:
+            pass
+
         if name.startswith("EVENT:"):
             pass
+
         elif name.startswith("INPUT:"):
             pass
 
