@@ -48,6 +48,8 @@ class Job:
             # Find all relevant files using the list of paths and filtering with the sample and channel tags.
             # Tags are looked for by separating underscores. If one file features multiple tags it will be
             # added multiple times here but duplicates will be removed at a later stage.
+            # N.B the name of the tags required has to be exactly equal to the tag retrieved in the file for
+            # this to be added in the list.
             for f in FN.find_files(attr["path"]):
                 self.job["inputs"][name]["files"].extend(
                     f
@@ -61,9 +63,9 @@ class Job:
                         ),
                     )
                 )
-             
+            # removing duplicates from the list of files. At this stage no groups are built yet.             
             self.job["inputs"][name]["files"] = ST.remove_duplicates(self.job["inputs"][name]["files"])
-                
+            print(self.job["inputs"][name]["files"]) 
                 
             # Group files using the first part of their names.
             self.job["inputs"][name]["files"] = [
