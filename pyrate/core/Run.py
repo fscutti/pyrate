@@ -110,7 +110,7 @@ class Run:
         if not store.check("any", "READY"):
             store = self.run("execute", store)
 
-        # self.get_history(show=True)
+        self.get_history(show=True)
 
         store = self.run("finalise", store)
 

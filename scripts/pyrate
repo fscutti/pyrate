@@ -27,7 +27,9 @@ if __name__ == "__main__":
         stream = open(jc, "r")
 
         jconfig = yaml.full_load(stream)
+
         jname = jc.split(".")[0]
+
         log_level = args.logging_level
 
         job = Job(jname, jconfig, log_level)

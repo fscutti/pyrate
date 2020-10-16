@@ -3,24 +3,29 @@
 # Analysis regions
 # -----------------------------------------------------------
 objects: 
-    muonSelection:
+    muonSmallSelection:
         algorithm: 
             name: Region
             check_weights_overlap: false
         selection: 
-            - chargeMuonCh0 >= 8800000.0
-            - chargeMuonCh1 < 8704000.0 || chargeMuonCh1 >= 8705000.0
+            - chargeSmallMuonCh0 >= 8800000.0
+            - chargeSmallMuonCh1 < 8704000.0 || chargeSmallMuonCh1 >= 8705000.0
         weights: 
-            - weightMuonCh0
-            - weightMuonCh1
+            - weightSmallMuonCh0
+            - weightSmallMuonCh1
         is_subregion_of: 
-            - muonTrigger
+            - muonSmallTrigger
   
-    muonTrigger: 
+    muonSmallTrigger: 
         algorithm: 
             name: Region 
         selection: 
-            - muonTriggeredChannels == 16
+            - muonSmallTriggerTime < 0
       
+    sabreTrigger: 
+        algorithm: 
+            name: Region 
+        selection: 
+            - sabreTriggerTime < 0
 
 # EOF

@@ -7,49 +7,54 @@ objects:
      # -----------------------------------------------------------
      # Variables
      # -----------------------------------------------------------
-     baseMuonCh0:
+     baseSmallMuonCh0:
          algorithm: 
              name: Baseline
-         baseline: EVENT:SmallMuon:Channel_0:Baseline
+         baseline: EVENT:GROUP:ch0:SmallMuon:Channel_0:Baseline
 
-     baseMuonCh1:
+     baseSmallMuonCh1:
          algorithm: 
              name: Baseline
-         baseline: EVENT:SmallMuon:Channel_1:Baseline
+         baseline: EVENT:GROUP:ch1:SmallMuon:Channel_1:Baseline
 
-     waveformMuonCh0:
+     waveformSmallMuonCh0:
          algorithm: 
              name: Waveform
              basesub: true
-         waveform: EVENT:SmallMuon:Channel_0:RawWaveform
+         waveform: EVENT:GROUP:ch0:SmallMuon:Channel_0:RawWaveform
 
-     waveformMuonCh1:
+     waveformSmallMuonCh1:
          algorithm: 
              name: Waveform
              basesub: false
-         waveform: EVENT:SmallMuon:Channel_1:RawWaveform
+         waveform: EVENT:GROUP:ch1:SmallMuon:Channel_1:RawWaveform
 
-     chargeMuonCh0:
+     chargeSmallMuonCh0:
          algorithm: 
              name: Charge
-         waveform: waveformMuonCh0
+         waveform: waveformSmallMuonCh0
 
-     chargeMuonCh1:
+     chargeSmallMuonCh1:
          algorithm: 
              name: Charge
-         waveform: waveformMuonCh1
+         waveform: waveformSmallMuonCh1
 
-     muonTriggeredChannels:
+     muonSmallTriggerTime:
          algorithm: 
              name: Trigger
-         triggeredch: EVENT:SmallMuon:EventData:TriggeredChannels
+         triggeredch: EVENT:SmallMuon:EventData:TriggerTime
      
-     weightMuonCh0:
+     sabreTriggerTime:
+         algorithm: 
+             name: Trigger
+         triggeredch: EVENT:SABRE:EventData:TriggerTime
+
+     weightSmallMuonCh0:
          algorithm: 
              name: Weight
          value: 1
 
-     weightMuonCh1:
+     weightSmallMuonCh1:
          algorithm: 
              name: Weight
          value: 2
@@ -58,30 +63,27 @@ objects:
      # -----------------------------------------------------------
      # Plots
      # -----------------------------------------------------------
-     stackplot1D:
+     smallMuonPlot1D:
          algorithm: 
              name: Make1DPlot
              makeratio: True
              regions:
-                 muonSelection:
+                 muonSmallSelection:
                      channels: 
-                         chargeMuonCh0: 1000, 8600000, 9000000
-                         chargeMuonCh1: 1000, 8600000, 9000000
-                 # 
-                 #muonDetector:
-                 #    event:
-                 #        muonTriggeredChannels: 10, 0, 10
-     
-     #plot2D:
-     #    algorithm: 
-     #        name: Make2DPlot
-     #        binning:
-     #            region1:
-     #                var10,var11: nbinsx, xmin, xmax, nbinsy, ymin, ymax
-     #                var5,var8: nbinsx, xmin, xmax, nbinsy, ymin, ymax
-     #    histograms: filledHists
-     
-     
+                         chargeSmallMuonCh0: 1000, 8600000, 9000000
+                         chargeSmallMuonCh1: 1000, 8600000, 9000000
+    
+     sabreDataPlot1D:
+         algorithm: 
+             name: Make1DPlot
+             makeratio: True
+             regions:
+                 sabreTrigger:
+                     channels: 
+                         weightSmallMuonCh0: 100, 0, 100
+                         weightSmallMuonCh1: 100, 0, 100
+
+
      # -----------------------------------------------------------
      # Histograms
      # -----------------------------------------------------------

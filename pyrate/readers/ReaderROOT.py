@@ -52,6 +52,7 @@ class ReaderROOT(Reader):
             self._read_variable(name, self._trees[tree_path]["tree"], variable)
 
         elif name.startswith("INPUT:"):
+            # To do: break name appropriately to retrieve histogram in the right path.
             # call self._read_hist(name, hist) here
             pass
 
@@ -85,8 +86,9 @@ class ReaderROOT(Reader):
         self.store.put(name, getattr(tree, variable), "TRAN")
 
     def break_path(self, name, k, n):
-        """Breaks a given path excluding the INPUT/EVENT prefix.
-        NB: Always retrieve elements of tuple as (1, 2, ..., n,)."""
+        """Breaks a given path excluding the INPUT/EVENT/:/GROUP prefix
+        using the k index. NB: Always retrieve elements of tuple
+        as (1, 2, ..., n,)."""
 
         t = name.split(":")
 
