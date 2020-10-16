@@ -43,8 +43,8 @@ class Input(Reader):
             # if a group variable is required then transform the name
             if "GROUP:" in name:
                 req_g_name = name.split(":")
-                
-                if not g_name==req_g_name[2]:
+
+                if not g_name == req_g_name[2]:
                     continue
 
             if name.startswith("INPUT:"):
@@ -72,20 +72,20 @@ class Input(Reader):
                         self._init_reader(g_name, f_idx)
 
                     self._n_events += g_readers[f_idx].get_n_events()
-                
+
                 if not g_n_events:
                     g_n_events = self._n_events
                 else:
                     if not g_n_events == self._n_events:
                         sys.exit(f"ERROR: inconsistent nevents for {self.name} groups")
-                
+
                 self._n_events = 0
             self._n_events = g_n_events
 
     def set_idx(self, idx):
-        #print("set_idx")
-        #print(f"Current: {self._idx}")
-        #print(f"Required: {idx}")
+        # print("set_idx")
+        # print(f"Current: {self._idx}")
+        # print(f"Required: {idx}")
 
         if not self._n_events:
             self.set_n_events()
@@ -96,15 +96,15 @@ class Input(Reader):
             # ----------------------------------------
 
             self._idx = -1
-            #print("Cannot move beyond border")
+            # print("Cannot move beyond border")
             return
 
         else:
-            # use this reader as a reference
-            g = list(self.groups)[0]
+            # use a generic group to pick up a reference reader.
+            g = self.groups[list(self.groups)[0]]
 
             if idx > self._idx:
-                #print(f"idx > self._idx: {idx} > {self._idx}")
+                # print(f"idx > self._idx: {idx} > {self._idx}")
                 # ----------------------------------------
                 # Moving forward
                 # ----------------------------------------
@@ -113,9 +113,9 @@ class Input(Reader):
                 while (idx - self._idx) > (
                     g[self._f_idx].get_n_events() - 1 - g[self._f_idx].get_idx()
                 ):
-                    #print(f"While: required idx {idx}")
-                    #print(f"While: current idx {self._idx}")
-                    #print(f"While: current f_idx {self._f_idx}")
+                    # print(f"While: required idx {idx}")
+                    # print(f"While: current idx {self._idx}")
+                    # print(f"While: current f_idx {self._f_idx}")
                     if self._move_readers(verse) > -1:
 
                         # increment global index to match last index of previous file.
@@ -131,27 +131,26 @@ class Input(Reader):
                         for g_name, g_readers in self.groups.items():
                             g_readers[self._f_idx].set_idx(0)
 
-                        #g[self._f_idx].set_idx(0)
-
+                        # g[self._f_idx].set_idx(0)
 
                         self._idx += 1
-                        #print(f"MoveValid: Readers moved to f_idx {self._f_idx}")
-                        #print(
+                        # print(f"MoveValid: Readers moved to f_idx {self._f_idx}")
+                        # print(
                         #    f"MoveValid: Current reader has _idx {g[self._f_idx].get_idx()}"
-                        #)
-                        #print(f"MoveValid: Current index {self._idx}")
+                        # )
+                        # print(f"MoveValid: Current index {self._idx}")
 
                     else:
-                        #print(
+                        # print(
                         #    f"MoveFailed: Readers stopped at index {self._f_idx} out of {self._n_files}"
-                        #)
+                        # )
                         self._idx = -1
                         return
 
                 if (idx - self._idx) <= (
                     g[self._f_idx].get_n_events() - 1 - g[self._f_idx].get_idx()
                 ):
-                    #print(f"Setting from file _idx {g[self._f_idx].get_idx()}")
+                    # print(f"Setting from file _idx {g[self._f_idx].get_idx()}")
                     # increment global index to match the gap.
                     # To do: loop over readers here
                     increment = g[self._f_idx].get_idx() + (idx - self._idx)
@@ -159,13 +158,13 @@ class Input(Reader):
                     for g_name, g_readers in self.groups.items():
                         g_readers[self._f_idx].set_idx(increment)
 
-                    #g[self._f_idx].set_idx(increment)
-                    
+                    # g[self._f_idx].set_idx(increment)
+
                     self._idx = idx
-                    #print(f"Setting at f_idx {self._f_idx}")
-                    #print(f"Setting at f_idx with idx {g[self._f_idx].get_idx()}")
-                    #print(f"Setting at idx {self._idx}")
-                    #print(f"Setting to increment: {increment}")
+                    # print(f"Setting at f_idx {self._f_idx}")
+                    # print(f"Setting at f_idx with idx {g[self._f_idx].get_idx()}")
+                    # print(f"Setting at idx {self._idx}")
+                    # print(f"Setting to increment: {increment}")
                     return
 
             elif idx < self._idx:
@@ -178,7 +177,7 @@ class Input(Reader):
                 # ----------------------------------------
                 # Don't move
                 # ----------------------------------------
-                #print(f"Don't move! {idx} > {self._idx}")
+                # print(f"Don't move! {idx} > {self._idx}")
                 return self._idx
 
     def set_next_event(self):
