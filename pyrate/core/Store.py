@@ -38,10 +38,10 @@ class Store:
             return self._objects[opt][name]
 
         except KeyError:
-            self._run.logger.warning(
-                f"object {name} has not been found on the {opt} store."
-            )
-            return None
+            msg = f"object {name} has not been found on the {opt} store after updating."
+
+            self._run.logger.error(msg)
+            sys.exit(f"ERROR: {msg}")
 
     def copy(self, name, opt="TRAN"):
         """Returns a copy of the object."""
