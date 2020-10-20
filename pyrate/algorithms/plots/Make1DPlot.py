@@ -1,6 +1,8 @@
 """ Make one-dimensional ROOT plot. The plot consists of a python dictionary 
 named after the object, where entries are dictionaries having input names as 
-keys and histograms as values.
+keys and histograms as values. This algorithm requires the definition of regions
+implementing a selection. If the region is passed it fills the histograms with 
+the corresponding region weight.
 """
 import os
 
@@ -35,15 +37,14 @@ class Make1DPlot(Algorithm):
                 for v_name, v_bins in variable.items():
 
                     h_name = self.get_hist_name(region, v_name)
-                    obj_name = self.get_object_name(i_name, h_name)
-                    # obj_name = ":".join([i_name, h_name])
+                    
+                    # WARNING: if the histogram is not present in the input the value of
+                    # h is None. This is a behaviour ONLY typical of objects retrieved with
+                    # the INPUT: prefix.
+                    h = self.store.get("INPUT:"+h_name, "PERM")
 
                     # Only creates the object if it is not retrievable from the INPUT.
-                    h = self.store.get(obj_name, "PERM")
-
                     if not h:
-                        # empty_histograms += 1
-
                         binning = ST.get_items(v_bins)
                         h = R.TH1F(
                             h_name,
@@ -52,7 +53,18 @@ class Make1DPlot(Algorithm):
                             float(binning[1]),
                             float(binning[2]),
                         )
+
+                        
+                        # put the object on the store with a different name which 
+                        # includes the input name, as our final plot will be a stack 
+                        # potentially including histograms from different samples.
+                        obj_name = self.get_object_name(i_name, h_name)
                         self.store.put(obj_name, h, "PERM")
+        
+        # ----------------------------------------------------------------------
+        # This would be the place to puth the a config['name'] object on the store,
+        # should this be ready for the finalise step.
+        # ----------------------------------------------------------------------
 
     def execute(self, config):
         """Fills histograms."""

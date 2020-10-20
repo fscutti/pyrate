@@ -53,8 +53,7 @@ class ReaderROOT(Reader):
 
         elif name.startswith("INPUT:"):
             # To do: break name appropriately to retrieve histogram in the right path.
-            # call self._read_hist(name, hist) here
-            pass
+            self._read_hist(name) 
 
     def set_n_events(self):
         """Reads number of events in the main tree of the file."""
@@ -70,14 +69,17 @@ class ReaderROOT(Reader):
             self._idx = -1
         return self._idx
 
-    def _read_hist(self, name, hist):
+    def _read_hist(self, name):
         """Grabs histograms from the input file and puts them on the permanent store."""
+        
+        # if not object will be retrieved the histogram will be None.
+        self.store.put(name, None, "PERM")
 
-        h = self.f.Get(name, hist)
+        h = self.f.Get(name)
 
         if h:
-            if not self.store.check(name, "PERM"):
-                self.store.put(name, h, "PERM")
+            if not self.store.get(name, "PERM"):
+                self.store.put(name, h, "PERM", replace=True)
             else:
                 self.store.get(name, "PERM").Add(h)
 

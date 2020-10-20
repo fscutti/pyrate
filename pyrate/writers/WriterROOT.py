@@ -20,7 +20,8 @@ class WriterROOT(Writer):
 
     def write(self, name):
         """Write an object to file. This can be represented by a structure
-        indicating the folder structure of the output yet to be created at this point.
+        indicating the folder structure of the output yet to be created at 
+        this point.
         """
         obj = self.store.get(name, "PERM")
 
