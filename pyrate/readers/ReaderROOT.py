@@ -30,7 +30,7 @@ class ReaderROOT(Reader):
             path, (
                 tree,
                 variable,
-            ) = self.break_path(name, k, n)
+            ) = self._break_path(name, k, n)
 
             tree_path = path + tree
 
@@ -85,7 +85,7 @@ class ReaderROOT(Reader):
         """Reads a varable from a tree and puts it on the transient store."""
         self.store.put(name, getattr(tree, variable), "TRAN")
 
-    def break_path(self, name, k, n):
+    def _break_path(self, name, k, n):
         """Breaks a given path excluding the INPUT/EVENT/:/GROUP prefix
         using the k index. NB: Always retrieve elements of tuple
         as (1, 2, ..., n,)."""
