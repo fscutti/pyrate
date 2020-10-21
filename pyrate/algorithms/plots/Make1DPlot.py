@@ -42,7 +42,12 @@ class Make1DPlot(Algorithm):
                     # h is None. Notice that the input name is not guaranteed to be in the
                     # name of the histogram so this is an operation on the TRAN store.
                     # Later, if found, the histogram will need to be put on the PERM store.
-                    h = self.store.get("INPUT:" + h_name, "TRAN")
+                    h = self.store.copy("INPUT:" + h_name, "TRAN")
+                    # The object is unique and has been saved on the TRAN store. When later
+                    # it will be put on the PERM store it will anyway disappear from it after
+                    # the TRAN store is cleared after every target loop. Therefore above we
+                    # don't simply use the self.store.get instruction but self.store.copy
+                    # to copy the object and prevent it from being deleted.
 
                     # Only creates the object if it is not retrievable from the INPUT.
                     if not h:
