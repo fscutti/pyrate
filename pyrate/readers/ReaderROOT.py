@@ -1,5 +1,7 @@
 """ Reader of a ROOT file.
 """
+from copy import copy
+
 import ROOT as R
 
 from pyrate.core.Reader import Reader
@@ -75,7 +77,7 @@ class ReaderROOT(Reader):
         # if not object will be retrieved the histogram will be None.
         self.store.put(name, None, "PERM")
 
-        h = self.f.Get(name)
+        h = copy(self.f.Get(name))
 
         if h:
             if not self.store.get(name, "PERM"):

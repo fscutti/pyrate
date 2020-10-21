@@ -37,7 +37,7 @@ class Run:
         self._out = None
         self._config = self.configs["global"]["objects"]
 
-        self._history = {}
+        self._history = {"CURRENT TARGET": None}
 
         fileHandler = logging.FileHandler(
             f"{self.name}.{time.strftime('%Y-%m-%d-%Hh%M')}.log", mode="w"
@@ -77,6 +77,8 @@ class Run:
 
         store = Store(self)
 
+        store.put("history", self._history, "PERM")
+
         # -----------------------------------------------------------------------
         # Initialise/load the output. Files are opened and ready to be written.
         # -----------------------------------------------------------------------
@@ -110,7 +112,7 @@ class Run:
         if not store.check("any", "READY"):
             store = self.run("execute", store)
 
-        self.get_history(show=True)
+        # self.get_history(show=True)
 
         store = self.run("finalise", store)
 
@@ -223,33 +225,35 @@ class Run:
                 # ---------------------------------------------------------------
                 # Finalise
                 # ---------------------------------------------------------------
-                for obj in objects:
-                    if not store.check(obj["name"], "READY"):
+                for t in objects:
+                    if not store.check(t["name"], "READY"):
 
-                        self.loop(store, [obj])
+                        self.loop(store, [t])
 
-                        if not store.check(obj["name"], "PERM"):
-                            msg = f"finalise has been run for {obj['name']} but object has not been put on PERM store!!!"
+                        if not store.check(t["name"], "PERM"):
+                            msg = f"finalise has been run for {t['name']} but object has not been put on PERM store!!!"
 
                             sys.exit(f"ERROR: {msg}")
                             self.logger.error(msg)
 
                         else:
-                            store.put(obj["name"], obj["name"], "READY")
+                            store.put(t["name"], t["name"], "READY")
 
         return store
 
-    def loop(self, store, objects):
-        """Loop over required objects to resolve them. Skips completed ones."""
-        for obj in objects:
+    def loop(self, store, targets):
+        """Loop over required targets to resolve them. Skips completed ones."""
+        for t in targets:
 
-            self._history[obj["name"]] = []
-            self._target_history = self._history[obj["name"]]
+            self._history[t["name"]] = []
+            self._target_history = self._history[t["name"]]
 
-            self._config[obj["config"]]["name"] = obj["name"]
+            self._history["CURRENT TARGET"] = t["name"]
 
-            if not store.check(obj["name"], "READY"):
-                self.call(obj["config"], is_target=obj["name"])
+            self._config[t["config"]]["name"] = t["name"]
+
+            if not store.check(t["name"], "READY"):
+                self.call(t["config"], is_target=t["name"])
 
     def call(self, obj_config, is_target=""):
         """Calls an algorithm."""
@@ -261,6 +265,9 @@ class Run:
             self._config[obj_config]["name"] = obj_config
 
         if entry in self._target_history:
+
+            self.get_history(show=True)
+            FN.pretty(self._config[obj_config])
             sys.exit(f"ERROR:{entry} already executed")
         else:
             self._target_history.append(entry)

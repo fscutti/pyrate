@@ -3,6 +3,8 @@
 import sys
 from copy import copy
 
+from pyrate.utils import functions as FN
+
 
 class Store:
     def __init__(self, run):
@@ -42,6 +44,9 @@ class Store:
             msg = f"object {name} has not been found on the {opt} store after updating."
 
             self._run.logger.error(msg)
+
+            FN.pretty(self._objects["PERM"]["history"])
+
             sys.exit(f"ERROR: {msg}")
 
     def copy(self, name, opt="TRAN"):
