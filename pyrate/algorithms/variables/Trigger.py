@@ -35,8 +35,8 @@ class Trigger(Algorithm):
                 time -= previous_time
 
             else:
-               # NB: this operation will be executed only one time, as we are not forcing a replace.
-               self.store.put(config["name"], time, "PERM")
+                # NB: this operation will be executed only one time, as we are not forcing a replace.
+                self.store.put(config["name"], time, "PERM")
 
         self.store.put(config["name"], time)
 

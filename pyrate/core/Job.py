@@ -67,7 +67,6 @@ class Job:
             self.job["inputs"][name]["files"] = ST.remove_duplicates(
                 self.job["inputs"][name]["files"]
             )
-            print(self.job["inputs"][name]["files"])
 
             # Group files using the first tag found in their name.
             self.job["inputs"][name]["files"] = [

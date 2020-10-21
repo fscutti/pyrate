@@ -39,7 +39,7 @@ class Weight(Algorithm):
                         config["applycalib"]["filename"],
                     )
                 )
-                
+
                 # WARNING: we need to copy the histogram, as, when the file goes out of scope,
                 # the histogram will be deleted by ROOT!!!
                 h_calib = copy(file_calib.Get(config["applycalib"]["histname"]))

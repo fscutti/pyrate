@@ -30,18 +30,19 @@ class Make1DPlot(Algorithm):
         # N.B.: do not call get on config["name"] if this does not already exist
         # on the store. It will generate a recursion loop. Always check first.
         # ----------------------------------------------------------------------
-        i_name = self.store.get("INPUT:name", "PERM")
+        i_name = self.store.get("INPUT:name", "TRAN")
 
         for region, var_type in config["algorithm"]["regions"].items():
             for v_type, variable in var_type.items():
                 for v_name, v_bins in variable.items():
 
                     h_name = self.get_hist_name(region, v_name)
-                    
+
                     # WARNING: if the histogram is not present in the input the value of
-                    # h is None. This is a behaviour ONLY typical of objects retrieved with
-                    # the INPUT: prefix.
-                    h = self.store.get("INPUT:"+h_name, "PERM")
+                    # h is None. Notice that the input name is not guaranteed to be in the
+                    # name of the histogram so this is an operation on the TRAN store.
+                    # Later, if found, the histogram will need to be put on the PERM store.
+                    h = self.store.get("INPUT:" + h_name, "TRAN")
 
                     # Only creates the object if it is not retrievable from the INPUT.
                     if not h:
@@ -54,13 +55,12 @@ class Make1DPlot(Algorithm):
                             float(binning[2]),
                         )
 
-                        
-                        # put the object on the store with a different name which 
-                        # includes the input name, as our final plot will be a stack 
+                        # put the object on the store with a different name which
+                        # includes the input name, as our final plot will be a stack
                         # potentially including histograms from different samples.
                         obj_name = self.get_object_name(i_name, h_name)
                         self.store.put(obj_name, h, "PERM")
-        
+
         # ----------------------------------------------------------------------
         # This would be the place to puth the a config['name'] object on the store,
         # should this be ready for the finalise step.
@@ -68,7 +68,7 @@ class Make1DPlot(Algorithm):
 
     def execute(self, config):
         """Fills histograms."""
-        i_name = self.store.get("INPUT:name", "PERM")
+        i_name = self.store.get("INPUT:name")
 
         for region, var_type in config["algorithm"]["regions"].items():
             for v_type, variable in var_type.items():
@@ -115,6 +115,8 @@ class Make1DPlot(Algorithm):
 
                         h = self.store.get(obj_name, "PERM")
                         plots[p_entry].Add(h)
+
+        # One should create a canvas here...
 
         self.store.put(config["name"], plots, "PERM")
 

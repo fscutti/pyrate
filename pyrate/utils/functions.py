@@ -51,9 +51,7 @@ def get_copy(o, copy):
 
 def pretty(d, indent=0):
     """Prints dictionary with pre-defined intentation."""
-    print()
-    print()
-    print()
+    print("\n\n\n")
     for key, value in d.items():
         print("\t" * indent + str(key))
         if isinstance(value, dict):
@@ -65,9 +63,7 @@ def pretty(d, indent=0):
                     print("\t" * (indent + 1) + str(idx) + " : " + str(l))
             else:
                 print("\t" * (indent + 1) + str(value))
-    print()
-    print()
-    print()
+    print("\n\n\n")
 
 
 def merge(target, probe, path=None, merge_list=False):

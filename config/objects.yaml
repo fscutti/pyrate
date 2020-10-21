@@ -49,16 +49,25 @@ objects:
              name: Trigger
          triggeredch: EVENT:SABRE:EventData:TriggerTime
 
-     weightSmallMuonCh0:
+     sabreTriggerTimeDiff:
          algorithm: 
-             name: Weight
-         value: 1
+             name: Trigger
+             get_diff: true
+         triggeredch: EVENT:SABRE:EventData:TriggerTime
 
      weightSmallMuonCh1:
          algorithm: 
              name: Weight
          value: 2
 
+     weightSmallMuonCh0:
+         algorithm: 
+             name: Weight
+         applycalib: 
+             filepath: /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/calibrations
+             filename: detectorCalibration.root
+             histname: hist_calib
+             variable: chargeSmallMuonCh0
 
      # -----------------------------------------------------------
      # Plots
@@ -79,27 +88,17 @@ objects:
              makeratio: False
              regions:
                  sabreTrigger:
-                     channels: 
-                         weightSmallMuonCh0: 100, 0, 100
-                         weightSmallMuonCh1: 100, 0, 100
+                     event: 
+                         sabreTriggerTimeDiff: 10000, -52000000, 52000000
 
 
      # -----------------------------------------------------------
      # Histograms
      # -----------------------------------------------------------
-     #filledHists:
-     #    algorithm: 
-     #        name: FillHists
-     #    histograms: readHists
      
      
      # -----------------------------------------------------------
      # Trees
      # -----------------------------------------------------------
-     #tree1:
-     #    algorithm: 
-     #        name: TreeMaker 
-     #        attr1: "My attribute"
-     #    variables: var1, var2, var9
      
 # EOF
