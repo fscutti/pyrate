@@ -73,7 +73,7 @@ class Run:
         # The store object is the output of the launch function.
         # -----------------------------------------------------------------------
 
-        start = timeit.default_timer()
+        # start = timeit.default_timer()
 
         store = Store(self)
 
@@ -105,18 +105,21 @@ class Run:
         # Update the store in three steps: initialise, execute, finalise.
         # -----------------------------------------------------------------------
 
+        print("\n")
+
+        print("********************")
+        print("Launching pyrate run")
+        print("********************")
+
         store = self.run("initialise", store)
 
-        # self.get_history(show=True)
-
         if not store.check("any", "READY"):
-            store = self.run("execute", store)
 
-        # self.get_history(show=True)
+            store = self.run("execute", store)
 
         store = self.run("finalise", store)
 
-        # self.get_history(show=True)
+        print("\n")
 
         # -----------------------------------------------------------------------
         # Write finalised objects to the output.
@@ -125,7 +128,7 @@ class Run:
         for obj_name in self.run_objects:
             self._out.write(obj_name)
 
-        stop = timeit.default_timer()
+        # stop = timeit.default_timer()
 
         # self.logger.info("Execution time: ", str(stop - start))
 
@@ -135,20 +138,29 @@ class Run:
         """Run the loop function."""
         self.state = state
 
+        prefix = None
+
+        if self.state == "initialise":
+            prefix = "Inputs:  "
+
+        elif self.state == "execute":
+            prefix = "Events:  "
+
+        elif self.state == "finalise":
+            prefix = "Targets: "
+
+        info = self.state.rjust(40, ".")
+
         if self.state in ["finalise"]:
             store.clear("READY")
 
         for i_name, objects in tqdm(
             self.run_targets.items(),
-            desc=f"Input loop: {self.state}",
+            desc=f"{prefix}{info}",
             bar_format=self.colors[self.state]["input"],
         ):
 
             if self.state in ["initialise", "execute"]:
-
-                # The current input specifications are put on the TRAN store.
-                store.put("INPUT:name", i_name, "PERM", replace=True)
-                store.put("INPUT:config", self.inputs[i_name], "PERM", replace=True)
 
                 self._in = Input(i_name, store, self.logger, self.inputs[i_name])
                 self._in.load()
@@ -157,7 +169,9 @@ class Run:
                 # ---------------------------------------------------------------
                 # Initialise
                 # ---------------------------------------------------------------
-                # To do: offload input at the end of loop?
+                store.put("INPUT:name", i_name, "TRAN")
+                store.put("INPUT:config", self.inputs[i_name], "TRAN")
+
                 self.loop(store, self.run_targets[i_name])
 
                 store.clear("TRAN")
@@ -208,11 +222,15 @@ class Run:
                 # ---------------------------------------------------------------
                 # Event loop
                 # ---------------------------------------------------------------
+                info = f"{i_name}...{self.state}".rjust(40, ".")
+
                 for idx in tqdm(
                     range(erange),
-                    desc=f"Event loop: {self.state}",
+                    desc=f"{prefix}{info}",
                     bar_format=self.colors[self.state]["event"],
                 ):
+                    store.put("INPUT:name", i_name, "TRAN")
+                    store.put("INPUT:config", self.inputs[i_name], "TRAN")
                     store.put("EVENT:idx", self._in.get_idx())
 
                     self.loop(store, self.run_targets[i_name])
