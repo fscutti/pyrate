@@ -68,6 +68,7 @@ objects:
              filename: detectorCalibration.root
              histname: hist_calib
              variable: chargeSmallMuonCh0
+     
 
      # -----------------------------------------------------------
      # Plots
@@ -76,20 +77,36 @@ objects:
          algorithm: 
              name: Make1DPlot
              makeratio: False
+             makeoverlay: True
+             gather: variables
+             save_histograms: True
              regions:
                  muonSmallSelection:
                      channels: 
-                         chargeSmallMuonCh0: 1000, 8600000, 9000000
-                         chargeSmallMuonCh1: 1000, 8600000, 9000000
+                         chargeSmallMuonCh0: 1000, 8600000, 9000000, black
+                         chargeSmallMuonCh1: 1000, 8600000, 9000000, red
     
      sabreDataPlot1D:
          algorithm: 
              name: Make1DPlot
              makeratio: False
+             save_histograms: False
              regions:
                  sabreTrigger:
                      event: 
-                         sabreTriggerTimeDiff: 10000, -52000000, 52000000
+                         sabreTriggerTimeDiff: 1000, -52000000, 52000000, blue
+
+     commonPlot1D:
+         algorithm: 
+             name: Make1DPlot
+             makeratio: False
+             makeoverlay: False
+             gather: inputs
+             save_histograms: False
+             regions:
+                 muonSmallTrigger:
+                     event: 
+                         muonSmallTriggerTime: 1000, -2000000000, 0, green
 
 
      # -----------------------------------------------------------
