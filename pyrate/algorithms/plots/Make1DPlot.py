@@ -51,8 +51,8 @@ class Make1DPlot(Algorithm):
                     # This should be a general approach when moving objects from the TRAN
                     # store to the permanent store.
 
-                    # Only creates the object if it is not retrievable from the INPUT and 
-                    # has not previously been saved on the permanent store. 
+                    # Only creates the object if it is not retrievable from the INPUT and
+                    # has not previously been saved on the permanent store.
                     # IMPORTANT: pyrate does not save the same object on the store multiple
                     # times anyway!!! The check in the if condition below only serves to
                     # avoid a message from ROOT which would see the creation of an histogram
@@ -74,12 +74,22 @@ class Make1DPlot(Algorithm):
                         h.GetXaxis().SetTitle(v_name)
                         h.GetYaxis().SetTitle("a.u.")
 
+                        if "gather" in config["algorithm"]:
+                            if (
+                                config["algorithm"]["gather"] == "inputs"
+                                or len(specs) < 4
+                            ):
+
+                                h.SetLineColor(
+                                    self.get_ROOT_colors(
+                                        self.store.get("INPUT:config")["color"]
+                                    )
+                                )
+
+                            elif len(specs) == 4:
+                                h.SetLineColor(self.get_ROOT_colors(specs[3]))
+
                         h.SetLineStyle(self.store.get("INPUT:config")["linestyle"])
-                        h.SetLineColor(
-                            self.get_ROOT_colors(
-                                self.store.get("INPUT:config")["color"]
-                            )
-                        )
 
                         # put the object on the store with a different name which
                         # includes the input name, as our final plot will be a stack
@@ -87,7 +97,7 @@ class Make1DPlot(Algorithm):
                         self.store.put(obj_name, h, "PERM")
 
         # ----------------------------------------------------------------------
-        # This would be the place to put the a config['name'] object on the READY 
+        # This would be the place to put the a config['name'] object on the READY
         # store, should this be ready for the finalise step.
         # ----------------------------------------------------------------------
 
@@ -127,33 +137,85 @@ class Make1DPlot(Algorithm):
     def finalise(self, config):
         """Makes the plot."""
 
-        plots = {}
+        if "gather" in config["algorithm"]:
+            gather = config["algorithm"]["gather"]
+        else:
+            gather = False
 
+        p_collection = {}
+
+        # get inputs of the target from the target name which is always
+        # object_name:list_of_inputs
         inputs = ST.get_items(config["name"].split(":", -1)[-1])
 
-        for region, var_type in config["algorithm"]["regions"].items():
+        for r_name, var_type in config["algorithm"]["regions"].items():
+
             for v_type, variable in var_type.items():
                 for v_name, v_specs in variable.items():
 
-                    path = f"region/{region}/{v_type}"
-                    p_name = f"plot_{region}_{v_name}"
-
-                    p_entry = os.path.join(path, p_name)
-
-                    plots[p_entry] = R.THStack(p_name, p_name)
-
-                    # ------------------------
-                    # Fill the stack
-                    # ------------------------
                     for i_name in inputs:
 
-                        h_name = self.get_hist_name(region, v_name)
+                        # assume to write plots at the top level
+                        # if no gather options is provided.
+                        path, p_name = "", f"plot_{i_name}_{r_name}_{v_name}"
+
+                        if gather == "inputs":
+                            path = f"regions/{r_name}/{v_type}"
+                            p_name = f"plot_{r_name}_{v_name}"
+
+                        elif gather == "variables":
+                            path = f"regions/{r_name}/inputs/{i_name}/{v_type}"
+                            p_name = f"plot_{i_name}_{r_name}"
+
+                        elif gather == "regions":
+                            path = f"inputs/{i_name}/{v_type}"
+                            p_name = f"plot_{i_name}_{v_name}"
+
+                        p_entry = os.path.join(path, p_name)
+
+                        if not p_entry in p_collection:
+                            p_collection[p_entry] = {"object": None, "histograms": []}
+
+                        if not p_collection[p_entry]["object"]:
+
+                            if not "makeoverlay" in config:
+                                p_collection[p_entry]["object"] = R.THStack(
+                                    p_name, p_name
+                                )
+                            else:
+                                p_collection[p_entry]["object"] = R.TCanvas(
+                                    p_name, p_name, 900, 800
+                                )
+
+                        # retrieve the histogram
+                        h_name = self.get_hist_name(r_name, v_name)
                         obj_name = self.get_object_name(i_name, h_name)
 
                         h = self.store.get(obj_name, "PERM")
-                        plots[p_entry].Add(h)
 
-        # One should create a canvas here...
+                        gather_in_inputs = r_name in p_name and v_name in p_name
+                        gather_in_variables = i_name in p_name and r_name in p_name
+                        gather_in_regions = i_name in p_name and v_name in p_name
+
+                        if gather_in_inputs or gather_in_variables or gather_in_regions:
+                            p_collection[p_entry]["histograms"].append(h)
+
+        for p_entry, p_dict in p_collection.items():
+            for h in p_dict["histograms"]:
+
+                if not "makeoverlay" in config:
+                    p_dict["object"].Add(h)
+
+                else:
+                    p_dict["object"].cd()
+                    h.Draw("same, hist")
+
+        plots = {}
+        for p_entry in p_collection:
+            plots[p_entry] = p_collection[p_entry]["object"]
+
+        print(config["name"])
+        print(plots)
 
         self.store.put(config["name"], plots, "PERM")
 
