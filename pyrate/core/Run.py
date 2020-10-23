@@ -96,9 +96,9 @@ class Run:
         # -----------------------------------------------------------------------
 
         self.algorithms = {}
-        for s, objects in self.run_targets.items():
-            for o in objects:
-                alg_name = self._config[o["config"]]["algorithm"]["name"]
+        for i_name, targets in self.run_targets.items():
+            for t in targets:
+                alg_name = self._config[t["config"]]["algorithm"]["name"]
                 self.add(alg_name, store)
 
         # -----------------------------------------------------------------------
@@ -154,7 +154,7 @@ class Run:
         if self.state in ["finalise"]:
             store.clear("READY")
 
-        for i_name, objects in tqdm(
+        for i_name, targets in tqdm(
             self.run_targets.items(),
             desc=f"{prefix}{info}",
             bar_format=self.colors[self.state]["input"],
@@ -243,7 +243,7 @@ class Run:
                 # ---------------------------------------------------------------
                 # Finalise
                 # ---------------------------------------------------------------
-                for t in objects:
+                for t in targets:
                     if not store.check(t["name"], "READY"):
 
                         self.loop(store, [t])
