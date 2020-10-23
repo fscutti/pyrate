@@ -5,6 +5,7 @@ implementing a selection. If the region is passed it fills the histograms with
 the corresponding region weight.
 """
 import os
+from copy import copy
 
 from pyrate.core.Algorithm import Algorithm
 
@@ -155,37 +156,36 @@ class Make1DPlot(Algorithm):
 
                     for i_name in inputs:
 
-                        # assume to write plots at the top level
-                        # if no gather options is provided.
-                        path, p_name = "", f"plot_{i_name}_{r_name}_{v_name}"
+                        # The top level directory has the same name of the target object.
+                        path, p_name = (
+                            f"{config['name']}",
+                            f"plot_{i_name}_{r_name}_{v_name}",
+                        )
+
+                        path = path.replace(":", "_").replace(",", "_")
 
                         if gather == "inputs":
-                            path = f"regions/{r_name}/{v_type}"
+                            path += f"/regions/{r_name}/{v_type}"
                             p_name = f"plot_{r_name}_{v_name}"
 
                         elif gather == "variables":
-                            path = f"regions/{r_name}/inputs/{i_name}/{v_type}"
-                            p_name = f"plot_{i_name}_{r_name}"
+                            path += f"/inputs/{i_name}/regions/{r_name}/{v_type}"
+                            p_name = f"plot_{i_name}_{r_name}_{v_type}"
 
                         elif gather == "regions":
-                            path = f"inputs/{i_name}/{v_type}"
+                            path += f"/inputs/{i_name}/{v_type}"
                             p_name = f"plot_{i_name}_{v_name}"
 
                         p_entry = os.path.join(path, p_name)
 
+                        # ROOT: notice that we can avoid to copy() the canvas here as we will
+                        # close it afterward, and finalise is only executed once per target,
+                        # so the TCanvas below is really unique to *this* scope.
                         if not p_entry in p_collection:
-                            p_collection[p_entry] = {"object": None, "histograms": []}
-
-                        if not p_collection[p_entry]["object"]:
-
-                            if not "makeoverlay" in config:
-                                p_collection[p_entry]["object"] = R.THStack(
-                                    p_name, p_name
-                                )
-                            else:
-                                p_collection[p_entry]["object"] = R.TCanvas(
-                                    p_name, p_name, 900, 800
-                                )
+                            p_collection[p_entry] = {
+                                "canvas": R.TCanvas(p_name, p_name, 900, 800),
+                                "histograms": [],
+                            }
 
                         # retrieve the histogram
                         h_name = self.get_hist_name(r_name, v_name)
@@ -193,29 +193,44 @@ class Make1DPlot(Algorithm):
 
                         h = self.store.get(obj_name, "PERM")
 
+                        # include the histogram in the list only if it meets
+                        # the current valid gathering criterion.
                         gather_in_inputs = r_name in p_name and v_name in p_name
-                        gather_in_variables = i_name in p_name and r_name in p_name
+                        gather_in_variables = (
+                            i_name in p_name and r_name in p_name and v_type in p_name
+                        )
                         gather_in_regions = i_name in p_name and v_name in p_name
 
                         if gather_in_inputs or gather_in_variables or gather_in_regions:
                             p_collection[p_entry]["histograms"].append(h)
 
+        plots = {}
         for p_entry, p_dict in p_collection.items():
-            for h in p_dict["histograms"]:
+            p_dict["canvas"].cd()
 
-                if not "makeoverlay" in config:
-                    p_dict["object"].Add(h)
+            if not "makeoverlay" in config["algorithm"]:
 
-                else:
-                    p_dict["object"].cd()
+                p_name = p_dict["canvas"].GetName()
+
+                h_stack = copy(R.THStack(p_name, p_name))
+
+                for h in p_dict["histograms"]:
+                    h_stack.Add(h)
+                h_stack.Draw()
+
+            else:
+                for h in p_dict["histograms"]:
                     h.Draw("same, hist")
 
-        plots = {}
-        for p_entry in p_collection:
-            plots[p_entry] = p_collection[p_entry]["object"]
+            # IMPORTANT: the canvas has to be closed to avoid overalps with
+            # open canvases with the same name afterward. ROOT has an obscure
+            # memory management. We also have to clone the original.
+            # N.B.: cloning the canvas at its creation would not work as there
+            # might be other ROOT objects created in the process of drawing on it.
 
-        print(config["name"])
-        print(plots)
+            plots[p_entry] = p_dict["canvas"].Clone()
+
+            p_dict["canvas"].Close()
 
         self.store.put(config["name"], plots, "PERM")
 
