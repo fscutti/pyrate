@@ -90,6 +90,7 @@ objects:
          algorithm: 
              name: Make1DPlot
              makeratio: False
+             #makeoverlay: True
              save_histograms: False
              regions:
                  sabreTrigger:
@@ -100,13 +101,13 @@ objects:
          algorithm: 
              name: Make1DPlot
              makeratio: False
-             makeoverlay: False
+             #makeoverlay: True
              gather: inputs
              save_histograms: False
              regions:
                  muonSmallTrigger:
                      event: 
-                         muonSmallTriggerTime: 1000, -2000000000, 0, green
+                         muonSmallTriggerTime: 100, -2000000000, 0, green
 
 
      # -----------------------------------------------------------
