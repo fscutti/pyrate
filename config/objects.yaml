@@ -59,7 +59,8 @@ objects:
          algorithm: 
              name: Weight
          value: 2
-
+     
+     # WARNING: change the path of the file below!!!
      weightSmallMuonCh0:
          algorithm: 
              name: Weight
