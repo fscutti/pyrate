@@ -22,7 +22,7 @@ class Trigger(Algorithm):
             # a circular dependency, as, if it would not be on the store, *this* algorithm
             # will be called recursively. Note that the choice of using config["name"] to compute the
             # variable is completely arbitrary here, and has been chosen only
-            # as an example of avoiding circular dependencies with check, but a better choice
+            # as an example of avoiding circular dependencies with "check", but a better choice
             # of variable name should be chosen, not associated with any object linked to
             # an algorithm in the configuration.
             if self.store.check(config["name"], "PERM"):

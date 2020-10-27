@@ -1,14 +1,20 @@
 --- 
+
+# N.B. paths in this file are only for illustration and have to be 
+# changed to valid paths!
+
 # -----------------------------------------------------------------------
 # Multiple paths can be specified, eventually including the file name if 
 # no ambiguity would arise. Files can be specified using part of their 
-# names. Names given in samples refer to tags in the file names which 
-# will be read sequentially. Tags specified in group are tags which are 
-# searched for at the beginning of the file name to group several files 
-# under the same event. The nevents flag can be any integer number 
+# names (tags), in the samples field, separated by underscores. 
+# Tags in the group field are searched for at the beginning of the file.
+# Files having the same group tag are group together in reading an event
+# or the current input. The nevents field can be any integer number 
 # implying the loop will run up to that value, or the range can be 
-# explicitly specified. For different samples the first tag of 
-# the name has to be the same for all files.
+# explicitly specified. Field values other than those already mentioned 
+# are not used by the instance of the Run directly but can be retrieved 
+# within an algorithm retrieving the "INPUT:config" name from the store 
+# which returns the attribute of the current valid input.
 # -----------------------------------------------------------------------
 inputs: 
    sabreData:
@@ -49,10 +55,14 @@ configs:
 
 
 # -----------------------------------------------------------------------
-# The possibility is given to specify several output files and their 
-# content. The content has to refer to objects declared in the 
-# configuration file in the region field. The object specification is 
-# inclusive of all its non-specified sub-fields.
+# The output is defined below. Several target objects are distributed
+# in different output files, if requested. The name of the target is 
+# always the name of an object + the name of the input (declared above)
+# for which it has to be computed. The "all" flag implies that all inputs
+# have to be used to resolve a target. If an input declared above is not
+# included in the declaration of any target it is not considered by the 
+# Run. Notice that identical objects called for different inputs choices
+# effectively represent different targets.
 # -----------------------------------------------------------------------
 outputs:
     MuonDetectorTest1.root:
