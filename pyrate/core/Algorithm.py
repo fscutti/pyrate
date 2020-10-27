@@ -1,6 +1,12 @@
 """ Algorithm class.
 """
 
+"""
+*************************************************************
+config['name'] is the name of the object you want to compute.
+*************************************************************
+"""
+
 
 class Algorithm:
     __slots__ = ["name", "store", "logger"]
@@ -12,13 +18,13 @@ class Algorithm:
 
     def initialise(self, config):
         """Override this method to define algorithms. config is a dictionary.
-        At this stage the method know the current input.
+        At this stage the method knows the current input.
         """
         pass
 
     def execute(self, config):
         """Override this method to define algorithms. config is a dictionary.
-        At this stage the method know the current input and current event.
+        At this stage the method knows the current input and current event.
         """
         pass
 
