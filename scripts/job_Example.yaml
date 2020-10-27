@@ -32,7 +32,7 @@ inputs:
    smallMuonData:
        samples: Test
        group: ch0, ch1, ch2
-       nevents: 4000
+       nevents: 2000
        path:
           - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/groups/ch0
           - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/groups/ch1
