@@ -32,7 +32,6 @@ class Make1DPlot(Algorithm):
         # on the store. It will generate a recursion loop. Always check first.
         # ----------------------------------------------------------------------
         i_name = self.store.get("INPUT:name", "TRAN")
-
         for region, var_type in config["algorithm"]["regions"].items():
             for v_type, variable in var_type.items():
                 for v_name, v_specs in variable.items():
@@ -96,6 +95,7 @@ class Make1DPlot(Algorithm):
                         # includes the input name, as our final plot will be a stack
                         # potentially including histograms from different samples.
                         self.store.put(obj_name, h, "PERM")
+                        # self.store.put(config["name"], "READY")
 
         # ----------------------------------------------------------------------
         # This would be the place to put the a config['name'] object on the READY

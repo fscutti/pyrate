@@ -276,6 +276,7 @@ class Run:
     def call(self, obj_config, is_target=""):
         """Calls an algorithm."""
 
+        # print(f"calling {obj_config} is target: ({is_target})")
         alg = self.algorithms[self._config[obj_config]["algorithm"]["name"]]
         entry = f"{obj_config}:{alg.name}:TARGET({is_target})"
 
