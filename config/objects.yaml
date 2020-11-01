@@ -84,8 +84,8 @@ objects:
              regions:
                  muonSmallSelection:
                      channels: 
-                         chargeSmallMuonCh0: 1000, 8600000, 9000000, black
-                         chargeSmallMuonCh1: 1000, 8600000, 9000000, red
+                         chargeSmallMuonCh0: 100, 8600000, 9000000, black
+                         chargeSmallMuonCh1: 100, 8600000, 9000000, red
     
      sabreDataPlot1D:
          algorithm: 
@@ -96,7 +96,7 @@ objects:
              regions:
                  sabreTrigger:
                      event: 
-                         sabreTriggerTimeDiff: 1000, -52000000, 52000000, blue
+                         sabreTriggerTimeDiff: 100, -52000000, 52000000, blue
 
      commonPlot1D:
          algorithm: 
