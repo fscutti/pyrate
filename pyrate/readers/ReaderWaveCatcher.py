@@ -54,27 +54,45 @@ class ReaderWaveCatcher(Reader):
 
     def _read_variable(self, name, channel, variable):
         """Reads the variable from file and puts it on the transient store."""
-        # pos_current_line = self._mmf.tell()
+        pos_current_line = self._mmf.tell()
 
         if channel:
             self._move(channel, rel=1)
 
+            if variable == "RawWaveform":
+                # will need to move one line forward.
+                self._mmf.readline()
+
+                range_value = self._mmf.readline().decode("utf-8")
+
+                value = [float(s) for s in range_value.split(" ")[:-1]]
+
+            else:
+                pos_variable = self._mmf.find(variable.encode("utf-8"), 1)
+
+                range_value = self._mmf[pos_variable : pos_variable + 40].decode(
+                    "utf-8"
+                )
+
+                for s in range_value.split(" ")[1:]:
+                    if s:
+                        value = float(s)
+                        break
+        else:
+            self._move(variable, rel=1)
+
             pos_variable = self._mmf.find(variable.encode("utf-8"), 1)
 
-            range_value = self._mmf[pos_variable : pos_variable + 30].decode("utf-8")
-
-            print(range_value.split(" ")[1:])
+            range_value = self._mmf[pos_variable : pos_variable + 40].decode("utf-8")
 
             for s in range_value.split(" ")[1:]:
-                if s:
-                    value = float(s)
+                if s and not "=" in s and not s in variable:
+                    value = str(s)
                     break
-        else:
-            pass
 
         self.store.put(name, value, "TRAN")
 
-        # self._mmf.seek(pos_current_line)
+        self._mmf.seek(pos_current_line)
 
     def _break_path(self, name):
 
