@@ -4,6 +4,7 @@ import sys
 
 from pyrate.core.Reader import Reader
 from pyrate.readers.ReaderROOT import ReaderROOT
+from pyrate.readers.ReaderWaveCatcher import ReaderWaveCatcher
 
 from pyrate.utils import functions as FN
 from pyrate.utils import strings as ST
@@ -237,15 +238,15 @@ class Input(Reader):
 
             r_name = "_".join([g_name, str(f_idx)])
 
-            f = self.groups[g_name][f_idx]
+            f_name = self.groups[g_name][f_idx]
 
-            if f.endswith(".root"):
-                reader = ReaderROOT(r_name, self.store, self.logger, f, self.structure)
+            if f_name.endswith(".root"):
+                reader = ReaderROOT(r_name, self.store, self.logger, f_name, self.structure)
 
-            elif f.endswith(".dat"):
-                pass
+            elif f_name.endswith(".dat"):
+                reader = ReaderWaveCatcher(r_name, self.store, self.logger, f_name, self.structure)
 
-            elif f.endswith(".txt"):
+            elif f_name.endswith(".txt"):
                 pass
 
             reader.load()
