@@ -1,12 +1,14 @@
 """ Reader of a WaveCatcher file.
+WARNING: this is bugged!!!
 """
 import mmap
+import os
 
 from pyrate.core.Reader import Reader
 
 
 class ReaderWaveCatcher(Reader):
-    __slots__ = ["f", "structure", "_mmf", "_mmidx"]
+    __slots__ = ["f", "structure", "_mmf", "_mmidx", "_event"]
 
     def __init__(self, name, store, logger, f_name, structure):
         super().__init__(name, store, logger)
@@ -14,11 +16,12 @@ class ReaderWaveCatcher(Reader):
         self.structure = structure
 
     def load(self):
-        self.f = open(self.f, "rt", encoding="utf-8")
+        self.f = open(self.f, "r", encoding="utf-8")
         self._idx = 0
 
         self._mmf = mmap.mmap(self.f.fileno(), length=0, access=mmap.ACCESS_READ)
         self._mmidx = None
+        self._event = 0
 
     def read(self, name):
 
@@ -29,9 +32,8 @@ class ReaderWaveCatcher(Reader):
 
                 event = f"=== EVENT {self._mmidx} ==="
 
-                self._move(event, rel=1)
-
-                # print("This is the line:", self._mmf.readline())
+                self._move(event)
+                self._event = self._mmf.tell()
 
             variable, channel = self._break_path(name)
 
@@ -39,6 +41,7 @@ class ReaderWaveCatcher(Reader):
 
         elif name.startswith("INPUT:"):
             """ read metadata here """
+
             pass
 
     def set_n_events(self):
@@ -57,7 +60,7 @@ class ReaderWaveCatcher(Reader):
         pos_current_line = self._mmf.tell()
 
         if channel:
-            self._move(channel, rel=1)
+            self._move(channel)
 
             if variable == "RawWaveform":
                 # will need to move one line forward.
@@ -68,7 +71,7 @@ class ReaderWaveCatcher(Reader):
                 value = [float(s) for s in range_value.split(" ")[:-1]]
 
             else:
-                pos_variable = self._mmf.find(variable.encode("utf-8"), 1)
+                pos_variable = self._mmf.find(variable.encode("utf-8"))
 
                 range_value = self._mmf[pos_variable : pos_variable + 40].decode(
                     "utf-8"
@@ -79,9 +82,9 @@ class ReaderWaveCatcher(Reader):
                         value = float(s)
                         break
         else:
-            self._move(variable, rel=1)
+            self._move(variable)
 
-            pos_variable = self._mmf.find(variable.encode("utf-8"), 1)
+            pos_variable = self._mmf.find(variable.encode("utf-8"))
 
             range_value = self._mmf[pos_variable : pos_variable + 40].decode("utf-8")
 
@@ -115,7 +118,7 @@ class ReaderWaveCatcher(Reader):
         if opt == "bkw":
             self._mmf.seek(self._mmf.rfind(s))
         else:
-            self._mmf.seek(self._mmf.find(s, rel))
+            self._mmf.seek(self._mmf.find(s, self._event), rel)
 
 
 # EOF
