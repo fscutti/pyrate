@@ -1,5 +1,6 @@
 """ Base class for reading input files. 
 """
+import os
 import sys
 
 from pyrate.core.Reader import Reader
@@ -9,6 +10,8 @@ from pyrate.readers.ReaderWaveCatcherMMAP import ReaderWaveCatcherMMAP
 
 from pyrate.utils import functions as FN
 from pyrate.utils import strings as ST
+
+GB = 1e9
 
 
 class Input(Reader):
@@ -41,12 +44,12 @@ class Input(Reader):
 
         self.is_loaded = False
 
-        for g_name, g_readers in self.groups.items(): 
+        for g_name, g_readers in self.groups.items():
             for f_idx, reader in enumerate(g_readers):
-            
+
                 if isinstance(reader, str):
                     continue
-                
+
                 if reader.is_loaded:
                     g_readers[f_idx].offload()
 
@@ -257,11 +260,20 @@ class Input(Reader):
             f_name = self.groups[g_name][f_idx]
 
             if f_name.endswith(".root"):
-                reader = ReaderROOT(r_name, self.store, self.logger, f_name, self.structure)
+                reader = ReaderROOT(
+                    r_name, self.store, self.logger, f_name, self.structure
+                )
 
             elif f_name.endswith(".dat"):
-                reader = ReaderWaveCatcherLC(r_name, self.store, self.logger, f_name, self.structure)
-                #reader = ReaderWaveCatcherMMAP(r_name, self.store, self.logger, f_name, self.structure)
+                # choose the reader based on file size.
+                if os.path.getsize(f_name) >= 1 * GB:
+                    reader = ReaderWaveCatcherMMAP(
+                        r_name, self.store, self.logger, f_name, self.structure
+                    )
+                else:
+                    reader = ReaderWaveCatcherLC(
+                        r_name, self.store, self.logger, f_name, self.structure
+                    )
 
             elif f_name.endswith(".txt"):
                 pass
