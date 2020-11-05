@@ -18,6 +18,8 @@ class Input(Reader):
 
     def load(self):
 
+        self.is_loaded = True
+
         self._f_idx = 0
 
         if not hasattr(self, "structure"):
@@ -34,6 +36,19 @@ class Input(Reader):
             self._set_reader(g_names[g_idx], self._f_idx)
 
         self._n_files = len(self.files[0])
+
+    def offload(self):
+
+        self.is_loaded = False
+
+        for g_name, g_readers in self.groups.items(): 
+            for f_idx, reader in enumerate(g_readers):
+            
+                if isinstance(reader, str):
+                    continue
+                
+                if reader.is_loaded:
+                    g_readers[f_idx].offload()
 
     def read(self, name):
         """Looks for the object in the entire input. Initialises readers if

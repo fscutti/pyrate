@@ -17,9 +17,13 @@ class ReaderWaveCatcherLC(Reader):
 
     def load(self):
 
+        self.is_loaded = True
+
         f = open(self.f, "r", encoding="utf-8")
         self._mmf = mmap.mmap(f.fileno(), length=0, access=mmap.ACCESS_READ)
         f.close()
+
+        linecache.lazycache(self.f, globals())
 
         self._idx = 0
 
@@ -33,6 +37,11 @@ class ReaderWaveCatcherLC(Reader):
             self.structure = {
                 f"CH{idx}": 2 * (idx + 1) for idx in range(self._n_channels)
             }
+
+    def offload(self):
+        self.is_loaded = False
+        self._mmf.close()
+        linecache.clearcache()
 
     def read(self, name):
 

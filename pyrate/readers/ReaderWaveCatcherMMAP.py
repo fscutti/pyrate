@@ -16,12 +16,19 @@ class ReaderWaveCatcherMMAP(Reader):
         self.structure = structure
 
     def load(self):
+        self.is_loaded = True
         self.f = open(self.f, "r", encoding="utf-8")
         self._idx = 0
 
         self._mmf = mmap.mmap(self.f.fileno(), length=0, access=mmap.ACCESS_READ)
         self._mmidx = None
         self._event = 0
+
+        self.f.close()
+
+    def offload(self):
+        self.is_loaded = False
+        self._mmf.close()
 
     def read(self, name):
 
