@@ -7,7 +7,7 @@ import os
 from pyrate.core.Reader import Reader
 
 
-class ReaderWaveCatcher(Reader):
+class ReaderWaveCatcherMMAP(Reader):
     __slots__ = ["f", "structure", "_mmf", "_mmidx", "_event"]
 
     def __init__(self, name, store, logger, f_name, structure):
