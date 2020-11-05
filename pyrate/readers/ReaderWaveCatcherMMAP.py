@@ -1,0 +1,124 @@
+""" Reader of a WaveCatcher file.
+WARNING: this is bugged!!!
+"""
+import mmap
+import os
+
+from pyrate.core.Reader import Reader
+
+
+class ReaderWaveCatcher(Reader):
+    __slots__ = ["f", "structure", "_mmf", "_mmidx", "_event"]
+
+    def __init__(self, name, store, logger, f_name, structure):
+        super().__init__(name, store, logger)
+        self.f = f_name
+        self.structure = structure
+
+    def load(self):
+        self.f = open(self.f, "r", encoding="utf-8")
+        self._idx = 0
+
+        self._mmf = mmap.mmap(self.f.fileno(), length=0, access=mmap.ACCESS_READ)
+        self._mmidx = None
+        self._event = 0
+
+    def read(self, name):
+
+        if name.startswith("EVENT:"):
+
+            if self._mmidx != self._idx + 1:
+                self._mmidx = self._idx + 1
+
+                event = f"=== EVENT {self._mmidx} ==="
+
+                self._move(event)
+                self._event = self._mmf.tell()
+
+            variable, channel = self._break_path(name)
+
+            self._read_variable(name, channel, variable)
+
+        elif name.startswith("INPUT:"):
+            """ read metadata here """
+
+            pass
+
+    def set_n_events(self):
+        """Reads number of events using the last event header."""
+        if not self._n_events:
+            pos_current_line = self._mmf.tell()
+
+            self._move("EVENT ", opt="bkw")
+
+            self._n_events = int(self._mmf.readline().decode("utf-8").split(" ")[1])
+
+            self._mmf.seek(pos_current_line)
+
+    def _read_variable(self, name, channel, variable):
+        """Reads the variable from file and puts it on the transient store."""
+        pos_current_line = self._mmf.tell()
+
+        if channel:
+            self._move(channel)
+
+            if variable == "RawWaveform":
+                # will need to move one line forward.
+                self._mmf.readline()
+
+                range_value = self._mmf.readline().decode("utf-8")
+
+                value = [float(s) for s in range_value.split(" ")[:-1]]
+
+            else:
+                pos_variable = self._mmf.find(variable.encode("utf-8"))
+
+                range_value = self._mmf[pos_variable : pos_variable + 40].decode(
+                    "utf-8"
+                )
+
+                for s in range_value.split(" ")[1:]:
+                    if s:
+                        value = float(s)
+                        break
+        else:
+            self._move(variable)
+
+            pos_variable = self._mmf.find(variable.encode("utf-8"))
+
+            range_value = self._mmf[pos_variable : pos_variable + 40].decode("utf-8")
+
+            for s in range_value.split(" ")[1:]:
+                if s and not "=" in s and not s in variable:
+                    value = str(s)
+                    break
+
+        self.store.put(name, value, "TRAN")
+
+        self._mmf.seek(pos_current_line)
+
+    def _break_path(self, name):
+
+        t = name.split(":")
+
+        ch, var = None, None
+
+        if "CH" in name:
+            var = t[2]
+            ch = t[1].replace("CH", "CH: ")
+        else:
+            var = t[1]
+
+        return var, ch
+
+    def _move(self, s, rel=0, opt="frw"):
+
+        s = s.encode("utf-8")
+
+        if opt == "bkw":
+            self._mmf.seek(self._mmf.rfind(s))
+        else:
+            self._mmf.seek(self._mmf.find(s, self._event), rel)
+
+
+# EOF
