@@ -1,5 +1,4 @@
 """ Reader of a WaveCatcher file.
-WARNING: this is bugged!!!
 """
 import mmap
 import os
