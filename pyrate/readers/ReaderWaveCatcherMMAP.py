@@ -8,7 +8,7 @@ from pyrate.core.Reader import Reader
 
 
 class ReaderWaveCatcherMMAP(Reader):
-    __slots__ = ["f", "structure", "_mmf", "_mmidx", "_event"]
+    __slots__ = ["f", "structure", "_event", "_mmf", "_mmidx"]
 
     def __init__(self, name, store, logger, f_name, structure):
         super().__init__(name, store, logger)
@@ -40,9 +40,8 @@ class ReaderWaveCatcherMMAP(Reader):
             self._read_variable(name, channel, variable)
 
         elif name.startswith("INPUT:"):
-            """ read metadata here """
 
-            pass
+            self._read_header(name)
 
     def set_n_events(self):
         """Reads number of events using the last event header."""
@@ -55,8 +54,29 @@ class ReaderWaveCatcherMMAP(Reader):
 
             self._mmf.seek(pos_current_line)
 
+    def _read_header(self, name):
+        """Reads variable from run header and puts it in the transient store."""
+        pos_current_line = self._mmf.tell()
+
+        variable = name.split(":")[1]
+
+        self._mmf.seek(0)
+
+        pos_variable = self._mmf.find(variable.encode("utf-8")) + len(variable)
+
+        range_value = self._mmf[pos_variable : pos_variable + 40].decode("utf-8")
+
+        for s in range_value.split(" ")[1:]:
+            if s:
+                value = str(s).replace("[", "").replace("]", "")
+                break
+
+        self.store.put(name, value, "TRAN")
+
+        self._mmf.seek(pos_current_line)
+
     def _read_variable(self, name, channel, variable):
-        """Reads the variable from file and puts it on the transient store."""
+        """Reads variable from the event  and puts it in the transient store."""
         pos_current_line = self._mmf.tell()
 
         if channel:

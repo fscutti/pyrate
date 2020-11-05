@@ -4,7 +4,8 @@ import sys
 
 from pyrate.core.Reader import Reader
 from pyrate.readers.ReaderROOT import ReaderROOT
-from pyrate.readers.ReaderWaveCatcher import ReaderWaveCatcher
+from pyrate.readers.ReaderWaveCatcherLC import ReaderWaveCatcherLC
+from pyrate.readers.ReaderWaveCatcherMMAP import ReaderWaveCatcherMMAP
 
 from pyrate.utils import functions as FN
 from pyrate.utils import strings as ST
@@ -30,7 +31,7 @@ class Input(Reader):
         self.groups = {}
         for g_idx, g_files in enumerate(self.files):
             self.groups[g_names[g_idx]] = g_files
-            self._init_reader(g_names[g_idx], self._f_idx)
+            self._set_reader(g_names[g_idx], self._f_idx)
 
         self._n_files = len(self.files[0])
 
@@ -52,12 +53,12 @@ class Input(Reader):
                 for f_idx, reader in enumerate(g_readers):
 
                     if isinstance(reader, str):
-                        self._init_reader(g_name, f_idx)
+                        self._set_reader(g_name, f_idx)
 
                     g_readers[f_idx].read(name)
 
             elif name.startswith("EVENT:"):
-                self._init_reader(g_name, self._f_idx)
+                self._set_reader(g_name, self._f_idx)
                 g_readers[self._f_idx].read(name)
 
     def set_n_events(self):
@@ -70,7 +71,7 @@ class Input(Reader):
                 for f_idx, reader in enumerate(g_readers):
 
                     if isinstance(reader, str):
-                        self._init_reader(g_name, f_idx)
+                        self._set_reader(g_name, f_idx)
 
                     self._n_events += g_readers[f_idx].get_n_events()
 
@@ -210,7 +211,7 @@ class Input(Reader):
                 self._f_idx += 1
 
                 for g_name in self.groups:
-                    self._init_reader(g_name, self._f_idx)
+                    self._set_reader(g_name, self._f_idx)
 
             else:
                 self._f_idx = -1
@@ -223,14 +224,14 @@ class Input(Reader):
                 self._f_idx -= 1
 
                 for g_name in self.groups:
-                    self._init_reader(g_name, self._f_idx)
+                    self._set_reader(g_name, self._f_idx)
 
             else:
                 self._f_idx = 0
 
             return self._f_idx
 
-    def _init_reader(self, g_name, f_idx):
+    def _set_reader(self, g_name, f_idx):
         """Instantiate different readers here. If the instance exists nothing
         is done. This function transforms a string into a reader.
         """
@@ -244,7 +245,8 @@ class Input(Reader):
                 reader = ReaderROOT(r_name, self.store, self.logger, f_name, self.structure)
 
             elif f_name.endswith(".dat"):
-                reader = ReaderWaveCatcher(r_name, self.store, self.logger, f_name, self.structure)
+                reader = ReaderWaveCatcherLC(r_name, self.store, self.logger, f_name, self.structure)
+                #reader = ReaderWaveCatcherMMAP(r_name, self.store, self.logger, f_name, self.structure)
 
             elif f_name.endswith(".txt"):
                 pass
