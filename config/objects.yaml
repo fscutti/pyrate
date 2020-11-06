@@ -110,6 +110,10 @@ objects:
                      event: 
                          muonSmallTriggerTime: 100, -2000000000, 0, green
 
+     testingReader:
+         algorithm: 
+             name: Baseline
+
 
      # -----------------------------------------------------------
      # Histograms
