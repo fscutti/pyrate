@@ -10,15 +10,20 @@ from pyrate.core.Reader import Reader
 class ReaderROOT(Reader):
     __slots__ = ["f", "structure", "_trees"]
 
-    def __init__(self, name, store, logger, f, structure):
+    def __init__(self, name, store, logger, f_name, structure):
         super().__init__(name, store, logger)
-        self.f = f
+        self.f = f_name
         self.structure = structure
 
     def load(self):
+        self.is_loaded = True
         self.f = R.TFile.Open(self.f)
         self._idx = 0
         self._trees = {}
+
+    def offload(self):
+        self.is_loaded = False
+        self.f.Close()
 
     def read(self, name):
         if name.startswith("EVENT:"):
@@ -61,15 +66,6 @@ class ReaderROOT(Reader):
         """Reads number of events in the main tree of the file."""
         if not self._n_events:
             self._n_events = self.f.Get(self.structure["tree"]).GetEntries()
-
-    def set_next_event(self):
-        """If the next event reading will not be valid it outputs -1."""
-
-        if self._idx < self._n_events - 1:
-            self._idx += 1
-        else:
-            self._idx = -1
-        return self._idx
 
     def _read_hist(self, name):
         """Grabs histograms from the input file and puts them on the permanent store."""

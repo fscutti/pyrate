@@ -100,7 +100,12 @@ class Run:
             for t in targets:
                 alg_name = self._config[t["config"]]["algorithm"]["name"]
                 self.add(alg_name, store)
-
+       
+        # -----------------------------------------------------------------------
+        # Inputs will be initialised dynamically in the run function.
+        # -----------------------------------------------------------------------
+        self.ready_inputs = {}
+        
         # -----------------------------------------------------------------------
         # Update the store in three steps: initialise, execute, finalise.
         # -----------------------------------------------------------------------
@@ -117,7 +122,7 @@ class Run:
 
             store = self.run("execute", store)
 
-        store = self.run("finalise", store)
+        #store = self.run("finalise", store)
 
         print("\n")
 
@@ -125,8 +130,8 @@ class Run:
         # Write finalised objects to the output.
         # -----------------------------------------------------------------------
 
-        for obj_name in self.run_objects:
-            self._out.write(obj_name)
+        #for obj_name in self.run_objects:
+        #    self._out.write(obj_name)
 
         # stop = timeit.default_timer()
 
@@ -161,9 +166,14 @@ class Run:
         ):
 
             if self.state in ["initialise", "execute"]:
+                
+                if not i_name in self.ready_inputs:
+                    self.ready_inputs[i_name] = Input(i_name, store, self.logger, self.inputs[i_name])
+                     
+                self._in = self.ready_inputs[i_name]
 
-                self._in = Input(i_name, store, self.logger, self.inputs[i_name])
-                self._in.load()
+                if not self._in.is_loaded:
+                    self._in.load()
 
             if self.state == "initialise":
                 # ---------------------------------------------------------------
@@ -238,6 +248,8 @@ class Run:
                     store.clear("TRAN")
 
                     self._in.set_next_event()
+
+                self._in.offload()
 
             elif self.state == "finalise":
                 # ---------------------------------------------------------------

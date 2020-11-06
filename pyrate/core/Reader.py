@@ -3,17 +3,22 @@
 
 
 class Reader:
-    __slots__ = ["name", "store", "logger", "_idx", "_n_events"]
+    __slots__ = ["name", "store", "logger", "is_loaded", "_idx", "_n_events"]
 
     def __init__(self, name, store, logger):
         self.name = name
         self.store = store
         self.logger = logger
+        self.is_loaded = False
         self._idx = 0
         self._n_events = None
 
     def load(self):
         """Initialises reader condition members and puts it in a 'read ready' condition."""
+        pass
+
+    def offload(self):
+        """Closes files."""
         pass
 
     def read(self, name):
@@ -55,8 +60,13 @@ class Reader:
         pass
 
     def set_next_event(self):
-        """Updates idx to next event"""
-        pass
+        """If the next event reading will not be valid it outputs -1."""
+
+        if self._idx < self._n_events - 1:
+            self._idx += 1
+        else:
+            self._idx = -1
+        return self._idx
 
     def set_previous_event(self):
         """Sets idx to previous event."""
