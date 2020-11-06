@@ -1,4 +1,8 @@
-""" Reader of a WaveCatcher file.
+""" Reader of a WaveCatcher file. 
+This version of the reader uses memory mapping to read the file:
+https://docs.python.org/3.0/library/mmap.html.
+This makes the reading process less memory demanding but slightly slower.
+This reader should be used for larger files, e.g. >= 1 GB.
 """
 import mmap
 import os
@@ -124,6 +128,7 @@ class ReaderWaveCatcherMMAP(Reader):
         self._mmf.seek(pos_current_line)
 
     def _break_path(self, name):
+        """Return variable name and eventual channel."""
 
         t = name.split(":")
 
@@ -138,6 +143,8 @@ class ReaderWaveCatcherMMAP(Reader):
         return var, ch
 
     def _move(self, s, rel=0, opt="frw"):
+        """Move file position to beginning of string s.
+        The option of choosing to read the file backward is given."""
 
         s = s.encode("utf-8")
 

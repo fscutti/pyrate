@@ -1,4 +1,8 @@
-""" Reader of a WaveCatcher file.
+""" Reader of a WaveCatcher file. 
+This version of the reader uses a linecache methods to read the file: 
+https://docs.python.org/3.8/library/linecache.html. 
+This allows the reader to be faster but memory consumption increases. 
+Therefore, this reader should be used for smaller files, e.g. < 1 GB.
 """
 import mmap
 import linecache
