@@ -142,7 +142,7 @@ class ReaderWaveCatcherMMAP(Reader):
 
         return var, ch
 
-    def _move(self, s, rel=0, opt="frw"):
+    def _move(self, s, opt="frw"):
         """Move file position to beginning of string s.
         The option of choosing to read the file backward is given."""
 
@@ -151,7 +151,7 @@ class ReaderWaveCatcherMMAP(Reader):
         if opt == "bkw":
             self._mmf.seek(self._mmf.rfind(s))
         else:
-            self._mmf.seek(self._mmf.find(s, self._event), rel)
+            self._mmf.seek(self._mmf.find(s, self._event))
 
 
 # EOF
