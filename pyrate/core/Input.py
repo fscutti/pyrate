@@ -7,6 +7,7 @@ from pyrate.core.Reader import Reader
 from pyrate.readers.ReaderROOT import ReaderROOT
 from pyrate.readers.ReaderWaveCatcherLC import ReaderWaveCatcherLC
 from pyrate.readers.ReaderWaveCatcherMMAP import ReaderWaveCatcherMMAP
+from pyrate.readers.ReaderWaveDumpMMAP import ReaderWaveDumpMMAP
 
 from pyrate.utils import functions as FN
 from pyrate.utils import strings as ST
@@ -276,7 +277,9 @@ class Input(Reader):
                     )
 
             elif f_name.endswith(".txt"):
-                pass
+                reader = ReaderWaveDumpMMAP(
+                    r_name, self.store, self.logger, f_name, self.structure
+                )
 
             reader.load()
 
