@@ -129,7 +129,6 @@ class Run:
         # -----------------------------------------------------------------------
         # Write finalised objects to the output.
         # -----------------------------------------------------------------------
-
         for obj_name in self.run_objects:
             self._out.write(obj_name)
 
