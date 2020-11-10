@@ -7,6 +7,7 @@ from pyrate.core.Reader import Reader
 from pyrate.readers.ReaderROOT import ReaderROOT
 from pyrate.readers.ReaderWaveCatcherLC import ReaderWaveCatcherLC
 from pyrate.readers.ReaderWaveCatcherMMAP import ReaderWaveCatcherMMAP
+from pyrate.readers.ReaderWaveDumpMMAP import ReaderWaveDumpMMAP
 
 from pyrate.utils import functions as FN
 from pyrate.utils import strings as ST
@@ -33,12 +34,14 @@ class Input(Reader):
             for g_idx, g_name in enumerate(ST.get_items(self.group)):
                 g_names[g_idx] = g_name
 
+        self._n_groups = len(self.files)
+        self._n_files = len(self.files[0])
+
         self.groups = {}
         for g_idx, g_files in enumerate(self.files):
             self.groups[g_names[g_idx]] = g_files
             self._set_reader(g_names[g_idx], self._f_idx)
 
-        self._n_files = len(self.files[0])
 
     def offload(self):
 
@@ -90,8 +93,9 @@ class Input(Reader):
 
                     if isinstance(reader, str):
                         self._set_reader(g_name, f_idx)
-
-                    self._n_events += g_readers[f_idx].get_n_events()
+                    
+                    f_n_events = g_readers[f_idx].get_n_events()
+                    self._n_events += f_n_events
 
                 if not g_n_events:
                     g_n_events = self._n_events
@@ -266,7 +270,7 @@ class Input(Reader):
 
             elif f_name.endswith(".dat"):
                 # choose the reader based on file size.
-                if os.path.getsize(f_name) >= 1 * GB:
+                if os.path.getsize(f_name) >= 1 * GB / self._n_groups:
                     reader = ReaderWaveCatcherMMAP(
                         r_name, self.store, self.logger, f_name, self.structure
                     )
@@ -276,7 +280,9 @@ class Input(Reader):
                     )
 
             elif f_name.endswith(".txt"):
-                pass
+                reader = ReaderWaveDumpMMAP(
+                    r_name, self.store, self.logger, f_name, self.structure
+                )
 
             reader.load()
 

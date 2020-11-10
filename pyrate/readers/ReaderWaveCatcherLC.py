@@ -92,7 +92,7 @@ class ReaderWaveCatcherLC(Reader):
             self.store.put(name, value, "TRAN")
 
     def _read_variable(self, name, channel, variable, variable_line_idx):
-        """Reads variable from the event  and puts it in the transient store."""
+        """Reads variable from the event and puts it in the transient store."""
         line = self._get_line(variable_line_idx)
 
         if channel:
