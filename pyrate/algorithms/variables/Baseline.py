@@ -1,5 +1,7 @@
 """ Computation of PMT Baseline.
 """
+import sys
+from copy import copy
 
 from pyrate.core.Algorithm import Algorithm
 
@@ -9,93 +11,155 @@ class Baseline(Algorithm):
 
     def __init__(self, name, store, logger):
         super().__init__(name, store, logger)
-
+    
     def execute(self, config):
-        #=== CH: 0 EVENTID: 1 FCR: 496 Baseline: 0.000000 V Amplitude: 0.000000 V Charge:    0.000 pC LeadingEdgeTime:  0.000 ns TrailingEdgeTime:  0.000 ns TrigCount: 0 TimeCount 177 ===
-        #=== UnixTime = 1571206401.215 date = 2019.10.16 time = 17h.13m.21s.215ms == TDC From FPGA = 39804 == TDC Corrected = 17h13m21s,000.199.020ns === 
-        val10 = self.store.get("EVENT:UnixTime")
-        #print("EVENT:UnixTime", val10)
 
-        val11 = self.store.get("EVENT:date")
-        #print("EVENT:date", val11)
-        val12 = self.store.get("EVENT:time")
-        val13 = self.store.get("EVENT:TDC From FPGA")
-        val13 = self.store.get("EVENT:TDC Corrected")
-        #print("EVENT:time", val12)
+        if config["algorithm"]["format"] == "WC":
+            # WaveCatcher input:
+            #if self.store.get("EVENT:idx") == 0:
+            #    DATA_SAMPLES = self.store.get("INPUT:DATA SAMPLES")
+            #    NB_OF_CHANNELS_ACQUIRED = self.store.get(
+            #        "INPUT:NB OF CHANNELS ACQUIRED"
+            #    )
+            #    Sampling_Period = self.store.get("INPUT:Sampling Period")
+            #    Sampling_Period = self.store.get("INPUT:Sampling Period")
+            #    INL_Correction = self.store.get("INPUT:INL Correction")
 
-        val7 = self.store.get("EVENT:CH3:TrigCount")
-        val71 = self.store.get("EVENT:CH3:TimeCount")
-        val0 = self.store.get("EVENT:CH7:EVENTID")
-        val90 = self.store.get("EVENT:CH7:RawWaveform")
-        val901 = self.store.get("EVENT:CH3:RawWaveform")
-        val2 = self.store.get("EVENT:CH0:Baseline")
-        val4 = self.store.get("EVENT:CH3:Charge")
-        val3 = self.store.get("EVENT:CH3:Amplitude")
-        val14 = self.store.get("EVENT:TDC Corrected")
-        val5 = self.store.get("EVENT:CH0:LeadingEdgeTime")
-        val1 = self.store.get("EVENT:CH6:FCR")
-        #print("Event idx from store:", self.store.get("EVENT:idx"), val90[0])
+            # === UnixTime = 1571206401.215 date = 2019.10.16 time = 17h.13m.21s.215ms == TDC From FPGA = 39804 == TDC Corrected = 17h13m21s,000.199.020ns ===
+            UnixTime = self.store.get("EVENT:UnixTime")
+            date = self.store.get("EVENT:date")
+            time = self.store.get("EVENT:time")
+            TDC_From_FPGA = self.store.get("EVENT:TDC From FPGA")
+            TDC_Corrected = self.store.get("EVENT:TDC Corrected")
 
-
-        head1 = self.store.get("INPUT:DATA SAMPLES")
-        #print(head1)
-        head2 = self.store.get("INPUT:NB OF CHANNELS ACQUIRED")
-        #print(head2)
-        head3 = self.store.get("INPUT:Sampling Period")
-        #print(head3)
+            # === CH: 0 EVENTID: 1 FCR: 496 Baseline: 0.000000 V Amplitude: 0.000000 V Charge:    0.000 pC LeadingEdgeTime:  0.000 ns TrailingEdgeTime:  0.000 ns TrigCount: 0 TimeCount 177 ===
+            EVENTID = self.store.get("EVENT:CH0:EVENTID")
+            FCR = self.store.get("EVENT:CH1:FCR")
+            Baseline = self.store.get("EVENT:CH2:Baseline")
+            Amplitude = self.store.get("EVENT:CH3:Amplitude")
+            Charge = self.store.get("EVENT:CH4:Charge")
+            LeadingEdgeTime = self.store.get("EVENT:CH5:LeadingEdgeTime")
+            TrailingEdgeTime = self.store.get("EVENT:CH6:TrailingEdgeTime")
+            TrigCount = self.store.get("EVENT:CH7:TrigCount")
+            TimeCount = self.store.get("EVENT:CH0:TimeCount")
+            RawWaveform = self.store.get("EVENT:CH1:RawWaveform")
         
-        head4 = self.store.get("INPUT:Sampling Period")
-        #print(head4)
+        elif config["algorithm"]["format"] == "WD":
         
-        head5 = self.store.get("INPUT:INL Correction")
-        #print(head5)
-
-        """
-        print("EVENT:TDC From FPGA", val13)
-
+            # WaveDump input:
+            #if self.store.get("EVENT:idx") == 0:
+            #    Reading_at = self.store.get("INPUT:Reading at")
+            #    Trg_Rate = self.store.get("INPUT:Trg Rate")
+            #    Run_Start = self.store.get("INPUT:Run Start")
+            #    Run_End = self.store.get("INPUT:Run End")         
         
-        #print(self.store.get("EVENT:idx"))
-        #print("EVENT:CH0:TrailingEdgeTime", val6)
-        #print("EVENT:CH0:TrigCount", val7)
+            # Record Length: 128
+            # BoardID:  0
+            # Channel: 0
+            # Event Number: 45973
+            # Pattern: 0x0000
+            # Trigger Time Stamp: 3222448449
+            # DC offset (DAC): 0x1999
+
+            if self.store.get("EVENT:idx") == 0:
+                Reading_at = self.store.get("INPUT:Reading at")
+                Trg_Rate = self.store.get("INPUT:Trg Rate")
+                Run_Start = self.store.get("INPUT:Run Start")
+                Run_End = self.store.get("INPUT:Run End")      
         
-        val8 = self.store.get("EVENT:CH0:TimeCount")
-        #print("EVENT:CH0:TimeCount", val8)
-        #summation= 0 
-        """
+            Trigger_Time_Stamp = self.store.get("EVENT:GROUP:wave0:Trigger Time Stamp")
+            Trigger_Time_Stamp = self.store.get("EVENT:GROUP:wave1:Trigger Time Stamp")
+            Trigger_Time_Stamp = self.store.get("EVENT:GROUP:wave2:Trigger Time Stamp")
         
+            Pattern = self.store.get("EVENT:GROUP:wave0:Pattern")
+            Pattern = self.store.get("EVENT:GROUP:wave1:Pattern")
+            Pattern = self.store.get("EVENT:GROUP:wave2:Pattern")
+        
+            DC_offset_DAC = self.store.get("EVENT:GROUP:wave0:DC offset (DAC)")
+            DC_offset_DAC = self.store.get("EVENT:GROUP:wave1:DC offset (DAC)")
+            DC_offset_DAC = self.store.get("EVENT:GROUP:wave2:DC offset (DAC)")
+        
+            Record_Length = self.store.get("EVENT:GROUP:wave0:Record Length")
+            Record_Length = self.store.get("EVENT:GROUP:wave1:Record Length")
+            Record_Length = self.store.get("EVENT:GROUP:wave2:Record Length")
+        
+            BoardID = self.store.get("EVENT:GROUP:wave0:BoardID")
+            BoardID = self.store.get("EVENT:GROUP:wave1:BoardID")
+            BoardID = self.store.get("EVENT:GROUP:wave2:BoardID")
+        
+            Channel = self.store.get("EVENT:GROUP:wave0:Channel")
+            Channel = self.store.get("EVENT:GROUP:wave1:Channel")
+            Channel = self.store.get("EVENT:GROUP:wave2:Channel")
+        
+            RawWaveform = self.store.get("EVENT:GROUP:wave0:RawWaveform")
+            RawWaveform = self.store.get("EVENT:GROUP:wave1:RawWaveform")
+            RawWaveform = self.store.get("EVENT:GROUP:wave2:RawWaveform")
 
-        #val9 = self.store.get("EVENT:CH4:RawWaveform")
-        """
-        print("len(EVENT:CH4:RawWaveform)", len(val9))
-        if self.store.get("EVENT:idx") == 39245:
-            print(len(val9))
-            print(val9[:-1023])
-        #if isinstance(val9, list):
-        #    print(val9[0],val9[1],val9[2])
-        #print("EVENT:CH0:EVENTID", val0)
+            """
+            elif config["algorithm"]["format"] == "WD":
+            
+                # WaveDump input:
+                #if self.store.get("EVENT:idx") == 0:
+                #    Reading_at = self.store.get("INPUT:Reading at")
+                #    Trg_Rate = self.store.get("INPUT:Trg Rate")
+                #    Run_Start = self.store.get("INPUT:Run Start")
+                #    Run_End = self.store.get("INPUT:Run End")
+            
+                # Record Length: 128
+                # BoardID:  0
+                # Channel: 0
+                # Event Number: 45973
+                # Pattern: 0x0000
+                # Trigger Time Stamp: 3222448449
+                # DC offset (DAC): 0x1999
+            
+                Trigger_Time_Stamp = self.store.get("EVENT:Trigger Time Stamp")
+            
+                Pattern = self.store.get("EVENT:Pattern")
+            
+                DC_offset_DAC = self.store.get("EVENT:DC offset (DAC)")
+            
+                Record_Length = self.store.get("EVENT:Record Length")
+            
+                BoardID = self.store.get("EVENT:BoardID")
+            
+                Channel = self.store.get("EVENT:Channel")
+            
+                RawWaveform = self.store.get("EVENT:RawWaveform")
+            """
 
-        """
+        elif config["algorithm"]["format"] == "ROOT":
+            # ROOT input:
+            #if self.store.get("EVENT:idx") == 0:
+            #    self.store.get("EVENT:GROUP:ch0:RunMetadata:StartTime")
+            #    self.store.get("EVENT:GROUP:ch0:RunMetadata:StopTime")
+            #
+            #    self.store.get("EVENT:GROUP:ch1:RunMetadata:StartTime")
+            #    self.store.get("EVENT:GROUP:ch1:RunMetadata:StopTime")
+            #
+            #    self.store.get("EVENT:GROUP:ch2:RunMetadata:StartTime")
+            #    self.store.get("EVENT:GROUP:ch2:RunMetadata:StopTime")
 
-        """
-        #print("EVENT:CH0:FCR", val1)
-        #print("EVENT:CH0:Baseline", val2)
-        #print("EVENT:CH0:Amplitude", val3)
-        #print("EVENT:CH0:Charge", val4)
-        #print("EVENT:CH0:LeadingEdgeTime", val5)
-        val6 = self.store.get("EVENT:CH0:TrailingEdgeTime")
-        """
-        """
-        print("EVENT:CH7:RawWaveform", val9)
-        if self.store.get("EVENT:idx") == 39245:
-            print(len(val9))
-            print(val9[0])
-        #print()
-        """
+            self.store.get("EVENT:GROUP:ch0:SmallMuon:EventData:TriggerTime")
+            self.store.get("EVENT:GROUP:ch0:SmallMuon:EventData:TriggeredChannels")
 
-        #print("EVENT:TDC Corrected", val14)
-        #self.store.get("EVENT:UnixTime")
-        #"""
-        pass
+            #self.store.get("EVENT:GROUP:ch1:SmallMuon:EventData:TriggerTime")
+            #self.store.get("EVENT:GROUP:ch1:SmallMuon:EventData:TriggeredChannels")
+
+            #self.store.get("EVENT:GROUP:ch2:SmallMuon:EventData:TriggerTime")
+            #self.store.get("EVENT:GROUP:ch2:SmallMuon:EventData:TriggeredChannels")
+
+            w = self.store.get("EVENT:GROUP:ch0:SmallMuon:Channel_0:RawWaveform")
+            #print(w.at(0))
+            self.store.get("EVENT:GROUP:ch0:SmallMuon:Channel_0:Baseline")
+            #idx = self.store.get("EVENT:idx")
+            #self.store.put(f"{idx}", copy(w), "PERM")
+
+            #self.store.get("EVENT:GROUP:ch1:SmallMuon:Channel_0:RawWaveform")
+            #self.store.get("EVENT:GROUP:ch1:SmallMuon:Channel_0:Baseline")
+
+            #self.store.get("EVENT:GROUP:ch2:SmallMuon:Channel_0:RawWaveform")
+            #self.store.get("EVENT:GROUP:ch2:SmallMuon:Channel_0:Baseline")
 
 
 # EOF
