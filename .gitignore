@@ -9,6 +9,10 @@
 *.pyc
 __pycache__
 
+# Python package install files #
+################################
+*.egg-info
+
 # Packages #
 ############
 # it's better to unpack these files and commit the raw source
@@ -38,6 +42,7 @@ __pycache__
 .Trashes
 ehthumbs.db
 Thumbs.db
+*.nfs*
 \#*
 .\#*
 *~
