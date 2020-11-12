@@ -6,7 +6,6 @@ Therefore, this reader should be used for smaller files, e.g. < 1 GB.
 """
 import mmap
 import linecache
-import os
 
 from pyrate.core.Reader import Reader
 

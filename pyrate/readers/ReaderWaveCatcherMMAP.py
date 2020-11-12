@@ -5,7 +5,6 @@ This makes the reading process less memory demanding but slightly slower.
 This reader should be used for larger files, e.g. >= 1 GB.
 """
 import mmap
-import os
 
 from pyrate.core.Reader import Reader
 
