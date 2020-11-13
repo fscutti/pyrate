@@ -1,13 +1,18 @@
-""" Base class for reading input files. 
+""" The Input class handles the file readers for one input. 
+An input is intended to be a collection of files, eventually 
+organised in groups. This class also offers the possibility
+to read from a database, synchronously or not, wrt to files.
 """
 import os
 import sys
+import psycopg2
 
 from pyrate.core.Reader import Reader
 from pyrate.readers.ReaderROOT import ReaderROOT
 from pyrate.readers.ReaderWaveCatcherLC import ReaderWaveCatcherLC
 from pyrate.readers.ReaderWaveCatcherMMAP import ReaderWaveCatcherMMAP
 from pyrate.readers.ReaderWaveDumpMMAP import ReaderWaveDumpMMAP
+from pyrate.readers.ReaderPostgreSQL import ReaderPostgreSQL
 
 from pyrate.utils import functions as FN
 from pyrate.utils import strings as ST
@@ -29,19 +34,33 @@ class Input(Reader):
         if not hasattr(self, "structure"):
             self.structure = {}
 
-        g_names = {0: "0"}
-        if hasattr(self, "group"):
-            for g_idx, g_name in enumerate(ST.get_items(self.group)):
-                g_names[g_idx] = g_name
+        if hasattr(self, "samples"):
+            # The input might or not have samples associated to it.
+            # If it does, it has to read from files. This is not
+            # strictly necessary, as it might just want to read
+            # from a database.
+            g_names = {0: "0"}
+            if hasattr(self, "group"):
+                for g_idx, g_name in enumerate(ST.get_items(self.group)):
+                    g_names[g_idx] = g_name
 
-        self._n_groups = len(self.files)
-        self._n_files = len(self.files[0])
+            self._n_groups = len(self.files)
+            self._n_files = len(self.files[0])
 
-        self.groups = {}
-        for g_idx, g_files in enumerate(self.files):
-            self.groups[g_names[g_idx]] = g_files
-            self._set_reader(g_names[g_idx], self._f_idx)
+            self.groups = {}
+            for g_idx, g_files in enumerate(self.files):
+                self.groups[g_names[g_idx]] = g_files
+                self._set_reader(g_names[g_idx], self._f_idx)
 
+        if hasattr(self, "database"):
+            try: 
+                self._db_connection = psycopg2.connect(
+                    " ".join([f"{k}='{v}'" for k, v in self.database.items()])
+                )
+            except (Exception, psycopg2.Error) as error:
+                # print WARNING messsage here
+                self._db_connection = None
+            
 
     def offload(self):
 
@@ -93,7 +112,7 @@ class Input(Reader):
 
                     if isinstance(reader, str):
                         self._set_reader(g_name, f_idx)
-                    
+
                     f_n_events = g_readers[f_idx].get_n_events()
                     self._n_events += f_n_events
 
@@ -107,9 +126,10 @@ class Input(Reader):
             self._n_events = g_n_events
 
     def set_idx(self, idx):
-        # print("set_idx")
-        # print(f"Current: {self._idx}")
-        # print(f"Required: {idx}")
+        """Setting the event index of the global input reader to a specific value.
+        This operation requires moving/jumping to specific file readers which might
+        have not been initialised yet.
+        """
 
         if not self._n_events:
             self.set_n_events()
@@ -120,7 +140,6 @@ class Input(Reader):
             # ----------------------------------------
 
             self._idx = -1
-            # print("Cannot move beyond border")
             return
 
         else:
@@ -128,7 +147,6 @@ class Input(Reader):
             g = self.groups[list(self.groups)[0]]
 
             if idx > self._idx:
-                # print(f"idx > self._idx: {idx} > {self._idx}")
                 # ----------------------------------------
                 # Moving forward
                 # ----------------------------------------
@@ -137,9 +155,6 @@ class Input(Reader):
                 while (idx - self._idx) > (
                     g[self._f_idx].get_n_events() - 1 - g[self._f_idx].get_idx()
                 ):
-                    # print(f"While: required idx {idx}")
-                    # print(f"While: current idx {self._idx}")
-                    # print(f"While: current f_idx {self._f_idx}")
                     if self._move_readers(verse) > -1:
 
                         # increment global index to match last index of previous file.
@@ -149,46 +164,24 @@ class Input(Reader):
                             - g[self._f_idx - 1].get_idx()
                         )
 
-                        # increment global index to match first index of next file.
-                        # To do: loop over readers here
-
                         for g_name, g_readers in self.groups.items():
                             g_readers[self._f_idx].set_idx(0)
 
-                        # g[self._f_idx].set_idx(0)
-
                         self._idx += 1
-                        # print(f"MoveValid: Readers moved to f_idx {self._f_idx}")
-                        # print(
-                        #    f"MoveValid: Current reader has _idx {g[self._f_idx].get_idx()}"
-                        # )
-                        # print(f"MoveValid: Current index {self._idx}")
 
                     else:
-                        # print(
-                        #    f"MoveFailed: Readers stopped at index {self._f_idx} out of {self._n_files}"
-                        # )
                         self._idx = -1
                         return
 
                 if (idx - self._idx) <= (
                     g[self._f_idx].get_n_events() - 1 - g[self._f_idx].get_idx()
                 ):
-                    # print(f"Setting from file _idx {g[self._f_idx].get_idx()}")
-                    # increment global index to match the gap.
-                    # To do: loop over readers here
                     increment = g[self._f_idx].get_idx() + (idx - self._idx)
 
                     for g_name, g_readers in self.groups.items():
                         g_readers[self._f_idx].set_idx(increment)
 
-                    # g[self._f_idx].set_idx(increment)
-
                     self._idx = idx
-                    # print(f"Setting at f_idx {self._f_idx}")
-                    # print(f"Setting at f_idx with idx {g[self._f_idx].get_idx()}")
-                    # print(f"Setting at idx {self._idx}")
-                    # print(f"Setting to increment: {increment}")
                     return
 
             elif idx < self._idx:
@@ -201,7 +194,6 @@ class Input(Reader):
                 # ----------------------------------------
                 # Don't move
                 # ----------------------------------------
-                # print(f"Don't move! {idx} > {self._idx}")
                 return self._idx
 
     def set_next_event(self):
