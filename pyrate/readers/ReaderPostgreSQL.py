@@ -6,21 +6,30 @@ from pyrate.core.Reader import Reader
 
 
 class ReaderPostgreSQL(Reader):
-    __slots__ = ["f", "structure"]
+    __slots__ = ["db", "_db_connection", "_db_cursor"]
 
-    def __init__(self, name, store, logger, f_name, structure):
+    def __init__(self, name, store, logger, db):
         super().__init__(name, store, logger)
-        self.f = f_name
-        self.structure = structure
+        self.db = db
 
     def load(self):
         self.is_loaded = True
-        self._idx = 0
-        pass
+        try:
+            self._db_connection = psycopg2.connect(
+                " ".join([f"{k}='{v}'" for k, v in self.db.items()])
+            )
+
+        except (Exception, psycopg2.Error) as error:
+            sys.exit(
+                f"ERROR: database connection required for dbname {self.db['dbname']} has failed."
+            )
+
+        self._db_cursor = self._db_connection.cursor()
 
     def offload(self):
         self.is_loaded = False
-        pass
+        self._db_cursor.close()
+        self._db_connection.close()
 
     def read(self, name):
 
