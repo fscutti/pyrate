@@ -5,7 +5,6 @@ to read from a database, synchronously or not, wrt to files.
 """
 import os
 import sys
-import psycopg2
 
 from pyrate.core.Reader import Reader
 from pyrate.readers.ReaderROOT import ReaderROOT
@@ -50,36 +49,33 @@ class Input(Reader):
             self.groups = {}
             for g_idx, g_files in enumerate(self.files):
                 self.groups[g_names[g_idx]] = g_files
-                self._set_reader(g_names[g_idx], self._f_idx)
+                self._set_group_reader(g_names[g_idx], self._f_idx)
 
         if hasattr(self, "database"):
-            try: 
-                self._db_connection = psycopg2.connect(
-                    " ".join([f"{k}='{v}'" for k, v in self.database.items()])
-                )
-            except (Exception, psycopg2.Error) as error:
-                # print WARNING messsage here
-                self._db_connection = None
-            
+            self._set_db_reader(self.database)
+
+        assert hasattr(self, "groups") or hasattr(
+            self, "db"
+        ), "ERROR: input {self.name} does not have files or a database associated to it."
 
     def offload(self):
 
         self.is_loaded = False
 
-        for g_name, g_readers in self.groups.items():
-            for f_idx, reader in enumerate(g_readers):
+        if hasattr(self, "groups"):
+            for g_name, g_readers in self.groups.items():
+                for f_idx, reader in enumerate(g_readers):
 
-                if isinstance(reader, str):
-                    continue
+                    if isinstance(reader, str):
+                        continue
 
-                if reader.is_loaded:
-                    g_readers[f_idx].offload()
+                    if reader.is_loaded:
+                        g_readers[f_idx].offload()
 
-    def read(self, name):
-        """Looks for the object in the entire input. Initialises readers if
-        they were not. Global objects are accessed with the INPUT: prefix while
-        event-related variables with the EVENT: one."""
+        if hasattr(self, "db"):
+            self.db.offload()
 
+    def _read_from_groups(self, name):
         for g_name, g_readers in self.groups.items():
 
             # if a group variable is required then transform the name
@@ -93,13 +89,27 @@ class Input(Reader):
                 for f_idx, reader in enumerate(g_readers):
 
                     if isinstance(reader, str):
-                        self._set_reader(g_name, f_idx)
+                        self._set_group_reader(g_name, f_idx)
 
                     g_readers[f_idx].read(name)
 
             elif name.startswith("EVENT:"):
-                self._set_reader(g_name, self._f_idx)
+                self._set_group_reader(g_name, self._f_idx)
                 g_readers[self._f_idx].read(name)
+
+    def _read_from_database(self, name):
+        self.db.read(name)
+
+    def read(self, name):
+        """Looks for the object in the entire input. Initialises readers if
+        they were not. Global objects are accessed with the INPUT: prefix while
+        event-related variables with the EVENT: one."""
+
+        if hasattr(self, "groups"):
+            self._read_from_groups(name)
+
+        if not self.store.check(name, "TRAN") and hasattr(self, "db"):
+            self._read_from_database(name)
 
     def set_n_events(self):
         """Reads number of events of the entire input."""
@@ -111,7 +121,7 @@ class Input(Reader):
                 for f_idx, reader in enumerate(g_readers):
 
                     if isinstance(reader, str):
-                        self._set_reader(g_name, f_idx)
+                        self._set_group_reader(g_name, f_idx)
 
                     f_n_events = g_readers[f_idx].get_n_events()
                     self._n_events += f_n_events
@@ -128,7 +138,8 @@ class Input(Reader):
     def set_idx(self, idx):
         """Setting the event index of the global input reader to a specific value.
         This operation requires moving/jumping to specific file readers which might
-        have not been initialised yet.
+        have not been initialised yet. This operation is never necessary for the
+        database.
         """
 
         if not self._n_events:
@@ -197,7 +208,9 @@ class Input(Reader):
                 return self._idx
 
     def set_next_event(self):
-        """Move to the next event in the sequence."""
+        """Move to the next event in the sequence.
+        Only file-oriented readers support this functionality.
+        """
         for g_name, g_readers in self.groups.items():
 
             if g_readers[self._f_idx].set_next_event() < 0:
@@ -217,7 +230,8 @@ class Input(Reader):
         """Advances the file index to the next valid group of files  withing
         the boundary of their number. This function is "transforming" a string
         to a class (the individual reader instances) so it will leave a class
-        instance as a trace of previous usage.
+        instance as a trace of previous usage. Only file-oriented readers support
+        this functionality.
         """
         if option == "frw":
 
@@ -225,7 +239,7 @@ class Input(Reader):
                 self._f_idx += 1
 
                 for g_name in self.groups:
-                    self._set_reader(g_name, self._f_idx)
+                    self._set_group_reader(g_name, self._f_idx)
 
             else:
                 self._f_idx = -1
@@ -238,14 +252,22 @@ class Input(Reader):
                 self._f_idx -= 1
 
                 for g_name in self.groups:
-                    self._set_reader(g_name, self._f_idx)
+                    self._set_group_reader(g_name, self._f_idx)
 
             else:
                 self._f_idx = 0
 
             return self._f_idx
 
-    def _set_reader(self, g_name, f_idx):
+    def _set_db_reader(self, db):
+        """Instantiates the reader for the database."""
+        r_name = "_".join([self.name, db["dbname"]])
+
+        self.db = ReaderPostgreSQL(r_name, self.store, self.logger, db)
+
+        self.db.load()
+
+    def _set_group_reader(self, g_name, f_idx):
         """Instantiate different readers here. If the instance exists nothing
         is done. This function transforms a string into a reader.
         """
