@@ -117,25 +117,34 @@ class Input(Reader):
         """Reads number of events of the entire input."""
         if not self._n_events:
 
-            self._n_events, g_n_events = 0, 0
+            if hasattr(self, "db"):
+                self.db.set_n_events()
 
-            for g_name, g_readers in self.groups.items():
-                for f_idx, reader in enumerate(g_readers):
+            if not hasattr(self, "groups"):
+                self._n_events = self.db.get_n_events()
 
-                    if isinstance(reader, str):
-                        self._set_group_reader(g_name, f_idx)
+            else:
+                self._n_events, g_n_events = 0, 0
 
-                    f_n_events = g_readers[f_idx].get_n_events()
-                    self._n_events += f_n_events
+                for g_name, g_readers in self.groups.items():
+                    for f_idx, reader in enumerate(g_readers):
 
-                if not g_n_events:
-                    g_n_events = self._n_events
-                else:
-                    if not g_n_events == self._n_events:
-                        sys.exit(f"ERROR: inconsistent nevents for {self.name} groups")
+                        if isinstance(reader, str):
+                            self._set_group_reader(g_name, f_idx)
 
-                self._n_events = 0
-            self._n_events = g_n_events
+                        f_n_events = g_readers[f_idx].get_n_events()
+                        self._n_events += f_n_events
+
+                    if not g_n_events:
+                        g_n_events = self._n_events
+                    else:
+                        if not g_n_events == self._n_events:
+                            sys.exit(
+                                f"ERROR: inconsistent nevents for {self.name} groups"
+                            )
+
+                    self._n_events = 0
+                self._n_events = g_n_events
 
     def set_idx(self, idx):
         """Setting the event index of the global input reader to a specific value.
@@ -263,7 +272,7 @@ class Input(Reader):
 
     def _set_db_reader(self, db):
         """Instantiates the reader for the database."""
-        r_name = "_".join([self.name, db["dbname"]])
+        r_name = "_".join([self.name, db["connection"]["dbname"]])
 
         self.db = ReaderPostgreSQL(r_name, self.store, self.logger, db)
 
