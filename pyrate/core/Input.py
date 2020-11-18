@@ -103,13 +103,15 @@ class Input(Reader):
     def read(self, name):
         """Looks for the object in the entire input. Initialises readers if
         they were not. Global objects are accessed with the INPUT: prefix while
-        event-related variables with the EVENT: one."""
+        event-related variables with the EVENT: one. The QUERY: tag, inserted
+        in the name as INPUT/EVENT:QUERY:xyz is checked to understand whether to
+        read from a database."""
 
-        if hasattr(self, "groups"):
-            self._read_from_groups(name)
-
-        if not self.store.check(name, "TRAN") and hasattr(self, "db"):
+        if "QUERY:" in name:
             self._read_from_database(name)
+
+        else:
+            self._read_from_groups(name)
 
     def set_n_events(self):
         """Reads number of events of the entire input."""

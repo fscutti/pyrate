@@ -39,6 +39,19 @@ class ReaderPostgreSQL(Reader):
         elif name.startswith("INPUT:"):
             pass
 
+        query = self._break_path(name)
+
+        self._read_data(name, query)
+
+    def _read_data(self, name, query):
+        """Executes query on the database."""
+
+        self._db_cursor.execute(query)
+
+        value = self._db_cursor.fetchall()
+
+        self.store.put(name, value, "TRAN")
+
     def set_n_events(self):
         """Reads number of events using the last event header."""
         if not self._n_events:
@@ -46,7 +59,7 @@ class ReaderPostgreSQL(Reader):
 
     def _break_path(self, name):
         """Return variable name and eventual channel."""
-        pass
+        return name.split("QUERY:")[1]
 
 
 # EOF
