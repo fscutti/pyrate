@@ -58,10 +58,11 @@ class ReaderPostgreSQL(Reader):
 
         self.store.put(name, value, "TRAN")
 
-    def _read_variable(self, name, table, event, variable):
+    def _read_variable(self, name, table, row, variable):
+        """Reads variable from specific row, considered to be an event."""
 
         self._db_cursor.execute(
-            f"SELECT {variable} FROM {table} OFFSET {event} LIMIT 1"
+            f"SELECT {variable} FROM {table} OFFSET {row} LIMIT 1"
         )
 
         value = self._db_cursor.fetchall()[0][0]
