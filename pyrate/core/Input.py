@@ -149,90 +149,95 @@ class Input(Reader):
     def set_idx(self, idx):
         """Setting the event index of the global input reader to a specific value.
         This operation requires moving/jumping to specific file readers which might
-        have not been initialised yet. This operation is never necessary for the
-        database.
+        have not been initialised yet.
         """
 
         if not self._n_events:
             self.set_n_events()
 
-        if idx > self._n_events - 1:
-            # ----------------------------------------
-            # Don't move outside boundaries
-            # ----------------------------------------
-
-            self._idx = -1
-            return
+        if hasattr(self, "db") and not hasattr(self, "groups"):
+            self.db.set_idx(idx)
 
         else:
-            # use a generic group to pick up a reference reader.
-            g = self.groups[list(self.groups)[0]]
-
-            if idx > self._idx:
+            if idx > self._n_events - 1:
                 # ----------------------------------------
-                # Moving forward
+                # Don't move outside boundaries
                 # ----------------------------------------
-                verse = "frw"
 
-                while (idx - self._idx) > (
-                    g[self._f_idx].get_n_events() - 1 - g[self._f_idx].get_idx()
-                ):
-                    if self._move_readers(verse) > -1:
-
-                        # increment global index to match last index of previous file.
-                        self._idx += (
-                            g[self._f_idx - 1].get_n_events()
-                            - 1
-                            - g[self._f_idx - 1].get_idx()
-                        )
-
-                        for g_name, g_readers in self.groups.items():
-                            g_readers[self._f_idx].set_idx(0)
-
-                        self._idx += 1
-
-                    else:
-                        self._idx = -1
-                        return
-
-                if (idx - self._idx) <= (
-                    g[self._f_idx].get_n_events() - 1 - g[self._f_idx].get_idx()
-                ):
-                    increment = g[self._f_idx].get_idx() + (idx - self._idx)
-
-                    for g_name, g_readers in self.groups.items():
-                        g_readers[self._f_idx].set_idx(increment)
-
-                    self._idx = idx
-                    return
-
-            elif idx < self._idx:
-                # ----------------------------------------
-                # Moving backwards
-                # ----------------------------------------
-                verse = "bkw"
+                self._idx = -1
+                return
 
             else:
-                # ----------------------------------------
-                # Don't move
-                # ----------------------------------------
-                return self._idx
+                # use a generic group to pick up a reference reader.
+                g = self.groups[list(self.groups)[0]]
 
-    def set_next_event(self):
-        """Move to the next event in the sequence.
-        Only file-oriented readers support this functionality.
-        """
-        for g_name, g_readers in self.groups.items():
+                if idx > self._idx:
+                    # ----------------------------------------
+                    # Moving forward
+                    # ----------------------------------------
+                    verse = "frw"
 
-            if g_readers[self._f_idx].set_next_event() < 0:
-                if self._move_readers("frw") < 0:
+                    while (idx - self._idx) > (
+                        g[self._f_idx].get_n_events() - 1 - g[self._f_idx].get_idx()
+                    ):
+                        if self._move_readers(verse) > -1:
 
-                    self._idx = -1
-                    return self._idx
+                            # increment global index to match last index of previous file.
+                            self._idx += (
+                                g[self._f_idx - 1].get_n_events()
+                                - 1
+                                - g[self._f_idx - 1].get_idx()
+                            )
+
+                            for g_name, g_readers in self.groups.items():
+                                g_readers[self._f_idx].set_idx(0)
+
+                            self._idx += 1
+
+                        else:
+                            self._idx = -1
+                            return
+
+                    if (idx - self._idx) <= (
+                        g[self._f_idx].get_n_events() - 1 - g[self._f_idx].get_idx()
+                    ):
+                        increment = g[self._f_idx].get_idx() + (idx - self._idx)
+
+                        for g_name, g_readers in self.groups.items():
+                            g_readers[self._f_idx].set_idx(increment)
+
+                        self._idx = idx
+                        return
+
+                elif idx < self._idx:
+                    # ----------------------------------------
+                    # Moving backwards
+                    # ----------------------------------------
+                    verse = "bkw"
 
                 else:
-                    self._idx += 1
+                    # ----------------------------------------
+                    # Don't move
+                    # ----------------------------------------
                     return self._idx
+
+    def set_next_event(self):
+        """Move to the next event in the sequence."""
+        if hasattr(self, "db") and not hasattr(self, "groups"):
+            self.db.set_next_event()
+
+        else:
+            for g_name, g_readers in self.groups.items():
+
+                if g_readers[self._f_idx].set_next_event() < 0:
+                    if self._move_readers("frw") < 0:
+
+                        self._idx = -1
+                        return self._idx
+
+                    else:
+                        self._idx += 1
+                        return self._idx
 
         self._idx += 1
         return self._idx
