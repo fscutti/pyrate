@@ -1,0 +1,28 @@
+--- 
+inputs: 
+   Data:
+       samples: 
+           tags: s2019-07-15-02-35-14
+           groups: wave0, wave1, wave2
+       nevents: 
+           emin: 0
+           emax: 19
+       path:
+          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/WD/wave0
+          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/WD/wave1
+          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/WD/wave2
+   
+
+configs:
+    config2:
+       path:  /Users/fscutti/pyrate/config
+       names: objects
+
+
+outputs:
+    WDTest1.root:
+        path: /Users/fscutti/pyrate/myNotebooks/myOutput
+        objects:
+          - testingReader: Data
+    
+# EOF

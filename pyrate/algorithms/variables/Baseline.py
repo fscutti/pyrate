@@ -11,12 +11,12 @@ class Baseline(Algorithm):
 
     def __init__(self, name, store, logger):
         super().__init__(name, store, logger)
-    
+
     def execute(self, config):
 
         if config["algorithm"]["format"] == "WC":
             # WaveCatcher input:
-            #if self.store.get("EVENT:idx") == 0:
+            # if self.store.get("EVENT:idx") == 0:
             #    DATA_SAMPLES = self.store.get("INPUT:DATA SAMPLES")
             #    NB_OF_CHANNELS_ACQUIRED = self.store.get(
             #        "INPUT:NB OF CHANNELS ACQUIRED"
@@ -43,16 +43,16 @@ class Baseline(Algorithm):
             TrigCount = self.store.get("EVENT:CH7:TrigCount")
             TimeCount = self.store.get("EVENT:CH0:TimeCount")
             RawWaveform = self.store.get("EVENT:CH1:RawWaveform")
-        
+
         elif config["algorithm"]["format"] == "WD":
-        
+
             # WaveDump input:
-            #if self.store.get("EVENT:idx") == 0:
+            # if self.store.get("EVENT:idx") == 0:
             #    Reading_at = self.store.get("INPUT:Reading at")
             #    Trg_Rate = self.store.get("INPUT:Trg Rate")
             #    Run_Start = self.store.get("INPUT:Run Start")
-            #    Run_End = self.store.get("INPUT:Run End")         
-        
+            #    Run_End = self.store.get("INPUT:Run End")
+
             # Record Length: 128
             # BoardID:  0
             # Channel: 0
@@ -65,32 +65,32 @@ class Baseline(Algorithm):
                 Reading_at = self.store.get("INPUT:Reading at")
                 Trg_Rate = self.store.get("INPUT:Trg Rate")
                 Run_Start = self.store.get("INPUT:Run Start")
-                Run_End = self.store.get("INPUT:Run End")      
-        
+                Run_End = self.store.get("INPUT:Run End")
+
             Trigger_Time_Stamp = self.store.get("EVENT:GROUP:wave0:Trigger Time Stamp")
             Trigger_Time_Stamp = self.store.get("EVENT:GROUP:wave1:Trigger Time Stamp")
             Trigger_Time_Stamp = self.store.get("EVENT:GROUP:wave2:Trigger Time Stamp")
-        
+
             Pattern = self.store.get("EVENT:GROUP:wave0:Pattern")
             Pattern = self.store.get("EVENT:GROUP:wave1:Pattern")
             Pattern = self.store.get("EVENT:GROUP:wave2:Pattern")
-        
+
             DC_offset_DAC = self.store.get("EVENT:GROUP:wave0:DC offset (DAC)")
             DC_offset_DAC = self.store.get("EVENT:GROUP:wave1:DC offset (DAC)")
             DC_offset_DAC = self.store.get("EVENT:GROUP:wave2:DC offset (DAC)")
-        
+
             Record_Length = self.store.get("EVENT:GROUP:wave0:Record Length")
             Record_Length = self.store.get("EVENT:GROUP:wave1:Record Length")
             Record_Length = self.store.get("EVENT:GROUP:wave2:Record Length")
-        
+
             BoardID = self.store.get("EVENT:GROUP:wave0:BoardID")
             BoardID = self.store.get("EVENT:GROUP:wave1:BoardID")
             BoardID = self.store.get("EVENT:GROUP:wave2:BoardID")
-        
+
             Channel = self.store.get("EVENT:GROUP:wave0:Channel")
             Channel = self.store.get("EVENT:GROUP:wave1:Channel")
             Channel = self.store.get("EVENT:GROUP:wave2:Channel")
-        
+
             RawWaveform = self.store.get("EVENT:GROUP:wave0:RawWaveform")
             RawWaveform = self.store.get("EVENT:GROUP:wave1:RawWaveform")
             RawWaveform = self.store.get("EVENT:GROUP:wave2:RawWaveform")
@@ -130,7 +130,7 @@ class Baseline(Algorithm):
 
         elif config["algorithm"]["format"] == "ROOT":
             # ROOT input:
-            #if self.store.get("EVENT:idx") == 0:
+            # if self.store.get("EVENT:idx") == 0:
             #    self.store.get("EVENT:GROUP:ch0:RunMetadata:StartTime")
             #    self.store.get("EVENT:GROUP:ch0:RunMetadata:StopTime")
             #
@@ -143,23 +143,29 @@ class Baseline(Algorithm):
             self.store.get("EVENT:GROUP:ch0:SmallMuon:EventData:TriggerTime")
             self.store.get("EVENT:GROUP:ch0:SmallMuon:EventData:TriggeredChannels")
 
-            #self.store.get("EVENT:GROUP:ch1:SmallMuon:EventData:TriggerTime")
-            #self.store.get("EVENT:GROUP:ch1:SmallMuon:EventData:TriggeredChannels")
+            # self.store.get("EVENT:GROUP:ch1:SmallMuon:EventData:TriggerTime")
+            # self.store.get("EVENT:GROUP:ch1:SmallMuon:EventData:TriggeredChannels")
 
-            #self.store.get("EVENT:GROUP:ch2:SmallMuon:EventData:TriggerTime")
-            #self.store.get("EVENT:GROUP:ch2:SmallMuon:EventData:TriggeredChannels")
+            # self.store.get("EVENT:GROUP:ch2:SmallMuon:EventData:TriggerTime")
+            # self.store.get("EVENT:GROUP:ch2:SmallMuon:EventData:TriggeredChannels")
 
             w = self.store.get("EVENT:GROUP:ch0:SmallMuon:Channel_0:RawWaveform")
-            #print(w.at(0))
+            # print(w.at(0))
             self.store.get("EVENT:GROUP:ch0:SmallMuon:Channel_0:Baseline")
-            #idx = self.store.get("EVENT:idx")
-            #self.store.put(f"{idx}", copy(w), "PERM")
+            # idx = self.store.get("EVENT:idx")
+            # self.store.put(f"{idx}", copy(w), "PERM")
 
-            #self.store.get("EVENT:GROUP:ch1:SmallMuon:Channel_0:RawWaveform")
-            #self.store.get("EVENT:GROUP:ch1:SmallMuon:Channel_0:Baseline")
+            # self.store.get("EVENT:GROUP:ch1:SmallMuon:Channel_0:RawWaveform")
+            # self.store.get("EVENT:GROUP:ch1:SmallMuon:Channel_0:Baseline")
 
-            #self.store.get("EVENT:GROUP:ch2:SmallMuon:Channel_0:RawWaveform")
-            #self.store.get("EVENT:GROUP:ch2:SmallMuon:Channel_0:Baseline")
+            # self.store.get("EVENT:GROUP:ch2:SmallMuon:Channel_0:RawWaveform")
+            # self.store.get("EVENT:GROUP:ch2:SmallMuon:Channel_0:Baseline")
+
+        elif config["algorithm"]["format"] == "pgSQL":
+            # var1 = self.store.get("INPUT:QUERY:SELECT eventrate FROM muonmonitoring ORDER BY time DESC LIMIT 3")
+            # print(var1)
+            var2 = self.store.get("EVENT:QUERY:muonmonitoring:4:eventrate")
+            print(var2)
 
 
 # EOF
