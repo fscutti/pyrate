@@ -113,7 +113,7 @@ objects:
      testingReader:
          algorithm: 
              name: Baseline
-             format: ROOT
+             format: pgSQL
 
 
      # -----------------------------------------------------------
