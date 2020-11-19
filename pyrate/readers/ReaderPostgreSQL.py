@@ -61,9 +61,7 @@ class ReaderPostgreSQL(Reader):
     def _read_variable(self, name, table, row, variable):
         """Reads variable from specific row, considered to be an event."""
 
-        self._db_cursor.execute(
-            f"SELECT {variable} FROM {table} OFFSET {row} LIMIT 1"
-        )
+        self._db_cursor.execute(f"SELECT {variable} FROM {table} OFFSET {row} LIMIT 1")
 
         value = self._db_cursor.fetchall()[0][0]
 
