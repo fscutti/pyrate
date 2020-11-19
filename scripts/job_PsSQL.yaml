@@ -7,7 +7,7 @@ inputs:
            connection:
                dbname: muonData
                user: postgres
-               password: WIMPYwisp!
+               password: OpenSesame
                host: 10.100.15.71
                port: 5432
            tables:
