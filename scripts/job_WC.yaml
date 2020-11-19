@@ -1,0 +1,25 @@
+--- 
+inputs: 
+   Data:
+       samples: 
+            tags: AmBeTest
+       nevents: 
+           emin: 0
+           emax: 19
+       path:
+          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/
+   
+
+configs:
+    config2:
+       path:  /Users/fscutti/pyrate/config
+       names: objects
+
+
+outputs:
+    WCTest1.root:
+        path: /Users/fscutti/pyrate/myNotebooks/myOutput
+        objects:
+          - testingReader: Data
+    
+# EOF

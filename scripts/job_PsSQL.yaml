@@ -1,0 +1,37 @@
+--- 
+inputs: 
+   Data:
+       samples: 
+           tags: s2019-07-15-02-35-14
+           groups: wave0, wave1, wave2
+       database:
+           connection:
+               dbname: muonData
+               user: postgres
+               password: OpenSesame
+               host: 10.100.15.71
+               port: 5432
+           tables:
+             - muonmonitoring
+       nevents: 
+           emin: 0
+           emax: 1
+       path:
+          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/WD/wave0
+          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/WD/wave1
+          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/WD/wave2
+   
+
+configs:
+    config2:
+       path:  /Users/fscutti/pyrate/config
+       names: objects
+
+
+outputs:
+    WDTest1.root:
+        path: /Users/fscutti/pyrate/myNotebooks/myOutput
+        objects:
+          - testingReader: Data
+    
+# EOF
