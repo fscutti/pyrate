@@ -1,7 +1,8 @@
 --- 
 inputs: 
    Data:
-       samples: AmBeTest
+       samples: 
+            tags: AmBeTest
        nevents: 
            emin: 0
            emax: 19

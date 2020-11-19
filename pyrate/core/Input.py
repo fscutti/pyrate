@@ -39,8 +39,8 @@ class Input(Reader):
             # strictly necessary, as it might just want to read
             # from a database.
             g_names = {0: "0"}
-            if hasattr(self, "group"):
-                for g_idx, g_name in enumerate(ST.get_items(self.group)):
+            if "groups" in self.samples:
+                for g_idx, g_name in enumerate(ST.get_items(self.samples["groups"])):
                     g_names[g_idx] = g_name
 
             self._n_groups = len(self.files)

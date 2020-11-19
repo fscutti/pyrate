@@ -1,8 +1,9 @@
 --- 
 inputs: 
    Data:
-       samples: s2019-07-15-02-35-14
-       group: wave0, wave1, wave2
+       samples: 
+           tags: s2019-07-15-02-35-14
+           groups: wave0, wave1, wave2
        database:
            connection:
                dbname: muonData

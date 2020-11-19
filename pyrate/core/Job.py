@@ -53,13 +53,13 @@ class Job:
             for f in FN.find_files(attr["path"]):
                 self.job["inputs"][name]["files"].extend(
                     f
-                    for s in ST.get_items(attr["samples"])
+                    for s in ST.get_items(attr["samples"]["tags"])
                     if s in ST.get_tags(f)
                     and FN.modus_ponens(
-                        "group" in attr,
+                        "groups" in attr["samples"],
                         any(
                             c in ST.get_tags(f)
-                            for c in ST.get_items(attr.get("group", False))
+                            for c in ST.get_items(attr["samples"].get("groups", False))
                         ),
                     )
                 )
@@ -73,7 +73,9 @@ class Job:
                 list(f)
                 for j, f in groupby(
                     self.job["inputs"][name]["files"],
-                    lambda a: a.partition("_")[0] if "group" in attr else None,
+                    lambda a: a.partition("_")[0]
+                    if "groups" in attr["samples"]
+                    else None,
                 )
             ]
 
@@ -136,6 +138,8 @@ class Job:
         """
         self.runs = {}
         self.runs[f"{self.name}_run1"] = Run(f"{self.name}_run1", self.job)
+
+        print(self.job["inputs"])
 
     def launch(self):
         """Launch Run objects.

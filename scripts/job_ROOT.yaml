@@ -1,16 +1,16 @@
 --- 
 inputs: 
    Data:
-       samples: SmallMuon
-       #group: ch0, ch1, ch2
-       group: ch0
+       samples: 
+           tags: SmallMuon
+           groups: ch0, ch1, ch2
        nevents: 
            emin: 0
            emax: -1
        path:
           - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/groups/ch0
-          #- /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/groups/ch1
-          #- /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/groups/ch2
+          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/groups/ch1
+          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/groups/ch2
        structure:
            tree: SmallMuon/EventData
    
