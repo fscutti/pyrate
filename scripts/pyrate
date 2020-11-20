@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+
+import os
 import argparse
 import yaml
 
@@ -7,34 +9,90 @@ from pyrate.core.Job import Job
 parser = argparse.ArgumentParser(description="Command line options for pyrate")
 
 # -------------------------------------------------------------------
-# A single job is identified by just one job configuration file. 
+# A single job is identified by just one job configuration file.
 # Several of these can be passed to this script using the -j flag.
 # This means that the system will launch several jobs in sequence.
 # One job corresponds locally to a single instance of a Run.
+# The wildcard flag is provided to dynamically create a list of job
+# files from a template one, where the character * is replaced with
+# the input wildcards.
 # -------------------------------------------------------------------
 parser.add_argument(
-    "--job_config", "-j", help="job configuration file/s", nargs="+", required=True
+    "--job_config",
+    "-j",
+    help="job configuration file/s",
+    nargs="+",
+    required=False,
 )
+
 parser.add_argument(
-    "--logging_level", "-l", help="logging level", required=False, default="CRITICAL"
+    "--wildcards",
+    "-w",
+    help="replace * in job configuration with these wildcards",
+    nargs="+",
+    required=False,
+    default=[],
+)
+
+parser.add_argument(
+    "--logging_level",
+    "-l",
+    help="logging level",
+    required=False,
+    default="CRITICAL",
 )
 
 args = parser.parse_args()
 
+
+def create_files(job_in, wildcards):
+    """Returns a dictionary with job configuration files 'decorated' with wildcards."""
+
+    folder = os.path.join(
+        os.environ["PYRATE"], "scripts", f"jobset_{job_in}".replace(".yaml", "")
+    )
+
+    jobset = {folder: []}
+
+    lines = open(job_in, "r").readlines()
+
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
+    for wc in wildcards:
+        job_out = f"{folder}/{job_in}".replace(".yaml", f"_{wc}.yaml")
+
+        with open(job_out, "w") as out:
+
+            for l in lines:
+                out.write(l.replace("*", str(wc)))
+
+        jobset[folder].append(job_out)
+
+    if not jobset[folder]:
+        jobset[folder].append(os.path.abspath(job_in))
+
+    return jobset
+
+
 if __name__ == "__main__":
-    for jc in args.job_config:
+    for j_file in args.job_config:
 
-        stream = open(jc, "r")
+        jobset = create_files(j_file, args.wildcards)
 
-        jconfig = yaml.full_load(stream)
+        for j_folder, j_list in jobset.items():
+            for j in j_list:
 
-        jname = jc.split(".")[0]
+                j_name = j.split("/")[-1].split(".")[0]
 
-        log_level = args.logging_level
+                j_config = yaml.full_load(open(j, "r"))
 
-        job = Job(jname, jconfig, log_level)
+                j_log = args.logging_level
 
-        job.setup()
-        job.launch()
+                job = Job(j_name, j_config, j_log)
+
+                job.setup()
+
+                job.launch()
 
 # EOF
