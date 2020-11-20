@@ -8,7 +8,7 @@
 ## ----------------------
 
 path_of_this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-export MAIN=${path_of_this_dir}
+export PYRATE=${path_of_this_dir}
 
 add_to_python_path()
 {
@@ -44,15 +44,15 @@ add_to_path()
 ## ----------------
 
 echo "  Setting up your PYTHONPATH."
-add_to_python_path ${MAIN}
-add_to_python_path ${MAIN}/pyrate
+add_to_python_path ${PYRATE}
+add_to_python_path ${PYRATE}/pyrate
 echo "  done."
 
 ## ---------------------------------------------
 ## Add pyrate/scripts directory to PATH
 ## ---------------------------------------------
 #echo "  Add scripts to PATH."
-#add_to_path ${MAIN}/scripts
+#add_to_path ${PYRATE}/scripts
 #echo "  done."
 
 export DAQ_SCRIPTS=$(pwd)/scripts
