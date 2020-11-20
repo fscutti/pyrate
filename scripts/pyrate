@@ -22,7 +22,7 @@ parser.add_argument(
     "-j",
     help="job configuration file/s",
     nargs="+",
-    required=False,
+    required=True,
 )
 
 parser.add_argument(
