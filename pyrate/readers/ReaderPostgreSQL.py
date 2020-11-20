@@ -1,5 +1,6 @@
 """ Reader of a PostgreSQL database. 
 """
+import sys
 import psycopg2
 
 from pyrate.core.Reader import Reader
