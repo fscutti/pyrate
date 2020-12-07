@@ -149,14 +149,18 @@ class ReaderWaveDumpMMAP(Reader):
 
     def _move(self, s, opt="frw"):
         """Move file position to beginning of string s.
-        The option of choosing to read the file backward is given."""
-
+        The option of choosing to read the file backward is given.
+        If the seek operation fails one time it performs a new
+        search from the beginning of the file."""
+        
         s = s.encode("utf-8")
 
         if opt == "bkw":
             self._mmf.seek(self._mmf.rfind(s))
         else:
-            self._mmf.seek(self._mmf.find(s, self._event))
-
+            try:
+                self._mmf.seek(self._mmf.find(s, self._event))
+            except ValueError:
+                self._mmf.seek(self._mmf.find(s, 0))
 
 # EOF
