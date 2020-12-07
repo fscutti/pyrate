@@ -122,15 +122,15 @@ class Run:
 
             store = self.run("execute", store)
 
-        store = self.run("finalise", store)
+        #store = self.run("finalise", store)
 
         print("\n")
 
         # -----------------------------------------------------------------------
         # Write finalised objects to the output.
         # -----------------------------------------------------------------------
-        for obj_name in self.run_objects:
-            self._out.write(obj_name)
+        #for obj_name in self.run_objects:
+        #    self._out.write(obj_name)
 
         # stop = timeit.default_timer()
 
@@ -161,6 +161,7 @@ class Run:
         for i_name, targets in tqdm(
             self.run_targets.items(),
             desc=f"{prefix}{info}",
+            disable=False,
             bar_format=self.colors[self.state]["input"],
         ):
 
@@ -238,6 +239,8 @@ class Run:
                 for idx in tqdm(
                     range(erange),
                     desc=f"{prefix}{info}",
+                    disable=False,
+                    leave=False,
                     bar_format=self.colors[self.state]["event"],
                 ):
                     store.put("INPUT:name", i_name, "TRAN")

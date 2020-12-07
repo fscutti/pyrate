@@ -33,16 +33,16 @@ class Baseline(Algorithm):
             TDC_Corrected = self.store.get("EVENT:TDC Corrected")
 
             # === CH: 0 EVENTID: 1 FCR: 496 Baseline: 0.000000 V Amplitude: 0.000000 V Charge:    0.000 pC LeadingEdgeTime:  0.000 ns TrailingEdgeTime:  0.000 ns TrigCount: 0 TimeCount 177 ===
-            EVENTID = self.store.get("EVENT:CH0:EVENTID")
-            FCR = self.store.get("EVENT:CH1:FCR")
-            Baseline = self.store.get("EVENT:CH2:Baseline")
-            Amplitude = self.store.get("EVENT:CH3:Amplitude")
-            Charge = self.store.get("EVENT:CH4:Charge")
-            LeadingEdgeTime = self.store.get("EVENT:CH5:LeadingEdgeTime")
-            TrailingEdgeTime = self.store.get("EVENT:CH6:TrailingEdgeTime")
-            TrigCount = self.store.get("EVENT:CH7:TrigCount")
-            TimeCount = self.store.get("EVENT:CH0:TimeCount")
-            RawWaveform = self.store.get("EVENT:CH1:RawWaveform")
+            EVENTID = self.store.get("EVENT:CH8:EVENTID")
+            FCR = self.store.get("EVENT:CH9:FCR")
+            Baseline = self.store.get("EVENT:CH8:Baseline")
+            Amplitude = self.store.get("EVENT:CH9:Amplitude")
+            Charge = self.store.get("EVENT:CH8:Charge")
+            LeadingEdgeTime = self.store.get("EVENT:CH8:LeadingEdgeTime")
+            TrailingEdgeTime = self.store.get("EVENT:CH9:TrailingEdgeTime")
+            TrigCount = self.store.get("EVENT:CH8:TrigCount")
+            TimeCount = self.store.get("EVENT:CH9:TimeCount")
+            RawWaveform = self.store.get("EVENT:CH9:RawWaveform")
 
         elif config["algorithm"]["format"] == "WD":
 

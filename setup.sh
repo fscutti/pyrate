@@ -65,11 +65,17 @@ fi
 #EOF
 
 
-#pip3 install --user tqdm
+pip3 install --user tqdm
 #pip3 install --user file_read_backwards
-#pip3 install --user colorama
+pip3 install --user colorama
 #pip3 install --user scipy
 #pip3 install --user matplotlib
 #pip3 install --user pandas
-#pip3 install --user pyaml
+pip3 install --user pyaml
 #pip3 install --user strictyaml
+pip3 install --user psycopg2-binary
+
+pip3 install --user black
+#pip3 install --user memory_profiler
+
+
