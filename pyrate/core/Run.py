@@ -201,7 +201,7 @@ class Run:
 
                 for emin, emax in eslices:
 
-                    info = f"{i_name}...{self.state}...emin:{emin}...emax:{emax}".rjust(
+                    info = f"{self.state} ({i_name},  emin: {emin},  emax: {emax})".rjust(
                         70, "."
                     )
 
