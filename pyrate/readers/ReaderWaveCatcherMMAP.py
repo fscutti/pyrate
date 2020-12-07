@@ -154,6 +154,7 @@ class ReaderWaveCatcherMMAP(Reader):
         else:
             try:
                 self._mmf.seek(self._mmf.find(s, self._event))
+
             except ValueError:
                 self._mmf.seek(self._mmf.find(s, 0))
 

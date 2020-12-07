@@ -214,6 +214,9 @@ class Input(Reader):
                     # Moving backwards
                     # ----------------------------------------
                     verse = "bkw"
+                    sys.exit(
+                        f"ERROR: supporting moving the event index backward is still not supported!"
+                    )
 
                 else:
                     # ----------------------------------------

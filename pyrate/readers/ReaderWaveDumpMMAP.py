@@ -152,7 +152,7 @@ class ReaderWaveDumpMMAP(Reader):
         The option of choosing to read the file backward is given.
         If the seek operation fails one time it performs a new
         search from the beginning of the file."""
-        
+
         s = s.encode("utf-8")
 
         if opt == "bkw":
@@ -160,7 +160,9 @@ class ReaderWaveDumpMMAP(Reader):
         else:
             try:
                 self._mmf.seek(self._mmf.find(s, self._event))
+
             except ValueError:
                 self._mmf.seek(self._mmf.find(s, 0))
+
 
 # EOF

@@ -29,9 +29,6 @@ class Run:
         # At this point the Run object should have self.input/config/output
         # defined after being read from the configuration yaml file.
         # -----------------------------------------------------------------------
-        self.emin = 0
-        self.emax = -1
-
         self.state = None
         self._in = None
         self._out = None
@@ -111,8 +108,11 @@ class Run:
         # -----------------------------------------------------------------------
 
         msg = f"Launching pyrate run {self.name}"
-        
-        print("\n");print("*"*len(msg));print(msg);print("*"*len(msg))
+
+        print("\n")
+        print("*" * len(msg))
+        print(msg)
+        print("*" * len(msg))
 
         store = self.run("initialise", store)
 
@@ -120,14 +120,14 @@ class Run:
 
             store = self.run("execute", store)
 
-        #store = self.run("finalise", store)
+        # store = self.run("finalise", store)
 
         print("\n")
 
         # -----------------------------------------------------------------------
         # Write finalised objects to the output.
         # -----------------------------------------------------------------------
-        #for obj_name in self.run_objects:
+        # for obj_name in self.run_objects:
         #    self._out.write(obj_name)
 
         # stop = timeit.default_timer()
@@ -151,7 +151,7 @@ class Run:
         elif self.state == "finalise":
             prefix = "Targets: "
 
-        info = self.state.rjust(40, ".")
+        info = self.state.rjust(70, ".")
 
         if self.state in ["finalise"]:
             store.clear("READY")
@@ -191,65 +191,40 @@ class Run:
                 # Execute
                 # ---------------------------------------------------------------
 
-                nevents = self._in.get_n_events()
+                tot_n_events = self._in.get_n_events()
 
-                # ---------------------------------------------------------------
-                # Reading input events
-                # ---------------------------------------------------------------
-                if hasattr(self._in, "nevents"):
-
-                    if not isinstance(self._in.nevents, dict):
-                        self.emax = self._in.nevents - 1
-
-                        # -------------------------------------------------------
-                        # if nevents == 0 skip the execute step
-                        # -------------------------------------------------------
-                        if self.emax == -1:
-                            return store
-
-                    else:
-                        if "emin" in self._in.nevents:
-                            self.emin = self._in.nevents["emin"]
-
-                        if "emax" in self._in.nevents:
-                            self.emax = self._in.nevents["emax"]
-
-                # ---------------------------------------------------------------
-                # if emax == -1 run until the end of the file
-                # ---------------------------------------------------------------
-                if self.emax == -1:
-                    self.emax = nevents - 1
-
-                if not self.emin <= self.emax <= nevents - 1:
-                    sys.exit(
-                        f"ERROR: required input range not valid. emin:{self.emin} <= emax:{self.emax} <= {nevents-1}"
-                    )
-
-                self._in.set_idx(self.emin)
-
-                erange = self.emax - self.emin + 1
+                eslices = self.get_events_slices(tot_n_events)
 
                 # ---------------------------------------------------------------
                 # Event loop
                 # ---------------------------------------------------------------
-                info = f"{i_name}...{self.state}".rjust(40, ".")
 
-                for idx in tqdm(
-                    range(erange),
-                    desc=f"{prefix}{info}",
-                    disable=False,
-                    leave=False,
-                    bar_format=self.colors[self.state]["event"],
-                ):
-                    store.put("INPUT:name", i_name, "TRAN")
-                    store.put("INPUT:config", self.inputs[i_name], "TRAN")
-                    store.put("EVENT:idx", self._in.get_idx())
+                for emin, emax in eslices:
 
-                    self.loop(store, self.run_targets[i_name])
+                    info = f"{i_name}...{self.state}...emin:{emin}...emax:{emax}".rjust(
+                        70, "."
+                    )
 
-                    store.clear("TRAN")
+                    self._in.set_idx(emin)
 
-                    self._in.set_next_event()
+                    erange = emax - emin + 1
+
+                    for idx in tqdm(
+                        range(erange),
+                        desc=f"{prefix}{info}",
+                        disable=False,
+                        # leave=False,
+                        bar_format=self.colors[self.state]["event"],
+                    ):
+                        store.put("INPUT:name", i_name, "TRAN")
+                        store.put("INPUT:config", self.inputs[i_name], "TRAN")
+                        store.put("EVENT:idx", self._in.get_idx())
+
+                        self.loop(store, self.run_targets[i_name])
+
+                        store.clear("TRAN")
+
+                        self._in.set_next_event()
 
                 self._in.offload()
 
@@ -342,6 +317,81 @@ class Run:
         if show:
             FN.pretty(self._history)
         return self._history
+
+    def get_events_slices(self, tot):
+        """Updates emin and emax attributes for running on valid slice."""
+
+        eslices = []
+
+        # ---------------------------------------------------------------
+        # Reading input events
+        # ---------------------------------------------------------------
+        if hasattr(self._in, "eslices"):
+
+            if isinstance(self._in.eslices, dict):
+                emin, emax = 0, tot - 1
+
+                if "emin" in self._in.eslices:
+                    emin = self._in.eslices["emin"]
+
+                if "emax" in self._in.eslices and self._in.eslices["emax"] > -1:
+                    emax = self._in.eslices["emax"]
+
+                eslices.append((emin, emax))
+
+            elif isinstance(self._in.eslices, list):
+
+                for s in self._in.eslices:
+
+                    if "portion" in s:
+
+                        part = int(tot / s["parts"])
+
+                        emin, emax = 0, part - 1
+
+                        for s_idx in range(s["parts"]):
+
+                            if s_idx == s["portion"] - 1:
+
+                                if s_idx == s["parts"] - 1:
+                                    eslices.append((emin, tot - 1))
+                                else:
+                                    eslices.append((emin, emax))
+
+                            emin += part
+                            emax += part
+
+                    else:
+                        emin, emax = 0, tot - 1
+
+                        if "emin" in s:
+                            emin = s["emin"]
+
+                        if "emax" in s and s["emax"] > -1:
+                            emax = s["emax"]
+
+                        eslices.append((emin, emax))
+
+            else:
+                emin, emax = 0, self._in.eslices - 1
+
+                eslices.append((emin, emax))
+
+        for emin, emax in eslices:
+            self.check_events_slices(emin, emax, tot)
+
+        return eslices
+
+    def check_events_slices(self, emin, emax, tot):
+        """Validate events slice."""
+
+        tmp_min = 0
+        tmp_max = tot
+
+        if not emin <= emax <= tot - 1:
+            sys.exit(
+                f"ERROR: required input range not valid. emin:{emin} <= emax:{emax} <= {tot - 1}"
+            )
 
     """
     def modify_config(self):
