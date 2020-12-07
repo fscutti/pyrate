@@ -110,11 +110,9 @@ class Run:
         # Update the store in three steps: initialise, execute, finalise.
         # -----------------------------------------------------------------------
 
-        print("\n")
-
-        print("********************")
-        print("Launching pyrate run")
-        print("********************")
+        msg = f"Launching pyrate run {self.name}"
+        
+        print("\n");print("*"*len(msg));print(msg);print("*"*len(msg))
 
         store = self.run("initialise", store)
 
