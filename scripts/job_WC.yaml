@@ -4,7 +4,7 @@ inputs:
        samples: 
             tags: AmBe-pos5-80ns-100000
             group: file1, file2
-       nevents: 
+       eslices: 
            emin: 0
            emax: 10000
        path:

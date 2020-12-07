@@ -13,7 +13,7 @@ inputs:
                port: 5432
            tables:
              - muonmonitoring
-       nevents: 
+       eslices: 
            emin: 0
            emax: 1
        path:

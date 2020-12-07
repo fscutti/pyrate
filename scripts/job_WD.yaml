@@ -4,9 +4,9 @@ inputs:
        samples: 
            tags: s2019-07-15-02-35-14
            groups: wave0, wave1, wave2
-       nevents: 
-           emin: 0
-           emax: 19
+       eslices: 
+           - {portion: 1, parts: 40000}
+
        path:
           - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/WD/wave0
           - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/WD/wave1
