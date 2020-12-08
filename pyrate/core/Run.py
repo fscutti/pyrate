@@ -201,8 +201,10 @@ class Run:
 
                 for emin, emax in eslices:
 
-                    info = f"{self.state} ({i_name},  emin: {emin},  emax: {emax})".rjust(
-                        70, "."
+                    info = (
+                        f"{self.state} ({i_name},  emin: {emin},  emax: {emax})".rjust(
+                            70, "."
+                        )
                     )
 
                     self._in.set_idx(emin)
@@ -351,8 +353,18 @@ class Run:
 
                         for s_idx in range(s["parts"]):
 
-                            if s_idx == s["portion"] - 1:
+                            if not isinstance(s["portion"], str):
+                                if s_idx == s["portion"] - 1:
 
+                                    if s_idx == s["parts"] - 1:
+                                        eslices.append((emin, tot - 1))
+                                        break
+
+                                    else:
+                                        eslices.append((emin, emax))
+                                        break
+
+                            else:
                                 if s_idx == s["parts"] - 1:
                                     eslices.append((emin, tot - 1))
                                 else:
