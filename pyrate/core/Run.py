@@ -345,18 +345,18 @@ class Run:
 
                 for s in self._in.eslices:
 
-                    if "portion" in s:
+                    if "slice" in s:
 
-                        part = int(tot / s["parts"])
+                        part = int(tot / s["nparts"])
 
                         emin, emax = 0, part - 1
 
-                        for s_idx in range(s["parts"]):
+                        for s_idx in range(s["nparts"]):
 
-                            if not isinstance(s["portion"], str):
-                                if s_idx == s["portion"] - 1:
+                            if not isinstance(s["slice"], str):
+                                if s_idx == s["slice"] - 1:
 
-                                    if s_idx == s["parts"] - 1:
+                                    if s_idx == s["nparts"] - 1:
                                         eslices.append((emin, tot - 1))
                                         break
 
@@ -365,7 +365,7 @@ class Run:
                                         break
 
                             else:
-                                if s_idx == s["parts"] - 1:
+                                if s_idx == s["nparts"] - 1:
                                     eslices.append((emin, tot - 1))
                                 else:
                                     eslices.append((emin, emax))
