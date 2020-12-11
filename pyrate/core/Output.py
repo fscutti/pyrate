@@ -19,7 +19,7 @@ class Output(Writer):
         self.writers = {}
         objects = []
         for name, attr in self.outputs.items():
-            self._init_writer(name, attr["path"], attr["objects"])
+            self._init_writer(name + attr["format"], attr["path"], attr["objects"])
             objects.extend(attr["objects"])
 
         self.set_objects(objects)
