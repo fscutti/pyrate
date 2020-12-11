@@ -9,6 +9,7 @@ import copy
 import logging
 import itertools
 import shutil
+import time
 
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
@@ -22,7 +23,7 @@ class Scheduler:
 
     def setup(self):
 
-        self.sets = {"logger": None, "batches": {}, "jobs": {}}
+        self.sets = {"logger": None, "batches": {}, "jobs": {}, "files": {}}
 
         # --------------------------
         # Setup the logger
@@ -68,11 +69,31 @@ class Scheduler:
 
                 self.sets["batches"][jname][bname] = {}
 
-        # transfer fields from original job dictionaries to the batch one.
         for jname, bnames in self.sets["batches"].items():
+
+            # Prepare directory where all batch jobs configurations will be saved.
+            # If it already exists it will be recreated on demand.
+
+            self.sets["files"][jname] = []
+
+            directory = os.path.join(os.environ["PYRATE"], "batch", jname)
+
+            if os.path.isdir(directory):
+                answer = input(
+                    f"WARNING: path {directory} already exists.\nDo you want to delete it? "
+                )
+
+                if answer in ["y", "yes", "Y", "Yes", "YES", "yep", "fo sho"]:
+                    shutil.rmtree(directory)
+                else:
+                    directory += "_" + time.strftime("%Y-%m-%d-%Hh%M")
+
+            os.mkdir(directory)
+
+            # Transfer fields from original job dictionaries to the batch one.
             for bname in bnames:
 
-                # if fields are specified in the factorisation
+                # If fields are specified in the factorisation
                 # modify the settings of the original job field.
                 if "eparts" in self.sets["jobs"][jname]["factorisation"]:
                     eparts = bname.split("slice", 1)[1].split("_")
@@ -85,22 +106,31 @@ class Scheduler:
                         # of the original job. Later on this would need to be
                         # copied when building the corresponding attribute of
                         # the batch job.
-                        iattr["eslices"] = {"slice": b_slice, "nparts": b_nparts}
+                        iattr["eslices"] = list({"slice": b_slice, "nparts": b_nparts})
 
                 self._prepare_field(jname, bname, "inputs")
                 self._prepare_field(jname, bname, "outputs")
 
-                # add remaining fields from the original job config file which
+                # Add remaining fields from the original job config file which
                 # were not scheduled for modifiction.
                 for field in ["inputs", "configs", "outputs"]:
+
                     if field in self.sets["batches"][jname][bname]:
                         continue
+
                     else:
                         self.sets["batches"][jname][bname].update(
                             {field: self.sets["jobs"][jname][field]}
                         )
+                
+                bfile = os.path.join(directory, bname + ".yaml")
+                
+                # Add file to the list of batch files associated to one job.
+                # Then, write the configuration into the file.
+                self.sets["files"][jname].append(bfile)
 
-        self._prepare_directories()
+                with open(bfile, "w") as bf:
+                    yaml.dump(self.sets["batches"][jname][bname], bf)
 
     def launch(self):
         pass
@@ -133,26 +163,6 @@ class Scheduler:
                                 }
                             }
                         )
-
-    def _prepare_directories(self):
-        """Prepare directory where all batch jobs configurations will be saved.
-        If it already exists it will be recreated on demand."""
-
-        for jname, bname in self.sets["batches"].items():
-
-            directory = os.path.join(os.environ["PYRATE"], "batch", jname)
-
-            if os.path.isdir(directory):
-                answer = input(
-                    f"WARNING: path {directory} already exists.\nDo you want to delete it? "
-                )
-                if answer in ["y", "yes", "Y", "Yes", "YES"]:
-                    shutil.rmtree(directory)
-                    os.mkdir(directory)
-                else:
-                    # create a new directory with the date
-                    # directory...
-                    pass
 
     def _write_script(self):
         pass
