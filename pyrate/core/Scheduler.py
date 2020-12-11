@@ -122,9 +122,9 @@ class Scheduler:
                         self.sets["batches"][jname][bname].update(
                             {field: self.sets["jobs"][jname][field]}
                         )
-                
+
                 bfile = os.path.join(directory, bname + ".yaml")
-                
+
                 # Add file to the list of batch files associated to one job.
                 # Then, write the configuration into the file.
                 self.sets["files"][jname].append(bfile)
@@ -165,6 +165,7 @@ class Scheduler:
                         )
 
     def _write_script(self):
+        # https://dashboard.hpc.unimelb.edu.au/job_submission/
         pass
 
 
