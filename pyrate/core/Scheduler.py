@@ -37,15 +37,23 @@ class Scheduler:
         # --------------------------
 
         # create original job dictionary
-        for name, attr in self.config["jobs"].items():
+        for jname, jattr in self.config["jobs"].items():
 
-            self.sets["jobs"][name] = {}
+            self.sets["jobs"][jname] = {}
 
-            for f in FN.find_files(attr["path"]):
-                if f.endswith(name + ".yaml"):
+            jpath = os.path.join(os.environ["PYRATE"], "scripts")
 
-                    self.sets["jobs"][name].update(yaml.full_load(open(f, "r")))
-                    self.sets["jobs"][name].update(attr)
+            try:
+                jpath = jattr["path"]
+
+            except KeyError:
+                pass
+
+            for f in FN.find_files(jpath):
+                if f.endswith(jname + ".yaml"):
+
+                    self.sets["jobs"][jname].update(yaml.full_load(open(f, "r")))
+                    self.sets["jobs"][jname].update(jattr)
 
                     break
 
@@ -54,19 +62,27 @@ class Scheduler:
 
             self.sets["batches"][jname] = {}
 
-            # modify event slices
-            if "eparts" in jattr["factorisation"]:
+            if "factorisation" in jattr:
 
-                ep = jattr["factorisation"]["eparts"]
+                # modify event slices
+                if "eparts" in jattr["factorisation"]:
 
-                jattr["factorisation"]["eparts"] = [
-                    f"slice_{s+1}_nparts_{ep}" for s in range(ep)
-                ]
+                    ep = jattr["factorisation"]["eparts"]
 
-            for tags in list(itertools.product(*list(jattr["factorisation"].values()))):
+                    jattr["factorisation"]["eparts"] = [
+                        f"slice_{s+1}_nparts_{ep}" for s in range(ep)
+                    ]
 
-                bname = "_".join([f"{t}" for t in tags])
+                for tags in list(
+                    itertools.product(*list(jattr["factorisation"].values()))
+                ):
 
+                    bname = "_".join([f"{t}" for t in tags])
+
+                    self.sets["batches"][jname][bname] = {}
+
+            else:
+                bname = jname
                 self.sets["batches"][jname][bname] = {}
 
         for jname, bnames in self.sets["batches"].items():
@@ -91,25 +107,15 @@ class Scheduler:
             os.mkdir(directory)
 
             # Transfer fields from original job dictionaries to the batch one.
-            for bname in bnames:
+            for b_idx, bname in enumerate(bnames):
 
                 # If fields are specified in the factorisation
                 # modify the settings of the original job field.
-                if "eparts" in self.sets["jobs"][jname]["factorisation"]:
-                    eparts = bname.split("slice", 1)[1].split("_")
+                if "factorisation" in self.sets["jobs"][jname]:
 
-                    for iname, iattr in self.sets["jobs"][jname]["inputs"].items():
-
-                        b_slice, b_nparts = eparts[1], eparts[3]
-
-                        # N.B.: this is iteratively modifying an attribute
-                        # of the original job. Later on this would need to be
-                        # copied when building the corresponding attribute of
-                        # the batch job.
-                        iattr["eslices"] = list({"slice": b_slice, "nparts": b_nparts})
-
-                self._prepare_field(jname, bname, "inputs")
-                self._prepare_field(jname, bname, "outputs")
+                    self._prepare_events(jname, bname)
+                    self._prepare_io(jname, bname, "inputs")
+                    self._prepare_io(jname, bname, "outputs")
 
                 # Add remaining fields from the original job config file which
                 # were not scheduled for modifiction.
@@ -123,7 +129,15 @@ class Scheduler:
                             {field: self.sets["jobs"][jname][field]}
                         )
 
+                # dump configuration to file.
                 bfile = os.path.join(directory, bname + ".yaml")
+
+                try:
+                    if self.config["jobs"][jname]["make_array"]:
+                        bfile = os.path.join(directory, jname + f"_j{b_idx}" + ".yaml")
+
+                except KeyError:
+                    pass
 
                 # Add file to the list of batch files associated to one job.
                 # Then, write the configuration into the file.
@@ -135,7 +149,23 @@ class Scheduler:
     def launch(self):
         pass
 
-    def _prepare_field(self, job_name, batch_name, field):
+    def _prepare_events(self, job_name, batch_name):
+        """Prepare the eslice field of the batch job."""
+
+        if "eparts" in self.sets["jobs"][job_name]["factorisation"]:
+            eparts = batch_name.split("slice", 1)[1].split("_")
+
+            for iname, iattr in self.sets["jobs"][job_name]["inputs"].items():
+
+                b_slice, b_nparts = eparts[1], eparts[3]
+
+                # N.B.: this is iteratively modifying an attribute
+                # of the original job. Later on this would need to be
+                # copied when building the corresponding attribute of
+                # the batch job.
+                iattr["eslices"] = [{"slice": b_slice, "nparts": b_nparts}]
+
+    def _prepare_io(self, job_name, batch_name, field):
         """Prepare the inputs/outputs field of the batch job."""
 
         if field in self.sets["jobs"][job_name]["factorisation"]:
