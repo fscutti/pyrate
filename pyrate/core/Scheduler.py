@@ -23,7 +23,13 @@ class Scheduler:
 
     def setup(self):
 
-        self.sets = {"logger": None, "batches": {}, "jobs": {}, "files": {}}
+        self.sets = {
+            "logger": None,
+            "jobs": {},
+            "batches": {},
+            "files": {},
+            "batch_scripts": {},
+        }
 
         # --------------------------
         # Setup the logger
@@ -36,7 +42,7 @@ class Scheduler:
         # Build global configuration
         # --------------------------
 
-        # create original job dictionary
+        # create original job dictionary.
         for jname, jattr in self.config["jobs"].items():
 
             self.sets["jobs"][jname] = {}
@@ -57,7 +63,7 @@ class Scheduler:
 
                     break
 
-        # create batch jobs dictionary
+        # create batch jobs dictionary.
         for jname, jattr in self.sets["jobs"].items():
 
             self.sets["batches"][jname] = {}
@@ -85,26 +91,12 @@ class Scheduler:
                 bname = jname
                 self.sets["batches"][jname][bname] = {}
 
+        # create configuration files dictionary.
         for jname, bnames in self.sets["batches"].items():
-
-            # Prepare directory where all batch jobs configurations will be saved.
-            # If it already exists it will be recreated on demand.
 
             self.sets["files"][jname] = []
 
-            directory = os.path.join(os.environ["PYRATE"], "batch", jname)
-
-            if os.path.isdir(directory):
-                answer = input(
-                    f"WARNING: path {directory} already exists.\nDo you want to delete it? "
-                )
-
-                if answer in ["y", "yes", "Y", "Yes", "YES", "yep", "fo sho"]:
-                    shutil.rmtree(directory)
-                else:
-                    directory += "_" + time.strftime("%Y-%m-%d-%Hh%M")
-
-            os.mkdir(directory)
+            b_directory = self._prepare_directory(jname)
 
             # Transfer fields from original job dictionaries to the batch one.
             for b_idx, bname in enumerate(bnames):
@@ -119,34 +111,20 @@ class Scheduler:
 
                 # Add remaining fields from the original job config file which
                 # were not scheduled for modifiction.
-                for field in ["inputs", "configs", "outputs"]:
+                self._prepare_remaining_fields(jname, bname)
 
-                    if field in self.sets["batches"][jname][bname]:
-                        continue
+                b_file = self._prepare_config_file(jname, bname, b_idx, b_directory)
 
-                    else:
-                        self.sets["batches"][jname][bname].update(
-                            {field: self.sets["jobs"][jname][field]}
-                        )
+                self.sets["files"][job_name].append(b_file)
 
-                # dump configuration to file.
-                bfile = os.path.join(directory, bname + ".yaml")
-
-                try:
-                    if self.config["jobs"][jname]["make_array"]:
-                        bfile = os.path.join(directory, jname + f"_j{b_idx}" + ".yaml")
-
-                except KeyError:
-                    pass
-
-                # Add file to the list of batch files associated to one job.
-                # Then, write the configuration into the file.
-                self.sets["files"][jname].append(bfile)
-
-                with open(bfile, "w") as bf:
-                    yaml.dump(self.sets["batches"][jname][bname], bf)
+        # create submission scripts dictionary.
 
     def launch(self):
+        pass
+
+    def _write_script(self):
+        # https://dashboard.hpc.unimelb.edu.au/job_submission/
+        # https://dashboard.hpc.unimelb.edu.au/forms/script_generator/
         pass
 
     def _prepare_events(self, job_name, batch_name):
@@ -194,9 +172,56 @@ class Scheduler:
                             }
                         )
 
-    def _write_script(self):
-        # https://dashboard.hpc.unimelb.edu.au/job_submission/
-        pass
+    def _prepare_remaining_fields(self, job_name, batch_name):
+        """Prepare remaining fields of the batch job."""
+
+        for field in ["inputs", "configs", "outputs"]:
+
+            if field in self.sets["batches"][job_name][batch_name]:
+                continue
+
+            else:
+                self.sets["batches"][job_name][batch_name].update(
+                    {field: self.sets["jobs"][job_name][field]}
+                )
+
+    def _prepare_directory(self, job_name):
+        """Prepare directory containing batch configurations."""
+
+        directory = os.path.join(os.environ["PYRATE"], "batch", job_name)
+
+        if os.path.isdir(directory):
+            answer = input(
+                f"WARNING: path {directory} already exists.\nDo you want to delete it? "
+            )
+
+            if answer in ["y", "yes", "Y", "Yes", "YES", "yep", "fo sho"]:
+                shutil.rmtree(directory)
+            else:
+                directory += "_" + time.strftime("%Y-%m-%d-%Hh%M")
+
+        os.mkdir(directory)
+
+        return directory
+
+    def _prepare_config_file(self, job_name, batch_name, batch_idx, batch_directory):
+        """Save configuration to .yaml file."""
+
+        batch_file = os.path.join(batch_directory, batch_name + ".yaml")
+
+        try:
+            if self.config["jobs"][job_name]["make_array"]:
+                batch_file = os.path.join(
+                    batch_directory, job_name + f"_j{batch_idx}" + ".yaml"
+                )
+
+        except KeyError:
+            pass
+
+        with open(batch_file, "w") as bf:
+            yaml.dump(self.sets["batches"][job_name][batch_name], bf)
+
+        return batch_file
 
 
 # EOF
