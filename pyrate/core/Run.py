@@ -120,15 +120,15 @@ class Run:
 
             store = self.run("execute", store)
 
-        # store = self.run("finalise", store)
+        store = self.run("finalise", store)
 
         print("\n")
 
         # -----------------------------------------------------------------------
         # Write finalised objects to the output.
         # -----------------------------------------------------------------------
-        # for obj_name in self.run_objects:
-        #    self._out.write(obj_name)
+        for obj_name in self.run_objects:
+            self._out.write(obj_name)
 
         # stop = timeit.default_timer()
 
@@ -347,16 +347,22 @@ class Run:
 
                     if "slice" in s:
 
-                        part = int(tot / s["nparts"])
+                        s_nparts = int(s["nparts"])
+                        s_slice = "all"
+
+                        if not s["slice"] == "all":
+                            s_slice = int(s["slice"])
+
+                        part = int(tot / s_nparts)
 
                         emin, emax = 0, part - 1
 
-                        for s_idx in range(s["nparts"]):
+                        for s_idx in range(s_nparts):
 
-                            if not isinstance(s["slice"], str):
-                                if s_idx == s["slice"] - 1:
+                            if not s_slice == "all":
+                                if s_idx == s_slice - 1:
 
-                                    if s_idx == s["nparts"] - 1:
+                                    if s_idx == s_nparts - 1:
                                         eslices.append((emin, tot - 1))
                                         break
 
@@ -365,7 +371,7 @@ class Run:
                                         break
 
                             else:
-                                if s_idx == s["nparts"] - 1:
+                                if s_idx == s_nparts - 1:
                                     eslices.append((emin, tot - 1))
                                 else:
                                     eslices.append((emin, emax))
