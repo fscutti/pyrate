@@ -15,7 +15,7 @@ from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
 
 
-class Scheduler:
+class Batch:
     def __init__(self, name, config, log_level):
         self.name = name
         self.config = config
@@ -27,8 +27,8 @@ class Scheduler:
             "logger": None,
             "jobs": {},
             "batches": {},
-            "files": {},
-            "batch_scripts": {},
+            "config_files": {},
+            "script_files": {},
         }
 
         # --------------------------
@@ -94,9 +94,9 @@ class Scheduler:
         # create configuration files dictionary.
         for jname, bnames in self.sets["batches"].items():
 
-            self.sets["files"][jname] = []
+            self.sets["config_files"][jname] = []
 
-            b_directory = self._prepare_directory(jname)
+            b_directory = self._get_directory(jname)
 
             # Transfer fields from original job dictionaries to the batch one.
             for b_idx, bname in enumerate(bnames):
@@ -110,22 +110,124 @@ class Scheduler:
                     self._prepare_io(jname, bname, "outputs")
 
                 # Add remaining fields from the original job config file which
-                # were not scheduled for modifiction.
+                # were not scheduled for modification.
                 self._prepare_remaining_fields(jname, bname)
 
-                b_file = self._prepare_config_file(jname, bname, b_idx, b_directory)
+                make_array = False
 
-                self.sets["files"][job_name].append(b_file)
+                if "make_array" in self.config["jobs"][jname]:
+                    if self.config["jobs"][jname]["make_array"]:
+                        make_array = True
+
+                b_file = self._get_config_file(
+                    jname, bname, b_idx, b_directory, make_array=make_array
+                )
+
+                self.sets["config_files"][jname].append(b_file)
 
         # create submission scripts dictionary.
+        for jname, fnames in self.sets["config_files"].items():
+
+            self.sets["script_files"][jname] = []
+
+            s_directory = self._get_directory(jname, create=False)
+
+            for f_idx, fname in enumerate(fnames):
+
+                script = {}
+
+                make_array = False
+
+                if "make_array" in self.config["jobs"][jname]:
+                    if self.config["jobs"][jname]["make_array"]:
+                        make_array = True
+
+                s_file = self._get_script_file(
+                    jname, script, f_idx, s_directory, make_array=make_array
+                )
+
+                self.sets["script_files"][jname].append(s_file)
+
+                if make_array:
+                    break
 
     def launch(self):
         pass
 
-    def _write_script(self):
-        # https://dashboard.hpc.unimelb.edu.au/job_submission/
-        # https://dashboard.hpc.unimelb.edu.au/forms/script_generator/
-        pass
+    def _get_directory(self, job_name, create=True):
+        """Prepare directory containing batch configurations."""
+
+        directory = os.path.join(os.environ["PYRATE"], "batch", job_name)
+
+        if create:
+            if os.path.isdir(directory):
+                answer = input(
+                    f"WARNING: path {directory} already exists.\nDo you want to delete it? "
+                )
+
+                if answer in ["y", "yes", "Y", "Yes", "YES", "yep", "fo sho"]:
+                    shutil.rmtree(directory)
+                else:
+                    directory += "_" + time.strftime("%Y-%m-%d-%Hh%M")
+
+            os.mkdir(directory)
+
+        return directory
+
+    def _get_config_file(
+        self, job_name, batch_name, batch_idx, batch_directory, make_array=False
+    ):
+        """Save configuration to .yaml file."""
+
+        batch_file = os.path.join(batch_directory, batch_name + ".yaml")
+
+        if make_array:
+            batch_file = os.path.join(
+                batch_directory, job_name + f"_j{batch_idx}" + ".yaml"
+            )
+
+        with open(batch_file, "w") as bf:
+            yaml.dump(self.sets["batches"][job_name][batch_name], bf)
+
+        return batch_file
+
+    def _get_script_file(
+        self, job_name, script, file_idx, script_directory, make_array=False
+    ):
+        """ Prepare script file depeding on batch submission system."""
+
+        script_file = None
+
+        if "slurm" in self.config["jobs"][job_name]["system"]:
+
+            self._prepare_slurm_script(
+                job_name,
+                script,
+                self.config["jobs"][job_name]["system"]["slurm"],
+                file_idx,
+                make_array=make_array,
+            )
+
+            file_name = "_".join([job_name, "array.slurm"])
+
+            if not make_array:
+                path, file_name = os.path.split(
+                    self.sets["config_files"][job_name][file_idx]
+                )
+
+            script_file = os.path.join(
+                script_directory, file_name.replace(".yaml", ".slurm")
+            )
+
+        with open(script_file, "w") as sf:
+            for block, lines in script.items():
+
+                sf.write("\n")
+
+                for l in lines:
+                    sf.write(f"{l}\n")
+
+        return script_file
 
     def _prepare_events(self, job_name, batch_name):
         """Prepare the eslice field of the batch job."""
@@ -176,52 +278,53 @@ class Scheduler:
         """Prepare remaining fields of the batch job."""
 
         for field in ["inputs", "configs", "outputs"]:
+            if not field in self.sets["batches"][job_name][batch_name]:
 
-            if field in self.sets["batches"][job_name][batch_name]:
-                continue
-
-            else:
                 self.sets["batches"][job_name][batch_name].update(
                     {field: self.sets["jobs"][job_name][field]}
                 )
 
-    def _prepare_directory(self, job_name):
-        """Prepare directory containing batch configurations."""
+    def _prepare_slurm_script(
+        self, job_name, script, slurm_config, file_idx, make_array=False
+    ):
+        """ Fill dictionary with slurm script lines. """
 
-        directory = os.path.join(os.environ["PYRATE"], "batch", job_name)
+        # ToDo: support other shell types?
+        script["shell"] = ["#!/bin/bash"]
 
-        if os.path.isdir(directory):
-            answer = input(
-                f"WARNING: path {directory} already exists.\nDo you want to delete it? "
-            )
+        # SBATCH directives.
+        script["SBATCH"] = [
+            f"#SBATCH --{iname}={iattr}"
+            for iname, iattr in slurm_config["SBATCH"].items()
+        ]
 
-            if answer in ["y", "yes", "Y", "Yes", "YES", "yep", "fo sho"]:
-                shutil.rmtree(directory)
-            else:
-                directory += "_" + time.strftime("%Y-%m-%d-%Hh%M")
+        # sourcing scripts.
+        if "source" in slurm_config:
+            script["source"] = [f"source {s}" for s in slurm_config["source"]]
 
-        os.mkdir(directory)
+        # handling of modules.
+        script["modules"] = []
+        if "modules" in slurm_config:
+            for iname, iattr in slurm_config["modules"].items():
 
-        return directory
+                if iname == "purge":
+                    if iattr:
+                        script["modules"].append("module purge")
+                if iname == "load":
+                    for m in iattr:
+                        script["modules"].append(f"module load {m}")
 
-    def _prepare_config_file(self, job_name, batch_name, batch_idx, batch_directory):
-        """Save configuration to .yaml file."""
+        # command to launch the main program.
+        cf = self.sets["config_files"][job_name][file_idx]
+        script["command"] = [slurm_config["command"].replace("*", cf)]
 
-        batch_file = os.path.join(batch_directory, batch_name + ".yaml")
-
-        try:
+        if "make_array" in self.config["jobs"][job_name]:
             if self.config["jobs"][job_name]["make_array"]:
-                batch_file = os.path.join(
-                    batch_directory, job_name + f"_j{batch_idx}" + ".yaml"
-                )
 
-        except KeyError:
-            pass
+                first_cf = self.sets["config_files"][job_name][0]
+                first_cf = first_cf.replace("j0", "j{SLURM_ARRAY_TASK_ID}")
 
-        with open(batch_file, "w") as bf:
-            yaml.dump(self.sets["batches"][job_name][batch_name], bf)
-
-        return batch_file
+                script["command"] = [slurm_config["command"].replace("*", first_cf)]
 
 
 # EOF
