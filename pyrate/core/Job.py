@@ -131,23 +131,15 @@ class Job:
             self.job["outputs"][name].update(attr)
 
         # -----------------------
-        # Instantiate Run objects
+        # Instantiate Run object
         # -----------------------
-        """ To do: support criterion to split the job in 
-        several runs.
-        """
-        self.runs = {}
-        self.runs[f"{self.name}_run1"] = Run(f"{self.name}_run1", self.job)
+        self.run = Run(f"{self.name}_run", self.job)
 
-        print(self.job["inputs"])
+        self.run.setup()
 
     def launch(self):
-        """Launch Run objects.
-        To do: find a method to dispatch run objects.
-        """
-        for name, attr in self.runs.items():
-            attr.setup()
-            attr.launch()
+        """Launch Run objects. """
+        self.run.launch()
 
 
 # EOF
