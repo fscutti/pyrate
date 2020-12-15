@@ -98,6 +98,10 @@ class Batch:
 
             b_directory = self._get_directory(jname)
 
+            # save global configuration.
+            with open(os.path.join(b_directory, "global.yaml"), "w") as g:
+                yaml.dump(self.sets["jobs"][jname], g)
+
             # Transfer fields from original job dictionaries to the batch one.
             for b_idx, bname in enumerate(bnames):
 
@@ -152,7 +156,13 @@ class Batch:
                     break
 
     def launch(self):
-        pass
+        """Submit batch jobs."""
+        
+        # ToDo: distinguish different batch submission systems.
+        # ToDo: introduce job dependencies.
+        for jname, sfiles in self.sets["script_files"].items():
+            for sfile in sfiles:
+                os.system(f"sbatch {sfile}")
 
     def _get_directory(self, job_name, create=True):
         """Prepare directory containing batch configurations."""
