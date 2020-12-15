@@ -26,7 +26,13 @@ class Job:
         The keys of the following dictionary will be distributed to the Run.
         """
 
-        self.job = {"logger": None, "inputs": {}, "configs": {}, "outputs": {}}
+        self.job = {
+            "no_progress_bar": self.config["no_progress_bar"],
+            "logger": None,
+            "inputs": {},
+            "configs": {},
+            "outputs": {},
+        }
 
         # --------------------------
         # Setup the logger

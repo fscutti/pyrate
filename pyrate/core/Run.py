@@ -46,7 +46,7 @@ class Run:
         self.logger.addHandler(fileHandler)
 
         self.colors = {"initialise": {}, "execute": {}, "finalise": {}}
-
+            
         self.colors["initialise"]["input"] = "{l_bar}%s{bar}%s{r_bar}" % (
             Fore.BLUE,
             Fore.RESET,
@@ -70,7 +70,7 @@ class Run:
         # The store object is the output of the launch function.
         # -----------------------------------------------------------------------
 
-        # start = timeit.default_timer()
+        start = timeit.default_timer()
 
         store = Store(self)
 
@@ -130,7 +130,10 @@ class Run:
         for obj_name in self.run_objects:
             self._out.write(obj_name)
 
-        # stop = timeit.default_timer()
+        stop = timeit.default_timer()
+
+        if self.no_progress_bar:
+          print("Execution time: ", str(stop - start))
 
         # self.logger.info("Execution time: ", str(stop - start))
 
@@ -157,7 +160,7 @@ class Run:
         for i_name, targets in tqdm(
             self.run_targets.items(),
             desc=f"{prefix}{info}",
-            disable=False,
+            disable=self.no_progress_bar,
             bar_format=self.colors[self.state]["input"],
         ):
 
@@ -212,8 +215,7 @@ class Run:
                     for idx in tqdm(
                         range(erange),
                         desc=f"{prefix}{info}",
-                        disable=False,
-                        # leave=False,
+                        disable=self.no_progress_bar,
                         bar_format=self.colors[self.state]["event"],
                     ):
                         store.put("INPUT:name", i_name, "TRAN")

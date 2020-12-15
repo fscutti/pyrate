@@ -30,15 +30,14 @@ parser.add_argument(
     default="CRITICAL",
 )
 
-"""
 parser.add_argument(
-    "--progress_bar",
+    "--no_progress_bar",
     "-b",
-    help="display progressbar",
+    help="don't display progressbar",
     required=False,
-    default=True,
+    default=False,
+    action="store_true",
 )
-"""
 
 args = parser.parse_args()
 
@@ -49,6 +48,8 @@ if __name__ == "__main__":
         j_name = j_file.split("/")[-1].split(".")[0]
 
         j_config = yaml.full_load(open(j_file, "r"))
+
+        j_config.update({"no_progress_bar": args.no_progress_bar})
 
         j_log = args.logging_level
 
