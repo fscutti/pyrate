@@ -1,0 +1,56 @@
+--- 
+jobs: 
+
+    job_WD:
+
+        # https://slurm.schedmd.com/job_array.html
+        make_array: false
+
+        factorisation:
+            inputs: 
+              - Data
+              - MC
+            eparts: 2
+            outputs: 
+              - WDTest1
+              - WDTest2
+
+        path:
+            - /Users/fscutti/pyrate/scripts
+
+        system:
+            slurm:
+                shell: bash
+                SBATCH:
+                    nodes: 1 
+                    ntasks-per-node: 8
+                    time: 0-12:00:00
+                    partition: physical
+                    stdout: myOutput 
+                    stderr: myError
+                
+                source:
+                    - /usr/local/module/spartan_old.sh
+
+                modules:
+                    purge: true
+                    load:
+                      - foss/2019b
+                      - python/3.7.4
+                
+                #command: pyrate -j *
+                command: time srun -n 8 pyrate -j *
+
+                
+# ToDo: priority for jobs to run after another.
+# Avoid to write daemons. Eventually introduce job
+# dependencies based on arrays of jobs.
+priority:
+  - job1
+  - job2
+  - job3
+
+
+
+
+# EOF
