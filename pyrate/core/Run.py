@@ -138,18 +138,16 @@ class Run:
 
     def run(self, state, store):
         """Run the loop function."""
+
+        prefix_types = {
+            "initialise": "Inputs:  ",
+            "execute": "Events:  ",
+            "finalise": "Targets: ",
+        }
+
         self.state = state
 
-        prefix = None
-
-        if self.state == "initialise":
-            prefix = "Inputs:  "
-
-        elif self.state == "execute":
-            prefix = "Events:  "
-
-        elif self.state == "finalise":
-            prefix = "Targets: "
+        prefix = prefix_types[state]
 
         info = self.state.rjust(70, ".")
 
@@ -402,9 +400,6 @@ class Run:
 
     def check_events_slices(self, emin, emax, tot):
         """Validate events slice."""
-
-        tmp_min = 0
-        tmp_max = tot
 
         if not emin <= emax <= tot - 1:
             sys.exit(
