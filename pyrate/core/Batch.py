@@ -157,9 +157,10 @@ class Batch:
 
     def launch(self):
         """Submit batch jobs."""
-        
+
         # ToDo: distinguish different batch submission systems.
         # ToDo: introduce job dependencies.
+        # ToDo: handle input and output.
         for jname, sfiles in self.sets["script_files"].items():
             for sfile in sfiles:
                 os.system(f"sbatch {sfile}")
