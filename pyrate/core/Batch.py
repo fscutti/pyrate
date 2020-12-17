@@ -42,6 +42,13 @@ class Batch:
         # Build global configuration
         # --------------------------
 
+        main_dir = os.path.join(os.environ["PYRATE"], "batch")
+
+        if "batch_path" in self.config:
+            main_dir = os.path.join(os.environ["PYRATE"], self.config["batch_path"])
+
+        batch_dir = self._get_directory(main_dir, sub_dir=self.name)
+
         # create original job dictionary.
         for jname, jattr in self.config["jobs"].items():
 
@@ -65,6 +72,8 @@ class Batch:
 
         # create batch jobs dictionary.
         for jname, jattr in self.sets["jobs"].items():
+
+            # create main directory here.
 
             self.sets["batches"][jname] = {}
 
@@ -96,10 +105,12 @@ class Batch:
 
             self.sets["config_files"][jname] = []
 
-            b_directory = self._get_directory(jname)
+            b_directory = self._get_directory(
+                os.path.join(batch_dir, jname), sub_dir="batch_config"
+            )
 
             # save global configuration.
-            with open(os.path.join(b_directory, "global.yaml"), "w") as g:
+            with open(os.path.join(batch_dir, f"{jname}_global.yaml"), "w") as g:
                 yaml.dump(self.sets["jobs"][jname], g)
 
             # Transfer fields from original job dictionaries to the batch one.
@@ -134,7 +145,9 @@ class Batch:
 
             self.sets["script_files"][jname] = []
 
-            s_directory = self._get_directory(jname, create=False)
+            s_directory = self._get_directory(
+                os.path.join(batch_dir, jname), sub_dir="batch_scripts"
+            )
 
             for f_idx, fname in enumerate(fnames):
 
@@ -163,25 +176,28 @@ class Batch:
         # ToDo: handle input and output.
         for jname, sfiles in self.sets["script_files"].items():
             for sfile in sfiles:
-                os.system(f"sbatch {sfile}")
+                # os.system(f"sbatch {sfile}")
+                print(f"sbatch {sfile}")
 
-    def _get_directory(self, job_name, create=True):
+    def _get_directory(self, parent_dir, check=True, sub_dir=""):
         """Prepare directory containing batch configurations."""
 
-        directory = os.path.join(os.environ["PYRATE"], "batch", job_name)
+        directory = os.path.join(parent_dir, sub_dir)
 
-        if create:
+        if check:
             if os.path.isdir(directory):
+
                 answer = input(
                     f"WARNING: path {directory} already exists.\nDo you want to delete it? "
                 )
 
                 if answer in ["y", "yes", "Y", "Yes", "YES", "yep", "fo sho"]:
                     shutil.rmtree(directory)
-                else:
-                    directory += "_" + time.strftime("%Y-%m-%d-%Hh%M")
 
-            os.mkdir(directory)
+                else:
+                    directory += "_" + time.strftime("%Y-%m-%d-%Hh%Mm%Ss")
+
+        os.makedirs(directory)
 
         return directory
 
@@ -233,10 +249,10 @@ class Batch:
         with open(script_file, "w") as sf:
             for block, lines in script.items():
 
-                sf.write("\n")
-
                 for l in lines:
                     sf.write(f"{l}\n")
+
+                sf.write("\n")
 
         return script_file
 
@@ -326,7 +342,7 @@ class Batch:
                         script["modules"].append(f"module load {m}")
 
         # command to launch the main program.
-        cf = self.sets["config_files"][job_name][file_idx]
+        cf = self.sets["config_files"][job_name][file_idx] + " -b"
         script["command"] = [slurm_config["command"].replace("*", cf)]
 
         if "make_array" in self.config["jobs"][job_name]:
@@ -335,7 +351,7 @@ class Batch:
                 first_cf = self.sets["config_files"][job_name][0]
                 first_cf = first_cf.replace("j0", "j{SLURM_ARRAY_TASK_ID}")
 
-                script["command"] = [slurm_config["command"].replace("*", first_cf)]
+                script["command"] = [f"pyrate -j {first_cf} -b"]
 
 
 # EOF
