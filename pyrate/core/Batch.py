@@ -47,7 +47,7 @@ class Batch:
         if "batch_path" in self.config:
             main_dir = os.path.join(os.environ["PYRATE"], self.config["batch_path"])
 
-        batch_dir = self._get_directory(main_dir, sub_dir=self.name)
+        self.batch_dir = self._get_directory(main_dir, sub_dir=self.name)
 
         # create original job dictionary.
         for jname, jattr in self.config["jobs"].items():
@@ -57,7 +57,7 @@ class Batch:
             jpath = os.path.join(os.environ["PYRATE"], "scripts")
 
             try:
-                jpath = jattr["path"]
+                jpath = jattr["paths"]["in"]
 
             except KeyError:
                 pass
@@ -106,11 +106,11 @@ class Batch:
             self.sets["config_files"][jname] = []
 
             b_directory = self._get_directory(
-                os.path.join(batch_dir, jname), sub_dir="batch_config"
+                os.path.join(self.batch_dir, jname), sub_dir="batch_config"
             )
 
             # save global configuration.
-            with open(os.path.join(batch_dir, f"{jname}_global.yaml"), "w") as g:
+            with open(os.path.join(self.batch_dir, f"{jname}_global.yaml"), "w") as g:
                 yaml.dump(self.sets["jobs"][jname], g)
 
             # Transfer fields from original job dictionaries to the batch one.
@@ -146,7 +146,7 @@ class Batch:
             self.sets["script_files"][jname] = []
 
             s_directory = self._get_directory(
-                os.path.join(batch_dir, jname), sub_dir="batch_scripts"
+                os.path.join(self.batch_dir, jname), sub_dir="batch_scripts"
             )
 
             for f_idx, fname in enumerate(fnames):
@@ -184,8 +184,8 @@ class Batch:
 
         directory = os.path.join(parent_dir, sub_dir)
 
-        if check:
-            if os.path.isdir(directory):
+        if os.path.isdir(directory):
+            if check:
 
                 answer = input(
                     f"WARNING: path {directory} already exists.\nDo you want to delete it? "
@@ -196,6 +196,8 @@ class Batch:
 
                 else:
                     directory += "_" + time.strftime("%Y-%m-%d-%Hh%Mm%Ss")
+            else:
+                return directory
 
         os.makedirs(directory)
 
@@ -324,6 +326,22 @@ class Batch:
             f"#SBATCH --{iname}={iattr}"
             for iname, iattr in slurm_config["SBATCH"].items()
         ]
+
+        try:
+            outpath = self.config["jobs"][job_name]["paths"]["out"]
+
+            if outpath == "batch_path":
+
+                outpath = os.path.join(self.batch_dir, job_name)
+                outpath = self._get_directory(
+                    outpath, check=False, sub_dir="batch_output"
+                )
+
+            script["SBATCH"].append(f"#SBATCH -o {outpath}/slurm.%N.%j.out # STDOUT")
+            script["SBATCH"].append(f"#SBATCH -e {outpath}/slurm.%N.%j.err # STDERR")
+
+        except KeyError:
+            pass
 
         # sourcing scripts.
         if "source" in slurm_config:
