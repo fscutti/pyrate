@@ -176,8 +176,8 @@ class Batch:
         # ToDo: handle input and output.
         for jname, sfiles in self.sets["script_files"].items():
             for sfile in sfiles:
-                # os.system(f"sbatch {sfile}")
-                print(f"sbatch {sfile}")
+                os.system(f"sbatch {sfile}")
+                # print(f"sbatch {sfile}")
 
     def _get_directory(self, parent_dir, check=True, sub_dir=""):
         """Prepare directory containing batch configurations."""
@@ -322,52 +322,60 @@ class Batch:
         script["shell"] = ["#!/bin/bash"]
 
         # SBATCH directives.
-        script["SBATCH"] = [
-            f"#SBATCH --{iname}={iattr}"
-            for iname, iattr in slurm_config["SBATCH"].items()
-        ]
+        script["SBATCH"] = [f"#SBATCH {iline}" for iline in slurm_config["SBATCH"]]
+
+        if "make_array" in self.config["jobs"][job_name]:
+
+            n_jobs = len(self.sets["config_files"][job_name])
+
+            script["SBATCH"].append(f"#SBATCH --array=1-{n_jobs}")
+
+        launch = self.sets["config_files"][job_name][file_idx]
+
+        path, file_name = os.path.split(launch)
+        file_name = file_name.replace("_j0", "_array")
+        file_name = file_name.replace(".yaml", "")
 
         try:
             outpath = self.config["jobs"][job_name]["paths"]["out"]
 
-            if outpath == "batch_path":
-
-                outpath = os.path.join(self.batch_dir, job_name)
-                outpath = self._get_directory(
-                    outpath, check=False, sub_dir="batch_output"
-                )
-
-            script["SBATCH"].append(f"#SBATCH -o {outpath}/slurm.%N.%j.out # STDOUT")
-            script["SBATCH"].append(f"#SBATCH -e {outpath}/slurm.%N.%j.err # STDERR")
-
         except KeyError:
-            pass
+            outpath = os.getcwd()
+
+        if outpath == "batch_path":
+
+            outpath = self._get_directory(
+                os.path.join(self.batch_dir, job_name),
+                check=False,
+                sub_dir="batch_output",
+            )
+
+        script["SBATCH"].append(
+            f"#SBATCH -o {outpath}/slurm.{file_name}.%j.out # STDOUT"
+        )
+        script["SBATCH"].append(
+            f"#SBATCH -e {outpath}/slurm.{file_name}.%j.err # STDERR"
+        )
 
         # sourcing scripts.
         if "source" in slurm_config:
-            script["source"] = [f"source {s}" for s in slurm_config["source"]]
+            script["source"] = [f"source {iline}" for iline in slurm_config["source"]]
 
         # handling of modules.
-        script["modules"] = []
         if "modules" in slurm_config:
-            for iname, iattr in slurm_config["modules"].items():
-
-                if iname == "purge":
-                    if iattr:
-                        script["modules"].append("module purge")
-                if iname == "load":
-                    for m in iattr:
-                        script["modules"].append(f"module load {m}")
+            script["modules"] = [f"module {iline}" for iline in slurm_config["modules"]]
 
         # command to launch the main program.
-        cf = self.sets["config_files"][job_name][file_idx] + " -b"
-        script["command"] = [slurm_config["command"].replace("*", cf)]
+        launch = launch + " -b"
+
+        script["command"] = [slurm_config["command"].replace("*", launch)]
 
         if "make_array" in self.config["jobs"][job_name]:
             if self.config["jobs"][job_name]["make_array"]:
 
-                first_cf = self.sets["config_files"][job_name][0]
-                first_cf = first_cf.replace("j0", "j{SLURM_ARRAY_TASK_ID}")
+                first_cf = self.sets["config_files"][job_name][0].replace(
+                    "j0", "j${SLURM_ARRAY_TASK_ID}"
+                )
 
                 script["command"] = [f"pyrate -j {first_cf} -b"]
 
