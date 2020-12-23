@@ -10,6 +10,7 @@ import logging
 import itertools
 import shutil
 import time
+import subprocess
 
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
@@ -172,12 +173,51 @@ class Batch:
         """Submit batch jobs."""
 
         # ToDo: distinguish different batch submission systems.
-        # ToDo: introduce job dependencies.
-        # ToDo: handle input and output.
+
+        jsubmission = {}
+
+        for jname in self.config["priority"]:
+            self._submit_slurm(
+                jname,
+                self.sets["script_files"][jname],
+                jsubmission,
+                check_priority=True,
+            )
+
         for jname, sfiles in self.sets["script_files"].items():
-            for sfile in sfiles:
-                os.system(f"sbatch {sfile}")
-                # print(f"sbatch {sfile}")
+            if not jname in jsubmission:
+                self._submit_slurm(jname, sfiles, jsubmission, check_priority=False)
+
+        FN.pretty(jsubmission)
+
+    def _submit_slurm(self, job_name, job_files, jobs_submission, check_priority=False):
+        """Submit Slurm job."""
+
+        jobs_submission[job_name] = []
+
+        for jfile in job_files:
+
+            command = f"sbatch {jfile}"
+
+            if check_priority:
+                previous_jobs = self.config["priority"][
+                    : self.config["priority"].index(job_name)
+                ]
+
+                if previous_jobs:
+
+                    dependency = "--dependency=afterok:$"
+
+                    for pj in previous_jobs:
+                        dependency += ":$".join(jobs_submission[pj])
+
+                    command = command.replace("sbatch", f"sbatch {dependency}")
+
+            job_id = subprocess.check_output(command, shell=True)
+
+            job_id = job_id.split(b" ")[-1].decode("ascii").replace("\n", "")
+
+            jobs_submission[job_name].append(job_id)
 
     def _get_directory(self, parent_dir, check=True, sub_dir=""):
         """Prepare directory containing batch configurations."""
@@ -212,7 +252,7 @@ class Batch:
 
         if make_array:
             batch_file = os.path.join(
-                batch_directory, job_name + f"_j{batch_idx}" + ".yaml"
+                batch_directory, job_name + f"_j{batch_idx+1}" + ".yaml"
             )
 
         with open(batch_file, "w") as bf:
@@ -322,6 +362,7 @@ class Batch:
         script["shell"] = ["#!/bin/bash"]
 
         # SBATCH directives.
+        # https://slurm.schedmd.com/sbatch.html#lbAK
         script["SBATCH"] = [f"#SBATCH {iline}" for iline in slurm_config["SBATCH"]]
 
         if "make_array" in self.config["jobs"][job_name]:
@@ -333,8 +374,8 @@ class Batch:
         launch = self.sets["config_files"][job_name][file_idx]
 
         path, file_name = os.path.split(launch)
-        file_name = file_name.replace("_j0", "_array")
-        file_name = file_name.replace(".yaml", "")
+
+        file_name = file_name.replace("_j1", "_j%a").replace(".yaml", "")
 
         try:
             outpath = self.config["jobs"][job_name]["paths"]["out"]
