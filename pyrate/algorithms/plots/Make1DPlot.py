@@ -62,13 +62,17 @@ class Make1DPlot(Algorithm):
 
                     if not h and not self.store.check(obj_name, "PERM"):
                         specs = ST.get_items(v_specs)
-                        h = R.TH1F(
+
+                        # Why copy the following object? Because there might be already an object 
+                        # with the same name in the ROOT object list. Another way: h.SetDirectory(0)
+
+                        h = copy(R.TH1F(
                             h_name,
                             h_name,
                             int(specs[0]),
                             float(specs[1]),
                             float(specs[2]),
-                        )
+                        ))
 
                         # get histogram style from input configuration.
                         h.GetXaxis().SetTitle(v_name)
@@ -79,23 +83,26 @@ class Make1DPlot(Algorithm):
                                 config["algorithm"]["gather"] == "inputs"
                                 or len(specs) < 4
                             ):
-
-                                h.SetLineColor(
-                                    self.get_ROOT_colors(
-                                        self.store.get("INPUT:config")["color"]
+                                
+                                if "color" in self.store.get("INPUT:config"):
+                                    h.SetLineColor(
+                                        self.get_ROOT_colors(
+                                            self.store.get("INPUT:config")["color"]
+                                        )
                                     )
-                                )
 
                             elif len(specs) == 4:
                                 h.SetLineColor(self.get_ROOT_colors(specs[3]))
-
-                        h.SetLineStyle(self.store.get("INPUT:config")["linestyle"])
+                        
+                        if "linestyle" in self.store.get("INPUT:config"):
+                            h.SetLineStyle(self.store.get("INPUT:config")["linestyle"])
 
                         # put the object on the store with a different name which
                         # includes the input name, as our final plot will be a stack
                         # potentially including histograms from different samples.
                         self.store.put(obj_name, h, "PERM")
                         # self.store.put(config["name"], "READY")
+        
 
         # ----------------------------------------------------------------------
         # This would be the place to put the a config['name'] object on the READY
@@ -105,7 +112,7 @@ class Make1DPlot(Algorithm):
     def execute(self, config):
         """Fills histograms."""
         i_name = self.store.get("INPUT:name")
-
+        
         for region, var_type in config["algorithm"]["regions"].items():
             for v_type, variable in var_type.items():
                 for v_name, v_specs in variable.items():
@@ -134,7 +141,7 @@ class Make1DPlot(Algorithm):
                             # Which value is arbitrary as the "check" method only checks for
                             # the presence of an object, not its value.
                             self.store.put(obj_counter, "done")
-
+        
     def finalise(self, config):
         """Makes the plot."""
 
@@ -190,7 +197,7 @@ class Make1DPlot(Algorithm):
                         # retrieve the histogram
                         h_name = self.get_hist_name(r_name, v_name)
                         obj_name = self.get_object_name(i_name, h_name)
-
+                        
                         h = self.store.get(obj_name, "PERM")
 
                         # include the histogram in the list only if it meets
@@ -203,7 +210,7 @@ class Make1DPlot(Algorithm):
 
                         if gather_in_inputs or gather_in_variables or gather_in_regions:
                             p_collection[p_entry]["histograms"].append(h)
-
+        
         plots = {}
         for p_entry, p_dict in p_collection.items():
             p_dict["canvas"].cd()

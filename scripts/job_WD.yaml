@@ -5,13 +5,22 @@ inputs:
            tags: s2019-07-15-02-35-14
            groups: wave0, wave1, wave2
        eslices: 
-           - {portion: 1, parts: 40000}
+       - slice: 6
+         nparts: 10
 
        path:
           - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/WD/wave0
           - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/WD/wave1
           - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/WD/wave2
-   
+      
+   MC:
+       samples: 
+           tags: myTag
+       eslices: 
+           - {emin: 2, emax: 999}
+    
+       path:
+          - my/file/path
 
 configs:
     config2:
@@ -20,9 +29,16 @@ configs:
 
 
 outputs:
-    WDTest1.root:
+    WDTest1:
         path: /Users/fscutti/pyrate/myNotebooks/myOutput
+        format: .root
         objects:
           - testingReader: Data
+      
+    WDTest2:
+        path: /Users/fscutti/pyrate/myNotebooks/myOutput
+        format: .root
+        objects:
+          - testingReader: MC
     
 # EOF

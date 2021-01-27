@@ -98,6 +98,10 @@ objects:
                      event: 
                          sabreTriggerTimeDiff: 100, -52000000, 52000000, blue
 
+
+
+
+
      commonPlot1D:
          algorithm: 
              name: Make1DPlot
@@ -110,10 +114,23 @@ objects:
                      event: 
                          muonSmallTriggerTime: 100, -2000000000, 0, green
 
-     testingReader:
+     muonDetPlot1D:
          algorithm: 
-             name: Baseline
-             format: WC
+             name: Make1DPlot
+             makeratio: False
+             makeoverlay: False
+             gather: inputs
+             save_histograms: True
+             regions:
+                 muonDetSel:
+                     event: 
+                         muonDetEnergy: 100, 0, 10, blue
+
+     muonDetEnergy:
+         algorithm: 
+             name: MuonDetCharge
+             format: ROOT
+
 
 
      # -----------------------------------------------------------

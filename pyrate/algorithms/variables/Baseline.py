@@ -140,8 +140,8 @@ class Baseline(Algorithm):
             #    self.store.get("EVENT:GROUP:ch2:RunMetadata:StartTime")
             #    self.store.get("EVENT:GROUP:ch2:RunMetadata:StopTime")
 
-            self.store.get("EVENT:GROUP:ch0:SmallMuon:EventData:TriggerTime")
-            self.store.get("EVENT:GROUP:ch0:SmallMuon:EventData:TriggeredChannels")
+            #self.store.get("EVENT:GROUP:ch0:SmallMuon:EventData:TriggerTime")
+            #self.store.get("EVENT:GROUP:ch0:SmallMuon:EventData:TriggeredChannels")
 
             # self.store.get("EVENT:GROUP:ch1:SmallMuon:EventData:TriggerTime")
             # self.store.get("EVENT:GROUP:ch1:SmallMuon:EventData:TriggeredChannels")
@@ -149,9 +149,9 @@ class Baseline(Algorithm):
             # self.store.get("EVENT:GROUP:ch2:SmallMuon:EventData:TriggerTime")
             # self.store.get("EVENT:GROUP:ch2:SmallMuon:EventData:TriggeredChannels")
 
-            w = self.store.get("EVENT:GROUP:ch0:SmallMuon:Channel_0:RawWaveform")
+            #w = self.store.get("EVENT:GROUP:ch0:SmallMuon:Channel_0:RawWaveform")
             # print(w.at(0))
-            self.store.get("EVENT:GROUP:ch0:SmallMuon:Channel_0:Baseline")
+            #self.store.get("EVENT:GROUP:ch0:SmallMuon:Channel_0:Baseline")
             # idx = self.store.get("EVENT:idx")
             # self.store.put(f"{idx}", copy(w), "PERM")
 
@@ -160,6 +160,11 @@ class Baseline(Algorithm):
 
             # self.store.get("EVENT:GROUP:ch2:SmallMuon:Channel_0:RawWaveform")
             # self.store.get("EVENT:GROUP:ch2:SmallMuon:Channel_0:Baseline")
+
+            e = self.store.get("EVENT:nT:edepScint")
+            print(self.store.get("INPUT:name"))
+
+
 
         elif config["algorithm"]["format"] == "pgSQL":
             # var1 = self.store.get("INPUT:QUERY:SELECT eventrate FROM muonmonitoring ORDER BY time DESC LIMIT 3")

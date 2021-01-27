@@ -1,0 +1,91 @@
+--- 
+   
+inputs:
+
+   Neutron:
+        samples:
+          tags: neutron
+        eslices:
+            emin: 0
+            emax: -1
+        path:
+           - /Users/fscutti/simulation/run/WaveformSim/neutron
+        structure:
+            tree: nT
+        color: kBlack
+        fillstyle: 3005
+        
+   NeutronDeg45:
+        samples:
+            tags: pos5
+        eslices:
+            emin: 0
+            emax: -1
+        path:
+           - /Users/fscutti/simulation/run/WaveformSim/deg45
+        structure:
+            tree: nT
+        color: kMagenta
+        fillstyle: 3007
+   
+   
+   NeutronRadPi8:
+        samples:
+            tags: pos5
+        eslices:
+            emin: 0
+            emax: -1
+        path:
+           - /Users/fscutti/simulation/run/WaveformSim/radPi8
+        structure:
+            tree: nT
+        color: kGreen
+        fillstyle: 3006
+
+   AmBe:
+        samples:
+            tags: pos5
+        eslices:
+            emin: 0
+            emax: -1
+        path:
+           - /Users/fscutti/simulation/run/WaveformSim/AmBe
+        structure:
+            tree: nT
+        color: kRed
+        fillstyle: 3004
+
+   Gamma:
+       samples:
+         tags: gamma
+       eslices:
+           emin: 0
+           emax: -1
+       path:
+          - /Users/fscutti/simulation/run/WaveformSim/gamma
+       structure:
+           tree: nT
+       color: kGreen
+       fillstyle: 3004
+
+
+configs:
+    muondetobjs:
+       path:  /Users/fscutti/pyrate/config/muondet
+       names: objects
+    muondetregions:
+       path:  /Users/fscutti/pyrate/config/muondet
+       names: analysis
+
+
+outputs:
+    SimulationPlotsEnergyVsPhotonsMultineutron:
+        path: /Users/fscutti/pyrate/myNotebooks/myOutput
+        format: .root
+        objects:
+          #- muonDetEnergyCalib: NeutronRadPi8, NeutronDeg45, Neutron, AmBe
+          - muonDetEnergyCalib: Gamma, Neutron
+
+
+
+# EOF

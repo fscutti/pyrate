@@ -21,11 +21,25 @@ objects:
             name: Region 
         selection: 
             - muonSmallTriggerTime < 0
-      
+    
+
+    muonDetSel:
+      algorithm:
+        name: Region
+
+
     sabreTrigger: 
         algorithm: 
             name: Region 
         selection: 
             - sabreTriggerTime < 0
+
+
+
+
+
+
+
+
 
 # EOF
