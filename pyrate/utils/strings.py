@@ -10,7 +10,15 @@ def remove_duplicates(l):
 
 def get_items(s):
     """Gets comma-separated items in a string as a list."""
-    return str(s).replace(" ", "").split(",")
+    items = []
+
+    for i in str(s).split(","):
+        if not "\"" in i:
+            items.append(i.replace(" ", ""))
+        else:
+            items.append(i.replace("\"", ""))
+
+    return items
 
 
 def get_items_from_list(l):

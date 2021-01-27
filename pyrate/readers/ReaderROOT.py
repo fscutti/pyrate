@@ -23,6 +23,14 @@ class ReaderROOT(Reader):
 
     def offload(self):
         self.is_loaded = False
+
+        # for tpath in self._trees:
+        #    self._trees[tpath]["tree"].GetTree().PrintCacheStats()
+
+        # print(
+        #    f"Bytes read: {self.f.GetBytesRead()},  Read calls: {self.f.GetReadCalls()}"
+        # )
+
         self.f.Close()
 
     def read(self, name):
@@ -45,16 +53,19 @@ class ReaderROOT(Reader):
             # Update the status of the trees.
             # ------------------------------------------
             try:
+
                 if self._trees[tree_path]["idx"] != self._idx:
                     self._trees[tree_path]["idx"] = self._idx
-                    self._trees[tree_path]["tree"].GetEntry(self._idx)
+
+                    self._trees[tree_path]["tree"].LoadTree(self._idx)
 
             except KeyError:
                 self._trees[tree_path] = {
                     "idx": self._idx,
                     "tree": self.f.Get(tree_path),
                 }
-                self._trees[tree_path]["tree"].GetEntry(self._idx)
+
+                self._trees[tree_path]["tree"].LoadTree(self._idx)
 
             self._read_variable(name, self._trees[tree_path]["tree"], variable)
 
@@ -77,6 +88,7 @@ class ReaderROOT(Reader):
         h = copy(self.f.Get(name))
 
         if h:
+
             if not self.store.check(name, "TRAN"):
                 self.store.put(name, h, "TRAN")
 
@@ -90,6 +102,9 @@ class ReaderROOT(Reader):
 
     def _read_variable(self, name, tree, variable):
         """Reads a varable from a tree and puts it on the transient store."""
+
+        tree.GetBranch(variable).GetEntry(self._idx)
+
         self.store.put(name, getattr(tree, variable), "TRAN")
 
     def _break_path(self, name, k, n):

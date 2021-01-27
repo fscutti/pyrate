@@ -46,7 +46,7 @@ class Run:
         self.logger.addHandler(fileHandler)
 
         self.colors = {"initialise": {}, "execute": {}, "finalise": {}}
-            
+
         self.colors["initialise"]["input"] = "{l_bar}%s{bar}%s{r_bar}" % (
             Fore.BLUE,
             Fore.RESET,
@@ -85,7 +85,7 @@ class Run:
 
         self.run_targets = self._out.get_targets()
         self.run_objects = self._out.get_objects()
-
+     
         # self.modify_config()
 
         # -----------------------------------------------------------------------
@@ -124,16 +124,10 @@ class Run:
 
         print("\n")
 
-        # -----------------------------------------------------------------------
-        # Write finalised objects to the output.
-        # -----------------------------------------------------------------------
-        for obj_name in self.run_objects:
-            self._out.write(obj_name)
-
         stop = timeit.default_timer()
 
         if self.no_progress_bar:
-          print("Execution time: ", str(stop - start))
+            print("Execution time: ", str(stop - start))
 
         # self.logger.info("Execution time: ", str(stop - start))
 
@@ -191,11 +185,11 @@ class Run:
                 # ---------------------------------------------------------------
                 # Execute
                 # ---------------------------------------------------------------
-
+                
                 tot_n_events = self._in.get_n_events()
 
                 eslices = self.get_events_slices(tot_n_events)
-
+                
                 # ---------------------------------------------------------------
                 # Event loop
                 # ---------------------------------------------------------------
@@ -207,7 +201,7 @@ class Run:
                             70, "."
                         )
                     )
-
+                    
                     self._in.set_idx(emin)
 
                     erange = emax - emin + 1
@@ -221,6 +215,7 @@ class Run:
                         store.put("INPUT:name", i_name, "TRAN")
                         store.put("INPUT:config", self.inputs[i_name], "TRAN")
                         store.put("EVENT:idx", self._in.get_idx())
+                        
 
                         self.loop(store, self.run_targets[i_name])
 
@@ -247,7 +242,12 @@ class Run:
 
                         else:
                             store.put(t["name"], t["name"], "READY")
+        
+        if self.state in ["finalise"]:
 
+            for o in self.run_objects:
+                self._out.write(o)
+                    
         return store
 
     def loop(self, store, targets):

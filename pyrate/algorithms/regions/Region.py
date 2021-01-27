@@ -50,9 +50,6 @@ class Region(Algorithm):
 
                 for or_s in or_selection:
 
-                    variable_name, symbol, cut_value = self.get_selection(or_s)
-                    variable_value = self.store.get(variable_name)
-
                     x, symbol, y = self.get_selection(or_s)
 
                     try:
@@ -82,7 +79,7 @@ class Region(Algorithm):
 
                     weight_value = self.store.get(w)
                     region *= weight_value
-
+         
         self.store.put(config["name"], region)
 
     def get_selection(self, selection):
