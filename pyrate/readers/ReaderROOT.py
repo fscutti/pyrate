@@ -1,7 +1,6 @@
 """ Reader of a ROOT file.
 """
 import os
-import sys
 from copy import copy
 
 import ROOT as R
