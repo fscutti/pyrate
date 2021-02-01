@@ -18,7 +18,7 @@ class Make1DHistPlot(Algorithm):
         super().__init__(name, store, logger)
 
     def initialise(self, config):
-        """."""
+        """Prepares histograms."""
         i_name = self.store.get("INPUT:name", "TRAN")
 
         for f_name, f_attr in config["algorithm"]["folders"].items():
@@ -55,23 +55,46 @@ class Make1DHistPlot(Algorithm):
 
                     if not self.store.check(obj_counter):
                         
-                        weight = 1
+                        r_weight = 1
 
                         for sr_name in r_name.split("_"):
-                            weight *= self.store.get(r_name)
+                            sr_weight = self.store.get(sr_name)
+                            r_weight *= sr_weight
 
-                            if weight == 0: 
+                            if r_weight == 0: 
                                 break
                             
-                        if weight:
+                        if r_weight:
                             variable = self.store.get(v_name)
-                            self.store.get(obj_name, "PERM").Fill(variable, weight)
+                            self.store.get(obj_name, "PERM").Fill(variable, r_weight)
                         
                             self.store.put(obj_counter, "done")
 
     def finalise(self, config):
         """Makes the plot."""
+        
+        plot_collection = {}
 
+        inputs = ST.get_items(config["name"].split(":", -1)[-1])
+
+        for f_name, f_attr in config["algorithm"]["folders"].items():
+            for r_name in self.get_regions_list(f_attr):
+                for v_name, v_attr in f_attr["variables"].items():
+
+                    h_name = self.get_hist_name(r_name, v_name)
+
+                    for i_name in inputs:
+                        obj_name = self.get_object_name(i_name, h_name)
+
+
+                        path = ""
+                        if "path" in f_attr:
+                            path = f_attr["path"]
+                        
+                        print(f_attr["overlay"])
+
+
+        """
         if "gather" in config["algorithm"]:
             gather = config["algorithm"]["gather"]
         else:
@@ -79,7 +102,6 @@ class Make1DHistPlot(Algorithm):
 
         p_collection = {}
 
-        inputs = ST.get_items(config["name"].split(":", -1)[-1])
 
         for r_name, var_type in config["algorithm"]["regions"].items():
 
@@ -152,6 +174,30 @@ class Make1DHistPlot(Algorithm):
             p_dict["canvas"].Close()
 
         self.store.put(config["name"], plots, "PERM")
+        """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     def get_regions_list(self, folder):
 
