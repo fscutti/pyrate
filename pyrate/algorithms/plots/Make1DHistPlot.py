@@ -22,8 +22,8 @@ class Make1DHistPlot(Algorithm):
         i_name = self.store.get("INPUT:name", "TRAN")
 
         for f_name, f_attr in config["algorithm"]["folders"].items():
-            for r_name in self.get_regions_list(f_attr):
-                for v_name, v_attr in f_attr["variables"].items():
+            for v_name, v_attr in f_attr["variables"].items():
+                for r_name in self.make_regions_list(f_attr):
 
                     h_name = self.get_hist_name(r_name, v_name)
 
@@ -45,8 +45,8 @@ class Make1DHistPlot(Algorithm):
         i_name = self.store.get("INPUT:name")
 
         for f_name, f_attr in config["algorithm"]["folders"].items():
-            for r_name in self.get_regions_list(f_attr):
-                for v_name, v_attr in f_attr["variables"].items():
+            for v_name, v_attr in f_attr["variables"].items():
+                for r_name in self.make_regions_list(f_attr):
 
                     h_name = self.get_hist_name(r_name, v_name)
                     obj_name = self.get_object_name(i_name, h_name)
@@ -54,152 +54,50 @@ class Make1DHistPlot(Algorithm):
                     obj_counter = ":".join([obj_name, "counter"])
 
                     if not self.store.check(obj_counter):
-                        
+
                         r_weight = 1
 
                         for sr_name in r_name.split("_"):
                             sr_weight = self.store.get(sr_name)
                             r_weight *= sr_weight
 
-                            if r_weight == 0: 
+                            if r_weight == 0:
                                 break
-                            
+
                         if r_weight:
                             variable = self.store.get(v_name)
                             self.store.get(obj_name, "PERM").Fill(variable, r_weight)
-                        
+
                             self.store.put(obj_counter, "done")
 
     def finalise(self, config):
         """Makes the plot."""
-        
+
         plot_collection = {}
 
         inputs = ST.get_items(config["name"].split(":", -1)[-1])
 
         for f_name, f_attr in config["algorithm"]["folders"].items():
-            for r_name in self.get_regions_list(f_attr):
-                for v_name, v_attr in f_attr["variables"].items():
+            for v_name, v_attr in f_attr["variables"].items():
+                for r_name in self.make_regions_list(f_attr):
 
                     h_name = self.get_hist_name(r_name, v_name)
 
                     for i_name in inputs:
                         obj_name = self.get_object_name(i_name, h_name)
 
+                        path = f_name
 
-                        path = ""
                         if "path" in f_attr:
-                            path = f_attr["path"]
-                        
-                        print(f_attr["overlay"])
+                            path = os.path.join(f_attr["path"], path)
 
+                        self.make_plots_dict(plot_collection, h_name, path, f_attr)
+        
+        # make plots
+        # this can also be done in the make_plots_dict function.
+        print(plot_collection)
 
-        """
-        if "gather" in config["algorithm"]:
-            gather = config["algorithm"]["gather"]
-        else:
-            gather = False
-
-        p_collection = {}
-
-
-        for r_name, var_type in config["algorithm"]["regions"].items():
-
-            for v_type, variable in var_type.items():
-                for v_name, v_specs in variable.items():
-
-                    for i_name in inputs:
-
-                        path, p_name = (
-                            f"{config['name']}",
-                            f"plot_{i_name}_{r_name}_{v_name}",
-                        )
-
-                        path = path.replace(":", "_").replace(",", "_")
-
-                        if gather == "inputs":
-                            path += f"/regions/{r_name}/{v_type}"
-                            p_name = f"plot_{r_name}_{v_name}"
-
-                        elif gather == "variables":
-                            path += f"/inputs/{i_name}/regions/{r_name}/{v_type}"
-                            p_name = f"plot_{i_name}_{r_name}_{v_type}"
-
-                        elif gather == "regions":
-                            path += f"/inputs/{i_name}/{v_type}"
-                            p_name = f"plot_{i_name}_{v_name}"
-
-                        p_entry = os.path.join(path, p_name)
-
-                        if not p_entry in p_collection:
-                            p_collection[p_entry] = {
-                                "canvas": R.TCanvas(p_name, p_name, 900, 800),
-                                "histograms": [],
-                            }
-
-                        h_name = self.get_hist_name(r_name, v_name)
-                        obj_name = self.get_object_name(i_name, h_name)
-
-                        h = self.store.get(obj_name, "PERM")
-
-                        gather_in_inputs = r_name in p_name and v_name in p_name
-                        gather_in_variables = (
-                            i_name in p_name and r_name in p_name and v_type in p_name
-                        )
-                        gather_in_regions = i_name in p_name and v_name in p_name
-
-                        if gather_in_inputs or gather_in_variables or gather_in_regions:
-                            p_collection[p_entry]["histograms"].append(h)
-
-        plots = {}
-        for p_entry, p_dict in p_collection.items():
-            p_dict["canvas"].cd()
-
-            if not "makeoverlay" in config["algorithm"]:
-
-                p_name = p_dict["canvas"].GetName()
-
-                h_stack = copy(R.THStack(p_name, p_name))
-
-                for h in p_dict["histograms"]:
-                    h_stack.Add(h)
-                h_stack.Draw()
-
-            else:
-                for h in p_dict["histograms"]:
-                    h.Draw("same, hist")
-
-            plots[p_entry] = p_dict["canvas"].Clone()
-
-            p_dict["canvas"].Close()
-
-        self.store.put(config["name"], plots, "PERM")
-        """
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def get_regions_list(self, folder):
+    def make_regions_list(self, folder):
 
         regions_list = []
         overlay_regions = False
@@ -244,12 +142,12 @@ class Make1DHistPlot(Algorithm):
 
     def make_hist(self, h_name, variable, folder):
 
-        a = ST.get_items(variable)
+        var = self.get_var_dict(variable)
 
-        h = copy(R.TH1F(h_name, h_name, int(a[0]), float(a[1]), float(a[2])))
+        h = copy(R.TH1F(h_name, h_name, var["n_bins"], var["x_low"], var["x_high"]))
 
-        h.GetXaxis().SetTitle(a[3])
-        h.GetYaxis().SetTitle(a[4])
+        h.GetXaxis().SetTitle(var["x_label"])
+        h.GetYaxis().SetTitle(var["y_label"])
 
         color = None
 
@@ -257,11 +155,13 @@ class Make1DHistPlot(Algorithm):
 
             if folder["overlay"] == "regions":
 
-                for idx, r_name in enumerate(self.get_regions_list(folder)):
+                for idx, r_name in enumerate(self.make_regions_list(folder)):
                     if r_name in h_name:
 
-                        if len(a) > 5:
-                            color = self.get_ROOT_colors("+".join([a[5], str(idx)]))
+                        if var["color"]:
+                            color = self.get_ROOT_colors(
+                                "+".join([var["color"], str(idx)])
+                            )
 
             elif folder["overlay"] == "inputs":
 
@@ -272,14 +172,64 @@ class Make1DHistPlot(Algorithm):
 
             elif folder["overlay"] == "variables":
 
-                if len(a) > 5:
-                    color = self.get_ROOT_colors(a[5])
+                if var["color"]:
+                    color = self.get_ROOT_colors(var["color"])
 
         if color:
             h.SetLineColor(color)
             h.SetMarkerColor(color)
 
         return h
+
+    def make_plots_dict(self, plots, h_name, path, folder):
+
+        c_name = None
+
+        mode = "overlay"
+
+        if "overlay" in folder:
+
+            if folder["overlay"] == "regions":
+                c_name = f"{mode}_" + h_name.rsplit("_", 1)[-1]
+
+            elif folder["overlay"] == "variables":
+                c_name = h_name.rsplit("_", 1)[0].replace("hist", mode)
+            
+            elif folder["overlay"] == "inputs":
+                c_name = h_name.replace("hist", mode)
+
+        if not c_name:
+
+            mode = "stack"
+
+            c_name = h_name.replace("hist", mode)
+
+        if not c_name in plots:
+            plots[os.path.join(path, c_name)] = [h_name]
+        else:
+            plots[os.path.join(path, c_name)].append(h_name)
+
+    def get_var_dict(self, variable):
+
+        a = ST.get_items(variable)
+
+        d = {
+            "n_bins": int(a[0]),
+            "x_low": float(a[1]),
+            "x_high": float(a[2]),
+            "x_label": a[3],
+            "y_label": a[4],
+            "color": None,
+            "legend_entry": None,
+        }
+
+        if len(a) >= 6:
+            d["color"] = a[5]
+
+        if len(a) >= 7:
+            d["legend_entry"] = a[6]
+
+        return d
 
 
 # EOF
