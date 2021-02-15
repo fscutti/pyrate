@@ -10,6 +10,8 @@ from pyrate.utils import functions as FN
 
 import ROOT as R
 
+R.gStyle.SetOptStat(0)
+
 
 class Make1DHistPlot(Algorithm):
     __slots__ = ()
@@ -58,6 +60,10 @@ class Make1DHistPlot(Algorithm):
                         r_weight = 1
 
                         for sr_name in r_name.split("_"):
+
+                            if sr_name == "NOSEL":
+                                continue
+
                             sr_weight = self.store.get(sr_name)
                             r_weight *= sr_weight
 
@@ -91,28 +97,80 @@ class Make1DHistPlot(Algorithm):
                         if "path" in f_attr:
                             path = os.path.join(f_attr["path"], path)
 
-                        self.make_plots_dict(plot_collection, h_name, path, f_attr)
-        
-        # make plots
-        # this can also be done in the make_plots_dict function.
-        print(plot_collection)
+                        self.make_plots_dict(plot_collection, obj_name, path, f_attr)
 
-    def make_regions_list(self, folder):
+        FN.pretty(plot_collection)
 
-        regions_list = []
-        overlay_regions = False
+        canvas_collection = {}
 
-        if "overlay" in folder:
-            overlay_regions = folder["overlay"] == "regions"
+        for f_path, p_dict in plot_collection.items():
 
-        if "regions" in folder:
-            regions = ST.get_items(folder["regions"])
+            if not f_path in canvas_collection:
+                canvas_collection[f_path] = []
 
-            regions_list = [
-                "_".join(regions) if not overlay_regions else r for r in regions
-            ]
+            for p_name, m_dict in p_dict.items():
 
-        return regions_list
+                l = copy(R.TLegend(0.1, 0.8, 0.9, 0.9))
+
+                c = copy(R.TCanvas(p_name, "", 900, 800))
+
+                c.SetTickx()
+                c.SetTicky()
+
+                c.cd()
+
+                for mode, h_list in m_dict.items():
+
+                    if mode == "stack":
+                        h_stack = copy(R.THStack("hs", ""))
+
+                    for obj_name in h_list:
+                        h = self.store.get(obj_name, "PERM")
+
+                        l.AddEntry(h, obj_name, "pl")
+
+                        if mode == "overlay":
+                            h.Draw("same, hist")
+
+                        elif mode == "stack":
+                            h_stack.Add(h)
+
+                    if mode == "stack":
+                        h_stack.Draw("same, hist")
+
+                l = l.Clone()
+
+                l.Draw()
+
+                canvas_collection[f_path].append(c.Clone())
+
+                c.Close()
+
+        #FN.pretty(canvas_collection)
+
+        self.store.put(config["name"], canvas_collection, "PERM")
+
+    def get_var_dict(self, variable):
+
+        a = ST.get_items(variable)
+
+        d = {
+            "n_bins": int(a[0]),
+            "x_low": float(a[1]),
+            "x_high": float(a[2]),
+            "x_label": a[3],
+            "y_label": a[4],
+            "color": None,
+            "legend_entry": None,
+        }
+
+        if len(a) >= 6:
+            d["color"] = a[5]
+
+        if len(a) >= 7:
+            d["legend_entry"] = a[6]
+
+        return d
 
     def get_hist_name(self, region, variable):
         """Builds histogram name."""
@@ -139,6 +197,26 @@ class Make1DHistPlot(Algorithm):
             color = getattr(R, my_color)
 
         return int(color)
+
+    def make_regions_list(self, folder):
+
+        overlay_regions = False
+        regions_list = []
+
+        if "overlay" in folder:
+            overlay_regions = folder["overlay"] == "regions"
+
+        if "regions" in folder:
+            regions = ST.get_items(folder["regions"])
+
+            regions_list = [
+                "_".join(regions) if not overlay_regions else r for r in regions
+            ]
+
+        if not regions_list:
+            return ["NOSEL"]
+
+        return ST.remove_duplicates(regions_list)
 
     def make_hist(self, h_name, variable, folder):
 
@@ -181,55 +259,37 @@ class Make1DHistPlot(Algorithm):
 
         return h
 
-    def make_plots_dict(self, plots, h_name, path, folder):
+    def make_plots_dict(self, plots, obj_name, path, folder):
 
-        c_name = None
+        i_name, h_name = obj_name.split(":")
 
-        mode = "overlay"
+        c_name = h_name.replace("hist", "plot")
+        mode = "stack"
 
         if "overlay" in folder:
 
             if folder["overlay"] == "regions":
-                c_name = f"{mode}_" + h_name.rsplit("_", 1)[-1]
+                c_name = "plot_" + h_name.rsplit("_", 1)[-1]
+                mode = "overlay"
 
             elif folder["overlay"] == "variables":
-                c_name = h_name.rsplit("_", 1)[0].replace("hist", mode)
-            
-            elif folder["overlay"] == "inputs":
-                c_name = h_name.replace("hist", mode)
+                c_name = h_name.rsplit("_", 1)[0].replace("hist", "plot")
+                mode = "overlay"
 
-        if not c_name:
+            elif folder["overlay"] == "inputs" or folder["overlay"] == i_name:
+                mode = "overlay"
 
-            mode = "stack"
+        if not path in plots:
+            plots[path] = {}
 
-            c_name = h_name.replace("hist", mode)
+        if not c_name in plots[path]:
+            plots[path].update({c_name: {}})
 
-        if not c_name in plots:
-            plots[os.path.join(path, c_name)] = [h_name]
-        else:
-            plots[os.path.join(path, c_name)].append(h_name)
+        if not mode in plots[path][c_name]:
+            plots[path][c_name].update({mode: [obj_name]})
 
-    def get_var_dict(self, variable):
-
-        a = ST.get_items(variable)
-
-        d = {
-            "n_bins": int(a[0]),
-            "x_low": float(a[1]),
-            "x_high": float(a[2]),
-            "x_label": a[3],
-            "y_label": a[4],
-            "color": None,
-            "legend_entry": None,
-        }
-
-        if len(a) >= 6:
-            d["color"] = a[5]
-
-        if len(a) >= 7:
-            d["legend_entry"] = a[6]
-
-        return d
+        if not obj_name in plots[path][c_name][mode]:
+            plots[path][c_name][mode].append(obj_name)
 
 
 # EOF
