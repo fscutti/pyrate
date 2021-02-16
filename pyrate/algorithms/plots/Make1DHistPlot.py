@@ -1,4 +1,31 @@
-""" .
+""" This algorithm outputs a dictionary of path_in_output:[1d_plots] elements using ROOT.
+Plots will be grouped under folders in the output ROOT file under paths which can eventually 
+be specified.
+
+Configuration:
+
+     myObjectName:
+         algorithm: 
+             name: Make1DHistPlot
+             folders:
+               myFolder:
+                   path: myPathInOutputROOTFile  - OPTIONAL. A default path will be built using myFolder -
+                   regions: mySelection1, mySelection2 - OPTIONAL. Histograms will be filled with these selections in AND logic. -
+                   variables:
+                        myVar1: n_bins, x_low, x_high, x_title, y_title, ROOT_color 
+                        myVar2: n_bins, x_low, x_high, x_title, y_title, ROOT_color 
+                   overlay: regions - OPTIONAL. With this option the user can specifiy how to display overlaied histograms. -
+
+The overlay option is not strictly required and works as follows: 
+
+Not provided.      - A plot will be made for each variable, stacking all valid inputs relative to the AND of the declared regions. -
+overlay: inputs    - A plot will be made for each variable, overlaying all valid inputs relative to the AND of the declared regions. -
+overlay: someInput - If a specific input name is provided, this input will be overlaied against the stack of all other available. -
+overlay: regions   - A plot will be made for each variable overlaying each declared region and all available inputs. -
+overlay: variables - A plot will be made overlaying all available inputs and all available variables relative to the AND of the declared regions. -
+
+ToDo: better adjust the style of the plots. Introduce ratio plots.
+
 """
 import os
 from copy import copy
@@ -20,7 +47,9 @@ class Make1DHistPlot(Algorithm):
         super().__init__(name, store, logger)
 
     def initialise(self, config):
-        """Prepares histograms."""
+        """Prepares histograms.
+        If not found in the input already it will create new ones."""
+
         i_name = self.store.get("INPUT:name", "TRAN")
 
         for f_name, f_attr in config["algorithm"]["folders"].items():
@@ -97,9 +126,12 @@ class Make1DHistPlot(Algorithm):
                         if "path" in f_attr:
                             path = os.path.join(f_attr["path"], path)
 
+                        target_dir = config["name"].replace(",", "_").replace(":", "_")
+                        path = os.path.join(target_dir, path)
+
                         self.make_plots_dict(plot_collection, obj_name, path, f_attr)
 
-        FN.pretty(plot_collection)
+        # FN.pretty(plot_collection)
 
         canvas_collection = {}
 
@@ -119,6 +151,9 @@ class Make1DHistPlot(Algorithm):
 
                 c.cd()
 
+                has_already_drawn = False
+                h_stack = None
+
                 for mode, h_list in m_dict.items():
 
                     if mode == "stack":
@@ -130,13 +165,17 @@ class Make1DHistPlot(Algorithm):
                         l.AddEntry(h, obj_name, "pl")
 
                         if mode == "overlay":
-                            h.Draw("same, hist")
+                            h.Draw("same")
+                            has_already_drawn = True
 
                         elif mode == "stack":
                             h_stack.Add(h)
 
-                    if mode == "stack":
-                        h_stack.Draw("same, hist")
+                if h_stack:
+                    if not has_already_drawn:
+                        h_stack.Draw()
+                    else:
+                        h_stack.Draw("same")
 
                 l = l.Clone()
 
@@ -146,11 +185,12 @@ class Make1DHistPlot(Algorithm):
 
                 c.Close()
 
-        #FN.pretty(canvas_collection)
+        # FN.pretty(canvas_collection)
 
         self.store.put(config["name"], canvas_collection, "PERM")
 
     def get_var_dict(self, variable):
+        """Build dictionary for variable attributes."""
 
         a = ST.get_items(variable)
 
@@ -181,6 +221,7 @@ class Make1DHistPlot(Algorithm):
         return f"{input_name}:{histogram}"
 
     def get_ROOT_colors(self, my_color):
+        """Get ROOT color."""
 
         ROOT_color_name = "kBlack"
         ROOT_color_mod = ""
@@ -199,6 +240,7 @@ class Make1DHistPlot(Algorithm):
         return int(color)
 
     def make_regions_list(self, folder):
+        """Build list of selection regions considered for histogram filling."""
 
         overlay_regions = False
         regions_list = []
@@ -219,6 +261,7 @@ class Make1DHistPlot(Algorithm):
         return ST.remove_duplicates(regions_list)
 
     def make_hist(self, h_name, variable, folder):
+        """Make histograms."""
 
         var = self.get_var_dict(variable)
 
@@ -260,6 +303,7 @@ class Make1DHistPlot(Algorithm):
         return h
 
     def make_plots_dict(self, plots, obj_name, path, folder):
+        """Assign histogram content of plots."""
 
         i_name, h_name = obj_name.split(":")
 

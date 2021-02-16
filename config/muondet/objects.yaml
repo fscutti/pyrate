@@ -251,22 +251,42 @@ objects:
          algorithm: 
              name: Make1DHistPlot
              folders:
+
                testFolder1:
-                   #path: pmt_variables
+                   path: pmt_variables
                    regions: muonDetParticlePos5, muonDetParticlePos1
                    variables:
-                        numPhotonsPMT8: 30, 0., 30., "# of photons", "Entries", kBlue
-                        numPhotonsPMT12: 30, 0., 30., "# of photons", "Entries", kRed
+                        measEnergyPMT8: 30, 0., 4e-6, "# of photons", "entries", kBlue
+                        measEnergyPMT12: 30, 0., 4e-6, "# of photons", "Entries", kRed
                    overlay: regions
-                   save_histograms: False
+
                testFolder2:
-                   #path: pmt_variables
+                   path: pmt_variables
                    regions: muonDetParticlePos5
                    variables:
-                        numPhotonsPMT9: 30, 0., 30., "# of photons", "Entries", kGreen
-                        numPhotonsPMT13: 30, 0., 30., "# of photons", "Entries", kMagenta
+                        measEnergyPMT9: 30, 0., 4e-6, "# of photons", "Entries", kGreen
+                        measEnergyPMT13: 30, 0., 4e-6, "# of photons", "Entries", kMagenta
+                   overlay: Gamma
+
+               testFolder3:
+                   regions: muonDetParticlePos5
+                   variables:
+                        measEnergyPMT12: 30, 0., 4e-6, "# of photons", "Entries", kBlue
+                        measEnergyPMT13: 30, 0., 4e-6, "# of photons", "Entries", kMagenta
                    overlay: variables
-                   save_histograms: False
+
+               testFolder4:
+                   regions: muonDetParticlePos5
+                   variables:
+                        measEnergyPMT8: 30, 0., 4e-6, "# of photons", "Entries", kBlue
+                        measEnergyPMT13: 30, 0., 4e-6, "# of photons", "Entries", kMagenta
+                   overlay: inputs
+
+               testFolder5:
+                   regions: muonDetParticlePos5
+                   variables:
+                        measEnergyPMT8: 30, 0., 4e-6, "# of photons", "Entries", kBlue
+                        measEnergyPMT13: 30, 0., 4e-6, "# of photons", "Entries", kMagenta
 
 
      # -----------------------------------------------------------
