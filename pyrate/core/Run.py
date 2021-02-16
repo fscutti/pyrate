@@ -115,7 +115,7 @@ class Run:
         print("*" * len(msg))
 
         store = self.run("initialise", store)
-
+        
         if not store.check("any", "READY"):
 
             store = self.run("execute", store)

@@ -32,12 +32,15 @@ class WriterROOT(Writer):
 
     def _write_dirs(self, obj):
         """Write dictionary of objects to file. The keys are the paths."""
-        for entry, o in obj.items():
-
-            path = entry.rsplit("/", 1)[0]
+        for path, item in obj.items():
 
             self._make_dirs(path)
-            self.f.GetDirectory(path).WriteObject(o, o.GetName())
+
+            if isinstance(item, list):
+                for i in item:
+                    self.f.GetDirectory(path).WriteObject(i, i.GetName())
+            else:
+                self.f.GetDirectory(path).WriteObject(item, item.GetName())
 
     def _make_dirs(self, path):
         """Creates the path required to write an object."""

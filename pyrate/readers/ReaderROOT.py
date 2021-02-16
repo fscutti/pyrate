@@ -1,5 +1,6 @@
 """ Reader of a ROOT file.
 """
+import os
 from copy import copy
 
 import ROOT as R
@@ -34,14 +35,15 @@ class ReaderROOT(Reader):
         self.f.Close()
 
     def read(self, name):
+
+        k, n = 1, 1
+
+        if "GROUP:" in name:
+            k += 2
+
         if name.startswith("EVENT:"):
+            n += 1
 
-            if "GROUP:" in name:
-                k, n = 3, 2
-            else:
-                k, n = 1, 2
-
-            # To do: try to use a list here
             path, (
                 tree,
                 variable,
@@ -70,22 +72,23 @@ class ReaderROOT(Reader):
             self._read_variable(name, self._trees[tree_path]["tree"], variable)
 
         elif name.startswith("INPUT:"):
-            # To do: break name appropriately to retrieve histogram in the right path.
-            self._read_hist(name)
+            path, (histogram,) = self._break_path(name, k, n)
+
+            self._read_hist(name, path, histogram)
 
     def set_n_events(self):
         """Reads number of events in the main tree of the file."""
         if not self._n_events:
             self._n_events = self.f.Get(self.structure["tree"]).GetEntries()
 
-    def _read_hist(self, name):
+    def _read_hist(self, name, path, histogram):
         """Grabs histograms from the input file and puts them on the permanent store."""
 
         # if no object is present in the file the histogram will be None.
-        # overwriting this value only occurs if an histogram of with name
-        # if found for the first time.
+        # overwriting this value only occurs if an histogram is found under 'name'
+        # for the first time.
 
-        h = copy(self.f.Get(name))
+        h = copy(self.f.Get(os.path.join(path, histogram)))
 
         if h:
 
@@ -111,6 +114,8 @@ class ReaderROOT(Reader):
         """Breaks a given path excluding the INPUT/EVENT/:/GROUP prefix
         using the k index. NB: Always retrieve elements of tuple
         as (1, 2, ..., n,)."""
+
+        name = name.replace("/", ":").replace("::", ":")
 
         t = name.split(":")
 

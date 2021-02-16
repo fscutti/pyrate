@@ -68,6 +68,18 @@ inputs:
        color: kGreen
        fillstyle: 3004
 
+   Photons:
+       samples:
+         tags: gamma
+       eslices:
+           emin: 0
+           emax: -1
+       path:
+          - /Users/fscutti/simulation/run/WaveformSim/gamma
+       structure:
+           tree: nT
+       color: kBlack
+       fillstyle: 3004
 
 configs:
     muondetobjs:
@@ -79,12 +91,15 @@ configs:
 
 
 outputs:
-    SimulationPlotsEnergyVsPhotonsMultineutron:
+    #SimulationPlotsEnergyVsPhotonsMultineutron:
+    TestFile:
         path: /Users/fscutti/pyrate/myNotebooks/myOutput
         format: .root
         objects:
           #- muonDetEnergyCalib: NeutronRadPi8, NeutronDeg45, Neutron, AmBe
-          - muonDetEnergyCalib: Gamma, Neutron
+          #- muonDetEnergyCalib: Gamma, Neutron
+          - muonDetPlot1D: Gamma, Neutron, Photons
+          - muonDetPlot1D: Neutron, Photons
 
 
 
