@@ -34,6 +34,7 @@ from pyrate.core.Algorithm import Algorithm
 
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
+from pyrate.utils import ROOT_classes as CL
 
 import ROOT as R
 
@@ -61,6 +62,9 @@ class Make1DHistPlot(Algorithm):
                     path = ""
                     if "path" in f_attr:
                         path = f_attr["path"]
+                    
+                    target_dir = config["name"].replace(",", "_").replace(":", "_")
+                    path = os.path.join(target_dir, path)
 
                     h = self.store.copy("INPUT:" + os.path.join(path, h_name), "TRAN")
 
@@ -222,22 +226,7 @@ class Make1DHistPlot(Algorithm):
 
     def get_ROOT_colors(self, my_color):
         """Get ROOT color."""
-
-        ROOT_color_name = "kBlack"
-        ROOT_color_mod = ""
-        color = 1
-
-        if "+" in my_color:
-            ROOT_color_name, ROOT_color_mod = my_color.split("+")
-            color = getattr(R, ROOT_color_name) + R.Int_t(ROOT_color_mod)
-
-        elif "-" in my_color:
-            ROOT_color_name, ROOT_color_mod = my_color.split("-")
-            color = getattr(R, ROOT_color_name) - R.Int_t(ROOT_color_mod)
-        else:
-            color = getattr(R, my_color)
-
-        return int(color)
+        return CL.ColorFinder(my_color["R"], my_color["G"], my_color["B"]).match()
 
     def make_regions_list(self, folder):
         """Build list of selection regions considered for histogram filling."""
@@ -270,35 +259,40 @@ class Make1DHistPlot(Algorithm):
         h.GetXaxis().SetTitle(var["x_label"])
         h.GetYaxis().SetTitle(var["y_label"])
 
-        color = None
+        color_list = []
+
+        if "color" in self.store.get("INPUT:config"):
+            color_list.append(FN.get_color(self.store.get("INPUT:config")["color"]))
 
         if "overlay" in folder:
 
-            if folder["overlay"] == "regions":
+            if folder["overlay"] == "variables":
+
+                if var["color"]:
+                    color_list.append(FN.get_color(var["color"]))
+
+            elif folder["overlay"] == "inputs":
+                pass
+
+            elif folder["overlay"] == "regions":
 
                 for idx, r_name in enumerate(self.make_regions_list(folder)):
                     if r_name in h_name:
 
-                        if var["color"]:
-                            color = self.get_ROOT_colors(
-                                "+".join([var["color"], str(idx)])
-                            )
+                        pixels = ["R", "G", "B"]
 
-            elif folder["overlay"] == "inputs":
+                        primary = pixels[idx % 3]
+                        others = [p for p in pixels if p != primary]
 
-                if "color" in self.store.get("INPUT:config"):
-                    color = self.get_ROOT_colors(
-                        self.store.get("INPUT:config")["color"]
-                    )
+                        color_list.append(
+                            {primary: 0.7, others[0]: 0.0, others[1]: 0.0}
+                        )
 
-            elif folder["overlay"] == "variables":
+        color = FN.add_colors(color_list)
+        ROOT_color = self.get_ROOT_colors(color)
 
-                if var["color"]:
-                    color = self.get_ROOT_colors(var["color"])
-
-        if color:
-            h.SetLineColor(color)
-            h.SetMarkerColor(color)
+        h.SetLineColor(ROOT_color)
+        h.SetMarkerColor(ROOT_color)
 
         return h
 

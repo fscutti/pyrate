@@ -34,6 +34,7 @@ from pyrate.core.Algorithm import Algorithm
 
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
+from pyrate.utils import ROOT_classes as CL
 
 import ROOT as R
 
@@ -175,7 +176,7 @@ class Make2DHistPlot(Algorithm):
                         l.AddEntry(h, obj_name, "pl")
 
                         if mode == "overlay":
-                            h.Draw("same, box")
+                            h.Draw("same")
                             has_already_drawn = True
 
                         elif mode == "stack":
@@ -183,9 +184,9 @@ class Make2DHistPlot(Algorithm):
 
                 if h_stack:
                     if not has_already_drawn:
-                        h_stack.Draw("box")
+                        h_stack.Draw()
                     else:
-                        h_stack.Draw("same, box")
+                        h_stack.Draw("same")
 
                 l = l.Clone()
 
@@ -237,15 +238,14 @@ class Make2DHistPlot(Algorithm):
     def get_ROOT_colors(self, my_color):
         """Get ROOT color.
         https://root-forum.cern.ch/t/how-to-form-a-color-t-from-a-tcolor/25013
+        The following ways have been tried but are problematic:
+        # color = CL.Color(my_color["R"], my_color["G"], my_color["B"], f"{my_color['R'], my_color['G'], my_color['B']}")
+        # setattr(R, color.name, color)
+
+        # _c = R.TColor()
+        # color = _c.GetColor(my_color["R"], my_color["G"], my_color["B"])
         """
-        #color_idx = R.TColor.GetFreeColorIndex()
-
-        color = R.gROOT.GetColor(R.kBlack)
-        #color.SetRGB(my_color["R"], my_color["G"], my_color["B"])
-        color.SetRGB(0.1, 0.2, 0.3)
-
-        #color = R.TColor(color_idx, my_color["R"], my_color["B"], my_color["G"])
-        return color
+        return CL.ColorFinder(my_color["R"], my_color["G"], my_color["B"]).match()
 
     def make_regions_list(self, folder):
         """Build list of selection regions considered for histogram filling."""
@@ -308,14 +308,21 @@ class Make2DHistPlot(Algorithm):
 
                 for idx, r_name in enumerate(self.make_regions_list(folder)):
                     if r_name in h_name:
-                        color_list.append({"R": 0.2, "B": 0.2, "G": 0.2})
+
+                        pixels = ["R", "G", "B"]
+
+                        primary = pixels[idx % 3]
+                        others = [p for p in pixels if p != primary]
+
+                        color_list.append(
+                            {primary: 0.7, others[0]: 0.0, others[1]: 0.0}
+                        )
 
         color = FN.add_colors(color_list)
-
         ROOT_color = self.get_ROOT_colors(color)
 
-        h.SetLineColor(ROOT_color.GetNumber())
-        h.SetMarkerColor(ROOT_color.GetNumber())
+        h.SetLineColor(ROOT_color)
+        h.SetMarkerColor(ROOT_color)
 
         return h
 
