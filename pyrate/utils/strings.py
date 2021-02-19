@@ -13,10 +13,10 @@ def get_items(s):
     items = []
 
     for i in str(s).split(","):
-        if not "\"" in i:
+        if not '"' in i:
             items.append(i.replace(" ", ""))
         else:
-            items.append(i.replace("\"", ""))
+            items.append(i.replace('"', ""))
 
     return items
 

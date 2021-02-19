@@ -124,4 +124,31 @@ def intersect(probe, target):
     return intersection
 
 
+def get_color(my_color):
+    """Given a pixel string it prepares a pixel dictionary."""
+    my_color = my_color.replace(" ", "")
+
+    my_color = {c.split(":")[0]: float(c.split(":")[1]) for c in my_color.split("|")}
+
+    return my_color
+
+
+def add_colors(my_color_list):
+    """Adds color pixels from a list. Avoids white."""
+    added_color = {"R": 0.0, "G": 0.0, "B": 0.0}
+
+    for idx, my_color in enumerate(my_color_list):
+
+        added_color["R"] += my_color["R"]
+        added_color["G"] += my_color["G"]
+        added_color["B"] += my_color["B"]
+
+        is_white = sum([added_color[pixel] for pixel in ["R", "G", "B"]]) >= 2.9
+
+        if is_white:
+            added_color[["R", "G", "B"][idx % 3]] = 0.0
+
+    return added_color
+
+
 # EOF
