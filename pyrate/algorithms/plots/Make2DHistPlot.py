@@ -142,7 +142,7 @@ class Make2DHistPlot(Algorithm):
 
                         self.make_plots_dict(plot_collection, obj_name, path, f_attr)
 
-        FN.pretty(plot_collection)
+        # FN.pretty(plot_collection)
 
         canvas_collection = {}
 
@@ -162,31 +162,45 @@ class Make2DHistPlot(Algorithm):
 
                 c.cd()
 
-                has_already_drawn = False
                 h_stack = None
+                x_stack_label, y_stack_label = None, None
 
                 for mode, h_list in m_dict.items():
-
-                    if mode == "stack":
-                        h_stack = copy(R.THStack("hs", ""))
-
                     for obj_name in h_list:
+
                         h = self.store.get(obj_name, "PERM")
+
+                        if mode == "stack" and not h_stack:
+
+                            h_stack = copy(
+                                R.THStack(
+                                    "h_stack",
+                                    f";{h.GetXaxis().GetTitle()};{h.GetYaxis().GetTitle()}",
+                                )
+                            )
 
                         l.AddEntry(h, obj_name, "pl")
 
                         if mode == "overlay":
-                            h.Draw("same")
+
+                            if "stack" in m_dict:
+                                h.Draw("same,lego")
+                            else:
+                                if len(h_list) == 1:
+                                    h.Draw("colz")
+                                else:
+                                    h.Draw("same")
+
                             has_already_drawn = True
 
                         elif mode == "stack":
                             h_stack.Add(h)
 
                 if h_stack:
-                    if not has_already_drawn:
-                        h_stack.Draw()
-                    else:
-                        h_stack.Draw("same")
+                    h_stack.Draw("noclear,lego")
+
+                c.Modified()
+                c.Update()
 
                 l = l.Clone()
 
@@ -196,7 +210,7 @@ class Make2DHistPlot(Algorithm):
 
                 c.Close()
 
-        FN.pretty(canvas_collection)
+        # FN.pretty(canvas_collection)
 
         self.store.put(config["name"], canvas_collection, "PERM")
 
@@ -298,6 +312,9 @@ class Make2DHistPlot(Algorithm):
 
             if folder["overlay"] == "variables":
 
+                # h.GetXaxis().SetTitle("x")
+                # h.GetYaxis().SetTitle("y")
+
                 if var["color"]:
                     color_list.append(FN.get_color(var["color"]))
 
@@ -323,6 +340,7 @@ class Make2DHistPlot(Algorithm):
 
         h.SetLineColor(ROOT_color)
         h.SetMarkerColor(ROOT_color)
+        # h.SetFillColor(ROOT_color)
 
         return h
 

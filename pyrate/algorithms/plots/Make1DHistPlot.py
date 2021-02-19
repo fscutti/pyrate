@@ -62,7 +62,7 @@ class Make1DHistPlot(Algorithm):
                     path = ""
                     if "path" in f_attr:
                         path = f_attr["path"]
-                    
+
                     target_dir = config["name"].replace(",", "_").replace(":", "_")
                     path = os.path.join(target_dir, path)
 
@@ -155,31 +155,40 @@ class Make1DHistPlot(Algorithm):
 
                 c.cd()
 
-                has_already_drawn = False
                 h_stack = None
+                x_stack_label, y_stack_label = None, None
 
                 for mode, h_list in m_dict.items():
-
-                    if mode == "stack":
-                        h_stack = copy(R.THStack("hs", ""))
-
                     for obj_name in h_list:
+
                         h = self.store.get(obj_name, "PERM")
+
+                        if mode == "stack" and not h_stack:
+
+                            h_stack = copy(
+                                R.THStack(
+                                    "h_stack",
+                                    f";{h.GetXaxis().GetTitle()};{h.GetYaxis().GetTitle()}",
+                                )
+                            )
 
                         l.AddEntry(h, obj_name, "pl")
 
                         if mode == "overlay":
                             h.Draw("same")
-                            has_already_drawn = True
 
                         elif mode == "stack":
+
+                            x_stack_label = h.GetXaxis().GetTitle()
+                            y_stack_label = h.GetYaxis().GetTitle()
+
                             h_stack.Add(h)
 
                 if h_stack:
-                    if not has_already_drawn:
-                        h_stack.Draw()
-                    else:
-                        h_stack.Draw("same")
+                    h_stack.Draw("noclear")
+
+                c.Modified()
+                c.Update()
 
                 l = l.Clone()
 
@@ -267,6 +276,9 @@ class Make1DHistPlot(Algorithm):
         if "overlay" in folder:
 
             if folder["overlay"] == "variables":
+
+                # h.GetXaxis().SetTitle("x")
+                # h.GetYaxis().SetTitle("y")
 
                 if var["color"]:
                     color_list.append(FN.get_color(var["color"]))
