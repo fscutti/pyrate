@@ -115,137 +115,6 @@ objects:
      # -----------------------------------------------------------
      # Plots
      # -----------------------------------------------------------
-     muonDetEnergyCalib:
-         algorithm: 
-             name: Make1DGraph
-             gather: inputs
-             save_graphs: True
-             regions:
-                 #
-                 #muonDetParticlePos1:
-                 #    calibs: 
-                 #        numPhotonsPMT8,  trueParticleEnergy: 30, 0., 30., 0., 15., kBlack, "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT9,  trueParticleEnergy: 30, 0., 30., 0., 15., kRed,   "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT12, trueParticleEnergy: 30, 0., 30., 0., 15., kGreen, "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT13, trueParticleEnergy: 30, 0., 30., 0., 15., kBlue,  "# of photons", "Deposited Energy [MeV]"
-                 #muonDetParticlePos2:
-                 #    calibs: 
-                 #        numPhotonsPMT8,  trueParticleEnergy: 30, 0., 30., 0., 15., kBlack, "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT9,  trueParticleEnergy: 30, 0., 30., 0., 15., kRed,   "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT12, trueParticleEnergy: 30, 0., 30., 0., 15., kGreen, "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT13, trueParticleEnergy: 30, 0., 30., 0., 15., kBlue,  "# of photons", "Deposited Energy [MeV]"
-                 #muonDetParticlePos3:
-                 #    calibs: 
-                 #        numPhotonsPMT8,  trueParticleEnergy: 30, 0., 30., 0., 15., kBlack, "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT9,  trueParticleEnergy: 30, 0., 30., 0., 15., kRed,   "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT12, trueParticleEnergy: 30, 0., 30., 0., 15., kGreen, "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT13, trueParticleEnergy: 30, 0., 30., 0., 15., kBlue,  "# of photons", "Deposited Energy [MeV]"
-                 #muonDetParticlePos4:
-                 #    calibs: 
-                 #        numPhotonsPMT8,  trueParticleEnergy: 30, 0., 30., 0., 15., kBlack, "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT9,  trueParticleEnergy: 30, 0., 30., 0., 15., kRed,   "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT12, trueParticleEnergy: 30, 0., 30., 0., 15., kGreen, "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT13, trueParticleEnergy: 30, 0., 30., 0., 15., kBlue,  "# of photons", "Deposited Energy [MeV]"
-                 #
-                 #
-                 #muonDetParticlePos5:
-                 #    calibs: 
-                 #        numPhotonsPMT8,  trueParticleEnergy: 30, 0., 30., 0., 15., kBlack, "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT9,  trueParticleEnergy: 30, 0., 30., 0., 15., kRed,   "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT12, trueParticleEnergy: 30, 0., 30., 0., 15., kGreen, "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT13, trueParticleEnergy: 30, 0., 30., 0., 15., kBlue,  "# of photons", "Deposited Energy [MeV]"
-
-                 #muonDetParticlePos6:
-                 #    calibs: 
-                 #        numPhotonsPMT8,  trueParticleEnergy: 30, 0., 30., 0., 15., kBlack, "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT9,  trueParticleEnergy: 30, 0., 30., 0., 15., kRed,   "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT12, trueParticleEnergy: 30, 0., 30., 0., 15., kGreen, "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT13, trueParticleEnergy: 30, 0., 30., 0., 15., kBlue,  "# of photons", "Deposited Energy [MeV]"
-                 #muonDetParticlePos7:
-                 #    calibs: 
-                 #        numPhotonsPMT8,  trueParticleEnergy: 30, 0., 30., 0., 15., kBlack, "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT9,  trueParticleEnergy: 30, 0., 30., 0., 15., kRed,   "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT12, trueParticleEnergy: 30, 0., 30., 0., 15., kGreen, "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT13, trueParticleEnergy: 30, 0., 30., 0., 15., kBlue,  "# of photons", "Deposited Energy [MeV]"
-                 #muonDetParticlePos8:
-                 #    calibs: 
-                 #        numPhotonsPMT8,  trueParticleEnergy: 30, 0., 30., 0., 15., kBlack, "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT9,  trueParticleEnergy: 30, 0., 30., 0., 15., kRed,   "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT12, trueParticleEnergy: 30, 0., 30., 0., 15., kGreen, "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT13, trueParticleEnergy: 30, 0., 30., 0., 15., kBlue,  "# of photons", "Deposited Energy [MeV]"
-                 #muonDetParticlePos9:
-                 #    calibs: 
-                 #        numPhotonsPMT8,  trueParticleEnergy: 30, 0., 30., 0., 15., kBlack, "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT9,  trueParticleEnergy: 30, 0., 30., 0., 15., kRed,   "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT12, trueParticleEnergy: 30, 0., 30., 0., 15., kGreen, "# of photons", "Deposited Energy [MeV]"
-                 #        numPhotonsPMT13, trueParticleEnergy: 30, 0., 30., 0., 15., kBlue,  "# of photons", "Deposited Energy [MeV]"
-                 #
-                 #
-                 #
-                 #
-                 #
-                 muonDetParticlePos1:
-                     calibs: 
-                         numPhotonsPMT8, measEnergyPMT8  : 30, 0., 30., 0., 4E-6, kBlack, "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT9, measEnergyPMT9  : 30, 0., 30., 0., 4E-6, kRed,   "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT12,measEnergyPMT12 : 30, 0., 30., 0., 4E-6, kGreen, "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT13,measEnergyPMT13 : 30, 0., 30., 0., 4E-6, kBlue,  "# of photons", "Deposited Energy [MeV]"
-                 muonDetParticlePos2:
-                     calibs: 
-                         numPhotonsPMT8, measEnergyPMT8  : 30, 0., 30., 0., 4E-6, kBlack, "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT9, measEnergyPMT9  : 30, 0., 30., 0., 4E-6, kRed,   "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT12,measEnergyPMT12 : 30, 0., 30., 0., 4E-6, kGreen, "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT13,measEnergyPMT13 : 30, 0., 30., 0., 4E-6, kBlue,  "# of photons", "Deposited Energy [MeV]"
-                 muonDetParticlePos3:
-                     calibs: 
-                         numPhotonsPMT8, measEnergyPMT8  : 30, 0., 30., 0., 4E-6, kBlack, "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT9, measEnergyPMT9  : 30, 0., 30., 0., 4E-6, kRed,   "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT12,measEnergyPMT12 : 30, 0., 30., 0., 4E-6, kGreen, "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT13,measEnergyPMT13 : 30, 0., 30., 0., 4E-6, kBlue,  "# of photons", "Deposited Energy [MeV]"
-                 muonDetParticlePos5:
-                     calibs: 
-                         numPhotonsPMT8, measEnergyPMT8  : 10, 0., 2., 0., 4E-6, kBlack, "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT9, measEnergyPMT9  : 10, 0., 2., 0., 4E-6, kRed,   "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT12,measEnergyPMT12 : 10, 0., 2., 0., 4E-6, kGreen, "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT13,measEnergyPMT13 : 10, 0., 2., 0., 4E-6, kBlue,  "# of photons", "Deposited Energy [MeV]"
-                 muonDetParticlePos6:
-                     calibs: 
-                         numPhotonsPMT8, measEnergyPMT8  : 30, 0., 30., 0., 4E-6, kBlack, "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT9, measEnergyPMT9  : 30, 0., 30., 0., 4E-6, kRed,   "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT12,measEnergyPMT12 : 30, 0., 30., 0., 4E-6, kGreen, "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT13,measEnergyPMT13 : 30, 0., 30., 0., 4E-6, kBlue,  "# of photons", "Deposited Energy [MeV]"
-                 muonDetParticlePos7:
-                     calibs: 
-                         numPhotonsPMT8, measEnergyPMT8  : 30, 0., 30., 0., 4E-6, kBlack, "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT9, measEnergyPMT9  : 30, 0., 30., 0., 4E-6, kRed,   "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT12,measEnergyPMT12 : 30, 0., 30., 0., 4E-6, kGreen, "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT13,measEnergyPMT13 : 30, 0., 30., 0., 4E-6, kBlue,  "# of photons", "Deposited Energy [MeV]"
-                 muonDetParticlePos8:
-                     calibs: 
-                         numPhotonsPMT8, measEnergyPMT8  : 30, 0., 30., 0., 4E-6, kBlack, "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT9, measEnergyPMT9  : 30, 0., 30., 0., 4E-6, kRed,   "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT12,measEnergyPMT12 : 30, 0., 30., 0., 4E-6, kGreen, "# of photons", "Deposited Energy [MeV]"
-                         numPhotonsPMT13,measEnergyPMT13 : 30, 0., 30., 0., 4E-6, kBlue,  "# of photons", "Deposited Energy [MeV]"
-                 muonDetParticlePos9:
-                    calibs: 
-                        numPhotonsPMT8, measEnergyPMT8  : 30, 0., 30., 0., 4E-6, kBlack, "# of photons", "Deposited Energy [MeV]"
-                        numPhotonsPMT9, measEnergyPMT9  : 30, 0., 30., 0., 4E-6, kRed,   "# of photons", "Deposited Energy [MeV]"
-                        numPhotonsPMT12,measEnergyPMT12 : 30, 0., 30., 0., 4E-6, kGreen, "# of photons", "Deposited Energy [MeV]"
-                        numPhotonsPMT13,measEnergyPMT13 : 30, 0., 30., 0., 4E-6, kBlue,  "# of photons", "Deposited Energy [MeV]"
-                 
-     #
-     #muonDetPlot1D:
-     #    algorithm: 
-     #        name: Make1DPlot
-     #        makeratio: False
-     #        makeoverlay: False
-     #        gather: inputs
-     #        save_histograms: True
-     #        regions:
-     #            muonDetSel:
-     #                event: 
-     #                    muonDetEnergy: 100, 0, 10, blue
-
 
      muonDetPlot1D:
          algorithm: 
@@ -256,39 +125,77 @@ objects:
                    path: pmt_variables
                    regions: muonDetParticlePos5, muonDetParticlePos1
                    variables:
-                        measEnergyPMT8: 30, 0., 4e-6, "# of photons", "entries", kBlue
-                        measEnergyPMT12: 30, 0., 4e-6, "# of photons", "Entries", kRed
+                        measEnergyPMT8: 30, 0., 4e-6, "# of photons", "Entries", "R:0.|G:1.0| B:0."
+                        measEnergyPMT12: 30, 0., 4e-6, "# of photons", "Entries", "R:1.0| G:1.| B:0."
                    overlay: regions
 
                testFolder2:
                    path: pmt_variables
                    regions: muonDetParticlePos5
                    variables:
-                        measEnergyPMT9: 30, 0., 4e-6, "# of photons", "Entries", kGreen
-                        measEnergyPMT13: 30, 0., 4e-6, "# of photons", "Entries", kMagenta
+                        measEnergyPMT9: 30, 0., 4e-6, "# of photons", "Entries", "R:0.6| G:0.6| B:0.2"
+                        measEnergyPMT13: 30, 0., 4e-6, "# of photons", "Entries", "R:1.0| G:0.8| B:0.2"
                    overlay: Gamma
 
                testFolder3:
                    regions: muonDetParticlePos5
                    variables:
-                        measEnergyPMT12: 30, 0., 4e-6, "# of photons", "Entries", kBlue
-                        measEnergyPMT13: 30, 0., 4e-6, "# of photons", "Entries", kMagenta
+                        measEnergyPMT12: 30, 0., 4e-6, "# of photons", "Entries", "R:0.7|G:0.0|B:0.1"
+                        measEnergyPMT13: 30, 0., 4e-6, "# of photons", "Entries", "R:.2|G:.2|B:0.6"
                    overlay: variables
 
                testFolder4:
                    regions: muonDetParticlePos5
                    variables:
-                        measEnergyPMT8: 30, 0., 4e-6, "# of photons", "Entries", kBlue
-                        measEnergyPMT13: 30, 0., 4e-6, "# of photons", "Entries", kMagenta
+                        measEnergyPMT8: 30, 0., 4e-6, "# of photons", "Entries", "R:.2|G:.6|B:.6"
+                        measEnergyPMT13: 30, 0., 4e-6, "# of photons", "Entries", "R:.1|G:1.0|B:.0"
                    overlay: inputs
 
                testFolder5:
                    regions: muonDetParticlePos5
                    variables:
-                        measEnergyPMT8: 30, 0., 4e-6, "# of photons", "Entries", kBlue
-                        measEnergyPMT13: 30, 0., 4e-6, "# of photons", "Entries", kMagenta
+                        measEnergyPMT8: 30, 0., 4e-6, "# of photons", "Entries","R:0.6| G:0.6| B:0.2" 
+                        measEnergyPMT13: 30, 0., 4e-6, "# of photons", "Entries","R:0.1| G:1.0| B:0.1" 
 
 
+     muonDetPlot2D:
+         algorithm: 
+             name: Make2DHistPlot
+             folders:
+
+               testFolder1:
+                   path: pmt_variables
+                   regions: muonDetParticlePos5, muonDetParticlePos1
+                   variables:
+                        measEnergyPMT8, measEnergyPMT12: 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.|G:1.0| B:0."
+                        measEnergyPMT12, measEnergyPMT13: 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:1.0| G:1.| B:0." 
+                   overlay: regions
+               
+               testFolder2:
+                   path: pmt_variables
+                   regions: muonDetParticlePos5
+                   variables:
+                        measEnergyPMT8, measEnergyPMT12: 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.6| G:0.6| B:0.2" 
+                        measEnergyPMT9, measEnergyPMT13: 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:1.0| G:0.8| B:0.2" 
+                   overlay: Gamma
+               
+               testFolder3:
+                   regions: muonDetParticlePos5
+                   variables:
+                        measEnergyPMT9, measEnergyPMT13: 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.7|G:0.0|B:0.1" 
+                   overlay: variables
+               
+               testFolder4:
+                   regions: muonDetParticlePos5
+                   variables:
+                        measEnergyPMT8, measEnergyPMT9: 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:.2|G:.2|B:0.6" 
+                   overlay: inputs
+               
+               testFolder5:
+                   regions: muonDetParticlePos5
+                   variables:
+                        measEnergyPMT9, measEnergyPMT12: 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:.2|G:.6|B:.6" 
+     
      # -----------------------------------------------------------
      # Trees
      # -----------------------------------------------------------

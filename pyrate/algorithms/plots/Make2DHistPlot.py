@@ -1,4 +1,4 @@
-""" This algorithm outputs a dictionary of path_in_output:[1d_plots] elements using ROOT.
+""" This algorithm outputs a dictionary of path_in_output:[2d_plots] elements using ROOT.
 Plots will be grouped under folders in the output ROOT file under paths which can eventually 
 be specified.
 
@@ -6,14 +6,14 @@ Configuration:
 
      myObjectName:
          algorithm: 
-             name: Make1DHistPlot
+             name: Make2DHistPlot
              folders:
                myFolder:
                    path: myPathInOutputROOTFile  - OPTIONAL. A default path will be built using myFolder -
                    regions: mySelection1, mySelection2 - OPTIONAL. Histograms will be filled with these selections in AND logic. -
                    variables:
-                        myVar1: n_bins, x_low, x_high, x_title, y_title, ROOT_color 
-                        myVar2: n_bins, x_low, x_high, x_title, y_title, ROOT_color 
+                        myVar1,myVar2: n_bins_x, x_low, x_high, n_bins_y, y_low, y_high, x_title, y_title, ROOT_color 
+                        myVar3,myVar2: n_bins_x, x_low, x_high, n_bins_y, y_low, y_high, x_title, y_title, ROOT_color 
                    overlay: regions - OPTIONAL. With this option the user can specifiy how to display overlaied histograms. -
 
 The overlay option is not strictly required and works as follows: 
@@ -41,7 +41,7 @@ import ROOT as R
 R.gStyle.SetOptStat(0)
 
 
-class Make1DHistPlot(Algorithm):
+class Make2DHistPlot(Algorithm):
     __slots__ = ()
 
     def __init__(self, name, store, logger):
@@ -104,8 +104,15 @@ class Make1DHistPlot(Algorithm):
                                 break
 
                         if r_weight:
-                            variable = self.store.get(v_name)
-                            self.store.get(obj_name, "PERM").Fill(variable, r_weight)
+
+                            v_x_name, v_y_name = v_name.replace(" ", "").split(",")
+
+                            x_variable = self.store.get(v_x_name)
+                            y_variable = self.store.get(v_y_name)
+
+                            self.store.get(obj_name, "PERM").Fill(
+                                x_variable, y_variable, r_weight
+                            )
 
                             self.store.put(obj_counter, "done")
 
@@ -175,17 +182,22 @@ class Make1DHistPlot(Algorithm):
                         l.AddEntry(h, obj_name, "pl")
 
                         if mode == "overlay":
-                            h.Draw("same")
+
+                            if "stack" in m_dict:
+                                h.Draw("same,lego")
+                            else:
+                                if len(h_list) == 1:
+                                    h.Draw("colz")
+                                else:
+                                    h.Draw("same")
+
+                            has_already_drawn = True
 
                         elif mode == "stack":
-
-                            x_stack_label = h.GetXaxis().GetTitle()
-                            y_stack_label = h.GetYaxis().GetTitle()
-
                             h_stack.Add(h)
 
                 if h_stack:
-                    h_stack.Draw("noclear")
+                    h_stack.Draw("noclear,lego")
 
                 c.Modified()
                 c.Update()
@@ -208,25 +220,29 @@ class Make1DHistPlot(Algorithm):
         a = ST.get_items(variable)
 
         d = {
-            "n_bins": int(a[0]),
+            "n_bins_x": int(a[0]),
             "x_low": float(a[1]),
             "x_high": float(a[2]),
-            "x_label": a[3],
-            "y_label": a[4],
+            "n_bins_y": int(a[3]),
+            "y_low": float(a[4]),
+            "y_high": float(a[5]),
+            "x_label": a[6],
+            "y_label": a[7],
             "color": None,
             "legend_entry": None,
         }
 
-        if len(a) >= 6:
-            d["color"] = a[5]
+        if len(a) >= 9:
+            d["color"] = a[8]
 
-        if len(a) >= 7:
-            d["legend_entry"] = a[6]
+        if len(a) >= 10:
+            d["legend_entry"] = a[9]
 
         return d
 
     def get_hist_name(self, region, variable):
         """Builds histogram name."""
+        variable = variable.replace(",", "_").replace(" ", "")
         return f"hist_{region}_{variable}"
 
     def get_object_name(self, input_name, histogram):
@@ -234,7 +250,15 @@ class Make1DHistPlot(Algorithm):
         return f"{input_name}:{histogram}"
 
     def get_ROOT_colors(self, my_color):
-        """Get ROOT color."""
+        """Get ROOT color.
+        https://root-forum.cern.ch/t/how-to-form-a-color-t-from-a-tcolor/25013
+        The following ways have been tried but are problematic:
+        # color = CL.Color(my_color["R"], my_color["G"], my_color["B"], f"{my_color['R'], my_color['G'], my_color['B']}")
+        # setattr(R, color.name, color)
+
+        # _c = R.TColor()
+        # color = _c.GetColor(my_color["R"], my_color["G"], my_color["B"])
+        """
         return CL.ColorFinder(my_color["R"], my_color["G"], my_color["B"]).match()
 
     def make_regions_list(self, folder):
@@ -263,7 +287,18 @@ class Make1DHistPlot(Algorithm):
 
         var = self.get_var_dict(variable)
 
-        h = copy(R.TH1F(h_name, h_name, var["n_bins"], var["x_low"], var["x_high"]))
+        h = copy(
+            R.TH2F(
+                h_name,
+                h_name,
+                var["n_bins_x"],
+                var["x_low"],
+                var["x_high"],
+                var["n_bins_y"],
+                var["y_low"],
+                var["y_high"],
+            )
+        )
 
         h.GetXaxis().SetTitle(var["x_label"])
         h.GetYaxis().SetTitle(var["y_label"])
@@ -305,6 +340,7 @@ class Make1DHistPlot(Algorithm):
 
         h.SetLineColor(ROOT_color)
         h.SetMarkerColor(ROOT_color)
+        # h.SetFillColor(ROOT_color)
 
         return h
 
