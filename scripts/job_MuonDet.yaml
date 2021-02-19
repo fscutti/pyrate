@@ -12,7 +12,7 @@ inputs:
            - /Users/fscutti/simulation/run/WaveformSim/neutron
         structure:
             tree: nT
-        color: kBlack
+        color: "R:1.| G:0.| B:1."
         fillstyle: 3005
         
    NeutronDeg45:
@@ -25,7 +25,7 @@ inputs:
            - /Users/fscutti/simulation/run/WaveformSim/deg45
         structure:
             tree: nT
-        color: kMagenta
+        color: "R:0.| G:0.0| B:1.0"
         fillstyle: 3007
    
    
@@ -39,7 +39,7 @@ inputs:
            - /Users/fscutti/simulation/run/WaveformSim/radPi8
         structure:
             tree: nT
-        color: kGreen
+        color: "R:0.0| G:0.1| B:0.9"
         fillstyle: 3006
 
    AmBe:
@@ -52,7 +52,7 @@ inputs:
            - /Users/fscutti/simulation/run/WaveformSim/AmBe
         structure:
             tree: nT
-        color: kRed
+            color: "R:0.0| G:0.8| B:0.0"
         fillstyle: 3004
 
    Gamma:
@@ -65,7 +65,7 @@ inputs:
           - /Users/fscutti/simulation/run/WaveformSim/gamma
        structure:
            tree: nT
-       color: kGreen
+       color: "R:1.| G:0.| B:0."
        fillstyle: 3004
 
    Photons:
@@ -78,7 +78,7 @@ inputs:
           - /Users/fscutti/simulation/run/WaveformSim/gamma
        structure:
            tree: nT
-       color: kBlack
+       color: "R:0.| G:0.| B:1."
        fillstyle: 3004
 
 configs:
@@ -96,10 +96,12 @@ outputs:
         path: /Users/fscutti/pyrate/myNotebooks/myOutput
         format: .root
         objects:
-          #- muonDetEnergyCalib: NeutronRadPi8, NeutronDeg45, Neutron, AmBe
-          #- muonDetEnergyCalib: Gamma, Neutron
+          #- muonDetEnergyCaliB: NeutronRadPi8, NeutronDeg45, Neutron, AmBe
+          #- muonDetEnergyCaliB: Gamma, Neutron
           - muonDetPlot1D: Gamma, Neutron, Photons
           - muonDetPlot1D: Neutron, Photons
+          - muonDetPlot2D: Neutron
+          - muonDetPlot2D: Gamma, Photons, Neutron
 
 
 
