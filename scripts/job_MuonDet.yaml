@@ -99,9 +99,10 @@ outputs:
           #- muonDetEnergyCaliB: NeutronRadPi8, NeutronDeg45, Neutron, AmBe
           #- muonDetEnergyCaliB: Gamma, Neutron
           - muonDetPlot1D: Gamma, Neutron, Photons
-          - muonDetPlot1D: Neutron, Photons
-          - muonDetPlot2D: Neutron
+          #- muonDetPlot1D: Neutron, Photons
+          #- muonDetPlot2D: Neutron
           - muonDetPlot2D: Gamma, Photons, Neutron
+          - muonDetPlotProfile1D: Gamma, Photons, Neutron
 
 
 
