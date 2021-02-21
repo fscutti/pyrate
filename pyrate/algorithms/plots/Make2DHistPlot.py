@@ -191,8 +191,6 @@ class Make2DHistPlot(Algorithm):
                                 else:
                                     h.Draw("same")
 
-                            has_already_drawn = True
-
                         elif mode == "stack":
                             h_stack.Add(h)
 
@@ -349,17 +347,17 @@ class Make2DHistPlot(Algorithm):
 
         i_name, h_name = obj_name.split(":")
 
-        c_name = h_name.replace("hist", "plot")
+        c_name = h_name.replace("hist", "plot_2d")
         mode = "stack"
 
         if "overlay" in folder:
 
             if folder["overlay"] == "regions":
-                c_name = "plot_" + h_name.rsplit("_", 1)[-1]
+                c_name = "plot_2d_" + h_name.rsplit("_", 1)[-1]
                 mode = "overlay"
 
             elif folder["overlay"] == "variables":
-                c_name = h_name.rsplit("_", 1)[0].replace("hist", "plot")
+                c_name = h_name.rsplit("_", 1)[0].replace("hist", "plot_2d")
                 mode = "overlay"
 
             elif folder["overlay"] == "inputs" or folder["overlay"] == i_name:

@@ -158,6 +158,10 @@ objects:
                         measEnergyPMT13: 30, 0., 4e-6, "# of photons", "Entries","R:0.1| G:1.0| B:0.1" 
 
 
+
+
+
+
      muonDetPlot2D:
          algorithm: 
              name: Make2DHistPlot
@@ -195,6 +199,53 @@ objects:
                    regions: muonDetParticlePos5
                    variables:
                         measEnergyPMT9, measEnergyPMT12: 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:.2|G:.6|B:.6" 
+
+
+
+
+
+     muonDetPlotProfile1D:
+         algorithm: 
+             name: Make1DProfilePlot
+             folders:
+
+               testFolder1:
+                   path: pmt_variables
+                   regions: muonDetParticlePos5, muonDetParticlePos1
+                   variables:
+                        measEnergyPMT8, numPhotonsPMT8: 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.|G:1.0| B:0."
+                        measEnergyPMT12, numPhotonsPMT12: 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:1.0| G:1.| B:0." 
+                   overlay: regions
+               
+               testFolder2:
+                   path: pmt_variables
+                   regions: muonDetParticlePos5
+                   variables:
+                        measEnergyPMT8, numPhotonsPMT8: 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.6| G:0.6| B:0.2" 
+                        measEnergyPMT9, numPhotonsPMT9: 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:1.0| G:0.8| B:0.2" 
+                   overlay: Gamma
+               
+               testFolder3:
+                   regions: muonDetParticlePos5
+                   variables:
+                        measEnergyPMT9, numPhotonsPMT9: 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.7|G:0.0|B:0.1" 
+                   overlay: variables
+               
+               testFolder4:
+                   regions: muonDetParticlePos5
+                   variables:
+                        measEnergyPMT8, numPhotonsPMT8: 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:.2|G:.2|B:0.6" 
+                   overlay: inputs
+               
+               testFolder5:
+                   regions: muonDetParticlePos5
+                   variables:
+                        measEnergyPMT9, numPhotonsPMT9: 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:.2|G:.6|B:.6" 
+
+
+
+
+
      
      # -----------------------------------------------------------
      # Trees
