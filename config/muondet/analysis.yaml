@@ -6,7 +6,6 @@ objects:
     muonSmallSelection:
         algorithm: 
             name: Region
-            check_weights_overlap: false
         selection: 
             - chargeSmallMuonCh0 >= 8800000.0
             - chargeSmallMuonCh1 < 8704000.0 || chargeSmallMuonCh1 >= 8705000.0
