@@ -1,4 +1,21 @@
 """ Standard Region algorithm.
+
+mySelection:
+        algorithm:
+            name: Region
+        selection:
+            - myVar1 >= 10.
+            - myVar2 < 0.1 || myVar1 >= 500.
+        weights:
+            - myWeight1
+            - myWeight2
+        is_subregion_of:
+            - mySuperRegion1
+            - mySuperRegion2
+
+A region is represented by a dictionary with a integer indicating whether a selection 
+is passed and a set of weights. The option is_subregion_of indicates whether the region
+under consideration depends on other regions. Weight overlaps are checked and eliminated.
 """
 import sys
 
@@ -12,16 +29,9 @@ class Region(Algorithm):
         super().__init__(name, store, logger)
 
     def execute(self, config):
-        """Computes region weight. If selection criteria are not satisfied the loop is interrupted.
-        If the region is a subset of another set of regions their cumulative weight is added to
-        the current.
-        *******************************************************************************************
-        WARNING: the weights overlap b/w subregions and their superset is NON CHECKED. It is the
-        user responsibility to avoid overlaps.
-        *******************************************************************************************
-        """
+        """Computes region dictionary."""
 
-        region = 1
+        region = {"is_passed": 1, "weights": {}}
 
         selection = []
         if "selection" in config:
@@ -36,9 +46,16 @@ class Region(Algorithm):
             supersets = config["is_subregion_of"]
 
         for s in supersets:
-            region *= self.store.get(s)
+            super_region = self.store.get(s)
 
-        if region:
+            region["is_passed"] *= super_region["is_passed"]
+
+            for w_name, w_value in super_region["weights"].items():
+
+                if not w_name in region["weights"]:
+                    region["weigths"][w_name] = w_value
+
+        if region["is_passed"]:
 
             AND = 1
             and_selection = selection
@@ -71,15 +88,13 @@ class Region(Algorithm):
                 if AND == 0:
                     break
 
-            region *= AND
+            region["is_passed"] *= AND
 
-            if region:
+            if region["is_passed"]:
 
-                for w in weights:
+                for w_name in weights:
+                    region["weights"][w_name] = self.store.get(w_name)
 
-                    weight_value = self.store.get(w)
-                    region *= weight_value
-         
         self.store.put(config["name"], region)
 
     def get_selection(self, selection):

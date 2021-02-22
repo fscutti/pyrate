@@ -92,19 +92,32 @@ class Make1DHistPlot(Algorithm):
 
                         r_weight = 1
 
+                        region = {"is_passed": 1, "weights": {}}
+
                         for sr_name in r_name.split("_"):
 
                             if sr_name == "NOSEL":
                                 continue
 
-                            sr_weight = self.store.get(sr_name)
-                            r_weight *= sr_weight
+                            subregion = self.store.get(sr_name)
 
-                            if r_weight == 0:
+                            region["is_passed"] *= subregion["is_passed"]
+
+                            if region["is_passed"] == 0:
                                 break
 
+                            else:
+                                for w_name, w_value in subregion["weights"].items():
+                                    if not w_name in region["weights"]:
+
+                                        region["weights"][w_name] = w_value
+
+                                        r_weight *= w_value
+
                         if r_weight:
+
                             variable = self.store.get(v_name)
+
                             self.store.get(obj_name, "PERM").Fill(variable, r_weight)
 
                             self.store.put(obj_counter, "done")
