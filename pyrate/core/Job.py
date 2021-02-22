@@ -51,21 +51,32 @@ class Job:
             # which can have more than one element in the case of multiple channels declared in the group.
             self.job["inputs"][name] = {"files": []}
 
-            # Find all relevant files using the list of paths and filtering with the sample and channel tags.
-            # Tags are looked for by separating underscores. If one file features multiple tags it will be
-            # added multiple times here but duplicates will be removed at a later stage.
-            # N.B the name of the tags required has to be exactly equal to the tag retrieved in the file for
-            # this to be added in the list.
+            # Files are collected looking for tags separated by underscores. Sevaral options are available
+            # to collect tags.
+            # 1) any: (REQUIRED) collect a file if it contains any of these tags.
+            # 2) all: collect a file if it contains all of these tags.
+            # 3) gropus: if a file starts with any of the tags declared here it will be considered as part of a group.
             for f in FN.find_files(attr["path"]):
                 self.job["inputs"][name]["files"].extend(
                     f
-                    for s in ST.get_items(attr["samples"]["tags"])
+                    for s in ST.get_items(attr["samples"]["tags"]["any"])
                     if s in ST.get_tags(f)
                     and FN.modus_ponens(
-                        "groups" in attr["samples"],
+                        "all" in attr["samples"]["tags"],
+                        all(
+                            t in ST.get_tags(f)
+                            for t in ST.get_items(
+                                attr["samples"]["tags"].get("all", False)
+                            )
+                        ),
+                    )
+                    and FN.modus_ponens(
+                        "groups" in attr["samples"]["tags"],
                         any(
                             c in ST.get_tags(f)
-                            for c in ST.get_items(attr["samples"].get("groups", False))
+                            for c in ST.get_items(
+                                attr["samples"]["tags"].get("groups", False)
+                            )
                         ),
                     )
                 )
@@ -80,7 +91,7 @@ class Job:
                 for j, f in groupby(
                     self.job["inputs"][name]["files"],
                     lambda a: a.partition("_")[0]
-                    if "groups" in attr["samples"]
+                    if "groups" in attr["samples"]["tags"]
                     else None,
                 )
             ]
@@ -92,6 +103,8 @@ class Job:
 
             # Add all remaining attributes.
             self.job["inputs"][name].update(attr)
+
+        print(self.job["inputs"])
 
         self.job["configs"]["global"] = {"objects": {}}
         for name, attr in self.config["configs"].items():
