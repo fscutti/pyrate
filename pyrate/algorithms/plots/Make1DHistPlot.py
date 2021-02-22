@@ -90,9 +90,7 @@ class Make1DHistPlot(Algorithm):
 
                     if not self.store.check(obj_counter):
 
-                        r_weight = 1
-
-                        region = {"is_passed": 1, "weights": {}}
+                        region = {"r_weight": 1, "weights": {}}
 
                         for sr_name in r_name.split("_"):
 
@@ -101,9 +99,9 @@ class Make1DHistPlot(Algorithm):
 
                             subregion = self.store.get(sr_name)
 
-                            region["is_passed"] *= subregion["is_passed"]
+                            region["r_weight"] *= subregion["is_passed"]
 
-                            if region["is_passed"] == 0:
+                            if not region["r_weight"]:
                                 break
 
                             else:
@@ -112,13 +110,15 @@ class Make1DHistPlot(Algorithm):
 
                                         region["weights"][w_name] = w_value
 
-                                        r_weight *= w_value
+                                        region["r_weight"] *= w_value
 
-                        if r_weight:
+                        if region["r_weight"]:
 
                             variable = self.store.get(v_name)
 
-                            self.store.get(obj_name, "PERM").Fill(variable, r_weight)
+                            self.store.get(obj_name, "PERM").Fill(
+                                variable, region["r_weight"]
+                            )
 
                             self.store.put(obj_counter, "done")
 

@@ -89,20 +89,29 @@ class Make1DProfilePlot(Algorithm):
 
                     if not self.store.check(obj_counter):
 
-                        r_weight = 1
+                        region = {"r_weight": 1, "weights": {}}
 
                         for sr_name in r_name.split("_"):
 
                             if sr_name == "NOSEL":
                                 continue
 
-                            sr_weight = self.store.get(sr_name)
-                            r_weight *= sr_weight
+                            subregion = self.store.get(sr_name)
 
-                            if r_weight == 0:
+                            region["r_weight"] *= subregion["is_passed"]
+
+                            if not region["r_weight"]:
                                 break
 
-                        if r_weight:
+                            else:
+                                for w_name, w_value in subregion["weights"].items():
+                                    if not w_name in region["weights"]:
+
+                                        region["weights"][w_name] = w_value
+
+                                        region["r_weight"] *= w_value
+
+                        if region["r_weight"]:
 
                             v_x_name, v_y_name = v_name.replace(" ", "").split(",")
 
@@ -110,7 +119,7 @@ class Make1DProfilePlot(Algorithm):
                             y_variable = self.store.get(v_y_name)
 
                             self.store.get(obj_name, "PERM").Fill(
-                                x_variable, y_variable, r_weight
+                                x_variable, y_variable, region["r_weight"]
                             )
 
                             self.store.put(obj_counter, "done")
@@ -141,7 +150,7 @@ class Make1DProfilePlot(Algorithm):
 
                         self.make_plots_dict(plot_collection, obj_name, path, f_attr)
 
-        #FN.pretty(plot_collection)
+        # FN.pretty(plot_collection)
 
         canvas_collection = {}
 
@@ -178,7 +187,7 @@ class Make1DProfilePlot(Algorithm):
 
                 c.Close()
 
-        #FN.pretty(canvas_collection)
+        # FN.pretty(canvas_collection)
 
         self.store.put(config["name"], canvas_collection, "PERM")
 
