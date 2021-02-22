@@ -104,8 +104,6 @@ class Job:
             # Add all remaining attributes.
             self.job["inputs"][name].update(attr)
 
-        print(self.job["inputs"])
-
         self.job["configs"]["global"] = {"objects": {}}
         for name, attr in self.config["configs"].items():
 
