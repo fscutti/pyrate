@@ -4,7 +4,9 @@ inputs:
 
    Neutron:
         samples:
-          tags: neutron
+          tags: 
+              any: neutron
+              all: pos5
         eslices:
             emin: 0
             emax: -1
@@ -17,7 +19,8 @@ inputs:
         
    NeutronDeg45:
         samples:
-            tags: pos5
+            tags: 
+                any: pos5
         eslices:
             emin: 0
             emax: -1
@@ -31,7 +34,8 @@ inputs:
    
    NeutronRadPi8:
         samples:
-            tags: pos5
+            tags: 
+                any: pos5
         eslices:
             emin: 0
             emax: -1
@@ -44,7 +48,8 @@ inputs:
 
    AmBe:
         samples:
-            tags: pos5
+            tags: 
+                any: pos5
         eslices:
             emin: 0
             emax: -1
@@ -57,7 +62,8 @@ inputs:
 
    Gamma:
        samples:
-         tags: gamma
+         tags: 
+             any: gamma
        eslices:
            emin: 0
            emax: -1
@@ -70,7 +76,8 @@ inputs:
 
    Photons:
        samples:
-         tags: gamma
+         tags: 
+             any: gamma
        eslices:
            emin: 0
            emax: -1
@@ -98,11 +105,11 @@ outputs:
         objects:
           #- muonDetEnergyCaliB: NeutronRadPi8, NeutronDeg45, Neutron, AmBe
           #- muonDetEnergyCaliB: Gamma, Neutron
-          - muonDetPlot1D: Gamma, Neutron, Photons
-          - muonDetPlot1D: Neutron, Photons
+          #- muonDetPlot1D: Gamma, Neutron, Photons
+          #- muonDetPlot1D: Neutron, Photons
           - muonDetPlot2D: Neutron
-          - muonDetPlot2D: Gamma, Photons, Neutron
-          - muonDetPlotProfile1D: Gamma, Photons, Neutron
+          #- muonDetPlot2D: Gamma, Photons, Neutron
+          #- muonDetPlotProfile1D: Gamma, Photons, Neutron
 
 
 
