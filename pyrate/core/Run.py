@@ -83,9 +83,9 @@ class Run:
         self._out = Output(self.name, store, self.logger, outputs=self.outputs)
         self._out.load()
 
+        self.run_config_targets = self._out.get_config_targets()
         self.run_targets = self._out.get_targets()
-        self.run_objects = self._out.get_objects()
-     
+        
         # self.modify_config()
 
         # -----------------------------------------------------------------------
@@ -93,7 +93,7 @@ class Run:
         # -----------------------------------------------------------------------
 
         self.algorithms = {}
-        for i_name, targets in self.run_targets.items():
+        for i_name, targets in self.run_config_targets.items():
             for t in targets:
                 alg_name = self._config[t["config"]]["algorithm"]["name"]
                 self.add(alg_name, store)
@@ -152,7 +152,7 @@ class Run:
             store.clear("READY")
 
         for i_name, targets in tqdm(
-            self.run_targets.items(),
+            self.run_config_targets.items(),
             desc=f"{prefix}{info}",
             disable=self.no_progress_bar,
             bar_format=self.colors[self.state]["input"],
@@ -177,7 +177,7 @@ class Run:
                 store.put("INPUT:name", i_name, "TRAN")
                 store.put("INPUT:config", self.inputs[i_name], "TRAN")
 
-                self.loop(store, self.run_targets[i_name])
+                self.loop(store, self.run_config_targets[i_name])
 
                 store.clear("TRAN")
 
@@ -217,7 +217,7 @@ class Run:
                         store.put("EVENT:idx", self._in.get_idx())
                         
 
-                        self.loop(store, self.run_targets[i_name])
+                        self.loop(store, self.run_config_targets[i_name])
 
                         store.clear("TRAN")
 
@@ -245,8 +245,8 @@ class Run:
         
         if self.state in ["finalise"]:
 
-            for o in self.run_objects:
-                self._out.write(o)
+            for t in self.run_targets:
+                self._out.write(t)
                     
         return store
 

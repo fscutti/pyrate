@@ -129,21 +129,21 @@ class Job:
 
             self.job["outputs"][name]["files"] = os.path.join(attr["path"], name)
 
-            for obj in attr["objects"]:
-                for o_name, o_attr in obj.items():
+            for target in attr["targets"]:
+                for t_name, t_attr in target.items():
 
-                    if o_attr == "all":
+                    if t_attr == "all":
                         samples = ST.remove_duplicates(self.job["inputs"])
                     else:
-                        samples = ST.get_items(obj[o_name])
+                        samples = ST.get_items(target[t_name])
 
                     samples.sort()
 
                     s_names = ",".join(samples)
 
-                obj[o_name] = samples
+                target[t_name] = samples
 
-                obj[":".join([o_name, s_names])] = obj.pop(o_name)
+                target[":".join([t_name, s_names])] = target.pop(t_name)
 
             self.job["outputs"][name].update(attr)
 

@@ -146,7 +146,15 @@ class Make1DHistPlot(Algorithm):
                         target_dir = config["name"].replace(",", "_").replace(":", "_")
                         path = os.path.join(target_dir, path)
 
-                        self.make_plots_dict(plot_collection, obj_name, path, f_attr)
+                        self.make_plots_dict(
+                            plot_collection,
+                            obj_name,
+                            i_name,
+                            v_name,
+                            r_name,
+                            path,
+                            f_attr,
+                        )
 
         # FN.pretty(plot_collection)
 
@@ -159,9 +167,12 @@ class Make1DHistPlot(Algorithm):
 
             for p_name, m_dict in p_dict.items():
 
-                l = copy(R.TLegend(0.1, 0.8, 0.9, 0.9))
+                l_name, c_name = p_name.split("|")
 
-                c = copy(R.TCanvas(p_name, "", 900, 800))
+                l = copy(R.TLegend(0.1, 0.8, 0.9, 0.9))
+                l.SetHeader(l_name)
+
+                c = copy(R.TCanvas(c_name, "", 900, 800))
 
                 c.SetTickx()
                 c.SetTicky()
@@ -170,9 +181,12 @@ class Make1DHistPlot(Algorithm):
 
                 h_stack = None
                 x_stack_label, y_stack_label = None, None
+                has_already_drawn = False
 
                 for mode, h_list in m_dict.items():
-                    for obj_name in h_list:
+                    for obj in h_list:
+
+                        l_entry, obj_name = obj.split("|")
 
                         h = self.store.get(obj_name, "PERM")
 
@@ -185,10 +199,11 @@ class Make1DHistPlot(Algorithm):
                                 )
                             )
 
-                        l.AddEntry(h, obj_name, "pl")
+                        l.AddEntry(h, l_entry, "pl")
 
                         if mode == "overlay":
                             h.Draw("same")
+                            has_already_drawn = True
 
                         elif mode == "stack":
 
@@ -198,7 +213,10 @@ class Make1DHistPlot(Algorithm):
                             h_stack.Add(h)
 
                 if h_stack:
-                    h_stack.Draw("noclear")
+                    if not has_already_drawn:
+                        h_stack.Draw()
+                    else:
+                        h_stack.Draw("same")
 
                 c.Modified()
                 c.Update()
@@ -321,26 +339,35 @@ class Make1DHistPlot(Algorithm):
 
         return h
 
-    def make_plots_dict(self, plots, obj_name, path, folder):
+    def make_plots_dict(self, plots, obj_name, i_name, v_name, r_name, path, folder):
         """Assign histogram content of plots."""
 
-        i_name, h_name = obj_name.split(":")
-
-        c_name = h_name.replace("hist", "plot_1d")
+        c_name = obj_name.replace(f"{i_name}:hist", "plot_1d")
+        l_entry = i_name
+        l_name = ",".join([r_name, v_name])
         mode = "stack"
 
         if "overlay" in folder:
 
             if folder["overlay"] == "regions":
-                c_name = "plot_1d_" + h_name.rsplit("_", 1)[-1]
+                c_name = "plot_1d_" + v_name
+                l_entry = ",".join([i_name, r_name])
+                l_name = v_name
                 mode = "overlay"
 
             elif folder["overlay"] == "variables":
-                c_name = h_name.rsplit("_", 1)[0].replace("hist", "plot_1d")
+                c_name = obj_name.replace(f"{i_name}:hist", "plot_1d").replace(
+                    f"_{v_name}", ""
+                )
+                l_entry = ",".join([i_name, v_name])
+                l_name = r_name
                 mode = "overlay"
 
             elif folder["overlay"] == "inputs" or folder["overlay"] == i_name:
                 mode = "overlay"
+
+        c_name = "|".join([l_name, c_name])
+        e_name = "|".join([l_entry, obj_name])
 
         if not path in plots:
             plots[path] = {}
@@ -349,10 +376,10 @@ class Make1DHistPlot(Algorithm):
             plots[path].update({c_name: {}})
 
         if not mode in plots[path][c_name]:
-            plots[path][c_name].update({mode: [obj_name]})
+            plots[path][c_name].update({mode: [e_name]})
 
-        if not obj_name in plots[path][c_name][mode]:
-            plots[path][c_name][mode].append(obj_name)
+        if not e_name in plots[path][c_name][mode]:
+            plots[path][c_name][mode].append(e_name)
 
 
 # EOF
