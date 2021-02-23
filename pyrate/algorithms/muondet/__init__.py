@@ -1,3 +1,5 @@
+"""This module is intended as an example only."""
+
 #from pyrate.algorithms.muondet.MuonDetCharge import MuonDetCharge
 from pyrate.algorithms.muondet.Make1DGraph import Make1DGraph
 from pyrate.algorithms.muondet.TrueEnergy import TrueEnergy
