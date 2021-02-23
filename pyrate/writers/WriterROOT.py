@@ -5,18 +5,18 @@ from pyrate.core.Writer import Writer
 
 
 class WriterROOT(Writer):
-    __slots__ = ["f", "w_objects"]
+    __slots__ = ["f", "w_targets"]
 
-    def __init__(self, name, store, logger, f, w_objects):
+    def __init__(self, name, store, logger, f, w_targets):
         super().__init__(name, store, logger)
         self.f = f
-        self.w_objects = w_objects
+        self.w_targets = w_targets
 
     def load(self):
         """Creates the file and set targets."""
         self.f = R.TFile(self.f, "RECREATE")
-        self.set_objects(self.w_objects)
-        self.set_targets()
+        self.set_targets(self.w_targets)
+        self.set_config_targets()
 
     def write(self, name):
         """Write an object to file. This can be represented by a structure
