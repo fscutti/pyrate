@@ -66,14 +66,40 @@ class Make1DHistPlot(Algorithm):
                     target_dir = config["name"].replace(",", "_").replace(":", "_")
                     path = os.path.join(target_dir, path)
 
+                    # WARNING: if the histogram is not present in the input, the value of
+                    # h is None. This operation is performed on the TRAN store as the 
+                    # input name changes in the loop. Later, if found, the histogram will 
+                    # need to be put on the PERM store including the name of the input
+                    # it was created for.
                     h = self.store.copy("INPUT:" + os.path.join(path, h_name), "TRAN")
+                    # The object is unique and has been saved on the TRAN store. When it will later
+                    # be put on the PERM store, it will anyway disappear from there after
+                    # the TRAN store is cleared at the end of the target loop. Therefore above we
+                    # don't simply use the self.store.get instruction but self.store.copy
+                    # to copy the object and prevent its deletion.
+                    # This should be a general approach when moving objects from the TRAN
+                    # store to the permanent store.
 
                     obj_name = self.get_object_name(i_name, h_name)
 
-                    if not h:
+                    # Only creates the object if it is not retrievable from the INPUT and
+                    # has not previously been saved on the permanent store.
+                    # IMPORTANT: pyrate does not save the same object on the store multiple
+                    # times anyway!!! The check in the if condition below only serves to
+                    # avoid a message from ROOT which would see the creation of an histogram
+                    # with the same name in case we are rerunning on the same input.
+                    if not h and not self.store.check(obj_name, "PERM"):
                         h = self.make_hist(h_name, v_attr, f_attr)
 
+                    # put the object on the store with a different name which
+                    # includes the input name, as our final plot will be a stack
+                    # potentially including histograms from different samples.
                     self.store.put(obj_name, h, "PERM")
+
+        # ----------------------------------------------------------------------
+        # This would be the place to put the a config['name'] object on the READY
+        # store, should this be ready for the finalise step.
+        # ----------------------------------------------------------------------
 
     def execute(self, config):
         """Fills histograms."""
@@ -85,6 +111,12 @@ class Make1DHistPlot(Algorithm):
 
                     h_name = self.get_hist_name(r_name, v_name)
                     obj_name = self.get_object_name(i_name, h_name)
+
+                    # IMPORTANT: filling an histogram has to be done only once per event
+                    # but multiple algorithms might want to access this object. Therefore,
+                    # in every algorithm trying to fill the histogram, we might want to introduce
+                    # a counter on the transient store which flags whether this action has already
+                    # been performed by some other algorithm.
 
                     obj_counter = ":".join([obj_name, "counter"])
 
@@ -102,6 +134,7 @@ class Make1DHistPlot(Algorithm):
                             region["r_weight"] *= subregion["is_passed"]
 
                             if not region["r_weight"]:
+                                # Only fill the histogram if the selection is passed
                                 break
 
                             else:
@@ -120,6 +153,9 @@ class Make1DHistPlot(Algorithm):
                                 variable, region["r_weight"]
                             )
 
+                            # Save the counter on the transient store with some value.
+                            # Which value is arbitrary as the "check" method only checks for
+                            # the presence of an object, not its value.
                             self.store.put(obj_counter, "done")
 
     def finalise(self, config):
@@ -227,6 +263,11 @@ class Make1DHistPlot(Algorithm):
 
                 canvas_collection[f_path].append(c.Clone())
 
+                # IMPORTANT: the canvas has to be closed to avoid overalps with
+                # open canvases with the same name afterward. ROOT has an obscure
+                # memory management. We also have to clone the original.
+                # N.B.: cloning the canvas at its creation would not work as there
+                # might be other ROOT objects created in the process of drawing on it.
                 c.Close()
 
         # FN.pretty(canvas_collection)
@@ -294,6 +335,8 @@ class Make1DHistPlot(Algorithm):
 
         var = self.get_var_dict(variable)
 
+        # Why copy the following object? Because there might be already an object
+        # with the same name in the ROOT object list. Another way: h.SetDirectory(0)
         h = copy(R.TH1F(h_name, h_name, var["n_bins"], var["x_low"], var["x_high"]))
 
         h.GetXaxis().SetTitle(var["x_label"])
