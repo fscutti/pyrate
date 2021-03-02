@@ -10,12 +10,13 @@ import ROOT as R
 from pyrate.core.Algorithm import Algorithm
 
 
-class MeasuredEnergy(Algorithm):
+class TimeWeightedPulse(Algorithm):
     #__slots__ = ("quantum_efficiency")
 
     def __init__(self, name, store, logger):
         super().__init__(name, store, logger)
-
+        
+        # PMT quantum efficiency given as a function of incident photon wavelength in nm.
         self.quantum_efficiency = copy(R.TH1F("quantum_efficiency","quantum_efficiency", 6, 200, 800))
         self.quantum_efficiency.Fill(250, 0)
         self.quantum_efficiency.Fill(350, 21)
@@ -41,13 +42,10 @@ class MeasuredEnergy(Algorithm):
             else:
                 e_num += e * t
 
-            # e_num += e
             e_den += t
 
         if e_den > 0.0:
             measured_energy = e_num / e_den
-        #else: 
-        #    measured_energy = e_num
         
         self.store.put(config["name"], measured_energy)
 
