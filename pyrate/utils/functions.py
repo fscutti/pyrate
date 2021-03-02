@@ -11,12 +11,19 @@ def modus_ponens(p, q):
     else:
         return not p
 
+def find_env(path, env):
+    """Checks existence of environment variable in path and eventually replaces it."""
+    if env in path:
+        path = path.replace(env, os.environ.get(env))
+    return path
 
 def find_files(paths, env=None):
     """Find all files under a list of paths. It also sorts the list."""
     files = []
+
     if not isinstance(paths, list):
         paths = [paths]
+
     for p in paths:
 
         if env and env in p:

@@ -44,16 +44,16 @@ inputs:
 
 configs:
     muondetobjs:
-       path:  /Users/fscutti/pyrate/config/muondet
+       path:  PYRATE/config/muondet
        names: objects
     muondetregions:
-       path:  /Users/fscutti/pyrate/config/muondet
+       path:  PYRATE/config/muondet
        names: analysis
 
 
 outputs:
     TestFile:
-        path: /Users/fscutti/pyrate/myNotebooks/myOutput
+        path: PYRATE/test
         format: .root
         targets:
           - muonDetPlot1D: Gamma, Neutron, Photons

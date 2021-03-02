@@ -126,6 +126,8 @@ class Job:
         for name, attr in self.config["outputs"].items():
 
             self.job["outputs"][name] = {"files": []}
+            
+            attr["path"] = FN.find_env(attr["path"], "PYRATE")
 
             self.job["outputs"][name]["files"] = os.path.join(attr["path"], name)
 
