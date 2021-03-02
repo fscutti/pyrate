@@ -12,12 +12,16 @@ def modus_ponens(p, q):
         return not p
 
 
-def find_files(paths):
+def find_files(paths, env=None):
     """Find all files under a list of paths. It also sorts the list."""
     files = []
     if not isinstance(paths, list):
         paths = [paths]
     for p in paths:
+
+        if env and env in p:
+            p = p.replace(env, os.environ.get(env))
+
         files.extend(
             os.path.join(p, f)
             for f in os.listdir(p)

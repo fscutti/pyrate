@@ -11,7 +11,7 @@ inputs:
             emin: 0
             emax: -1
         path:
-           - /Users/fscutti/simulation/run/WaveformSim/Tests
+           - PYRATE/test/data
         structure:
             tree: nT
         color: "R:1.| G:0.| B:1."
@@ -24,7 +24,7 @@ inputs:
            emin: 0
            emax: -1
        path:
-          - /Users/fscutti/simulation/run/WaveformSim/Tests
+           - PYRATE/test/data
        structure:
            tree: nT
        color: "R:1.| G:0.| B:0."
@@ -37,7 +37,7 @@ inputs:
            emin: 0
            emax: -1
        path:
-          - /Users/fscutti/simulation/run/WaveformSim/Tests
+           - PYRATE/test/data
        structure:
            tree: nT
        color: "R:0.| G:0.| B:1."

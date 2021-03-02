@@ -56,7 +56,7 @@ class Job:
             # 1) any: (REQUIRED) collect a file if it contains any of these tags.
             # 2) all: collect a file if it contains all of these tags.
             # 3) gropus: if a file starts with any of the tags declared here it will be considered as part of a group.
-            for f in FN.find_files(attr["path"]):
+            for f in FN.find_files(attr["path"], "PYRATE"):
                 self.job["inputs"][name]["files"].extend(
                     f
                     for s in ST.get_items(attr["samples"]["tags"]["any"])
@@ -109,7 +109,7 @@ class Job:
 
             self.job["configs"][name] = {"files": []}
 
-            for f in FN.find_files(attr["path"]):
+            for f in FN.find_files(attr["path"], "PYRATE"):
                 self.job["configs"][name]["files"].extend(
                     f
                     for n in ST.get_items(attr["names"])
