@@ -14,13 +14,13 @@ inputs:
 
 configs:
     config2:
-       path:  /home/fscutti/pyrate/config
+       path:  PYRATE/config
        names: objects
 
 
 outputs:
     WCTest1:
-        path: /home/fscutti/outtest
+        path: PYRATE/test
         format: .root
         targets:
           - testingReader: Data

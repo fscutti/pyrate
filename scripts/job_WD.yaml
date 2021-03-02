@@ -10,9 +10,9 @@ inputs:
          nparts: 10
 
        path:
-          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/WD/wave0
-          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/WD/wave1
-          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/WD/wave2
+          - PYRATE/myNotebooks/myData/MuonDetData/WD/wave0
+          - PYRATE/myNotebooks/myData/MuonDetData/WD/wave1
+          - PYRATE/myNotebooks/myData/MuonDetData/WD/wave2
       
    MC:
        samples: 
@@ -25,19 +25,19 @@ inputs:
 
 configs:
     config2:
-       path:  /Users/fscutti/pyrate/config
+       path:  PYRATE/config
        names: objects
 
 
 outputs:
     WDTest1:
-        path: /Users/fscutti/pyrate/myNotebooks/myOutput
+        path: PYRATE/myNotebooks/myOutput
         format: .root
         targets:
           - testingReader: Data
       
     WDTest2:
-        path: /Users/fscutti/pyrate/myNotebooks/myOutput
+        path: PYRATE/myNotebooks/myOutput
         format: .root
         targets:
           - testingReader: MC

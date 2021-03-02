@@ -9,9 +9,9 @@ inputs:
            emin: 0
            emax: -1
        path:
-          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/groups/ch0
-          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/groups/ch1
-          - /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/groups/ch2
+          - PYRATE/myNotebooks/myData/MuonDetData/groups/ch0
+          - PYRATE/myNotebooks/myData/MuonDetData/groups/ch1
+          - PYRATE/myNotebooks/myData/MuonDetData/groups/ch2
        structure:
            tree: SmallMuon/EventData
    
@@ -24,7 +24,7 @@ configs:
 
 outputs:
     WCTest1:
-        path: /Users/fscutti/pyrate/myNotebooks/myOutput
+        path: PYRATE/myNotebooks/myOutput
         format: .root
         targets:
           - testingReader: Data
