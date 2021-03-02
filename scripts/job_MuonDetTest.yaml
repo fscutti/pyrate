@@ -16,46 +16,6 @@ inputs:
             tree: nT
         color: "R:1.| G:0.| B:1."
         
-   NeutronDeg45:
-        samples:
-            tags: 
-                any: pos5
-        eslices:
-            emin: 0
-            emax: -1
-        path:
-           - /Users/fscutti/simulation/run/WaveformSim/deg45
-        structure:
-            tree: nT
-        color: "R:0.| G:0.0| B:1.0"
-   
-   
-   NeutronRadPi8:
-        samples:
-            tags: 
-                any: pos5
-        eslices:
-            emin: 0
-            emax: -1
-        path:
-           - /Users/fscutti/simulation/run/WaveformSim/radPi8
-        structure:
-            tree: nT
-        color: "R:0.0| G:0.1| B:0.9"
-
-   AmBe:
-        samples:
-            tags: 
-                any: pos5
-        eslices:
-            emin: 0
-            emax: -1
-        path:
-           - /Users/fscutti/simulation/run/WaveformSim/AmBe
-        structure:
-            tree: nT
-            color: "R:0.0| G:0.8| B:0.0"
-
    Gamma:
        samples:
          tags: 
@@ -92,18 +52,11 @@ configs:
 
 
 outputs:
-    #SimulationPlotsEnergyVsPhotonsMultineutron:
     TestFile:
         path: /Users/fscutti/pyrate/myNotebooks/myOutput
         format: .root
         targets:
-          #- muonDetEnergyCaliB: NeutronRadPi8, NeutronDeg45, Neutron, AmBe
-          #- muonDetEnergyCaliB: Gamma, Neutron
           - muonDetPlot1D: Gamma, Neutron, Photons
-          #- muonDetPlot1D: Neutron, Photons
-          #- muonDetPlot2D: Neutron
-          #- muonDetPlot2D: Gamma, Photons, Neutron
-          #- muonDetPlotProfile1D: Gamma, Photons, Neutron
 
 
 

@@ -2,8 +2,9 @@
 inputs: 
    Data:
        samples: 
-           tags: s2019-07-15-02-35-14
-           groups: wave0, wave1, wave2
+           tags: 
+               any: s2019-07-15-02-35-14
+               groups: wave0, wave1, wave2
        database:
            connection:
                dbname: muonData
@@ -29,9 +30,10 @@ configs:
 
 
 outputs:
-    WDTest1.root:
+    WDTest1:
         path: /Users/fscutti/pyrate/myNotebooks/myOutput
-        objects:
+        format: .root
+        targets:
           - testingReader: Data
     
 # EOF

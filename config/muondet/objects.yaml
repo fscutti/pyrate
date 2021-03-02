@@ -49,47 +49,47 @@ objects:
      # -----------------------------------------------------------
      numPhotonsPMT8:
          algorithm:
-             name: MeasuredEnergy
+             name: TimeWeightedPulse
              only_photons: True
          waveform: wfPMT8
 
      numPhotonsPMT9:
          algorithm:
-             name: MeasuredEnergy
+             name: TimeWeightedPulse
              only_photons: True
          waveform: wfPMT9
 
      numPhotonsPMT12:
          algorithm:
-             name: MeasuredEnergy
+             name: TimeWeightedPulse
              only_photons: True
          waveform: wfPMT12
 
      numPhotonsPMT13:
          algorithm:
-             name: MeasuredEnergy
+             name: TimeWeightedPulse
              only_photons: True
          waveform: wfPMT13
 
 
      measEnergyPMT8:
          algorithm:
-             name: MeasuredEnergy
+             name: TimeWeightedPulse
          waveform: wfPMT8
 
      measEnergyPMT9:
          algorithm:
-             name: MeasuredEnergy
+             name: TimeWeightedPulse
          waveform: wfPMT9
 
      measEnergyPMT12:
          algorithm:
-             name: MeasuredEnergy
+             name: TimeWeightedPulse
          waveform: wfPMT12
 
      measEnergyPMT13:
          algorithm:
-             name: MeasuredEnergy
+             name: TimeWeightedPulse
          waveform: wfPMT13
 
      muonDetEnergy:

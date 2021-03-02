@@ -2,8 +2,9 @@
 inputs: 
    Data:
        samples: 
-           tags: SmallMuon
-           groups: ch0, ch1, ch2
+           tags: 
+               any: SmallMuon
+               groups: ch0, ch1, ch2
        eslices: 
            emin: 0
            emax: -1
@@ -22,9 +23,10 @@ configs:
 
 
 outputs:
-    WCTest1.root:
+    WCTest1:
         path: /Users/fscutti/pyrate/myNotebooks/myOutput
-        objects:
+        format: .root
+        targets:
           - testingReader: Data
     
 # EOF

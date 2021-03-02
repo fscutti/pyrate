@@ -2,8 +2,9 @@
 inputs: 
    Data:
        samples: 
-           tags: s2019-07-15-02-35-14
-           groups: wave0, wave1, wave2
+           tags: 
+               any: s2019-07-15-02-35-14
+               groups: wave0, wave1, wave2
        eslices: 
        - slice: 6
          nparts: 10
@@ -32,13 +33,13 @@ outputs:
     WDTest1:
         path: /Users/fscutti/pyrate/myNotebooks/myOutput
         format: .root
-        objects:
+        targets:
           - testingReader: Data
       
     WDTest2:
         path: /Users/fscutti/pyrate/myNotebooks/myOutput
         format: .root
-        objects:
+        targets:
           - testingReader: MC
     
 # EOF

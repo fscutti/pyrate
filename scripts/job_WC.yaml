@@ -2,8 +2,9 @@
 inputs: 
    Data:
        samples: 
-            tags: AmBe-pos5-80ns-100000
-            group: file1, file2
+            tags: 
+                any: AmBe-pos5-80ns-100000
+                group: file1, file2
        eslices: 
            emin: 0
            emax: 10000
@@ -18,9 +19,10 @@ configs:
 
 
 outputs:
-    WCTest1.root:
+    WCTest1:
         path: /home/fscutti/outtest
-        objects:
+        format: .root
+        targets:
           - testingReader: Data
     
 # EOF
