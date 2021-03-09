@@ -1,0 +1,7 @@
+tqdm
+colorama
+pyaml
+psycopg2-binary
+black
+numpy
+scipy
