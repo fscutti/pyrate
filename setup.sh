@@ -81,9 +81,9 @@ pip3.8 $QUIET install -r requirements.txt
 #  install pyrate
 # the -e option is impotant so that pyrate is globall recognised
 # so you can run it independent of were $(pwd) is. 
-pip3.8 $QUIET install -e .
+pip3.8 $QUIET install -e $PYRATE
 
-bash ./test/check_for_root_test.sh
+bash $PYRATE/test/check_for_root_test.sh
 if [ $? -ne 0 ]; then # last exitcode
 	echo -e "${RED}Could not find ${NC}${CYAN}ROOT$NC${RED}! Did you set it up? ${NC}"
 else
@@ -91,7 +91,7 @@ else
 fi
 
 # short test
-bash ./test/install_test.sh
+bash $PYRATE/test/install_test.sh
 if [ $? -ne 0 ]; then # last exitcode
 	echo -e "${RED}SOMETHING WENT WRONG.${NC}"
 else
