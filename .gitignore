@@ -51,7 +51,6 @@ Thumbs.db
 
 # Other #
 ######################
-*.root
 *.ipynb
 *.eps
 *.png
