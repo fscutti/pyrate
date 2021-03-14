@@ -12,6 +12,8 @@ __pycache__
 # Python package install files #
 ################################
 *.egg-info
+# virtual env 
+*env*/
 
 # Packages #
 ############
@@ -49,7 +51,6 @@ Thumbs.db
 
 # Other #
 ######################
-*.root
 *.ipynb
 *.eps
 *.png
