@@ -33,7 +33,7 @@ __pycache__
 *.log
 *.sql
 *.sqlite
-
+./*/logs/*
 # OS generated files #
 ######################
 *.swp
