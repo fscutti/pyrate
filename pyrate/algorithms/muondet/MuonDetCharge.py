@@ -20,4 +20,5 @@ class MuonDetCharge(Algorithm):
 
             self.store.put(config["name"], e)
 
+
 # EOF

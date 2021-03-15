@@ -7,6 +7,7 @@ import numpy as np
 
 from pyrate.core.Algorithm import Algorithm
 
+
 class SimulatedWaveformsBuilder(Algorithm):
     __slots__ = ("pmt_map", "pmt_intervals", "pc_width", "pc_depth")
 
@@ -53,11 +54,11 @@ class SimulatedWaveformsBuilder(Algorithm):
             ]
 
     def execute(self, config):
-        
+
         waveforms = {}
         for pmt, position in self.pmt_intervals.items():
             waveforms[pmt] = {"energy": [], "time": []}
-        
+
         x_hits = self.store.get(config["algorithm"]["hits_x_positions"])
         y_hits = self.store.get(config["algorithm"]["hits_y_positions"])
         z_hits = self.store.get(config["algorithm"]["hits_z_positions"])

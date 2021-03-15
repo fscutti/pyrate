@@ -250,9 +250,9 @@ class Make1DGraph(Algorithm):
 
         n_points = len(array["x_axis"]) - 1
 
-        #graph.SetPointX(0, graph.GetXaxis().GetXmin())
-        #graph.SetPointY(0, graph.GetYaxis().GetXmin())
-        #graph.SetPointError(0, 0, 0)
+        # graph.SetPointX(0, graph.GetXaxis().GetXmin())
+        # graph.SetPointY(0, graph.GetYaxis().GetXmin())
+        # graph.SetPointError(0, 0, 0)
 
         for i in range(n_points):
 
@@ -275,9 +275,9 @@ class Make1DGraph(Algorithm):
             graph.SetPointY(i, y_value)
             graph.SetPointError(i, x_err, y_err)
 
-        #graph.SetPointX(n_points + 1, graph.GetXaxis().GetXmax())
-        #graph.SetPointY(n_points + 1, graph.GetYaxis().GetXmax())
-        #graph.SetPointError(n_points, 0, 0)
+        # graph.SetPointX(n_points + 1, graph.GetXaxis().GetXmax())
+        # graph.SetPointY(n_points + 1, graph.GetYaxis().GetXmax())
+        # graph.SetPointError(n_points, 0, 0)
 
     def get_graph_name(self, array_name):
         """Builds histogram name."""
