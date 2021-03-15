@@ -57,6 +57,8 @@ outputs:
         format: .root
         targets:
           - muonDetPlot1D: Gamma, Neutron, Photons
+          - muonDetPlot2D: all
+          - muonDetPlot2D: Neutron
 
 
 

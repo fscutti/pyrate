@@ -192,7 +192,7 @@ class Make1DHistPlot(Algorithm):
                             f_attr,
                         )
 
-        FN.pretty(plot_collection)
+        #FN.pretty(plot_collection)
 
         canvas_collection = {}
 
