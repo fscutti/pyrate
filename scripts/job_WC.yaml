@@ -15,7 +15,8 @@ inputs:
 configs:
     config2:
        path:  PYRATE/config
-       names: objects
+       tags: 
+           any: objects
 
 
 outputs:

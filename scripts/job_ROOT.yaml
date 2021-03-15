@@ -19,7 +19,8 @@ inputs:
 configs:
     config2:
        path:  /Users/fscutti/pyrate/config
-       names: objects
+       tags: 
+           any: objects
 
 
 outputs:

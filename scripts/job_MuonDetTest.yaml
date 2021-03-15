@@ -45,10 +45,12 @@ inputs:
 configs:
     muondetobjs:
        path:  PYRATE/config/muondet
-       names: objects
+       tags: 
+           any: objects
     muondetregions:
        path:  PYRATE/config/muondet
-       names: analysis
+       tags: 
+           any: analysis
 
 
 outputs:

@@ -50,10 +50,12 @@ inputs:
 configs:
     config1:
        path:  /Users/fscutti/pyrate/config
-       names: analysis
+       tags: 
+           any: analysis
     config2:
        path:  /Users/fscutti/pyrate/config
-       names: objects
+       tags: 
+           any: objects
 
 
 # -----------------------------------------------------------------------

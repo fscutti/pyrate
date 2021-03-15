@@ -112,8 +112,16 @@ class Job:
             for f in FN.find_files(attr["path"], "PYRATE"):
                 self.job["configs"][name]["files"].extend(
                     f
-                    for n in ST.get_items(attr["names"])
-                    if n in ST.get_tags(f) and f.lower().endswith(".yaml")
+                    for n in ST.get_items(attr["tags"]["any"])
+                    if n in ST.get_tags(f)
+                    and FN.modus_ponens(
+                        "all" in attr["tags"],
+                        all(
+                            t in ST.get_tags(f)
+                            for t in ST.get_items(attr["tags"].get("all", False))
+                        ),
+                    )
+                    and f.lower().endswith(".yaml")
                 )
 
             for f in self.job["configs"][name]["files"]:
@@ -126,7 +134,7 @@ class Job:
         for name, attr in self.config["outputs"].items():
 
             self.job["outputs"][name] = {"files": []}
-            
+
             attr["path"] = FN.find_env(attr["path"], "PYRATE")
 
             self.job["outputs"][name]["files"] = os.path.join(attr["path"], name)
