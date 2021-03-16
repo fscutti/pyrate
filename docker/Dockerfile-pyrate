@@ -56,25 +56,31 @@ RUN rm -rf $BUILD_DIR && rm -rf $SRC_DIR && echo "Done"
 
 ###########################################################################################
 
-# for some reason the docker bash ignores all rc, /etc/profile and /etc/profile.d files 
-# so we have to manually source root before starting our shell
-RUN echo "source ${INSTALL_DIR}/bin/thisroot.sh && /bin/bash" >> /entrypoint.sh && chmod +x /entrypoint.sh 
-
 # setup root and do quick test
-RUN ["/bin/bash", "-c", "source ${INSTALL_DIR}/bin/thisroot.sh && python3.8 -c \"import ROOT\""]
+# this is what 'thisroot.sh' actually does...
 
+# ARG ROOTSYS=$INSTALL_DIR
+ARG LD_LIBRARY_PATH=$INSTALL_DIR/lib
+ARG DYLD_LIBRARY_PATH=$INSTALL_DIR/lib
+ARG SHLIB_PATH=$INSTALL_DIR/lib
+ARG LIBPATH=$INSTALL_DIR/lib
+ARG PYTHONPATH=$INSTALL_DIR/lib
+
+RUN ["/bin/bash", "-c", "python3.8 -c \"import ROOT\""]
 
 ###########################################################################################
 
-COPY . /pyrate/
-WORKDIR /pyrate/
+COPY . /pyrate_src/
+WORKDIR /pyrate_src/
 
-# do this a step earlier so we can cache the result
-RUN pip3.8 install -r requirements.txt
+# RUN chmod +x setup.sh && /bin/bash -c "./setup.sh"
+RUN chmod +x setup_docker.sh && /bin/bash -c "./setup_docker.sh"
 
-RUN /bin/bash setup.sh
+# for some reason the docker bash ignores all rc, /etc/profile and /etc/profile.d files 
+# so we have to manually source root before starting our shell
+RUN echo "source ${INSTALL_DIR}/bin/thisroot.sh && source /pyrate_src/pyrate_venv/bin/activate &&  /bin/bash" >> /entrypoint.sh && chmod +x /entrypoint.sh 
 
 # if you run the container with 'docker run' this will be called and python will know about ROOT
-ENTRYPOINT ["bin/bash", "-c", "/entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "-c", "/entrypoint.sh"]
 
 
