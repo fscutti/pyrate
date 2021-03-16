@@ -93,7 +93,14 @@ class Region(Algorithm):
             if region["is_passed"]:
 
                 for w_name in weights:
-                    region["weights"][w_name] = self.store.get(w_name)
+
+                    if "=" in w_name:
+                        region["weights"][w_name] = float(
+                            w_name.split("=")[-1].replace(" ", "")
+                        )
+
+                    else:
+                        region["weights"][w_name] = self.store.get(w_name)
 
         self.store.put(config["name"], region)
 

@@ -192,7 +192,7 @@ class Make1DHistPlot(Algorithm):
                             f_attr,
                         )
 
-        # FN.pretty(plot_collection)
+        #FN.pretty(plot_collection)
 
         canvas_collection = {}
 
@@ -235,6 +235,9 @@ class Make1DHistPlot(Algorithm):
                                 )
                             )
 
+                        if mode == "stack":
+                            l_entry = "stack:"+l_entry
+                          
                         l.AddEntry(h, l_entry, "pl")
 
                         if mode == "overlay":

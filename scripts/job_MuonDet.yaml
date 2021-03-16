@@ -85,10 +85,12 @@ inputs:
 configs:
     muondetobjs:
        path:  /Users/fscutti/pyrate/config/muondet
-       names: objects
+       tags: 
+           any: objects
     muondetregions:
        path:  /Users/fscutti/pyrate/config/muondet
-       names: analysis
+       tags: 
+           any: analysis
 
 
 outputs:

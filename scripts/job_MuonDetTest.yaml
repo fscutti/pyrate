@@ -45,10 +45,12 @@ inputs:
 configs:
     muondetobjs:
        path:  PYRATE/config/muondet
-       names: objects
+       tags: 
+           any: objects
     muondetregions:
        path:  PYRATE/config/muondet
-       names: analysis
+       tags: 
+           any: analysis
 
 
 outputs:
@@ -57,6 +59,8 @@ outputs:
         format: .root
         targets:
           - muonDetPlot1D: Gamma, Neutron, Photons
+          - muonDetPlot2D: all
+          - muonDetPlot2D: Neutron
 
 
 
