@@ -8,7 +8,7 @@ This will be the baseimage for the buildboit pipe until the ROOT devs release a 
 
 ## How to docker
 build the container:
-    - docker build  --tag name:version /path/to/docker/file
+    - docker build  --tag name:version -f /path/to/docker/file .
 run the container: 
     - '-it' for interactive, meaning you will get a shell (bash) in the container
     - docker run -it rootpy3.8:version0.1
