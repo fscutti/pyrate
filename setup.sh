@@ -67,7 +67,11 @@ if [ -z "$VIRTUAL_ENV" ]; then
 	# get this module as a global user module
 	python3.8 -m pip install --user virtualenv
 	python3.8 -m venv $VENV_NAME
+
+    echo -e "Virtual environemnt at'${VENV_NAME}' PATH: '${PATH}'"
+
 	source $VENV_NAME/bin/activate
+    echo -e "Virtuel environment activated."
 else
 	echo -e "${GREEN}Virtual environment found at:\n${NC}${CYAN}${VIRTUAL_ENV}${NC}\n${GREEN}Using it to install our dependencies.${NC}"
 fi
@@ -76,12 +80,16 @@ fi
 # install all specified packages in that file
 #QUIET="-q" # unset his if you ned to debug the setup
 
+echo -e "$(which pip3.8) $(which python3.8)"
+
 pip3.8 $QUIET install pip --upgrade
 pip3.8 $QUIET install -r requirements.txt
 #  install pyrate
 # the -e option is impotant so that pyrate is globall recognised
 # so you can run it independent of were $(pwd) is. 
 pip3.8 $QUIET install -e $PYRATE
+
+echo -e "pyrate base dir is ${PYRATE}"
 
 bash $PYRATE/test/check_for_root_test.sh
 if [ $? -ne 0 ]; then # last exitcode
