@@ -26,7 +26,7 @@ git clone --branch $ROOT_VERSION https://github.com/root-project/root.git $SRC_D
 cd $BUILD_DIR
 
 # check if we have python3.8
-python3.8 -c "print(Found python3.8 - all good so far...)" || echo "Did not find python3.8 did you install it?"
+python3.8 -c "print('Found python3.8 - all good so far...')" || echo "Did not find python3.8 did you install it?"
 
 # configure needs cmake>3.14 on centos7 his is diffrencent from 'cmake'
 cmake3 -j$(nproc) -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR -Dcxx11=ON -DPYTHON_EXECUTABLE=$(which python3.8) -Droofit=ON -Dx11=ON $SRC_DIR

@@ -1,0 +1,16 @@
+# Content
+This dockerfile contains and image of centos7 and builds python3.8 as well as root-6.22.00. Building it from scratch takes ~30 mins on my machine.
+Once it is build you will not have to build it again.
+You will be able to use ROOT in python within the container.
+
+## Purpose
+This will be the baseimage for the buildboit pipe until the ROOT devs release a sable root version with python3.8.
+
+## How to docker
+build the container:
+    - docker build  --tag name:version -f /path/to/docker/file .
+run the container: 
+    - '-it' for interactive, meaning you will get a shell (bash) in the container
+    - docker run -it rootpy3.8:version0.1
+
+
