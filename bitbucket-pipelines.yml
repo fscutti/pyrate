@@ -11,6 +11,7 @@ pipelines:
           caches:
             - pip
           script:
+            - source /cern_root/cern_root/rootv6.22py3.8/bin/thisroot.sh
             - source ./setup.sh
 
 #      - step:
