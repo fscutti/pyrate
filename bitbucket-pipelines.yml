@@ -14,6 +14,7 @@ pipelines:
             - source /cern_root/rootv6.22py3.8/bin/thisroot.sh
             - python3.8 -c "import ROOT" || echo "Couldn't setup ROOT"
             - source ./setup.sh
+            - robot ./test/    # this runs all robot tests cases
 
 #      - step:
 #          name: Lint code
