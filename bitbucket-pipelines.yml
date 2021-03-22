@@ -11,7 +11,8 @@ pipelines:
           caches:
             - pip
           script:
-            - source /cern_root/cern_root/rootv6.22py3.8/bin/thisroot.sh
+            - source /cern_root/rootv6.22py3.8/bin/thisroot.sh
+            - python3.8 -c "import ROOT" || echo "Couldn't setup ROOT"
             - source ./setup.sh
 
 #      - step:
