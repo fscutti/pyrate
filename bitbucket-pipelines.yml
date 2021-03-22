@@ -1,0 +1,21 @@
+
+# This is an image that contains python3.8 and root build with it as
+# in the /docker/ folder
+image: nohrk/sabreroopy:v1.0
+
+pipelines:
+  default:
+    - parallel:
+      - step:
+          name: Build
+          caches:
+            - pip
+          script:
+            - source ./setup.sh
+
+#      - step:
+#          name: Lint code
+#          script:
+#            # Enforce style consistency across Python projects https://flake8.pycqa.org/en/latest/manpage.html
+#            - pip install flake8
+#            - flake8 . --extend-exclude=dist,build --show-source --statistics
