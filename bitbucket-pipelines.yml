@@ -5,8 +5,10 @@ image: nohrk/sabreroopy:v1.0
 
 pipelines:
   default:
+    - parallel:
       - step:
-          name: Build
+          # boh has to be done in one step
+          name: Build and test 
           caches:
             # this speeds up the build, we cache most python packages
             - pip
@@ -19,18 +21,12 @@ pipelines:
             # install pyrate
             - source ./setup.sh
             # run tests (all those ending wih `.robot` ...)
-#            - robot ./test/
-      - step:
-          name: Test
-          caches:
-            - pip
-          script:
             - robot ./test/
 
 
-#      - step:
-#          name: Lint code
-#          script:
-#            # Enforce style consistency across Python projects https://flake8.pycqa.org/en/latest/manpage.html
-#            - pip install flake8
-#            - flake8 . --extend-exclude=dist,build --show-source --statistics
+      - step:
+          name: Lint code
+          script:
+            # Enforce style consistency across Python projects https://flake8.pycqa.org/en/latest/manpage.html
+            - pip install flake8
+            - flake8 . --extend-exclude=dist,build --show-source --statistics
