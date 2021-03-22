@@ -13,4 +13,9 @@ run the container:
     - '-it' for interactive, meaning you will get a shell (bash) in the container
     - docker run -it rootpy3.8:version0.1
 
-
+# Upload a container to the public docker hubfor use in the buildbot
+  - build
+  - docker images # see all images and their hashes
+  - docker tag <hash> username/pyrateroot:<tag> # have to retag with the username!
+  - docker push username/pyrateroot:<tag>
+  - the image should now be public under username/pyrateroot:<tag> and ready for use in the buildbot
