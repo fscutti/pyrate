@@ -1,20 +1,32 @@
 
-# This is an image that contains python3.8 and root build with it as
-# in the /docker/ folder
+# This is an image that contains python3.8 and root build with it
+# as in the /docker/ folder
 image: nohrk/sabreroopy:v1.0
 
 pipelines:
   default:
-    - parallel:
       - step:
           name: Build
           caches:
+            # this speeds up the build, we cache most python packages
             - pip
           script:
+            # this is a hardcoded place in the container 
+            # for some reason the entrypoint of the container is ignored, so we have to manually setup root again
             - source /cern_root/rootv6.22py3.8/bin/thisroot.sh
-            - python3.8 -c "import ROOT" || echo "Couldn't setup ROOT"
+            # this is just a check
+            - python3.8 -c "import ROOT" || echo "Couldn't setup ROOT something is wrong with the docker container!!!"
+            # install pyrate
             - source ./setup.sh
-            - robot ./test/    # this runs all robot tests cases
+            # run tests (all those ending wih `.robot` ...)
+#            - robot ./test/
+      - step:
+          name: Test
+          caches:
+            - pip
+          script:
+            - robot ./test/
+
 
 #      - step:
 #          name: Lint code
