@@ -28,5 +28,5 @@ pipelines:
           name: Lint code
           script:
             # Enforce style consistency across Python projects https://flake8.pycqa.org/en/latest/manpage.html
-            - pip install flake8
+            - pip3.8 install flake8
             - flake8 . --extend-exclude=dist,build --show-source --statistics
