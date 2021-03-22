@@ -1,0 +1,32 @@
+
+# This is an image that contains python3.8 and root build with it
+# as in the /docker/ folder
+image: nohrk/sabreroopy:v1.0
+
+pipelines:
+  default:
+    - parallel:
+      - step:
+          # boh has to be done in one step
+          name: Build and test 
+          caches:
+            # this speeds up the build, we cache most python packages
+            - pip
+          script:
+            # this is a hardcoded place in the container 
+            # for some reason the entrypoint of the container is ignored, so we have to manually setup root again
+            - source /cern_root/rootv6.22py3.8/bin/thisroot.sh
+            # this is just a check
+            - python3.8 -c "import ROOT" || echo "Couldn't setup ROOT something is wrong with the docker container!!!"
+            # install pyrate
+            - source ./setup.sh
+            # run tests (all those ending wih `.robot` ...)
+            - robot ./test/
+
+# This needs a lo of work bfore we can enable it ...
+#      - step:
+#          name: Lint code
+#          script:
+#            # Enforce style consistency across Python projects https://flake8.pycqa.org/en/latest/manpage.html
+#            - pip3.8 install flake8
+#            - flake8 . --extend-exclude=dist,build --show-source --statistics
