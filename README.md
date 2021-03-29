@@ -7,6 +7,9 @@
     module load root/6.22.02-python-3.8.2	
     module avail # see whats available 
 
+## Setup pyrate itself
+    source setup.sh
+
 ## Testing
   We use robot-framework for testing. All tests go to `./test` and end with `.robot`. See the example.	
   Run all tests:
