@@ -76,6 +76,11 @@ else
 	echo -e "${GREEN}Virtual environment found at:\n${NC}${CYAN}${VIRTUAL_ENV}${NC}\n${GREEN}Using it to install our dependencies.${NC}"
 fi
 
+# Check the environment has been activated
+if [ -z "$VIRTUAL_ENV" ]; then
+	echo -e "${RED}ERROR: Python environment failed to activate. Exiting...${NC}"
+	exit 1
+fi
 
 # install all specified packages in that file
 #QUIET="-q" # unset his if you ned to debug the setup
