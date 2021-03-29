@@ -83,7 +83,7 @@ fi
 echo -e "$(which pip3.8) $(which python3.8)"
 
 pip3.8 $QUIET install pip --upgrade
-pip3.8 $QUIET install -r requirements.txt
+pip3.8 $QUIET install -r $PYRATE/requirements.txt
 #  install pyrate
 # the -e option is impotant so that pyrate is globall recognised
 # so you can run it independent of were $(pwd) is. 
