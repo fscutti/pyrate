@@ -76,6 +76,11 @@ else
 	echo -e "${GREEN}Virtual environment found at:\n${NC}${CYAN}${VIRTUAL_ENV}${NC}\n${GREEN}Using it to install our dependencies.${NC}"
 fi
 
+# Check the environment has been activated
+if [ -z "$VIRTUAL_ENV" ]; then
+	echo -e "${RED}ERROR: Python environment failed to activate. Exiting...${NC}"
+	exit 1
+fi
 
 # install all specified packages in that file
 #QUIET="-q" # unset his if you ned to debug the setup
@@ -83,7 +88,7 @@ fi
 echo -e "$(which pip3.8) $(which python3.8)"
 
 pip3.8 $QUIET install pip --upgrade
-pip3.8 $QUIET install -r requirements.txt
+pip3.8 $QUIET install -r $PYRATE/requirements.txt
 #  install pyrate
 # the -e option is impotant so that pyrate is globall recognised
 # so you can run it independent of were $(pwd) is. 
