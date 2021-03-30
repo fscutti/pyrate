@@ -10,6 +10,7 @@ from pyrate.core.Reader import Reader
 from pyrate.readers.ReaderROOT import ReaderROOT
 from pyrate.readers.ReaderWaveCatcherLC import ReaderWaveCatcherLC
 from pyrate.readers.ReaderWaveCatcherMMAP import ReaderWaveCatcherMMAP
+from pyrate.readers.ReaderBlueTongueMMAP import ReaderBlueTongueMMAP
 from pyrate.readers.ReaderWaveDumpMMAP import ReaderWaveDumpMMAP
 from pyrate.readers.ReaderPostgreSQL import ReaderPostgreSQL
 
@@ -303,6 +304,7 @@ class Input(Reader):
 
             elif f_name.endswith(".dat"):
                 # choose the reader based on file size.
+                """
                 if os.path.getsize(f_name) >= 1 * GB / self._n_groups:
                     reader = ReaderWaveCatcherMMAP(
                         r_name, self.store, self.logger, f_name, self.structure
@@ -311,6 +313,10 @@ class Input(Reader):
                     reader = ReaderWaveCatcherLC(
                         r_name, self.store, self.logger, f_name, self.structure
                     )
+                """
+                reader = ReaderBlueTongueMMAP(
+                    r_name, self.store, self.logger, f_name, self.structure
+                )
 
             elif f_name.endswith(".txt"):
                 reader = ReaderWaveDumpMMAP(

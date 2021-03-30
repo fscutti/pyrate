@@ -53,6 +53,8 @@ objects:
       selection:
         - xParticleHitPos == 0.0
         - yParticleHitPos == 0.0
+      #weights:
+      #  - myWeight = 2.
 
     muonDetParticlePos6:
       algorithm:

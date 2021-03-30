@@ -9,6 +9,7 @@ mySelection:
         weights:
             - myWeight1
             - myWeight2
+            - myArbitraryWeightName = 103.
         is_subregion_of:
             - mySuperRegion1
             - mySuperRegion2

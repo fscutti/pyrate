@@ -5,8 +5,9 @@ inputs:
    Neutron:
         samples:
           tags: 
-              any: neutron
-              all: pos5
+              any: neutron, neutron2
+              all: pos5, pos1
+              group: ch1, ch2
         eslices:
             emin: 0
             emax: -1
@@ -32,10 +33,11 @@ inputs:
    Photons:
        samples:
          tags: 
-             any: gamma
-       eslices:
-           emin: 0
-           emax: -1
+             any: gamma, neutron
+             all: pos5
+         eslices:
+             emin: 0
+             emax: 129
        path:
            - PYRATE/test/data
        structure:

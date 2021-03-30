@@ -11,11 +11,13 @@ def modus_ponens(p, q):
     else:
         return not p
 
+
 def find_env(path, env):
     """Checks existence of environment variable in path and eventually replaces it."""
     if env in path:
         path = path.replace(env, os.environ.get(env))
     return path
+
 
 def find_files(paths, env=None):
     """Find all files under a list of paths. It also sorts the list."""
@@ -133,6 +135,25 @@ def intersect(probe, target):
             else:
                 raise ValueError("values for common keys don't match")
     return intersection
+
+
+def find(key, dictionary):
+    """Find value of key in nested dictionary. Thank you, internet!
+    https://stackoverflow.com/questions/9807634/find-all-occurrences-of-a-key-in-nested-dictionaries-and-lists
+    """
+    if hasattr(dictionary, "items"):
+        for k, v in dictionary.items():
+            if k == key:
+                yield v
+
+            if isinstance(v, dict):
+                for result in find(key, v):
+                    yield result
+
+            elif isinstance(v, list):
+                for d in v:
+                    for result in find(key, d):
+                        yield result
 
 
 def get_color(my_color):
