@@ -53,4 +53,5 @@ It is important here that `feature/my-feature-name` is the same name as you crea
     git push --set-upstream origin feature/my-feature-name:origin/feature/different-name
 
 if you want a deffenrent name on the remote repo. (Maybe you have a typo earlier but you can also rename locally with `git banch -m new-name`).
+Then make a pull request. Go to "branches" and klick on "open pull request", select "master" as destination (should be default) you need to include at least Federico.
 
