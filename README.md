@@ -31,6 +31,13 @@ Please implement a test for every new feature you implement.
 
 ## Some git basics
 When you create new branches please use the prefixes `feature` and `bugfix`. The keyword `release` will later be used for relases.
+Get updates from remote repo
+
+    git fetch
+
+Checkout the master branch and pull latest changes
+
+    git checkout master && git pull
 
 Make a new branch
 
@@ -52,6 +59,6 @@ It is important here that `feature/my-feature-name` is the same name as you crea
 
     git push --set-upstream origin feature/my-feature-name:origin/feature/different-name
 
-if you want a deffenrent name on the remote repo. (Maybe you have a typo earlier but you can also rename locally with `git banch -m new-name`).
-Then make a pull request. Go to "branches" and klick on "open pull request", select "master" as destination (should be default) you need to include at least Federico.
+if you want a different name on the remote repo. (Maybe you have a typo earlier but you can also rename locally with `git branch -m new-name`).
+Then make a pull request. Go to "branches" and klick on "open pull request", select "master" as destination (should be default) you need to include at least Federico. Klick the litle box to delete the branch after it is merged.
 
