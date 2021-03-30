@@ -304,8 +304,13 @@ class Input(Reader):
 
             elif f_name.endswith(".dat"):
                 # choose the reader based on file size.
-                """
-                if os.path.getsize(f_name) >= 1 * GB / self._n_groups:
+                
+                if "sabre" in f_name:
+                    reader = ReaderBlueTongueMMAP(
+                        r_name, self.store, self.logger, f_name, self.structure
+                    )
+
+                elif os.path.getsize(f_name) >= 1 * GB / self._n_groups:
                     reader = ReaderWaveCatcherMMAP(
                         r_name, self.store, self.logger, f_name, self.structure
                     )
@@ -313,10 +318,6 @@ class Input(Reader):
                     reader = ReaderWaveCatcherLC(
                         r_name, self.store, self.logger, f_name, self.structure
                     )
-                """
-                reader = ReaderBlueTongueMMAP(
-                    r_name, self.store, self.logger, f_name, self.structure
-                )
 
             elif f_name.endswith(".txt"):
                 reader = ReaderWaveDumpMMAP(
