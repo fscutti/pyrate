@@ -23,7 +23,7 @@ But before that you need to install pyrate at least once with:
 Alternatively you can run above also everytime you want to use pyrate (just might take a couple of seconds longer). It sets the $PYRATE variable which is important for pyrate to know is root directory (`source` makes sure this variable persists after running the script, so just doing `./setup.sh` will result in crashes).
 
 ## **Testing**
-We use robot-framework for testing. All tests go to `./test` and end with `.robot`. See the example.	
+We use [robot-framework](https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html) for testing. All tests go to `./test` and end with `.robot`. See the example in the folder.	
 Run all tests:
 
     robot ./test # runs all tests in the directory ending with `.robot`
