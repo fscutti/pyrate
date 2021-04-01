@@ -156,6 +156,11 @@ def find(key, dictionary):
                         yield result
 
 
+def grab(key, dictionary):
+    """This is just a wrapper around the find function, getting a single item as opposed to the iterator."""
+    return [i for i in find(key, dictionary)][0]
+
+
 def get_color(my_color):
     """Given a pixel string it prepares a pixel dictionary."""
     my_color = my_color.replace(" ", "")

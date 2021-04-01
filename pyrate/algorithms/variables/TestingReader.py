@@ -5,7 +5,6 @@ from copy import copy
 
 from pyrate.core.Algorithm import Algorithm
 
-
 class TestingReader(Algorithm):
     __slots__ = ()
 
@@ -184,7 +183,8 @@ class TestingReader(Algorithm):
             #self.store.get("EVENT:board_1:time_count_ch_8")
             #self.store.get("EVENT:board_1:trigger_count_ch_10")
             #self.store.get("EVENT:timestamp")
-            #print(self.store.get("EVENT:board_1:event_counter"))
+            #v = self.store.get("EVENT:board_1:event_counter")
+            v = self.store.get(config["algorithm"]["var"])
             
             """
             print(self.store.get("INPUT:board_1:n_channels"))
@@ -193,41 +193,9 @@ class TestingReader(Algorithm):
             print(self.store.get("INPUT:board_1:type"))
             print(self.store.get("INPUT:board_1:record_length"))
             print(self.store.get("INPUT:board_1:channel_numbers"))
+            v = self.store.get("INPUT:n_boards")
             """
-            pass
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            self.store.put(config["name"], v)
 
 
 # EOF

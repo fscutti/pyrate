@@ -7,6 +7,10 @@ Binary data is written according to this scheme:
 It is read using this method: 
     https://docs.python.org/3.8/library/struct.html
 
+EVENT or INPUT (header) variables should be accessed using the namespace reported in the following dictionaries:
+    Example: EVENT:board_2:raw_waveform_ch_3, EVENT:timestamp, INPUT:n_boards, INPUT:board_1:name, etc...
+
+
 Event dictionary ->
 
 timestamp: xyz
@@ -241,7 +245,7 @@ class ReaderBlueTongueMMAP(Reader):
     def _read_header(self, name, variable):
         """Reads variable from the header dictionary and puts it in the transient store."""
 
-        value = [b_pos for b_pos in FN.find(variable, self._hd)][0]
+        value = FN.grab(variable, self._hd)
 
         self.store.put(name, value, "TRAN")
 
@@ -249,7 +253,7 @@ class ReaderBlueTongueMMAP(Reader):
         """Reads variable from the event and puts it in the transient store."""
         pos_current_line = self._mmf.tell()
 
-        t = [b_pos for b_pos in FN.find(variable, self._ev)][0]
+        t = FN.grab(variable, self._ev)
 
         items_number, items_type, items_offset = t[0], t[1], t[2]
 

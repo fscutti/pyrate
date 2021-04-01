@@ -144,12 +144,77 @@ objects:
      # Trees
      # -----------------------------------------------------------
      #
-     
+     treeMaker:
+       algorithm:
+           name: TreeMaker
+       trees:
+         - MuonDetector/MetaData:
+               numbers: 
+                   int: EventCount
+               vectors: 
+                   float: Waveform
+         #          int: X
+         #- MuonDetector/Event:
+         #      numbers: 
+         #          int: x
+         #          float: x
+         #      vectors: 
+         #          int: x 
+         #          float: x
+         #- MuonDetector/Channel_8:
+         #      numbers: 
+         #          int: x
+         #          float: x
+         #      vectors: 
+         #          int: x
+         #          float: x
+
+
+
      # -----------------------------------------------------------
      # Testing
      # -----------------------------------------------------------
-     testingReader:
+     EventCount:
        algorithm:
          name: TestingReader
          format: BlueTongue
+         #var: EVENT:board_1:time_count_ch_8
+         var: INPUT:n_boards
+     
+     Waveform:
+       algorithm:
+         name: TestingReader
+         format: BlueTongue
+         var: EVENT:board_1:raw_waveform_ch_10
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # EOF
