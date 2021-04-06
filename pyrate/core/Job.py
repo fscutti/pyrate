@@ -45,101 +45,111 @@ class Job:
         # Build global configuration
         # --------------------------
 
-        for name, attr in self.config["inputs"].items():
+        for i_name, i_attr in self.config["inputs"].items():
 
             # This dictionary contains all input information. The file list contains lists
             # which can have more than one element in the case of multiple channels declared in the group.
-            self.job["inputs"][name] = {"files": []}
+            self.job["inputs"][i_name] = {"files": []}
 
             # Files are collected looking for tags separated by underscores. Sevaral options are available
             # to collect tags.
             # 1) any: (REQUIRED) collect a file if it contains any of these tags.
             # 2) all: collect a file if it contains all of these tags.
             # 3) gropus: if a file starts with any of the tags declared here it will be considered as part of a group.
-            for f in FN.find_files(attr["path"], "PYRATE"):
-                self.job["inputs"][name]["files"].extend(
-                    f
-                    for s in ST.get_items(attr["samples"]["tags"]["any"])
-                    if s in ST.get_tags(f)
-                    and FN.modus_ponens(
-                        "all" in attr["samples"]["tags"],
-                        all(
-                            t in ST.get_tags(f)
-                            for t in ST.get_items(
-                                attr["samples"]["tags"].get("all", False)
-                            )
-                        ),
+            # 
+            # Files can also be added providing their full path under the 'path' field. Notice that if the 'samples' options
+            # are ALSO provided, all files added in this way will be selected according to the 'tags' rules as usual.
+
+            for f in FN.find_files(i_attr["path"], "PYRATE"):
+
+                if "samples" in i_attr:
+                    self.job["inputs"][i_name]["files"].extend(
+                        f
+                        for s in ST.get_items(i_attr["samples"]["tags"]["any"])
+                        if s in ST.get_tags(f)
+                        and FN.modus_ponens(
+                            "all" in i_attr["samples"]["tags"],
+                            all(
+                                t in ST.get_tags(f)
+                                for t in ST.get_items(
+                                    i_attr["samples"]["tags"].get("all", False)
+                                )
+                            ),
+                        )
+                        and FN.modus_ponens(
+                            "groups" in i_attr["samples"]["tags"],
+                            any(
+                                c in ST.get_tags(f)
+                                for c in ST.get_items(
+                                    i_attr["samples"]["tags"].get("groups", False)
+                                )
+                            ),
+                        )
                     )
-                    and FN.modus_ponens(
-                        "groups" in attr["samples"]["tags"],
-                        any(
-                            c in ST.get_tags(f)
-                            for c in ST.get_items(
-                                attr["samples"]["tags"].get("groups", False)
-                            )
-                        ),
-                    )
-                )
+
+                else:
+                    self.job["inputs"][i_name]["files"].append(f)
+
             # removing duplicates from the list of files. At this stage no groups are built yet.
-            self.job["inputs"][name]["files"] = ST.remove_duplicates(
-                self.job["inputs"][name]["files"]
+            self.job["inputs"][i_name]["files"] = ST.remove_duplicates(
+                self.job["inputs"][i_name]["files"]
             )
 
             # Group files using the first tag found in their name.
-            self.job["inputs"][name]["files"] = [
+            self.job["inputs"][i_name]["files"] = [
                 list(f)
                 for j, f in groupby(
-                    self.job["inputs"][name]["files"],
+                    self.job["inputs"][i_name]["files"],
                     lambda a: a.partition("_")[0]
-                    if "groups" in attr["samples"]["tags"]
+                    if FN.find("groups", i_attr)
                     else None,
                 )
             ]
 
-            if not self.job["inputs"][name]["files"]:
+            if not self.job["inputs"][i_name]["files"]:
                 sys.exit(
-                    f"ERROR: no input files found for input {name} under path {attr['path']}"
+                    f"ERROR: no input files found for input {i_name} under path {i_attr['path']}"
                 )
 
             # Add all remaining attributes.
-            self.job["inputs"][name].update(attr)
+            self.job["inputs"][i_name].update(i_attr)
 
         self.job["configs"]["global"] = {"objects": {}}
-        for name, attr in self.config["configs"].items():
+        for c_name, c_attr in self.config["configs"].items():
 
-            self.job["configs"][name] = {"files": []}
+            self.job["configs"][c_name] = {"files": []}
 
-            for f in FN.find_files(attr["path"], "PYRATE"):
-                self.job["configs"][name]["files"].extend(
+            for f in FN.find_files(c_attr["path"], "PYRATE"):
+                self.job["configs"][c_name]["files"].extend(
                     f
-                    for n in ST.get_items(attr["tags"]["any"])
+                    for n in ST.get_items(c_attr["tags"]["any"])
                     if n in ST.get_tags(f)
                     and FN.modus_ponens(
-                        "all" in attr["tags"],
+                        "all" in c_attr["tags"],
                         all(
                             t in ST.get_tags(f)
-                            for t in ST.get_items(attr["tags"].get("all", False))
+                            for t in ST.get_items(c_attr["tags"].get("all", False))
                         ),
                     )
                     and f.lower().endswith(".yaml")
                 )
 
-            for f in self.job["configs"][name]["files"]:
-                self.job["configs"][name].update(yaml.full_load(open(f, "r")))
+            for f in self.job["configs"][c_name]["files"]:
+                self.job["configs"][c_name].update(yaml.full_load(open(f, "r")))
 
             self.job["configs"]["global"]["objects"].update(
-                self.job["configs"][name]["objects"]
+                self.job["configs"][c_name]["objects"]
             )
 
-        for name, attr in self.config["outputs"].items():
+        for o_name, o_attr in self.config["outputs"].items():
 
-            self.job["outputs"][name] = {"files": []}
+            self.job["outputs"][o_name] = {"files": []}
 
-            attr["path"] = FN.find_env(attr["path"], "PYRATE")
+            o_attr["path"] = FN.find_env(o_attr["path"], "PYRATE")
 
-            self.job["outputs"][name]["files"] = os.path.join(attr["path"], name)
+            self.job["outputs"][o_name]["files"] = os.path.join(o_attr["path"], o_name)
 
-            for target in attr["targets"]:
+            for target in o_attr["targets"]:
                 for t_name, t_attr in target.items():
 
                     if t_attr == "all":
@@ -155,7 +165,7 @@ class Job:
 
                 target[":".join([t_name, s_names])] = target.pop(t_name)
 
-            self.job["outputs"][name].update(attr)
+            self.job["outputs"][o_name].update(o_attr)
 
         # -----------------------
         # Instantiate Run object

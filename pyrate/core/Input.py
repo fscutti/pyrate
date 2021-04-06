@@ -8,8 +8,9 @@ import sys
 
 from pyrate.core.Reader import Reader
 from pyrate.readers.ReaderROOT import ReaderROOT
-from pyrate.readers.ReaderWaveCatcherLC import ReaderWaveCatcherLC
+#from pyrate.readers.ReaderWaveCatcherLC import ReaderWaveCatcherLC    # this reader is not the preferred one but we'll keep this line for reference.
 from pyrate.readers.ReaderWaveCatcherMMAP import ReaderWaveCatcherMMAP
+from pyrate.readers.ReaderBlueTongueMMAP import ReaderBlueTongueMMAP
 from pyrate.readers.ReaderWaveDumpMMAP import ReaderWaveDumpMMAP
 from pyrate.readers.ReaderPostgreSQL import ReaderPostgreSQL
 
@@ -33,25 +34,36 @@ class Input(Reader):
         if not hasattr(self, "structure"):
             self.structure = {}
 
-        if hasattr(self, "samples"):
+        if not hasattr(self, "database"):
             # The input might or not have samples associated to it.
             # If it does, it has to read from files. This is not
             # strictly necessary, as it might just want to read
             # from a database.
+
             g_names = {0: "0"}
-            if "groups" in self.samples:
-                for g_idx, g_name in enumerate(ST.get_items(self.samples["groups"])):
-                    g_names[g_idx] = g_name
+
+            if hasattr(self, "samples"):
+                if "groups" in self.samples:
+
+                    for g_idx, g_name in enumerate(
+                        ST.get_items(self.samples["groups"])
+                    ):
+                        g_names[g_idx] = g_name
 
             self._n_groups = len(self.files)
             self._n_files = len(self.files[0])
 
             self.groups = {}
+
             for g_idx, g_files in enumerate(self.files):
+
+                if not isinstance(g_files, list):
+                    g_files = [g_files]
+
                 self.groups[g_names[g_idx]] = g_files
                 self._set_group_reader(g_names[g_idx], self._f_idx)
 
-        if hasattr(self, "database"):
+        else:
             self._set_db_reader(self.database)
 
         assert hasattr(self, "groups") or hasattr(
@@ -303,12 +315,14 @@ class Input(Reader):
 
             elif f_name.endswith(".dat"):
                 # choose the reader based on file size.
-                if os.path.getsize(f_name) >= 1 * GB / self._n_groups:
-                    reader = ReaderWaveCatcherMMAP(
+
+                if "sabre" in f_name:
+                    reader = ReaderBlueTongueMMAP(
                         r_name, self.store, self.logger, f_name, self.structure
                     )
+
                 else:
-                    reader = ReaderWaveCatcherLC(
+                    reader = ReaderWaveCatcherMMAP(
                         r_name, self.store, self.logger, f_name, self.structure
                     )
 

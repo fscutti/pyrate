@@ -1,0 +1,27 @@
+--- 
+inputs: 
+   Data:
+       eslices: 
+           emin: 0
+           emax: -1
+       path:
+          - PYRATE/test/data/sabre_70_1.dat
+          - PYRATE/test/data/sabre_70_10.dat
+   
+
+configs:
+    config2:
+       path:  PYRATE/config
+       tags: 
+           any: objects
+
+
+outputs:
+    BlueTongueTest:
+        path: PYRATE/test
+        format: .root
+        targets:
+          - treeMaker: Data
+          #- testingReader: Data
+    
+# EOF
