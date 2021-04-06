@@ -30,13 +30,18 @@ def find_files(paths, env=None):
 
         if env and env in p:
             p = p.replace(env, os.environ.get(env))
+        
+        if not os.path.isfile(p):
+            files.extend(
+                os.path.join(p, f)
+                for f in os.listdir(p)
+                if os.path.isfile(os.path.join(p, f))
+            )
+        else:
+            files.append(p)
 
-        files.extend(
-            os.path.join(p, f)
-            for f in os.listdir(p)
-            if os.path.isfile(os.path.join(p, f))
-        )
     files.sort()
+
     return files
 
 

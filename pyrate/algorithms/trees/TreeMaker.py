@@ -95,7 +95,8 @@ class TreeMaker(Algorithm):
                     v_value = self.store.get(b_name)
 
                     if type(v_value).__name__ in ["list", "tuple"]:
-
+                        
+                        # use assign here ...
                         for v in v_value:
                             tree_dict[t_path][t_name]["branches"][b_name].push_back(v)
 
