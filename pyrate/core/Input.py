@@ -316,7 +316,7 @@ class Input(Reader):
             elif f_name.endswith(".dat"):
                 # choose the reader based on file size.
 
-                if "sabre" in f_name:
+                if "sabre" in os.path.basename(f_name):
                     reader = ReaderBlueTongueMMAP(
                         r_name, self.store, self.logger, f_name, self.structure
                     )
