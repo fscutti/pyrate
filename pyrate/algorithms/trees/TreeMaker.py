@@ -25,7 +25,7 @@ from pyrate.core.Algorithm import Algorithm
 
 from pyrate.utils import strings as ST
 
-_T = {"float": {"python": "f", "root": "F"}, "int": {"python": "i", "root": "I"}}
+_T = {"float": {"python": "f", "root": "D"}, "int": {"python": "i", "root": "I"}}
 
 
 class TreeMaker(Algorithm):
@@ -70,13 +70,15 @@ class TreeMaker(Algorithm):
 
                         for v_name in ST.get_items(v_list):
 
+                            if v_type == 'float':
+                                v_type = 'double'
+
                             b = R.vector(v_type)()
 
                             tree_dict[t_path][t_name]["branches"][v_name] = b
 
                             tree_dict[t_path][t_name]["instance"].Branch(
-                                v_name, b, f"{v_name}/{_T[v_type]['root']}"
-                            )
+                                v_name, b)
 
         self.store.put("tree_dict:" + config["name"], tree_dict, "PERM")
 
@@ -103,6 +105,10 @@ class TreeMaker(Algorithm):
                             vectors.append(
                                 tree_dict[t_path][t_name]["branches"][b_name]
                             )
+                    
+                    elif type(v_value).__name__ == 'ndarray':
+                        tree_dict[t_path][t_name]["branches"][b_name].assign(v_value)
+
                     else:
                         tree_dict[t_path][t_name]["branches"][b_name][0] = v_value
 
