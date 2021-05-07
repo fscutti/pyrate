@@ -301,7 +301,7 @@ class Run:
                         alg_name, store, self.logger
                     )
                     for m in sys.modules
-                    if alg_name in m
+                    if alg_name ==  m.split(".")[-1]
                 }
             )
 
