@@ -39,6 +39,7 @@ from pyrate.utils import ROOT_classes as CL
 import ROOT as R
 
 R.gStyle.SetOptStat(0)
+R.gROOT.SetBatch()
 
 
 class Make2DHistPlot(Algorithm):
