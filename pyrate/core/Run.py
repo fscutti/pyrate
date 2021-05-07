@@ -262,7 +262,16 @@ class Run:
             self._config[t["config"]]["name"] = t["name"]
 
             if not store.check(t["name"], "READY"):
-                self.call(t["config"], is_target=t["name"])
+                try:
+                    self.call(t["config"], is_target=t["name"])
+                except:
+                    pyrate_modules = [m.split('.')[-1] for m in sys.modules if "pyrate" in m]
+                    if (alg_name := self._config[t["config"]]["algorithm"]["name"]) not in pyrate_modules:
+                        sys.exit(f"ERROR: {alg_name} not found in pyrate's modules.\n"
+                                  "Make sure the algorithm/module has been added to the nearest __init__.py, and all higher-level __init__.py files.\n"
+                                  "Also check the name of the class in the algorithm's file, the file name, and delcaration in __init__.py all match")
+                    # Eh, might as well fail the way we were going to ¯\_(ツ)_/¯
+                    self.call(t["config"], is_target=t["name"])
 
     def call(self, obj_config, is_target=""):
         """Calls an algorithm."""
