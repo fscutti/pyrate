@@ -264,7 +264,7 @@ class Run:
             if not store.check(t["name"], "READY"):
                 try:
                     self.call(t["config"], is_target=t["name"])
-                except:
+                except KeyError:
                     pyrate_modules = [m.split('.')[-1] for m in sys.modules if "pyrate" in m]
                     if (alg_name := self._config[t["config"]]["algorithm"]["name"]) not in pyrate_modules:
                         sys.exit(f"ERROR: {alg_name} not found in pyrate's modules.\n"
