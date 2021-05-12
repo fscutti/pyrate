@@ -97,11 +97,10 @@ class ReaderWaveDumpMMAP(Reader):
 
         if not "Run" in variable:
             self._move(variable)
-
-            value = [
-                float(v.split(" ")[1])
-                for v in self._mmf.readline().decode("utf-8").split(variable)[1:]
-            ]
+            # Get the string of the header variable
+            line = self._mmf.readline().decode("utf-8").split(variable)[-1]
+            # Get rid of the junk, and type cast to int depedning on base
+            value = int(line.split(" ")[-1], 16) if "0x" in line else int(line.split(" ")[-1])
 
         else:
             self._move(variable, "bkw")
