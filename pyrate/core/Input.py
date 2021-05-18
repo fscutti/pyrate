@@ -43,10 +43,10 @@ class Input(Reader):
             g_names = {0: "0"}
 
             if hasattr(self, "samples"):
-                if "groups" in self.samples:
+                if "groups" in self.samples["tags"]:
 
                     for g_idx, g_name in enumerate(
-                        ST.get_items(self.samples["groups"])
+                        ST.get_items(self.samples["tags"]["groups"])
                     ):
                         g_names[g_idx] = g_name
 
