@@ -25,7 +25,7 @@ from pyrate.core.Algorithm import Algorithm
 
 from pyrate.utils import strings as ST
 
-_T = {"float": {"python": "f", "root": "D"}, "int": {"python": "i", "root": "I"}}
+_T = {"float": {"python": "d", "root": "D"}, "int": {"python": "i", "root": "I"}}
 
 
 class TreeMaker(Algorithm):
