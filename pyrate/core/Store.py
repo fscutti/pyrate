@@ -2,6 +2,7 @@
 """
 import sys
 from copy import copy
+import traceback
 
 from pyrate.utils import functions as FN
 
@@ -42,6 +43,12 @@ class Store:
 
         except KeyError:
             msg = f"object {name} has not been found on the {opt} store after updating."
+            print("\n***** Full stack trace *****")
+            stack_trace = ''.join(traceback.format_list(traceback.extract_stack()[:-1]))
+            sys.stdout.write(stack_trace)
+            print("\n***** See full stack trace above *****")
+            self._run.logger.error(msg)
+            self._run.logger.error(stack_trace)
 
             self._run.logger.error(msg)
 
