@@ -3,7 +3,7 @@ This version of the reader uses memory mapping to read the file:
 https://docs.python.org/3.0/library/mmap.html.
 """
 import mmap
-import numpy as np
+# import numpy as np
 
 from pyrate.core.Reader import Reader
 
