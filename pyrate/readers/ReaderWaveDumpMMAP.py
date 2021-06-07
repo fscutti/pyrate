@@ -3,7 +3,7 @@ This version of the reader uses memory mapping to read the file:
 https://docs.python.org/3.0/library/mmap.html.
 """
 import mmap
-import numpy as np
+# import numpy as np
 
 from pyrate.core.Reader import Reader
 
@@ -125,8 +125,8 @@ class ReaderWaveDumpMMAP(Reader):
                 int(self._mmf.readline().decode("utf-8"))
                 for w_idx in range(self._len_waveform)
             ]
-            # Convert to numpy
-            value = np.fromiter(value, dtype=np.int, count=self._len_waveform)
+            # # Convert to numpy
+            # value = np.fromiter(value, dtype=np.int, count=self._len_waveform)
 
         else:
             self._move(variable)
