@@ -43,10 +43,10 @@ class Store:
 
         except KeyError:
             msg = f"object {name} has not been found on the {opt} store after updating."
-            print("\n***** Full stack trace *****")
+            print("\n******* Stack trace *******")
             stack_trace = ''.join(traceback.format_list(traceback.extract_stack()[:-1]))
             sys.stdout.write(stack_trace)
-            print("\n***** See full stack trace above *****")
+            print("\n****** See stack trace above ******")
             self._run.logger.error(msg)
             self._run.logger.error(stack_trace)
 
