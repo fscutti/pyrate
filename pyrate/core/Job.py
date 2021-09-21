@@ -56,7 +56,7 @@ class Job:
             # 1) any: (REQUIRED) collect a file if it contains any of these tags.
             # 2) all: collect a file if it contains all of these tags.
             # 3) gropus: if a file starts with any of the tags declared here it will be considered as part of a group.
-            # 
+            #
             # Files can also be added providing their full path under the 'path' field. Notice that if the 'samples' options
             # are ALSO provided, all files added in this way will be selected according to the 'tags' rules as usual.
 
@@ -119,6 +119,23 @@ class Job:
 
             self.job["configs"][c_name] = {"files": []}
 
+            """
+            for f in FN.find_files(c_attr["path"], "PYRATE"):
+                
+                self.job["configs"][c_name]["files"].extend(f)
+
+                for t in ST.get_tags(f)
+                
+                for s in FN.find("any", c_attr):
+                   ST.get_items(s)
+                   if s in ST.get_tags(f):
+                       True
+                for s in FN.find("all", c_attr):
+                   ST.get_items(s)
+                   if s in ST.get_tags(f):
+                       True
+            """
+
             for f in FN.find_files(c_attr["path"], "PYRATE"):
                 self.job["configs"][c_name]["files"].extend(
                     f
@@ -166,6 +183,9 @@ class Job:
                 target[":".join([t_name, s_names])] = target.pop(t_name)
 
             self.job["outputs"][o_name].update(o_attr)
+
+        # print(self.job["configs"]["global"]["objects"])
+        # sys.exit()
 
         # -----------------------
         # Instantiate Run object

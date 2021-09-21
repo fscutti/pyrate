@@ -143,7 +143,8 @@ def intersect(probe, target):
 
 
 def find(key, dictionary):
-    """Find value of key in nested dictionary. Thank you, internet!
+    """Find value of key in nested dictionary and returns a generator over the found arguments. 
+    Thank you, internet!
     https://stackoverflow.com/questions/9807634/find-all-occurrences-of-a-key-in-nested-dictionaries-and-lists
     """
     if hasattr(dictionary, "items"):

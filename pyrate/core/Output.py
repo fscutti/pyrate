@@ -22,8 +22,7 @@ class Output(Writer):
             self._init_writer(name + attr["format"], attr["path"], attr["targets"])
             targets.extend(attr["targets"])
 
-        self.set_targets(targets)
-        self.set_config_targets()
+        self.set_inputs_vs_targets(targets)
 
     def write(self, name):
 

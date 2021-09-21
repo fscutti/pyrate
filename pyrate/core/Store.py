@@ -11,15 +11,17 @@ class Store:
     def __init__(self, run):
         self._run = run
         self.name = self._run.name
-        self._objects = {"PERM": {}, "TRAN": {}, "READY": {}}
-        # ------------------------------------------------------------------------------------
+        self._objects = {"PERM": {}, "TRAN": {}, "READY": {}, "WRITTEN": {}}
+        # ----------------------------------------------------------------------------------------
         # PERM:
         #     objects which are persistent throughout the run.
         # TRAN:
         #     objects which are volatile and removed after each input/event loop.
         # READY:
         #     map holding the boolean status of objects which are ready for the finalise step.
-        # ------------------------------------------------------------------------------------
+        # WRITTEN:
+        #     map holding the boolean status of objects which have already been written to output.
+        # ----------------------------------------------------------------------------------------
 
     def put(self, name, obj, opt="TRAN", replace=False):
         """Objects should be put on the store only once!"""
@@ -38,7 +40,7 @@ class Store:
             pass
 
         try:
-            self._run.update(name, self)
+            self._run.update_store(name, self)
             return self._objects[opt][name]
 
         except KeyError:
