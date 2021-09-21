@@ -184,7 +184,10 @@ class TestingReader(Algorithm):
             #self.store.get("EVENT:board_1:trigger_count_ch_10")
             #self.store.get("EVENT:timestamp")
             #v = self.store.get("EVENT:board_1:event_counter")
+            #v = self.store.get(config["algorithm"]["var"])
+            
             v = self.store.get(config["algorithm"]["var"])
+            #v = 1024 * [1]
             
             """
             print(self.store.get("INPUT:board_1:n_channels"))

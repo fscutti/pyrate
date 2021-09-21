@@ -14,16 +14,22 @@ class WriterROOT(Writer):
 
     def load(self):
         """Creates the file and set targets."""
+        self.set_inputs_vs_targets(self.w_targets)
+     
         self.f = R.TFile(self.f, "RECREATE")
-        self.set_targets(self.w_targets)
-        self.set_config_targets()
+        
+        # WARNING: if the file pointer needs to be retrieved from the store
+        # by accessing the OUTPUT keys like follows, then is better for the 
+        # target to belong to just one output file.
+        for t in self.get_targets():
+            self.store.put(f"OUTPUT:{t}", self.f, "PERM")
 
     def write(self, name):
         """Write an object to file. This can be represented by a structure
         indicating the folder structure of the output yet to be created at
         this point.
         """
-        obj = self.store.get(name, "PERM")
+        obj = self.store.copy(name, "PERM")
 
         if isinstance(obj, dict):
             self._write_dirs(obj)
