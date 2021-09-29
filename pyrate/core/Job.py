@@ -206,7 +206,7 @@ class Job:
         """Launch Run objects. """
         self.run.launch()
 
-    def _validate_conf(self, name, conf):
+    def _validate_conf(self, obj_name, conf):
         """Checks:
         1) That the configured object implements an algorithm field.
         2) That the algorithm field implements a name filed.
@@ -217,20 +217,20 @@ class Job:
         """
 
         # Check 1
-        if not FN.check("algorithm", conf):
+        if not FN.check("algorithm", obj_conf):
             sys.exit(
-                f"ERROR: object {name} has no algorithm field in its configuration!"
+                f"ERROR: object {obj_name} has no algorithm field in its configuration!"
             )
 
         # Check 2
-        if not FN.check("name", conf["algorithm"]):
-            sys.exit(f"ERROR: please specify  algorithm name for object {name}!")
+        if not FN.check("name", obj_conf["algorithm"]):
+            sys.exit(f"ERROR: please specify  algorithm name for object {obj_name}!")
 
         pyrate_modules = [m for m in sys.modules if "pyrate" in m]
 
         n_alg_definitions = 0
 
-        alg_name = conf["algorithm"]["name"]
+        alg_name = obj_conf["algorithm"]["name"]
 
         states = ["initialise", "execute", "finalise"]
 
@@ -250,18 +250,18 @@ class Job:
 
                 alg_states = set([s for s in alg_methods if s in states])
 
-                conf_states = set([s for s in states if FN.check(s, conf)])
+                conf_states = set([s for s in states if FN.check(s, obj_conf)])
 
                 # Check 5
                 if not alg_states == conf_states:
                     sys.exit(
-                        f"ERROR: states mismatch b/w object {name} and algorithm {alg_name}!"
+                        f"ERROR: states mismatch b/w object {obj_name} and algorithm {alg_name}!"
                     )
                 # Check 6
                 for s in conf_states:
-                    if not FN.check("input", conf[s]):
+                    if not FN.check("input", obj_conf[s]):
                         sys.exit(
-                            f"ERROR: state {s} for object {name} has no input defined!"
+                            f"ERROR: state {s} for object {obj_name} has no input defined!"
                         )
 
         # Check 3
