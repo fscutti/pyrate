@@ -18,7 +18,7 @@ def get_items(s):
         else:
             items.append(i.replace('"', ""))
 
-    return items
+    return remove_duplicates(items)
 
 
 def get_items_from_list(l):

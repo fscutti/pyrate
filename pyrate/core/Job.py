@@ -189,11 +189,17 @@ class Job:
         # Validate configuration
         # --------------------------
 
-        # pyrate_modules_names = [m.split(".")[-1] for m in sys.modules if "pyrate" in m]
-
         for obj_name, obj_attr in self.job["configs"]["global"]["objects"].items():
 
             self._validate_conf(obj_name, obj_attr)
+
+        # --------------------------
+        # Modify configuration
+        # --------------------------
+
+        for obj_name, obj_attr in self.job["configs"]["global"]["objects"].items():
+
+            self._check_dependency(obj_name, obj_attr)
 
         # -----------------------
         # Instantiate Run object
@@ -206,13 +212,52 @@ class Job:
         """Launch Run objects. """
         self.run.launch()
 
-    def _validate_conf(self, obj_name, conf):
+    def _modify_conf(self, dep_obj_name, obj_conf):
+        """Eventually modifies the obj_conf if depends on an object dep_obj_name
+        which is not consistently declared across all states needed for its computation.
+        N.B. if one of these needed states is simply not implemented by the algorithm
+        computing obj_name, dep_obj_name is added nontheless to obj_conf for that state.
+        This is not an issue, as the state might not be called anyway downstream but only
+        the dependencies are created on the store at that stage.
+        """
+
+        g_config = self.job["configs"]["global"]["objects"]
+
+        for s in ["initialise", "execute", "finalise"]:
+
+            if s in g_config[dep_obj_name]:
+
+                if not FN.check(s, obj_conf):
+                    obj_conf[s] = {"input": dep_obj_name}
+
+                else:
+                    if not dep_obj_name in ST.get_items(obj_conf[s]["input"]):
+                        obj_conf[s]["input"] += f", {dep_obj_name}"
+
+    def _check_dependency(self, obj_name, obj_conf):
+        """Checks the existence of dependencies in the global configuration. """
+
+        g_config = self.job["configs"]["global"]["objects"]
+
+        for s in ["initialise", "execute", "finalise"]:
+
+            for o in ST.get_items(obj_conf[s]["input"]):
+
+                if not o in g_config:
+                    sys.exit(
+                        f"ERROR: {o} is required by {obj_name} for {s} but is not in the global configuration!"
+                    )
+
+                else:
+                    self._modify_conf(o, obj_conf)
+
+    def _validate_conf(self, obj_name, obj_conf):
         """Checks:
         1) That the configured object implements an algorithm field.
-        2) That the algorithm field implements a name filed.
+        2) That the algorithm field implements a name field.
         3) That alg_name corresponds to one pyrate module and one only.
         4) That the module contains the definition of a class called alg_name.
-        5) That the states required at configuration match those of the algorithm.
+        5) That the states required at configuration match those implemented by the algorithm.
         6) That configured states require some input.
         """
 
@@ -266,15 +311,15 @@ class Job:
 
         # Check 3
         if n_alg_definitions == 0:
-            e_msg = f"ERROR: algorithm {alg_name} not found among pyrate modules!\n"
-            e_msg += "1) The algorithm/module has to be added to its local __init__.py file.\n"
+            e_msg = f"ERROR: while checking the configuration for {obj_name}, no suitable {alg_name} module has been found!\n"
+            e_msg += "1) The algorithm / module has to be added to its local __init__.py file.\n"
             e_msg += "2) Make sure the name of the algorithm is written correctly.\n"
             e_msg += "3) The module and the algorithm have to have the same name.\n"
             sys.exit(e_msg)
 
         elif n_alg_definitions > 1:
             sys.exit(
-                f"ERROR: there are {n_alg_definitions} definitions of a module called {alg_name}!"
+                f"ERROR: while checking the configuration for {obj_name}, {n_alg_definitions} definitions of a module called {alg_name} have been found!"
             )
 
 

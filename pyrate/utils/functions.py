@@ -30,7 +30,7 @@ def find_files(paths, env=None):
 
         if env and env in p:
             p = p.replace(env, os.environ.get(env))
-        
+
         if not os.path.isfile(p):
             files.extend(
                 os.path.join(p, f)
@@ -143,7 +143,7 @@ def intersect(probe, target):
 
 
 def find(key, dictionary):
-    """Find value of key in nested dictionary and returns a generator over the found arguments. 
+    """Find value of key in nested dictionary and returns a generator over the found arguments.
     Thank you, internet!
     https://stackoverflow.com/questions/9807634/find-all-occurrences-of-a-key-in-nested-dictionaries-and-lists
     """
@@ -161,6 +161,9 @@ def find(key, dictionary):
                     for result in find(key, d):
                         yield result
 
+def check(key, dictionary):
+    """Uses the find function to just check the existence of the key without returning the generator."""
+    return bool([i for i in find(key, dictionary)])
 
 def grab(key, dictionary):
     """This is just a wrapper around the find function, getting a single item as opposed to the iterator."""
