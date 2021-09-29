@@ -5,6 +5,7 @@ instances of a Run homogeneous in purpose and structure.
 import os
 import sys
 import yaml
+import pyclbr
 import logging
 
 from itertools import groupby
@@ -184,8 +185,15 @@ class Job:
 
             self.job["outputs"][o_name].update(o_attr)
 
-        # print(self.job["configs"]["global"]["objects"])
-        # sys.exit()
+        # --------------------------
+        # Validate configuration
+        # --------------------------
+
+        # pyrate_modules_names = [m.split(".")[-1] for m in sys.modules if "pyrate" in m]
+
+        for obj_name, obj_attr in self.job["configs"]["global"]["objects"].items():
+
+            self._validate_conf(obj_name, obj_attr)
 
         # -----------------------
         # Instantiate Run object
@@ -197,6 +205,77 @@ class Job:
     def launch(self):
         """Launch Run objects. """
         self.run.launch()
+
+    def _validate_conf(self, name, conf):
+        """Checks:
+        1) That the configured object implements an algorithm field.
+        2) That the algorithm field implements a name filed.
+        3) That alg_name corresponds to one pyrate module and one only.
+        4) That the module contains the definition of a class called alg_name.
+        5) That the states required at configuration match those of the algorithm.
+        6) That configured states require some input.
+        """
+
+        # Check 1
+        if not FN.check("algorithm", conf):
+            sys.exit(
+                f"ERROR: object {name} has no algorithm field in its configuration!"
+            )
+
+        # Check 2
+        if not FN.check("name", conf["algorithm"]):
+            sys.exit(f"ERROR: please specify  algorithm name for object {name}!")
+
+        pyrate_modules = [m for m in sys.modules if "pyrate" in m]
+
+        n_alg_definitions = 0
+
+        alg_name = conf["algorithm"]["name"]
+
+        states = ["initialise", "execute", "finalise"]
+
+        for m in pyrate_modules:
+            if alg_name in m.split(".")[-1]:
+
+                n_alg_definitions += 1
+
+                # Check 4
+                if not alg_name in pyclbr.readmodule(f"{m}").keys():
+
+                    sys.exit(
+                        f"ERROR: module {m} has to contain an algorithm called {alg_name}!"
+                    )
+
+                alg_methods = pyclbr.readmodule(f"{m}")[alg_name].__dict__["children"]
+
+                alg_states = set([s for s in alg_methods if s in states])
+
+                conf_states = set([s for s in states if FN.check(s, conf)])
+
+                # Check 5
+                if not alg_states == conf_states:
+                    sys.exit(
+                        f"ERROR: states mismatch b/w object {name} and algorithm {alg_name}!"
+                    )
+                # Check 6
+                for s in conf_states:
+                    if not FN.check("input", conf[s]):
+                        sys.exit(
+                            f"ERROR: state {s} for object {name} has no input defined!"
+                        )
+
+        # Check 3
+        if n_alg_definitions == 0:
+            e_msg = f"ERROR: algorithm {alg_name} not found among pyrate modules!\n"
+            e_msg += "1) The algorithm/module has to be added to its local __init__.py file.\n"
+            e_msg += "2) Make sure the name of the algorithm is written correctly.\n"
+            e_msg += "3) The module and the algorithm have to have the same name.\n"
+            sys.exit(e_msg)
+
+        elif n_alg_definitions > 1:
+            sys.exit(
+                f"ERROR: there are {n_alg_definitions} definitions of a module called {alg_name}!"
+            )
 
 
 # EOF
