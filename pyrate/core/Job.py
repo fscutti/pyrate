@@ -201,6 +201,8 @@ class Job:
 
             self._check_dependency(obj_name, obj_attr)
 
+        sys.exit()
+
         # -----------------------
         # Instantiate Run object
         # -----------------------
@@ -211,45 +213,6 @@ class Job:
     def launch(self):
         """Launch Run objects. """
         self.run.launch()
-
-    def _modify_conf(self, dep_obj_name, obj_conf):
-        """Eventually modifies the obj_conf if depends on an object dep_obj_name
-        which is not consistently declared across all states needed for its computation.
-        N.B. if one of these needed states is simply not implemented by the algorithm
-        computing obj_name, dep_obj_name is added nontheless to obj_conf for that state.
-        This is not an issue, as the state might not be called anyway downstream but only
-        the dependencies are created on the store at that stage.
-        """
-
-        g_config = self.job["configs"]["global"]["objects"]
-
-        for s in ["initialise", "execute", "finalise"]:
-
-            if s in g_config[dep_obj_name]:
-
-                if not FN.check(s, obj_conf):
-                    obj_conf[s] = {"input": dep_obj_name}
-
-                else:
-                    if not dep_obj_name in ST.get_items(obj_conf[s]["input"]):
-                        obj_conf[s]["input"] += f", {dep_obj_name}"
-
-    def _check_dependency(self, obj_name, obj_conf):
-        """Checks the existence of dependencies in the global configuration. """
-
-        g_config = self.job["configs"]["global"]["objects"]
-
-        for s in ["initialise", "execute", "finalise"]:
-
-            for o in ST.get_items(obj_conf[s]["input"]):
-
-                if not o in g_config:
-                    sys.exit(
-                        f"ERROR: {o} is required by {obj_name} for {s} but is not in the global configuration!"
-                    )
-
-                else:
-                    self._modify_conf(o, obj_conf)
 
     def _validate_conf(self, obj_name, obj_conf):
         """Checks:
@@ -321,6 +284,66 @@ class Job:
             sys.exit(
                 f"ERROR: while checking the configuration for {obj_name}, {n_alg_definitions} definitions of a module called {alg_name} have been found!"
             )
+
+    def _check_dependency(self, obj_name, obj_conf):
+        """Checks the existence of dependencies in the global configuration."""
+
+        g_config = self.job["configs"]["global"]["objects"]
+
+        states = ["initialise", "execute", "finalise"]
+
+        for s_idx, s in enumerate(states):
+
+            prev_states = states[:s_idx]
+
+            if s in obj_conf:
+
+                for o in ST.get_items(obj_conf[s]["input"]):
+
+                    if not o in g_config:
+
+                        # Check that the object is not computed upstream by the same algorithm
+                        # which should be the only exception to the dependence object being missing in the
+                        # global configuration.
+                        if not self._check_alg_outputs(o, prev_states, obj_conf):
+
+                            sys.exit(
+                                f"ERROR: {o} is required by {obj_name} for {s} but is not in the global configuration!"
+                            )
+
+                    self._modify_conf(o, prev_states, obj_conf)
+
+    def _modify_conf(self, dep_obj_name, prev_states, obj_conf):
+        """Eventually modifies the obj_conf if it depends on an object dep_obj_name which
+        is not consistently declared across all inputs of the states needed for its computation.
+        N.B.: if one of these needed states is simply not implemented by the algorithm
+        computing obj_name, dep_obj_name is added nontheless to obj_conf for that state.
+        This is not an issue, as the state might not be called anyway downstream but only
+        the dependencies are created on the store at that stage.
+        """
+
+        g_config = self.job["configs"]["global"]["objects"]
+
+        for ps in prev_states:
+            if ps in g_config[dep_obj_name]:
+
+                if not ps in obj_conf:
+                    obj_conf[ps] = {"input": dep_obj_name}
+
+                else:
+                    if not dep_obj_name in ST.get_items(obj_conf[ps]["input"]):
+                        obj_conf[ps]["input"] += f", {dep_obj_name}"
+
+    def _check_alg_outputs(self, dep_obj_name, prev_states, obj_conf):
+        """Returns False if an object is not computed upstream by an algorithm."""
+
+        for ps in prev_states:
+            if "output" in obj_conf[ps]:
+
+                if dep_obj_name in ST.get_items(obj_conf[ps]["output"]):
+                    return True
+
+        return False
 
 
 # EOF
