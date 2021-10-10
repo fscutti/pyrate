@@ -40,8 +40,8 @@ class TimeWeightedPulse(Algorithm):
                 self.photon_wavelength(e)
             )
 
-            if "only_photons" in config["algorithm"]:
-                if config["algorithm"]["only_photons"]:
+            if "only_photons" in config:
+                if config["only_photons"]:
                     e_num += t * self.quantum_efficiency.GetBinContent(bin_idx) / 100.0
             else:
                 e_num += e * t

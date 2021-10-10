@@ -5,6 +5,7 @@ instances of a Run homogeneous in purpose and structure.
 import os
 import sys
 import yaml
+import pyclbr
 import logging
 
 from itertools import groupby
@@ -184,7 +185,27 @@ class Job:
 
             self.job["outputs"][o_name].update(o_attr)
 
-        # print(self.job["configs"]["global"]["objects"])
+        # --------------------------
+        # Validate configuration
+        # --------------------------
+
+        # The configuration validation runs conservatively on all objects in the
+        # configuration files passed, even if they are not needed by any target.
+        for obj_name, obj_attr in self.job["configs"]["global"]["objects"].items():
+
+            self._validate_conf(obj_name, obj_attr)
+
+        # --------------------------
+        # Modify configuration
+        # --------------------------
+
+        # Making sure that all objects are included as input of the appropriate states.
+        for obj_name, obj_attr in self.job["configs"]["global"]["objects"].items():
+
+            self._check_dependency(obj_name, obj_attr)
+
+        # FN.pretty(self.job["configs"]["global"]["objects"])
+
         # sys.exit()
 
         # -----------------------
@@ -197,6 +218,159 @@ class Job:
     def launch(self):
         """Launch Run objects. """
         self.run.launch()
+
+    def _validate_conf(self, obj_name, obj_conf):
+        """Checks:
+        1) That the configured object implements an algorithm field.
+        2) That the algorithm field implements a name field.
+        3) That alg_name corresponds to one pyrate module and one only.
+        4) That the module contains the definition of a class called alg_name.
+        5) That the states required at configuration match those implemented by the algorithm.
+        6) That configured states require some input or output fields.
+        """
+
+        # Check 1
+        if not FN.check("algorithm", obj_conf):
+            sys.exit(
+                f"ERROR: object {obj_name} has no algorithm field in its configuration!"
+            )
+
+        # Check 2
+        if not FN.check("name", obj_conf["algorithm"]):
+            sys.exit(f"ERROR: please specify  algorithm name for object {obj_name}!")
+
+        pyrate_modules = [m for m in sys.modules if "pyrate" in m]
+
+        n_alg_definitions = 0
+
+        alg_name = obj_conf["algorithm"]["name"]
+
+        states = ["initialise", "execute", "finalise"]
+
+        for m in pyrate_modules:
+            if alg_name == m.split(".")[-1]:
+
+                n_alg_definitions += 1
+
+                # Check 4
+                if not alg_name in pyclbr.readmodule(f"{m}").keys():
+
+                    sys.exit(
+                        f"ERROR: module {m} has to contain an algorithm called {alg_name}!"
+                    )
+
+                alg_methods = pyclbr.readmodule(f"{m}")[alg_name].__dict__["children"]
+
+                alg_states = set([s for s in alg_methods if s in states])
+
+                conf_states = set([s for s in states if FN.check(s, obj_conf)])
+
+                # Check 5
+                if not alg_states == conf_states:
+                    sys.exit(
+                        f"ERROR: states mismatch b/w object {obj_name} and algorithm {alg_name}!"
+                    )
+                # Check 6
+                for s in conf_states:
+                    if not (
+                        FN.check("input", obj_conf[s])
+                        or FN.check("output", obj_conf[s])
+                    ):
+                        sys.exit(
+                            f"ERROR: state {s} for object {obj_name} has no input or output fields defined!\nPlease add at least one of the fields"
+                        )
+
+        # Check 3
+        if n_alg_definitions == 0:
+            e_msg = f"ERROR: while checking the configuration for {obj_name}, no suitable {alg_name} module has been found!\n"
+            e_msg += "1) The algorithm / module has to be added to its local __init__.py file.\n"
+            e_msg += "2) Make sure the name of the algorithm is written correctly.\n"
+            e_msg += "3) The module and the algorithm have to have the same name.\n"
+            sys.exit(e_msg)
+
+        elif n_alg_definitions > 1:
+            sys.exit(
+                f"ERROR: while checking the configuration for {obj_name}, {n_alg_definitions} definitions of a module called {alg_name} have been found!"
+            )
+
+    def _check_dependency(self, obj_name, obj_conf):
+        """Checks the existence of dependencies in the global configuration."""
+
+        g_config = self.job["configs"]["global"]["objects"]
+
+        states = ["initialise", "execute", "finalise"]
+
+        for s_idx, s in enumerate(states):
+
+            prev_states = states[:s_idx]
+
+            if s in obj_conf:
+
+                # If the object relies on an initialise or finalise method, these have to put
+                # on the permanent store some data identifiable with the object name.
+                if s == ["initialise", "finalise"]:
+
+                    if not "output" in obj_conf[s]:
+                        obj_conf[s]["output"] = "SELF"
+
+                    else:
+                        if not "SELF" in ST.get_items(obj_conf[s]["output"]):
+                            obj_conf[s]["output"] += f", SELF"
+
+                if "input" in obj_conf[s]:
+
+                    for o in ST.get_items(obj_conf[s]["input"]):
+
+                        if "EVENT:" in o or "INPUT:" in o:
+                            continue
+
+                        if not o in g_config:
+
+                            # Check that the object is not computed upstream by the same algorithm
+                            # which should be the only exception to the dependence object being missing in the
+                            # global configuration.
+                            if not self._check_alg_outputs(o, prev_states, obj_conf):
+
+                                sys.exit(
+                                    f"ERROR: {o} is required by {obj_name} for {s} but is not in the global configuration!"
+                                )
+
+                        self._modify_conf(o, prev_states, obj_conf)
+
+    def _modify_conf(self, dep_obj_name, prev_states, obj_conf):
+        """Eventually modifies the obj_conf if it depends on an object dep_obj_name which
+        is not consistently declared across all inputs of the states needed for its computation.
+        N.B.: if one of these needed states is simply not implemented by the algorithm
+        computing obj_name, dep_obj_name is added nontheless to obj_conf for that state.
+        This is not an issue, as the state might not be called anyway downstream but only
+        the dependencies are created on the store at that stage.
+        """
+
+        g_config = self.job["configs"]["global"]["objects"]
+
+        for ps in prev_states:
+            if ps in g_config[dep_obj_name]:
+
+                if not ps in obj_conf:
+                    obj_conf[ps] = {"input": dep_obj_name}
+
+                else:
+                    if not dep_obj_name in ST.get_items(obj_conf[ps]["input"]):
+                        obj_conf[ps]["input"] += f", {dep_obj_name}"
+
+    def _check_alg_outputs(self, dep_obj_name, prev_states, obj_conf):
+        """Returns False if an object is not computed upstream by an algorithm."""
+
+        for ps in prev_states:
+
+            if ps in obj_conf:
+
+                if "output" in obj_conf[ps]:
+
+                    if dep_obj_name in ST.get_items(obj_conf[ps]["output"]):
+                        return True
+
+        return False
 
 
 # EOF
