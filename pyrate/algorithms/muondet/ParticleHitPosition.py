@@ -14,7 +14,7 @@ class ParticleHitPosition(Algorithm):
 
     def execute(self, config):
 
-        coor = config["algorithm"]["coordinate"]
+        coor = config["coordinate"]
 
         pos = None
 

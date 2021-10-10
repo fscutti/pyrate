@@ -54,7 +54,7 @@ class Make2DHistPlot(Algorithm):
 
         i_name = self.store.get("INPUT:name", "TRAN")
 
-        for f_name, f_attr in config["algorithm"]["folders"].items():
+        for f_name, f_attr in config["folders"].items():
             for v_name, v_attr in f_attr["variables"].items():
                 for r_name in self.make_regions_list(f_attr):
 
@@ -80,7 +80,7 @@ class Make2DHistPlot(Algorithm):
         """Fills histograms."""
         i_name = self.store.get("INPUT:name")
 
-        for f_name, f_attr in config["algorithm"]["folders"].items():
+        for f_name, f_attr in config["folders"].items():
             for v_name, v_attr in f_attr["variables"].items():
                 for r_name in self.make_regions_list(f_attr):
 
@@ -133,7 +133,7 @@ class Make2DHistPlot(Algorithm):
 
         inputs = ST.get_items(config["name"].split(":", -1)[-1])
 
-        for f_name, f_attr in config["algorithm"]["folders"].items():
+        for f_name, f_attr in config["folders"].items():
             for v_name, v_attr in f_attr["variables"].items():
                 for r_name in self.make_regions_list(f_attr):
 
@@ -246,7 +246,7 @@ class Make2DHistPlot(Algorithm):
     def get_var_dict(self, variable):
         """Build dictionary for variable attributes."""
 
-        a = ST.get_items(variable)
+        a = ST.get_items(variable, no_duplicates=False)
 
         d = {
             "n_bins_x": int(a[0]),
@@ -260,6 +260,7 @@ class Make2DHistPlot(Algorithm):
             "color": None,
             "legend_entry": None,
         }
+
 
         if len(a) >= 9:
             d["color"] = a[8]

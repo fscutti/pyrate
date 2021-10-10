@@ -54,7 +54,7 @@ class Make1DHistPlot(Algorithm):
 
         i_name = self.store.get("INPUT:name", "TRAN")
 
-        for f_name, f_attr in config["algorithm"]["folders"].items():
+        for f_name, f_attr in config["folders"].items():
             for v_name, v_attr in f_attr["variables"].items():
                 for r_name in self.make_regions_list(f_attr):
 
@@ -106,7 +106,7 @@ class Make1DHistPlot(Algorithm):
         """Fills histograms."""
         i_name = self.store.get("INPUT:name")
 
-        for f_name, f_attr in config["algorithm"]["folders"].items():
+        for f_name, f_attr in config["folders"].items():
             for v_name, v_attr in f_attr["variables"].items():
                 for r_name in self.make_regions_list(f_attr):
 
@@ -166,7 +166,7 @@ class Make1DHistPlot(Algorithm):
 
         inputs = ST.get_items(config["name"].split(":", -1)[-1])
 
-        for f_name, f_attr in config["algorithm"]["folders"].items():
+        for f_name, f_attr in config["folders"].items():
             for v_name, v_attr in f_attr["variables"].items():
                 for r_name in self.make_regions_list(f_attr):
 

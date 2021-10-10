@@ -14,7 +14,7 @@ class TrueEnergy(Algorithm):
 
     def execute(self, config):
 
-        te = self.store.get("EVENT:nT:ekin_particle")[0]
+        te = self.store.get(config["etrue"])[0]
 
         self.store.put(config["name"], te)
 

@@ -20,8 +20,8 @@ class SimulatedWaveformsGetter(Algorithm):
 
         wf_map = self.store.get(config["waveform_map"])
 
-        if config["algorithm"]["pmt_name"] in wf_map:
-            waveform = wf_map[config["algorithm"]["pmt_name"]]
+        if config["pmt_name"] in wf_map:
+            waveform = wf_map[config["pmt_name"]]
 
         self.store.put(config["name"], waveform)
 

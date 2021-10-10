@@ -14,9 +14,9 @@ class MuonDetCharge(Algorithm):
 
     def execute(self, config):
 
-        if config["algorithm"]["format"] == "ROOT":
+        if config["format"] == "ROOT":
 
-            e = self.store.get("EVENT:nT:edepScint")
+            e = self.store.get(config["edep"])
 
             self.store.put(config["name"], e)
 
