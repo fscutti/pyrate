@@ -204,9 +204,9 @@ class Job:
 
             self._check_dependency(obj_name, obj_attr)
 
-        #FN.pretty(self.job["configs"]["global"]["objects"])
+        # FN.pretty(self.job["configs"]["global"]["objects"])
 
-        sys.exit()
+        # sys.exit()
 
         # -----------------------
         # Instantiate Run object
@@ -248,7 +248,7 @@ class Job:
         states = ["initialise", "execute", "finalise"]
 
         for m in pyrate_modules:
-            if alg_name in m.split(".")[-1]:
+            if alg_name == m.split(".")[-1]:
 
                 n_alg_definitions += 1
 
