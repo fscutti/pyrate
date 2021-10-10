@@ -189,6 +189,8 @@ class Job:
         # Validate configuration
         # --------------------------
 
+        # The configuration validation runs conservatively on all objects in the
+        # configuration files passed, even if they are not needed by any target.
         for obj_name, obj_attr in self.job["configs"]["global"]["objects"].items():
 
             self._validate_conf(obj_name, obj_attr)
@@ -197,9 +199,12 @@ class Job:
         # Modify configuration
         # --------------------------
 
+        # Making sure that all objects are included as input of the appropriate states.
         for obj_name, obj_attr in self.job["configs"]["global"]["objects"].items():
 
             self._check_dependency(obj_name, obj_attr)
+
+        #FN.pretty(self.job["configs"]["global"]["objects"])
 
         sys.exit()
 
@@ -221,7 +226,7 @@ class Job:
         3) That alg_name corresponds to one pyrate module and one only.
         4) That the module contains the definition of a class called alg_name.
         5) That the states required at configuration match those implemented by the algorithm.
-        6) That configured states require some input.
+        6) That configured states require some input or output fields.
         """
 
         # Check 1
@@ -267,9 +272,12 @@ class Job:
                     )
                 # Check 6
                 for s in conf_states:
-                    if not FN.check("input", obj_conf[s]):
+                    if not (
+                        FN.check("input", obj_conf[s])
+                        or FN.check("output", obj_conf[s])
+                    ):
                         sys.exit(
-                            f"ERROR: state {s} for object {obj_name} has no input defined!"
+                            f"ERROR: state {s} for object {obj_name} has no input or output fields defined!\nPlease add at least one of the fields"
                         )
 
         # Check 3
@@ -298,20 +306,36 @@ class Job:
 
             if s in obj_conf:
 
-                for o in ST.get_items(obj_conf[s]["input"]):
+                # If the object relies on an initialise or finalise method, these have to put
+                # on the permanent store some data identifiable with the object name.
+                if s == ["initialise", "finalise"]:
 
-                    if not o in g_config:
+                    if not "output" in obj_conf[s]:
+                        obj_conf[s]["output"] = "SELF"
 
-                        # Check that the object is not computed upstream by the same algorithm
-                        # which should be the only exception to the dependence object being missing in the
-                        # global configuration.
-                        if not self._check_alg_outputs(o, prev_states, obj_conf):
+                    else:
+                        if not "SELF" in ST.get_items(obj_conf[s]["output"]):
+                            obj_conf[s]["output"] += f", SELF"
 
-                            sys.exit(
-                                f"ERROR: {o} is required by {obj_name} for {s} but is not in the global configuration!"
-                            )
+                if "input" in obj_conf[s]:
 
-                    self._modify_conf(o, prev_states, obj_conf)
+                    for o in ST.get_items(obj_conf[s]["input"]):
+
+                        if "EVENT:" in o or "INPUT:" in o:
+                            continue
+
+                        if not o in g_config:
+
+                            # Check that the object is not computed upstream by the same algorithm
+                            # which should be the only exception to the dependence object being missing in the
+                            # global configuration.
+                            if not self._check_alg_outputs(o, prev_states, obj_conf):
+
+                                sys.exit(
+                                    f"ERROR: {o} is required by {obj_name} for {s} but is not in the global configuration!"
+                                )
+
+                        self._modify_conf(o, prev_states, obj_conf)
 
     def _modify_conf(self, dep_obj_name, prev_states, obj_conf):
         """Eventually modifies the obj_conf if it depends on an object dep_obj_name which
@@ -338,10 +362,13 @@ class Job:
         """Returns False if an object is not computed upstream by an algorithm."""
 
         for ps in prev_states:
-            if "output" in obj_conf[ps]:
 
-                if dep_obj_name in ST.get_items(obj_conf[ps]["output"]):
-                    return True
+            if ps in obj_conf:
+
+                if "output" in obj_conf[ps]:
+
+                    if dep_obj_name in ST.get_items(obj_conf[ps]["output"]):
+                        return True
 
         return False
 
