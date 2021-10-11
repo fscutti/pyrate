@@ -52,7 +52,7 @@ class Make2DHistPlot(Algorithm):
         """Prepares histograms.
         If not found in the input already it will create new ones."""
 
-        i_name = self.store.get("INPUT:name", "TRAN")
+        i_name = self.store.get("INPUT:name")
 
         for f_name, f_attr in config["folders"].items():
             for v_name, v_attr in f_attr["variables"].items():
@@ -67,14 +67,14 @@ class Make2DHistPlot(Algorithm):
                     target_dir = config["name"].replace(",", "_").replace(":", "_")
                     path = os.path.join(target_dir, path)
 
-                    h = self.store.copy("INPUT:" + os.path.join(path, h_name), "TRAN")
+                    h = self.store.copy("INPUT:" + os.path.join(path, h_name))
 
                     obj_name = self.get_object_name(i_name, h_name)
 
                     if not h:
                         h = self.make_hist(h_name, v_attr, f_attr)
 
-                    self.store.put(obj_name, h, "PERM")
+                    self.store.put(obj_name, h)
 
     def execute(self, config):
         """Fills histograms."""
@@ -120,7 +120,7 @@ class Make2DHistPlot(Algorithm):
                             x_variable = self.store.get(v_x_name)
                             y_variable = self.store.get(v_y_name)
 
-                            self.store.get(obj_name, "PERM").Fill(
+                            self.store.get(obj_name).Fill(
                                 x_variable, y_variable, region["r_weight"]
                             )
 
@@ -192,7 +192,7 @@ class Make2DHistPlot(Algorithm):
 
                         l_entry, obj_name = obj.split("|")
 
-                        h = self.store.get(obj_name, "PERM")
+                        h = self.store.get(obj_name)
 
                         if mode == "stack" and not h_stack:
 
@@ -241,7 +241,7 @@ class Make2DHistPlot(Algorithm):
 
         # FN.pretty(canvas_collection)
 
-        self.store.put(config["name"], canvas_collection, "PERM")
+        self.store.put(config["name"], canvas_collection)
 
     def get_var_dict(self, variable):
         """Build dictionary for variable attributes."""

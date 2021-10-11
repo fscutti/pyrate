@@ -5,12 +5,13 @@ from pyrate.utils import functions as FN
 
 
 class Writer:
-    __slots__ = ["name", "store", "logger", "_inputs_vs_targets", "_targets", "_is_loaded"]
+    __slots__ = ["name", "store", "logger", "is_loaded", "_inputs_vs_targets", "_targets"]
 
     def __init__(self, name, store, logger):
         self.name = name
         self.store = store
         self.logger = logger
+        self.is_loaded = False
         self._targets = {}
         self._inputs_vs_targets = {}
 

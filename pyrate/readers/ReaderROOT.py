@@ -104,7 +104,7 @@ class ReaderROOT(Reader):
             self.store.put(name, None, "TRAN")
 
     def _read_variable(self, name, tree, variable):
-        """Reads a varable from a tree and puts it on the transient store."""
+        """Reads a variable from a tree and puts it on the transient store."""
 
         tree.GetBranch(variable).GetEntry(self._idx)
 

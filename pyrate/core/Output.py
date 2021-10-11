@@ -16,6 +16,8 @@ class Output(Writer):
 
     def load(self):
 
+        self.is_loaded = True
+
         self.writers = {}
         targets = []
         for name, attr in self.outputs.items():

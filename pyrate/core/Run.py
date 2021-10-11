@@ -81,7 +81,9 @@ class Run:
         # -----------------------------------------------------------------------
 
         self._out = Output(self.name, store, self.logger, outputs=self.outputs)
-        self._out.load()
+
+        if not self._out.is_loaded:
+            self._out.load()
 
         all_inputs_vs_targets = self._out.get_inputs_vs_targets()
 
@@ -120,7 +122,7 @@ class Run:
 
             # update the store.
             store = self.run(state, store, current_inputs_vs_targets)
-
+            
         print("\n")
 
         stop = timeit.default_timer()
@@ -178,8 +180,9 @@ class Run:
                 store.put("INPUT:config", self.inputs[i_name], "TRAN")
 
                 self.loop(store, targets)
-
+                
                 store.clear("TRAN")
+
 
             elif self.state == "execute":
                 # ---------------------------------------------------------------

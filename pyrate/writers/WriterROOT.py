@@ -14,6 +14,8 @@ class WriterROOT(Writer):
 
     def load(self):
         """Creates the file and set targets."""
+        self.is_loaded = True
+
         self.set_inputs_vs_targets(self.w_targets)
      
         self.f = R.TFile(self.f, "RECREATE")

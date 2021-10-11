@@ -28,6 +28,7 @@ ToDo: better adjust the style of the plots. Introduce ratio plots.
 
 """
 import os
+import sys
 from copy import copy
 
 from pyrate.core.Algorithm import Algorithm
@@ -52,7 +53,7 @@ class Make1DHistPlot(Algorithm):
         """Prepares histograms.
         If not found in the input already it will create new ones."""
 
-        i_name = self.store.get("INPUT:name", "TRAN")
+        i_name = self.store.get("INPUT:name")
 
         for f_name, f_attr in config["folders"].items():
             for v_name, v_attr in f_attr["variables"].items():
@@ -72,7 +73,7 @@ class Make1DHistPlot(Algorithm):
                     # input name changes in the loop. Later, if found, the histogram will 
                     # need to be put on the PERM store including the name of the input
                     # it was created for.
-                    h = self.store.copy("INPUT:" + os.path.join(path, h_name), "TRAN")
+                    h = self.store.copy("INPUT:" + os.path.join(path, h_name))
                     # The object is unique and has been saved on the TRAN store. When it will later
                     # be put on the PERM store, it will anyway disappear from there after
                     # the TRAN store is cleared at the end of the target loop. Therefore above we
@@ -89,14 +90,14 @@ class Make1DHistPlot(Algorithm):
                     # times anyway!!! The check in the if condition below only serves to
                     # avoid a message from ROOT which would see the creation of an histogram
                     # with the same name in case we are rerunning on the same input.
-                    if not h and not self.store.check(obj_name, "PERM"):
+                    if not h and not self.store.check(obj_name):
                         h = self.make_hist(h_name, v_attr, f_attr)
 
                     # put the object on the store with a different name which
                     # includes the input name, as our final plot will be a stack
                     # potentially including histograms from different samples.
-                    self.store.put(obj_name, h, "PERM")
-
+                    self.store.put(obj_name, h)
+                    
         # ----------------------------------------------------------------------
         # This would be the place to put the a config['name'] object on the READY
         # store, should this be ready for the finalise step.
@@ -149,8 +150,8 @@ class Make1DHistPlot(Algorithm):
                         if region["r_weight"]:
 
                             variable = self.store.get(v_name)
-
-                            self.store.get(obj_name, "PERM").Fill(
+                            
+                            self.store.get(obj_name).Fill(
                                 variable, region["r_weight"]
                             )
 
@@ -225,7 +226,7 @@ class Make1DHistPlot(Algorithm):
 
                         l_entry, obj_name = obj.split("|")
 
-                        h = self.store.get(obj_name, "PERM")
+                        h = self.store.get(obj_name)
 
                         if mode == "stack" and not h_stack:
 
@@ -276,7 +277,7 @@ class Make1DHistPlot(Algorithm):
 
         # FN.pretty(canvas_collection)
 
-        self.store.put(config["name"], canvas_collection, "PERM")
+        self.store.put(config["name"], canvas_collection)
 
     def get_var_dict(self, variable):
         """Build dictionary for variable attributes."""
