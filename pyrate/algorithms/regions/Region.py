@@ -29,7 +29,7 @@ class Region(Algorithm):
     def __init__(self, name, store, logger):
         super().__init__(name, store, logger)
 
-    def execute(self, config):
+    def _execute(self, config):
         """Computes region dictionary."""
 
         region = {"is_passed": 1, "weights": {}}

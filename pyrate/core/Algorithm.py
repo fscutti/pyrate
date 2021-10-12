@@ -6,6 +6,8 @@
 config['name'] is the name of the object you want to compute.
 *************************************************************
 """
+from pyrate.utils import strings as ST
+from pyrate.utils import functions as FN
 
 
 class Algorithm:
@@ -33,6 +35,29 @@ class Algorithm:
         The method is launched independently of the input or event.
         """
         pass
+
+    def _prepare_input(self, config, state):
+        """Prepares objects on the store before the execution of the state methods.
+        N.B.: config might not have a state and/or input fields defined. In this 
+        case, the KeyError exception is caught and the function simply returns.
+        """
+        try:
+            objs = ST.get_items_fast(config[state]["input"])
+
+        except KeyError:
+            return
+
+        for o in objs:
+            self.store.get(o)
+
+    def _initialise(self, config):
+        self._prepare_input(config, "initialise")
+
+    def _execute(self, config):
+        self._prepare_input(config, "execute")
+
+    def _finalise(self, config):
+        self._prepare_input(config, "finalise")
 
 
 # EOF
