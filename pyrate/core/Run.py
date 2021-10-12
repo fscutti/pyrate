@@ -122,7 +122,7 @@ class Run:
 
             # update the store.
             store = self.run(state, store, current_inputs_vs_targets)
-            
+
         print("\n")
 
         stop = timeit.default_timer()
@@ -180,9 +180,8 @@ class Run:
                 store.put("INPUT:config", self.inputs[i_name], "TRAN")
 
                 self.loop(store, targets)
-                
-                store.clear("TRAN")
 
+                store.clear("TRAN")
 
             elif self.state == "execute":
                 # ---------------------------------------------------------------
@@ -259,7 +258,6 @@ class Run:
             self._config[t["object"]]["name"] = t["name"]
 
             self.call(t["object"], is_target=t["name"])
-            
 
     def call(self, obj_name, is_target=""):
         """Calls an algorithm."""
@@ -283,11 +281,15 @@ class Run:
 
             self._target_history.append(entry)
 
-            # preparing input variables 
-            getattr(alg, "_"+self.state)(self._config[obj_name])
-            
+            # preparing input variables
+            getattr(alg, "_" + self.state)(self._config[obj_name])
+
             # executing main algorithm state
             getattr(alg, self.state)(self._config[obj_name])
+
+            # guaranteeing output variables
+            if self.state in {"initialise", "finalise"}:
+                getattr(alg, "_check_output")(self._config[obj_name], self.state)
 
     def add(self, alg_name, store):
         """Adds instances of algorithms dynamically."""

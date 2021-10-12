@@ -38,7 +38,7 @@ class Algorithm:
 
     def _prepare_input(self, config, state):
         """Prepares objects on the store before the execution of the state methods.
-        N.B.: config might not have a state and/or input fields defined. In this 
+        N.B.: config might not have a state and/or input fields defined. In this
         case, the KeyError exception is caught and the function simply returns.
         """
         try:
@@ -49,6 +49,24 @@ class Algorithm:
 
         for o in objs:
             self.store.get(o)
+
+    def _check_output(self, config, state):
+        """This function checks that the required output has been put on the store."""
+        try:
+            objs = ST.get_items_fast(config[state]["output"])
+
+        except KeyError:
+            return True
+
+        for o in objs:
+
+            if o == "SELF":
+                o = config["name"]
+
+            if not self.store.check(o):
+                return False
+
+        return True
 
     def _initialise(self, config):
         self._prepare_input(config, "initialise")
