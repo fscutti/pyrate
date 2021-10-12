@@ -260,6 +260,11 @@ class Job:
                     )
 
                 alg_methods = pyclbr.readmodule(f"{m}")[alg_name].__dict__["children"]
+                
+                # some algorithms might simply want to reimplement 
+                # the internal methods to prepare the input, so the underscore
+                # has to be replaced (see Algorithm definition).
+                alg_methods = [a.replace("_", "") for a in alg_methods]
 
                 alg_states = set([s for s in alg_methods if s in states])
 

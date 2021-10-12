@@ -24,6 +24,10 @@ def get_items(s, no_duplicates=True):
         return items
 
 
+def get_items_fast(s):
+    return [i.replace(" ", "") for i in s.split(",")]
+
+
 def get_items_from_list(l):
     """Gets comma-separated items in lists of strings as a list."""
     items = []

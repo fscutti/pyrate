@@ -274,10 +274,19 @@ class Run:
         if entry in self._target_history:
 
             self.get_history(show=True)
+
             FN.pretty(self._config[obj_name])
+
             sys.exit(f"ERROR:{entry} already executed")
+
         else:
+
             self._target_history.append(entry)
+
+            # preparing input variables 
+            getattr(alg, "_"+self.state)(self._config[obj_name])
+            
+            # executing main algorithm state
             getattr(alg, self.state)(self._config[obj_name])
 
     def add(self, alg_name, store):
