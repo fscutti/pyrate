@@ -260,8 +260,8 @@ class Job:
                     )
 
                 alg_methods = pyclbr.readmodule(f"{m}")[alg_name].__dict__["children"]
-                
-                # some algorithms might simply want to reimplement 
+
+                # some algorithms might simply want to reimplement
                 # the internal methods to prepare the input, so the underscore
                 # has to be replaced (see Algorithm definition).
                 alg_methods = [a.replace("_", "") for a in alg_methods]
@@ -360,7 +360,10 @@ class Job:
                     obj_conf[ps] = {"input": dep_obj_name}
 
                 else:
-                    if not dep_obj_name in ST.get_items(obj_conf[ps]["input"]):
+                    if not "input" in obj_conf[ps]:
+                        obj_conf[ps]["input"] = f"{dep_obj_name}"
+
+                    elif not dep_obj_name in ST.get_items(obj_conf[ps]["input"]):
                         obj_conf[ps]["input"] += f", {dep_obj_name}"
 
     def _check_alg_outputs(self, dep_obj_name, prev_states, obj_conf):
