@@ -289,7 +289,13 @@ class Run:
 
             # guaranteeing output variables
             if self.state in {"initialise", "finalise"}:
-                getattr(alg, "_check_output")(self._config[obj_name], self.state)
+
+                if not getattr(alg, "_check_output")(
+                    self._config[obj_name], self.state
+                ):
+                    sys.exit(
+                        f"ERROR: algorithm {alg.name} should put object {obj_name} on the store during the {self.state} state"
+                    )
 
     def add(self, alg_name, store):
         """Adds instances of algorithms dynamically."""
