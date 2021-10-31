@@ -76,6 +76,12 @@ class Make2DHistPlot(Algorithm):
 
                     self.store.put(obj_name, h)
 
+        # ----------------------------------------------------------------------
+        # This would be the place to put the a config['name'] object on the READY
+        # store, should this be ready for the finalise step.
+        # ----------------------------------------------------------------------
+        self.store.put(config["name"], None)
+
     def execute(self, config):
         """Fills histograms."""
         i_name = self.store.get("INPUT:name")
@@ -241,7 +247,9 @@ class Make2DHistPlot(Algorithm):
 
         # FN.pretty(canvas_collection)
 
-        self.store.put(config["name"], canvas_collection)
+        # the True option is just a placeholder, this algorithm might need some
+        # restructuring by putting the definition of the main object in the initialise function.
+        self.store.put(config["name"], canvas_collection, replace=True)
 
     def get_var_dict(self, variable):
         """Build dictionary for variable attributes."""
