@@ -60,8 +60,8 @@ class Algorithm:
 
         for o in objs:
 
-            if o == "SELF":
-                o = config["name"]
+            if "SELF" in o:
+                o = o.replace("SELF", config["name"])
 
             if not self.store.check(o):
                 return False
