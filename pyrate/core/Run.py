@@ -328,21 +328,22 @@ class Run:
 
     def update_store(self, obj_name, store):
         """Updates value of object on the store."""
-        try:
-            self.call(obj_name)
-            return
-
-        except KeyError:
-            pass
-
-        try:
-            self.add(self._config[obj_name]["algorithm"]["name"], store)
-            self.call(obj_name)
-            return
-
-        except KeyError:
+        if not obj_name in self._config:
             self._in.read(obj_name)
             return
+
+        else:
+            alg_name = self._config[obj_name]["algorithm"]["name"]
+
+            try:
+                alg_instance = self.algorithms[alg_name]
+
+            except KeyError:
+                self.add(alg_name, store)
+
+            self.call(obj_name)
+            return
+
 
     def get_history(self, show=False):
         """Returns the algorithm history."""

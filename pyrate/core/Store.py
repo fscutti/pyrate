@@ -12,7 +12,7 @@ class Store:
         self._run = run
         self.name = self._run.name
         self._objects = {"PERM": {}, "TRAN": {}, "READY": {}, "WRITTEN": {}}
-        self._default = {"initialise": "PERM", "execute": "TRAN", "finalise": "PERM"}
+        self._default = {None: "TRAN", "initialise": "PERM", "execute": "TRAN", "finalise": "PERM"}
 
         # ----------------------------------------------------------------------------------------
         # PERM:
@@ -43,40 +43,35 @@ class Store:
     def get(self, name, opt=None):
         """try/except among objects."""
 
+        opts1, opts2 = [], []
+
         if opt:
-
-            try:
-                return self._objects[opt][name]
-
-            except KeyError:
-                pass
-
-            try:
-                self._run.update_store(name, self)
-                return self._objects[opt][name]
-
-            except KeyError:
-                pass
-
+            opts1, opts2 = [opt], [opt]
         else:
+            opts1 = ["TRAN", "PERM", "READY", "WRITTEN"] 
+            opts2 = ["TRAN", "PERM", "READY", "WRITTEN"]
+        
+        # first try to retrieve the object from the store.
+        while opts1:
+            try:
+                return self._objects[opts1.pop(0)][name]
 
-            opts = ["TRAN", "PERM", "READY", "WRITTEN"]
+            except KeyError:
+                pass
 
-            while opts:
+        # the object is not there so we'll update the store.
+        self._run.update_store(name, self)
 
-                try:
-                    return self._objects[opts[0]][name]
+        # try to retrieve the object a second time.
+        while opts2:
+            try:
+                return self._objects[opts2.pop(0)][name]
 
-                except KeyError:
-                    pass
-
-                try:
-                    self._run.update_store(name, self)
-                    return self._objects[opts[0]][name]
-
-                except KeyError:
-                    opts = opts[1:]
-
+            except KeyError:
+                pass
+        
+        # if none of the previous instructions has returned the object
+        # we will output an error message and exit.
         msg = f"object {name} has not been found on the store after updating."
 
         stack_trace = "".join(traceback.format_list(traceback.extract_stack()[:-1]))
@@ -93,9 +88,6 @@ class Store:
 
         self._run.logger.error(msg)
         self._run.logger.error(msg2)
-        # self._run.logger.error(stack_trace)
-
-        # FN.pretty(self._objects["PERM"]["history"])
 
         sys.exit(f"ERROR: {msg}\n{msg2}")
 
