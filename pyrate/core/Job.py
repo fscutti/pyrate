@@ -202,7 +202,7 @@ class Job:
         # Making sure that all objects are included as input of the appropriate states.
         for obj_name, obj_attr in self.job["configs"]["global"]["objects"].items():
 
-            self._check_dependency(obj_name, obj_attr)
+            self._modify_conf(obj_name, obj_attr)
 
         # FN.pretty(self.job["configs"]["global"]["objects"])
 
@@ -298,8 +298,8 @@ class Job:
                 f"ERROR: while checking the configuration for {obj_name}, {n_alg_definitions} definitions of a module called {alg_name} have been found!"
             )
 
-    def _check_dependency(self, obj_name, obj_conf):
-        """Checks the existence of dependencies in the global configuration."""
+    def _modify_conf(self, obj_name, obj_conf):
+        """Adds consistent dependencies from the global configuration."""
 
         g_config = self.job["configs"]["global"]["objects"]
 
@@ -310,17 +310,6 @@ class Job:
             prev_states = states[:s_idx]
 
             if s in obj_conf:
-
-                # If the object relies on an initialise or finalise method, these have to put
-                # on the permanent store some data identifiable with the object name.
-                if s == ["initialise", "finalise"]:
-
-                    if not "output" in obj_conf[s]:
-                        obj_conf[s]["output"] = "SELF"
-
-                    else:
-                        if not "SELF" in ST.get_items(obj_conf[s]["output"]):
-                            obj_conf[s]["output"] += f", SELF"
 
                 if "input" in obj_conf[s]:
 
@@ -340,9 +329,22 @@ class Job:
                                     f"ERROR: {o} is required by {obj_name} for {s} but is not in the global configuration!"
                                 )
 
-                        self._modify_conf(o, prev_states, obj_conf)
+                        self._modify_input_conf(o, prev_states, obj_conf)
 
-    def _modify_conf(self, dep_obj_name, prev_states, obj_conf):
+                # If the object relies on an initialise or finalise method, these have to put
+                # on the permanent store some data identifiable with the object name.
+                """
+                if s == ["initialise", "finalise"]:
+
+                    if not "output" in obj_conf[s]:
+                        obj_conf[s]["output"] = "SELF"
+
+                    else:
+                        if not "SELF" in ST.get_items(obj_conf[s]["output"]):
+                            obj_conf[s]["output"] += f", SELF"
+                """
+
+    def _modify_input_conf(self, dep_obj_name, prev_states, obj_conf):
         """Eventually modifies the obj_conf if it depends on an object dep_obj_name which
         is not consistently declared across all inputs of the states needed for its computation.
         N.B.: if one of these needed states is simply not implemented by the algorithm
@@ -357,6 +359,7 @@ class Job:
             if ps in g_config[dep_obj_name]:
 
                 if not ps in obj_conf:
+
                     obj_conf[ps] = {"input": dep_obj_name}
 
                 else:
