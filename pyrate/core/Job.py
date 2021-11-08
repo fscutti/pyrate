@@ -188,9 +188,13 @@ class Job:
         # --------------------------
         # Validate configuration
         # --------------------------
+        
+        # This dictionary keeps track of algorithm properties of the associated object.
+        self.obj_algs = {}
 
         # The configuration validation runs conservatively on all objects in the
         # configuration files passed, even if they are not needed by any target.
+        
         for obj_name, obj_attr in self.job["configs"]["global"]["objects"].items():
 
             self._validate_conf(obj_name, obj_attr)
@@ -228,6 +232,8 @@ class Job:
         5) That the states required at configuration match those implemented by the algorithm.
         6) That configured states require some input or output fields.
         """
+
+        self.obj_algs[obj_name] = []
 
         # Check 1
         if not FN.check("algorithm", obj_conf):
@@ -275,6 +281,10 @@ class Job:
                     sys.exit(
                         f"ERROR: states mismatch b/w object {obj_name} and algorithm {alg_name}!"
                     )
+                
+                # keep track of the actual states implemented by the algorithm.
+                self.obj_algs[obj_name] = alg_states
+
                 # Check 6
                 for s in conf_states:
                     if not (
@@ -356,7 +366,8 @@ class Job:
         g_config = self.job["configs"]["global"]["objects"]
 
         for ps in prev_states:
-            if ps in g_config[dep_obj_name]:
+            #if ps in g_config[dep_obj_name]:
+            if ps in self.obj_algs[dep_obj_name]:
 
                 if not ps in obj_conf:
 
