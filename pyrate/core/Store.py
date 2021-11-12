@@ -12,7 +12,12 @@ class Store:
         self._run = run
         self.name = self._run.name
         self._objects = {"PERM": {}, "TRAN": {}, "READY": {}, "WRITTEN": {}}
-        self._default = {None: "TRAN", "initialise": "PERM", "execute": "TRAN", "finalise": "PERM"}
+        self._default = {
+            None: "TRAN",
+            "initialise": "PERM",
+            "execute": "TRAN",
+            "finalise": "PERM",
+        }
 
         # ----------------------------------------------------------------------------------------
         # PERM:
@@ -48,9 +53,9 @@ class Store:
         if opt:
             opts1, opts2 = [opt], [opt]
         else:
-            opts1 = ["TRAN", "PERM", "READY", "WRITTEN"] 
+            opts1 = ["TRAN", "PERM", "READY", "WRITTEN"]
             opts2 = ["TRAN", "PERM", "READY", "WRITTEN"]
-        
+
         # first try to retrieve the object from the store.
         while opts1:
             try:
@@ -69,7 +74,7 @@ class Store:
 
             except KeyError:
                 pass
-        
+
         # if none of the previous instructions has returned the object
         # we will output an error message and exit.
         msg = f"object {name} has not been found on the store after updating."
@@ -101,16 +106,20 @@ class Store:
 
             if opt:
 
-                return name in self._objects[opt]
+                try:
+                    return not (self._objects[opt][name] == name)
+
+                except KeyError:
+                    return False
 
             else:
 
-                return any(
-                    [
-                        name in self._objects[opt]
-                        for opt in ["TRAN", "PERM", "READY", "WRITTEN"]
-                    ]
-                )
+                for opt in ["TRAN", "PERM", "READY", "WRITTEN"]:
+                    
+                    if name in self._objects[opt]:
+                        return not (self._objects[opt][name] == name)
+
+                return False
 
         else:
             assert (
