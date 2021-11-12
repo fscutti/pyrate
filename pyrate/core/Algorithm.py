@@ -22,32 +22,26 @@ class Algorithm:
         """Override this method to define algorithms. config is a dictionary.
         At this stage the method knows the current input.
         """
-        pass
+        self.store.put(config["name"], config["name"], "PERM")
 
     def execute(self, config):
         """Override this method to define algorithms. config is a dictionary.
         At this stage the method knows the current input and current event.
         """
-        pass
+        self.store.put(config["name"], config["name"], "TRAN")
 
     def finalise(self, config):
         """Override this method to define algorithms. config is a dictionary.
         The method is launched independently of the input or event.
         """
-        pass
+        self.store.put(config["name"], config["name"], "PERM")
 
     def _prepare_input(self, config, state):
         """Prepares objects on the store before the execution of the state methods.
         N.B.: config might not have a state and/or input fields defined. In this
         case, the KeyError exception is caught and the function simply returns.
         """
-        try:
-            objs = ST.get_items_fast(config[state]["input"])
-
-        except KeyError:
-            return
-
-        for o in objs:
+        for o in config["dependency"][state]:
             self.store.get(o)
 
     def _check_output(self, config, state):
