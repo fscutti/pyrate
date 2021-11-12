@@ -22,19 +22,19 @@ class Algorithm:
         """Override this method to define algorithms. config is a dictionary.
         At this stage the method knows the current input.
         """
-        self.store.put(config["name"], "PERM")
+        self.store.put(config["name"], config["name"], "PERM")
 
     def execute(self, config):
         """Override this method to define algorithms. config is a dictionary.
         At this stage the method knows the current input and current event.
         """
-        self.store.put(config["name"], "TRAN")
+        self.store.put(config["name"], config["name"], "TRAN")
 
     def finalise(self, config):
         """Override this method to define algorithms. config is a dictionary.
         The method is launched independently of the input or event.
         """
-        self.store.put(config["name"], "PERM")
+        self.store.put(config["name"], config["name"], "PERM")
 
     def _prepare_input(self, config, state):
         """Prepares objects on the store before the execution of the state methods.
