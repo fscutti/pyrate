@@ -41,13 +41,7 @@ class Algorithm:
         N.B.: config might not have a state and/or input fields defined. In this
         case, the KeyError exception is caught and the function simply returns.
         """
-        try:
-            objs = ST.get_items_fast(config[state]["input"])
-
-        except KeyError:
-            return
-
-        for o in objs:
+        for o in config["dependency"][state]:
             self.store.get(o)
 
     def _check_output(self, config, state):
