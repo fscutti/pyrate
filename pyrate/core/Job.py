@@ -196,7 +196,7 @@ class Job:
             self._validate_conf(obj_name, obj_attr)
 
         # --------------------------
-        # Build target dependencies
+        # Build dependencies
         # --------------------------
 
         # Build object dependencies to guarantee that all states are run consistently.
@@ -299,7 +299,7 @@ class Job:
                 f"ERROR: while checking the configuration for {obj_name}, {n_alg_definitions} definitions of a module called {alg_name} have been found!"
             )
 
-    def _modify_conf(self, obj_name, obj_conf):
+    def _build_dependencies(self, obj_name, obj_conf):
         """Adds consistent dependencies from the global configuration."""
 
         g_config = self.job["configs"]["global"]["objects"]
