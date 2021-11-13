@@ -140,7 +140,7 @@ class Run:
         prefix_types = {
             "initialise": "Inputs:  ",
             "execute": "Events:  ",
-            "finalise": "Targets: ",
+            "finalise": "Inputs: ",
         }
 
         self.state = state
@@ -160,21 +160,21 @@ class Run:
             if not targets:
                 continue
 
-            if self.state in ["initialise", "execute"]:
+            # if self.state in ["initialise", "execute"]:
 
-                if not i_name in self.instanciated_inputs:
-                    self.instanciated_inputs[i_name] = Input(
-                        i_name, store, self.logger, self.inputs[i_name]
-                    )
+            if not i_name in self.instanciated_inputs:
+                self.instanciated_inputs[i_name] = Input(
+                    i_name, store, self.logger, self.inputs[i_name]
+                )
 
-                self._in = self.instanciated_inputs[i_name]
+            self._in = self.instanciated_inputs[i_name]
 
-                if not self._in.is_loaded:
-                    self._in.load()
+            if not self._in.is_loaded:
+                self._in.load()
 
-            if self.state == "initialise":
+            if self.state in {"initialise", "finalise"}:
                 # ---------------------------------------------------------------
-                # Initialise loop
+                # Initialise and finalise loops
                 # ---------------------------------------------------------------
                 store.put("INPUT:name", i_name, "TRAN")
                 store.put("INPUT:config", self.inputs[i_name], "TRAN")
@@ -226,23 +226,21 @@ class Run:
 
                 self._in.offload()
 
-            elif self.state == "finalise":
-                # ---------------------------------------------------------------
-                # Finalise loop
-                # ---------------------------------------------------------------
+        if self.state == "finalise":
+            # ---------------------------------------------------------------
+            # Write outputs after finalise input loop
+            # ---------------------------------------------------------------
 
-                self.loop(store, targets)
+            for t in targets:
 
-                for t in targets:
+                if not store.check(t["name"], "PERM"):
+                    msg = f"finalise has been run for {t['name']} but object has not been put on PERM store!!!"
 
-                    if not store.check(t["name"], "PERM"):
-                        msg = f"finalise has been run for {t['name']} but object has not been put on PERM store!!!"
+                    sys.exit(f"ERROR: {msg}")
+                    self.logger.error(msg)
 
-                        sys.exit(f"ERROR: {msg}")
-                        self.logger.error(msg)
-
-                    else:
-                        self._out.write(t["name"])
+                else:
+                    self._out.write(t["name"])
 
         return store
 
@@ -343,7 +341,6 @@ class Run:
 
             self.call(obj_name)
             return
-
 
     def get_history(self, show=False):
         """Returns the algorithm history."""
