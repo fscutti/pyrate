@@ -32,7 +32,7 @@ class Algorithm:
 
     def finalise(self, config):
         """Override this method to define algorithms. config is a dictionary.
-        The method is launched independently of the input or event.
+        At this stage the method knows the current input.
         """
         self.store.put(config["name"], "PYRATE:none", "PERM")
 
