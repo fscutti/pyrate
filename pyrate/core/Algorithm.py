@@ -43,9 +43,9 @@ class Algorithm:
         """
         for o in config["dependency"][state]:
             self.store.get(o)
-
+    """
     def _check_output(self, config, state):
-        """This function checks that the required output has been put on the store."""
+        #This function checks that the required output has been put on the store.
         try:
             objs = ST.get_items_fast(config[state]["output"])
 
@@ -60,6 +60,7 @@ class Algorithm:
                 return False
 
         return True
+    """
 
     def _initialise(self, config):
         self._prepare_input(config, "initialise")
