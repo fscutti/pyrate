@@ -63,12 +63,21 @@ class Algorithm:
     """
 
     def _initialise(self, config):
+
+        self.store.put(config["name"], "PYRATE:none", "PERM")
+
         self._prepare_input(config, "initialise")
 
     def _execute(self, config):
+
+        self.store.put(config["name"], "PYRATE:none", "TRAN")
+
         self._prepare_input(config, "execute")
 
     def _finalise(self, config):
+
+        self.store.put(config["name"], "PYRATE:none", "PERM")
+
         self._prepare_input(config, "finalise")
 
 
