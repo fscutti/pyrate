@@ -117,7 +117,7 @@ class Store:
                 for opt in ["TRAN", "PERM", "READY", "WRITTEN"]:
                     
                     if name in self._objects[opt]:
-                        return not (self._objects[opt][name] == name)
+                        return not (self._objects[opt][name] == "PYRATE:none")
 
                 return False
 
