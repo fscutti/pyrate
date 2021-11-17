@@ -25,7 +25,7 @@ def get_items(s, no_duplicates=True):
 
 
 def get_items_fast(s):
-    return [i.replace(" ", "") for i in s.split(",")]
+    return [i.replace(" ", "") for i in str(s).split(",")]
 
 
 def get_items_from_list(l):
