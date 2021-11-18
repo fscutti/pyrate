@@ -29,7 +29,7 @@ from pyrate.core.Algorithm import Algorithm
 
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
-from pyrate.utils import pyrate_enums
+from pyrate.utils import enums
 
 GB = 1e9
 MB = 1e6
