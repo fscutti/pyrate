@@ -302,6 +302,6 @@ class TreeMaker(Algorithm):
 
         # Store itself on the store with SKIP_WRITE code to show we have nothing 
         # to return.
-        self.store.put(config["name"], pyrate_enums.Pyrate.SKIP_WRITE)
+        self.store.put(config["name"], enums.Pyrate.SKIP_WRITE)
 
 # EOF
