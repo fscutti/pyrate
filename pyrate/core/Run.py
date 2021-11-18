@@ -16,7 +16,7 @@ from pyrate.core.Output import Output
 
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
-
+from pyrate.utils import enums
 
 class Run:
     def __init__(self, name, iterable=(), **kwargs):
@@ -240,7 +240,8 @@ class Run:
                     self.logger.error(msg)
 
                 else:
-                    self._out.write(t["name"])
+                    if store.get(t["name"], "PERM") is not enums.Pyrate.SKIP_WRITE:
+                        self._out.write(t["name"])
 
         return store
 
