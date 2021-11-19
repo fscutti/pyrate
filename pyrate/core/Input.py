@@ -5,7 +5,6 @@ to read from a database, synchronously or not, wrt to files.
 """
 import os
 import sys
-import mmap
 from importlib import import_module
 
 from pyrate.core.Reader import Reader
@@ -350,20 +349,20 @@ class Input(Reader):
                         r_name, self.store, self.logger, f_name, self.structure
                     )
                 
-                elif self.is_bt(f_name):
+                elif FN.is_bt(f_name):
                     # BlueTongue file
                     self.logger.info(f"Auto-setting reader for {f_name} to ReaderBlueTongueMMAP")
                     reader = ReaderBlueTongueMMAP(
                             r_name, self.store, self.logger, f_name, self.structure
                         )
 
-                elif self.is_wd_ascii(f_name):
+                elif FN.is_wd_ascii(f_name):
                     # WaveDump file
                     self.logger.info(f"Auto-setting reader for {f_name} to ReaderWaveDumpMMAP")
                     reader = ReaderWaveDumpMMAP(
                         r_name, self.store, self.logger, f_name, self.structure
                     )
-                elif self.is_wc_ascii(f_name):
+                elif FN.is_wc_ascii(f_name):
                     # WaveCatcher file
                     self.logger.info(f"Auto-setting reader for {f_name} to ReaderWaveCatcherMMAP")
                     reader = ReaderWaveCatcherMMAP(
@@ -373,87 +372,9 @@ class Input(Reader):
                 if not reader:
                     # Uh oh, we haven't got a reader yet!
                     self.logger.info(f"Unable to auto-set reader")
-                    sys.exit("ERROR: pyrate could not determine file type")
+                    sys.exit("ERROR: pyrate could not determine file type. You can try specifying the reader manaully in the config.")
             
             reader.load()
             self.groups[g_name][f_idx] = reader
-
-    def is_wc_ascii(self, filepath):
-        """ Determines if a file is a text wavecatcher file
-        """
-        filepath = os.path.abspath(filepath)
-        try:
-            with open(filepath) as f:
-                first_line = f.readline()
-            if "=== DATA FILE SAVED WITH SOFTWARE VERSION:" in first_line:
-                return True
-        except UnicodeDecodeError:
-            # Not ascii
-            pass
-        return False
-    
-    def is_wd_ascii(self, filepath):
-        """ Determines if a file is an ASCII wavedump file
-        """
-        filepath = os.path.abspath(filepath)
-        try:
-            with open(filepath) as f:
-                first_line = f.readline()
-                if "Record Length:" in first_line:
-                    return True
-        except UnicodeDecodeError:
-            pass
-        return False
-    
-    def is_bt(self, filepath):
-        """ Determines if a file is a bluetongue file
-        """
-        filepath = os.path.abspath(filepath)
-        try:
-            reader = ReaderBlueTongueMMAP(
-                        "BT_CHECK", self.store, self.logger, filepath, self.structure
-                    )
-            # Read like the BlueTongue reader does 
-            # --------------------------------------------------------------------
-            # Mimic the load() function without getting the file size as it's slow
-            reader.is_loaded = True
-            reader.f = open(reader.f, "rb")
-            reader._idx = 0
-            reader._mmf = mmap.mmap(reader.f.fileno(), length=0, access=mmap.ACCESS_READ)
-            reader._event = 0
-            reader._event_size = 0
-            reader._header_size = 0
-            # Hack to check if the board number is too high
-            # if it's over 64, then something is really wrong
-            current_pos = reader._mmf.tell()
-            reader._hd = {"n_boards": reader._get_items(1, "I")[0]}
-            if reader._hd["n_boards"] > 64:
-                # Uh oh, something's not right, probably not a BT file
-                return False
-            reader._mmf.seek(current_pos)
-            reader._set_header_dict()
-            reader._set_event_dict()
-            reader.f.close()
-            # load() function over
-            # ------------------------------------------------------------------
-            if reader._event != reader._idx * reader._event_size + reader._header_size:
-                reader._event = reader._idx * reader._event_size + reader._header_size
-            reader._move(reader._event)
-            t = FN.grab("check_word", reader._ev)
-            items_number, items_type, items_offset = t[0], t[1], t[2]
-            reader._mmf.seek(items_offset, 1)
-            cw = reader._get_items(items_number, items_type)[0]
-            if cw == 65226:
-                # All good!
-                return True
-        except:
-            pass
-        finally:
-            try:
-                reader.offload()
-                del reader
-            except:
-                pass
-        return False
 
 # EOF
