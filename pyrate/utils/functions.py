@@ -194,5 +194,14 @@ def add_colors(my_color_list):
 
     return added_color
 
+def iterable(obj):
+    """ Determines if an object is iterable or not
+    """
+    try:
+        iter(obj)
+    except Exception:
+        return False
+    else:
+        return True
 
 # EOF
