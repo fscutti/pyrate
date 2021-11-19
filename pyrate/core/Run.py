@@ -77,50 +77,51 @@ class Run:
         store.put("history", self._history, "PERM")
 
         # -----------------------------------------------------------------------
-        # Initialise/load the output. Files are opened and ready to be written.
+        # Instanciate/load the output. Files are opened and ready to be written.
         # -----------------------------------------------------------------------
 
         self._out = Output(self.name, store, self.logger, outputs=self.outputs)
-        self._out.load()
 
-        self.run_config_targets = self._out.get_config_targets()
-        self.run_targets = self._out.get_targets()
-        
+        if not self._out.is_loaded:
+            self._out.load()
+
+        all_inputs_vs_targets = self._out.get_inputs_vs_targets()
+
+        # sys.exit()
+
         # self.modify_config()
 
         # -----------------------------------------------------------------------
-        # Initialise algorithms for the declared object in the output.
+        # Instanciate algorithms for all targets specified in the job options.
         # -----------------------------------------------------------------------
 
         self.algorithms = {}
-        for i_name, targets in self.run_config_targets.items():
+        for i_name, targets in all_inputs_vs_targets.items():
             for t in targets:
-                alg_name = self._config[t["config"]]["algorithm"]["name"]
+                alg_name = self._config[t["object"]]["algorithm"]["name"]
                 self.add(alg_name, store)
 
         # -----------------------------------------------------------------------
         # Inputs will be initialised dynamically in the run function.
         # -----------------------------------------------------------------------
-        self.ready_inputs = {}
+        self.instanciated_inputs = {}
 
         # -----------------------------------------------------------------------
         # Update the store in three steps: initialise, execute, finalise.
         # -----------------------------------------------------------------------
 
         msg = f"Launching pyrate run {self.name}"
+        print("\n", "*" * len(msg), msg, "*" * len(msg))
 
-        print("\n")
-        print("*" * len(msg))
-        print(msg)
-        print("*" * len(msg))
+        for state in ["initialise", "execute", "finalise"]:
 
-        store = self.run("initialise", store)
-        
-        if not store.check("any", "READY"):
+            # updating list of targets to be considered for the next loop.
+            current_inputs_vs_targets = self.update_inputs_vs_targets(
+                state, store, all_inputs_vs_targets
+            )
 
-            store = self.run("execute", store)
-
-        store = self.run("finalise", store)
+            # update the store.
+            store = self.run(state, store, current_inputs_vs_targets)
 
         print("\n")
 
@@ -133,13 +134,13 @@ class Run:
 
         return store
 
-    def run(self, state, store):
+    def run(self, state, store, inputs_vs_targets):
         """Run the loop function."""
 
         prefix_types = {
             "initialise": "Inputs:  ",
             "execute": "Events:  ",
-            "finalise": "Targets: ",
+            "finalise": "Inputs: ",
         }
 
         self.state = state
@@ -148,48 +149,49 @@ class Run:
 
         info = self.state.rjust(70, ".")
 
-        if self.state in ["finalise"]:
-            store.clear("READY")
-
         for i_name, targets in tqdm(
-            self.run_config_targets.items(),
+            inputs_vs_targets.items(),
             desc=f"{prefix}{info}",
             disable=self.no_progress_bar,
             bar_format=self.colors[self.state]["input"],
         ):
 
-            if self.state in ["initialise", "execute"]:
+            # if there are no targets for this state, skip all loops.
+            if not targets:
+                continue
 
-                if not i_name in self.ready_inputs:
-                    self.ready_inputs[i_name] = Input(
-                        i_name, store, self.logger, self.inputs[i_name]
-                    )
+            # if self.state in ["initialise", "execute"]:
 
-                self._in = self.ready_inputs[i_name]
+            if not i_name in self.instanciated_inputs:
+                self.instanciated_inputs[i_name] = Input(
+                    i_name, store, self.logger, self.inputs[i_name]
+                )
 
-                if not self._in.is_loaded:
-                    self._in.load()
+            self._in = self.instanciated_inputs[i_name]
 
-            if self.state == "initialise":
+            if not self._in.is_loaded:
+                self._in.load()
+
+            if self.state in {"initialise", "finalise"}:
                 # ---------------------------------------------------------------
-                # Initialise
+                # Initialise and finalise loops
                 # ---------------------------------------------------------------
                 store.put("INPUT:name", i_name, "TRAN")
                 store.put("INPUT:config", self.inputs[i_name], "TRAN")
 
-                self.loop(store, self.run_config_targets[i_name])
+                self.loop(store, targets)
 
                 store.clear("TRAN")
 
             elif self.state == "execute":
                 # ---------------------------------------------------------------
-                # Execute
+                # Execute loop
                 # ---------------------------------------------------------------
-                
+
                 tot_n_events = self._in.get_n_events()
 
                 eslices = self.get_events_slices(tot_n_events)
-                
+
                 # ---------------------------------------------------------------
                 # Event loop
                 # ---------------------------------------------------------------
@@ -201,7 +203,7 @@ class Run:
                             70, "."
                         )
                     )
-                    
+
                     self._in.set_idx(emin)
 
                     erange = emax - emin + 1
@@ -215,9 +217,8 @@ class Run:
                         store.put("INPUT:name", i_name, "TRAN")
                         store.put("INPUT:config", self.inputs[i_name], "TRAN")
                         store.put("EVENT:idx", self._in.get_idx())
-                        
 
-                        self.loop(store, self.run_config_targets[i_name])
+                        self.loop(store, targets)
 
                         store.clear("TRAN")
 
@@ -225,29 +226,22 @@ class Run:
 
                 self._in.offload()
 
-            elif self.state == "finalise":
-                # ---------------------------------------------------------------
-                # Finalise
-                # ---------------------------------------------------------------
-                for t in targets:
-                    if not store.check(t["name"], "READY"):
+        if self.state == "finalise":
+            # ---------------------------------------------------------------
+            # Write outputs after finalise input loop
+            # ---------------------------------------------------------------
 
-                        self.loop(store, [t])
+            for t in targets:
 
-                        if not store.check(t["name"], "PERM"):
-                            msg = f"finalise has been run for {t['name']} but object has not been put on PERM store!!!"
+                if not store.check(t["name"], "PERM"):
+                    msg = f"finalise has been run for {t['name']} but object has not been put on PERM store!!!"
 
-                            sys.exit(f"ERROR: {msg}")
-                            self.logger.error(msg)
+                    sys.exit(f"ERROR: {msg}")
+                    self.logger.error(msg)
 
-                        else:
-                            store.put(t["name"], t["name"], "READY")
-        
-        if self.state in ["finalise"]:
+                else:
+                    self._out.write(t["name"])
 
-            for t in self.run_targets:
-                self._out.write(t)
-                    
         return store
 
     def loop(self, store, targets):
@@ -259,38 +253,49 @@ class Run:
 
             self._history["CURRENT TARGET"] = t["name"]
 
-            self._config[t["config"]]["name"] = t["name"]
+            self._config[t["object"]]["name"] = t["name"]
 
-            if not store.check(t["name"], "READY"):
-                try:
-                    self.call(t["config"], is_target=t["name"])
-                except KeyError:
-                    pyrate_modules = [m.split('.')[-1] for m in sys.modules if "pyrate" in m]
-                    if (alg_name := self._config[t["config"]]["algorithm"]["name"]) not in pyrate_modules:
-                        sys.exit(f"ERROR: {alg_name} not found in pyrate's modules.\n"
-                                  "Make sure the algorithm/module has been added to the nearest __init__.py, and all higher-level __init__.py files.\n"
-                                  "Also check the name of the class in the algorithm's file, the file name, and delcaration in __init__.py all match")
-                    # Eh, might as well fail the way we were going to ¯\_(ツ)_/¯
-                    self.call(t["config"], is_target=t["name"])
+            self.call(t["object"], is_target=t["name"])
 
-    def call(self, obj_config, is_target=""):
+    def call(self, obj_name, is_target=""):
         """Calls an algorithm."""
 
-        # print(f"calling {obj_config} is target: ({is_target})")
-        alg = self.algorithms[self._config[obj_config]["algorithm"]["name"]]
-        entry = f"{obj_config}:{alg.name}:TARGET({is_target})"
+        # print(f"calling {obj_name} is target: ({is_target})")
+        alg = self.algorithms[self._config[obj_name]["algorithm"]["name"]]
+        entry = f"{obj_name}:{alg.name}:TARGET({is_target})"
 
         if not is_target:
-            self._config[obj_config]["name"] = obj_config
+            self._config[obj_name]["name"] = obj_name
 
         if entry in self._target_history:
 
             self.get_history(show=True)
-            FN.pretty(self._config[obj_config])
+
+            FN.pretty(self._config[obj_name])
+
             sys.exit(f"ERROR:{entry} already executed")
+
         else:
+
             self._target_history.append(entry)
-            getattr(alg, self.state)(self._config[obj_config])
+
+            # preparing input variables
+            getattr(alg, "_" + self.state)(self._config[obj_name])
+
+            # executing main algorithm state
+            getattr(alg, self.state)(self._config[obj_name])
+
+            # guaranteeing output variables
+            """
+            if self.state in {"initialise", "finalise"}:
+
+                if not getattr(alg, "_check_output")(
+                    self._config[obj_name], self.state
+                ):
+                    sys.exit(
+                        f"ERROR: algorithm {alg.name} should put object {obj_name} on the store during the {self.state} state"
+                    )
+            """
 
     def add(self, alg_name, store):
         """Adds instances of algorithms dynamically."""
@@ -301,26 +306,42 @@ class Run:
                         alg_name, store, self.logger
                     )
                     for m in sys.modules
-                    if alg_name ==  m.split(".")[-1]
+                    if alg_name == m.split(".")[-1]
                 }
             )
 
-    def update(self, obj_config, store):
+    def update_inputs_vs_targets(self, state, store, inputs_vs_targets):
+        """Updates the dictionary containing all the targets relative to an input."""
+
+        new_inputs_vs_targets = dict.fromkeys(inputs_vs_targets.keys(), [])
+
+        for i_name, targets in inputs_vs_targets.items():
+            for t in targets:
+                # if the next state will be "execute" and the target is READY then skip it in the target loop.
+                # if the next state will be "finalise" and the target is WRITTEN then skip it in the target loop.
+                if (state == "execute" and store.check(t["name"], "READY")) or (
+                    state == "finalise" and store.check(t["name"], "WRITTEN")
+                ):
+                    continue
+                new_inputs_vs_targets[i_name].append(dict(t))
+        return new_inputs_vs_targets
+
+    def update_store(self, obj_name, store):
         """Updates value of object on the store."""
-        try:
-            self.call(obj_config)
+        if not obj_name in self._config:
+            self._in.read(obj_name)
             return
 
-        except KeyError:
-            pass
+        else:
+            alg_name = self._config[obj_name]["algorithm"]["name"]
 
-        try:
-            self.add(self._config[obj_config]["algorithm"]["name"], store)
-            self.call(obj_config)
-            return
+            try:
+                alg_instance = self.algorithms[alg_name]
 
-        except KeyError:
-            self._in.read(obj_config)
+            except KeyError:
+                self.add(alg_name, store)
+
+            self.call(obj_name)
             return
 
     def get_history(self, show=False):

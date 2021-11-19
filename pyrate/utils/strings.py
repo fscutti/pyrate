@@ -8,7 +8,7 @@ def remove_duplicates(l):
     return list(dict.fromkeys(l))
 
 
-def get_items(s):
+def get_items(s, no_duplicates=True):
     """Gets comma-separated items in a string as a list."""
     items = []
 
@@ -18,7 +18,14 @@ def get_items(s):
         else:
             items.append(i.replace('"', ""))
 
-    return items
+    if no_duplicates:
+        return remove_duplicates(items)
+    else:
+        return items
+
+
+def get_items_fast(s):
+    return [i.replace(" ", "") for i in str(s).split(",")]
 
 
 def get_items_from_list(l):

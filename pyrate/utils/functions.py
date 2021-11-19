@@ -30,7 +30,7 @@ def find_files(paths, env=None):
 
         if env and env in p:
             p = p.replace(env, os.environ.get(env))
-        
+
         if not os.path.isfile(p):
             files.extend(
                 os.path.join(p, f)
@@ -69,7 +69,6 @@ def get_copy(o, copy):
 
 def pretty(d, indent=0):
     """Prints dictionary with pre-defined intentation."""
-    print("\n\n\n")
     for key, value in d.items():
         print("\t" * indent + str(key))
         if isinstance(value, dict):
@@ -81,7 +80,6 @@ def pretty(d, indent=0):
                     print("\t" * (indent + 1) + str(idx) + " : " + str(l))
             else:
                 print("\t" * (indent + 1) + str(value))
-    print("\n\n\n")
 
 
 def merge(target, probe, path=None, merge_list=False):
@@ -143,7 +141,8 @@ def intersect(probe, target):
 
 
 def find(key, dictionary):
-    """Find value of key in nested dictionary. Thank you, internet!
+    """Find value of key in nested dictionary and returns a generator over the found arguments.
+    Thank you, internet!
     https://stackoverflow.com/questions/9807634/find-all-occurrences-of-a-key-in-nested-dictionaries-and-lists
     """
     if hasattr(dictionary, "items"):
@@ -160,6 +159,9 @@ def find(key, dictionary):
                     for result in find(key, d):
                         yield result
 
+def check(key, dictionary):
+    """Uses the find function to just check the existence of the key without returning the generator."""
+    return bool([i for i in find(key, dictionary)])
 
 def grab(key, dictionary):
     """This is just a wrapper around the find function, getting a single item as opposed to the iterator."""

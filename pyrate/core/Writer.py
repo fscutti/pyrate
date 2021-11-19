@@ -5,14 +5,15 @@ from pyrate.utils import functions as FN
 
 
 class Writer:
-    __slots__ = ["name", "store", "logger", "_config_targets", "_targets", "_is_loaded"]
+    __slots__ = ["name", "store", "logger", "is_loaded", "_inputs_vs_targets", "_targets"]
 
     def __init__(self, name, store, logger):
         self.name = name
         self.store = store
         self.logger = logger
+        self.is_loaded = False
         self._targets = {}
-        self._config_targets = {}
+        self._inputs_vs_targets = {}
 
     def load(self):
         """Initialises the targets. Also puts the writer
@@ -28,26 +29,25 @@ class Writer:
         """Returns objects."""
         return self._targets
 
-    def get_config_targets(self):
+    def get_inputs_vs_targets(self):
         """Returns objects."""
-        return self._config_targets
+        return self._inputs_vs_targets
 
-    def set_targets(self, targets):
-        """Add targets from a list of objects."""
+    def set_inputs_vs_targets(self, targets):
+        """Rearranges the target attribute."""
+
         for t in targets:
             self._targets = FN.merge(self._targets, t, merge_list=True)
 
-    def set_config_targets(self):
-        """Rearranges the target attribute."""
-        for t, samples in self._targets.items():
-            for s in samples:
+        for t, inputs in self._targets.items():
+            for i in inputs:
 
-                element = {"config": t.split(":", 1)[0], "name": t}
+                element = {"name": t, "object": t.split(":", 1)[0]}
 
-                if not s in self._config_targets:
-                    self._config_targets[s] = [element]
+                if not i in self._inputs_vs_targets:
+                    self._inputs_vs_targets[i] = [element]
                 else:
-                    self._config_targets[s].append(element)
+                    self._inputs_vs_targets[i].append(element)
 
 
 # EOF

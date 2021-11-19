@@ -53,7 +53,7 @@ class Make1DProfilePlot(Algorithm):
 
         i_name = self.store.get("INPUT:name", "TRAN")
 
-        for f_name, f_attr in config["algorithm"]["folders"].items():
+        for f_name, f_attr in config["folders"].items():
             for v_name, v_attr in f_attr["variables"].items():
                 for r_name in self.make_regions_list(f_attr):
 
@@ -75,11 +75,17 @@ class Make1DProfilePlot(Algorithm):
 
                     self.store.put(obj_name, g, "PERM")
 
+        # ----------------------------------------------------------------------
+        # This would be the place to put the a config['name'] object on the READY
+        # store, should this be ready for the finalise step.
+        # ----------------------------------------------------------------------
+        self.store.put(config["name"], None)
+
     def execute(self, config):
         """Fills graphs."""
         i_name = self.store.get("INPUT:name")
 
-        for f_name, f_attr in config["algorithm"]["folders"].items():
+        for f_name, f_attr in config["folders"].items():
             for v_name, v_attr in f_attr["variables"].items():
                 for r_name in self.make_regions_list(f_attr):
 
@@ -132,7 +138,7 @@ class Make1DProfilePlot(Algorithm):
 
         inputs = ST.get_items(config["name"].split(":", -1)[-1])
 
-        for f_name, f_attr in config["algorithm"]["folders"].items():
+        for f_name, f_attr in config["folders"].items():
             for v_name, v_attr in f_attr["variables"].items():
                 for r_name in self.make_regions_list(f_attr):
 
@@ -203,12 +209,14 @@ class Make1DProfilePlot(Algorithm):
 
         # FN.pretty(canvas_collection)
 
-        self.store.put(config["name"], canvas_collection, "PERM")
+        # the True option is just a placeholder, this algorithm might need some
+        # restructuring by putting the definition of the main object in the initialise function.
+        self.store.put(config["name"], canvas_collection, replace=True)
 
     def get_var_dict(self, variable):
         """Build dictionary for variable attributes."""
 
-        a = ST.get_items(variable)
+        a = ST.get_items(variable, no_duplicates=False)
 
         d = {
             "n_bins_x": int(a[0]),
