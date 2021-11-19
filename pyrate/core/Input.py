@@ -128,7 +128,7 @@ class Input(Reader):
             elif name.startswith("GROUPS"):
                 # Adds the group keys to the store so the user can know
                 # what groups are in use without checking the config
-                self.store.put(name, list(self.groups.keys()))
+                self.store.put(name, list(self.groups.keys()), "TRAN")
 
     def _read_from_database(self, name):
         self.db.read(name)
@@ -349,7 +349,7 @@ class Input(Reader):
                         r_name, self.store, self.logger, f_name, self.structure
                     )
                 
-                elif FN.is_bt(f_name):
+                elif FN.is_bt(f_name, self.store, self.logger, self.structure):
                     # BlueTongue file
                     self.logger.info(f"Auto-setting reader for {f_name} to ReaderBlueTongueMMAP")
                     reader = ReaderBlueTongueMMAP(
