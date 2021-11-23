@@ -159,7 +159,7 @@ class Tree:
         """
         
         self.TTree = R.TTree(self.name, self.name)
-        self.TTree.SetMaxTreeSize((int(1 * MB)))
+        # self.TTree.SetMaxTreeSize((int(1 * MB)))
         self.initialised = True
     
     def link_all_branches(self):
