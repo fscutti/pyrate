@@ -41,14 +41,9 @@ class Algorithm:
         N.B.: config might not have a state and/or input fields defined. In this
         case, the KeyError exception is caught and the function simply returns.
         """
-        if state == "initialise":
-            all_states = ["initialise", "execute", "finalise"]
-            for s in all_states:
-                for o in config["dependency"][s]:
-                    self.store.get(o)
-        else:
-            for o in config["dependency"][state]:
-                self.store.get(o)
+        for o in config["dependency"][state]:
+            self.store.get(o)
+
     """
     def _check_output(self, config, state):
         #This function checks that the required output has been put on the store.
