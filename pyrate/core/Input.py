@@ -13,6 +13,7 @@ from pyrate.readers.ReaderWaveCatcherMMAP import ReaderWaveCatcherMMAP
 from pyrate.readers.ReaderBlueTongueMMAP import ReaderBlueTongueMMAP
 from pyrate.readers.ReaderWaveDumpMMAP import ReaderWaveDumpMMAP
 from pyrate.readers.ReaderPostgreSQL import ReaderPostgreSQL
+from pyrate.readers.ReaderCAEN1730_RAW import ReaderCAEN1730_RAW
 
 from pyrate.utils import functions as FN
 from pyrate.utils import strings as ST
@@ -322,7 +323,10 @@ class Input(Reader):
                     )
 
                 else:
-                    reader = ReaderWaveCatcherMMAP(
+                    #reader = ReaderWaveCatcherMMAP(
+                    #    r_name, self.store, self.logger, f_name, self.structure
+                    #)
+                    reader = ReaderCAEN1730_RAW(
                         r_name, self.store, self.logger, f_name, self.structure
                     )
 
