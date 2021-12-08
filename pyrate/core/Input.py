@@ -14,6 +14,7 @@ from pyrate.readers.ReaderBlueTongueMMAP import ReaderBlueTongueMMAP
 from pyrate.readers.ReaderWaveDumpMMAP import ReaderWaveDumpMMAP
 from pyrate.readers.ReaderPostgreSQL import ReaderPostgreSQL
 from pyrate.readers.ReaderCAEN1730_RAW import ReaderCAEN1730_RAW
+from pyrate.readers.ReaderCAEN1730_ZLE import ReaderCAEN1730_ZLE
 
 from pyrate.utils import functions as FN
 from pyrate.utils import strings as ST
@@ -323,6 +324,7 @@ class Input(Reader):
                     )
 
                 else:
+                    #ToDo: Fix this up, Mike spoke about having the user determine what reader is used
                     #reader = ReaderWaveCatcherMMAP(
                     #    r_name, self.store, self.logger, f_name, self.structure
                     #)

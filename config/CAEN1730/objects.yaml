@@ -19,6 +19,14 @@ objects:
          input:
        waveform: EVENT:board_0:ch_0:waveform
 
+     RawWaveform_CH1:
+       algorithm:
+         name: Waveform
+         format: "asdf"
+       execute:
+         input:
+       waveform: EVENT:board_1:ch_0:waveform
+
 
      # -----------------------------------------------------------
      # Histograms
@@ -38,7 +46,7 @@ objects:
          initialise:
              output:
          execute:
-             input: RawWaveform_CH0
+             input: RawWaveform_CH0, RawWaveform_CH1
          trees:
              - Channel_0:
                  event:

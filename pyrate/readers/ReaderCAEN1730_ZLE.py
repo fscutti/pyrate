@@ -1,8 +1,8 @@
-""" Reader of binary files from CAEN1730 digitizers using the raw firmware.
+""" Reader of binary files from CAEN1730 digitizers using the zle firmware.
 This version of the reader uses memory mapping to read the file:
 https://docs.python.org/3.0/library/mmap.html.
 
-Binary data is written according to the scheme given in the CAEN1730 manual
+Binary data is written according to the scheme given in the ZLE manual
 """
 import os
 import mmap
@@ -10,7 +10,7 @@ import struct
 
 from pyrate.core.Reader import Reader
 
-class ReaderCAEN1730_RAW(Reader):
+class ReaderCAEN1730_ZLE(Reader):
     __slots__ = [
         "f",
         "structure",
@@ -18,7 +18,7 @@ class ReaderCAEN1730_RAW(Reader):
         "_currentEventTimestamp",
         "_currentChannelMask",
         "_currentEventWaveforms",
-        "_currentEventChannelRead",
+        "_currentEventChannelRead"
     ]
 
     def __init__(self, name, store, logger, f_name, structure):
@@ -36,7 +36,7 @@ class ReaderCAEN1730_RAW(Reader):
         self._currentEventTimestamp = 0
         self._currentChannelMask = 0
         self._currentEventWaveforms = {}
-        self._currentEventChannelRead = []
+        self._currentEventChannelRead = {}
         
     def offload(self):
         self.is_loaded = False
@@ -80,12 +80,11 @@ class ReaderCAEN1730_RAW(Reader):
             head1 = int.from_bytes(head1,"little")
             eventSize = head1 & 0b00001111111111111111111111111111
             self._mmf.seek(4*(eventSize - 1),1)
-
-        print(self._n_events)
+            
         self._mmf.seek(0, 0)
         self._get_next_event()        
 
-    def _get_waveform(self, ch):
+    def _get_waveform(self,  ch):
         """Reads variable from the event and puts it in the transient store."""
         #If the channel is not in the event return an empty list
         #ToDo: Confirm this behaviour in pyrate
@@ -98,8 +97,6 @@ class ReaderCAEN1730_RAW(Reader):
 
         #Return the waveform and mark that this channel has been read
         self._currentEventChannelRead[ch] = True;
-        print("\n")
-        print(ch,self._currentEventWaveforms[ch])
         return self._currentEventWaveforms[ch]
 
     def _get_next_event(self):
@@ -107,7 +104,7 @@ class ReaderCAEN1730_RAW(Reader):
         head1 = self._mmf.read(4)
         head1 = int.from_bytes(head1,"little")
         eventSize = head1 & 0b00001111111111111111111111111111
-        
+
         head2 = self._mmf.read(4)
         head2 = int.from_bytes(head2,"little")
         boardID = head2 & 0b11111000000000000000000000000000
@@ -126,23 +123,36 @@ class ReaderCAEN1730_RAW(Reader):
         self._currentEventTimestamp = pattern << 32 + TTT
         self._currentChannelMask = (channelMaskHi << 8) + (channelMaskLo)        
 
-        #Figure out what channels are in the event
-        numCh = 0
         self._currentEventChannelRead = {}
         self._currentEventWaveforms = {}        
-        for i in range(15):
-            if self._currentChannelMask & (1 << i):
-                numCh += 1
-                self._currentEventChannelRead[i] = False
-                self._currentEventWaveforms[i] = []
-            
-        recordSize = int(2*(eventSize - 4)/numCh)
-
         #Read in the waveform data
         for i in range(15):
             if self._currentChannelMask & (1 << i):
-                for j in range(recordSize):
-                    sample = self._mmf.read(2)
-                    self._currentEventWaveforms[i].append(int.from_bytes(sample,"little"))
+                self._currentEventChannelRead[i] = False
+                self._currentEventWaveforms[i] = []
+                
+                #Get the baseline and record size (in words)
+                sample = int.from_bytes(self._mmf.read(4),"little")
+
+                baseLine = (sample & 0b11111111111111110000000000000000) >> 16
+                recordSize = sample & 0b00000000000000001111111111111111
+
+                #Scan through the record
+                rawTrace = []
+                for j in range(recordSize - 1):
+                    sample = int.from_bytes(self._mmf.read(4),"little")
+
+                    #If the samples being skipped
+                    if((sample & 0b11110000000000000000000000000000) >> 28 == (0b1000)):
+                        #Add the approparite number of skipped samples to the trace
+                        numSkipped = (sample & 0b00001111111111111111111111111111)
+                        for k in range(2*numSkipped):
+                            rawTrace.append(baseLine)
+                    else:
+                        #Otherwise append the two samples 
+                        rawTrace.append((sample & 0b00111111111111110000000000000000) >> 16)
+                        rawTrace.append(sample & 0b00000000000000000011111111111111)
+
+                self._currentEventWaveforms[i] = rawTrace
 
 # EOF
