@@ -94,7 +94,7 @@ class Branch:
             sys.exit(1)
         if isiter and not self.vector:
             print("Error: input data is iterable, but this branch ({}) expects a single element".format(self.name))
-            print("Input data type: {}, branch datatype: {}, storage datatype: {}".format(type(data), self.datatype, self.data.dtype))
+            print("Input data type: {}, branch datatype: {}, storage datatype: {}".format(type(data), self.datatype, type(self.data)))
             sys.exit(1)
         assert(isiter==self.vector)
         if self.vector:
