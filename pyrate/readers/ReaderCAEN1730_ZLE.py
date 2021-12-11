@@ -64,6 +64,7 @@ class ReaderCAEN1730_ZLE(Reader):
         
     def set_n_events(self):
         """Reads number of events using the last event header."""
+        #TODO: Is this necessary?  How does pyrate use the number of events
         #Seek to the start of the file
         self._mmf.seek(0, 0)
         self._n_events = 0
@@ -79,6 +80,9 @@ class ReaderCAEN1730_ZLE(Reader):
             self._n_events +=1
             head1 = int.from_bytes(head1,"little")
             eventSize = head1 & 0b00001111111111111111111111111111
+            if(self._mmf.tell() + 4*(eventSize - 1) > self._mmf.size()):
+                break
+            
             self._mmf.seek(4*(eventSize - 1),1)
             
         self._mmf.seek(0, 0)

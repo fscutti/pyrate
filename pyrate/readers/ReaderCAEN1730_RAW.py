@@ -64,6 +64,7 @@ class ReaderCAEN1730_RAW(Reader):
         
     def set_n_events(self):
         """Reads number of events using the last event header."""
+        #TODO: Is this necessary?  How does pyrate use the number of events
         #Seek to the start of the file
         self._mmf.seek(0, 0)
         self._n_events = 0
@@ -79,9 +80,12 @@ class ReaderCAEN1730_RAW(Reader):
             self._n_events +=1
             head1 = int.from_bytes(head1,"little")
             eventSize = head1 & 0b00001111111111111111111111111111
+
+            if(self._mmf.tell() + 4*(eventSize - 1) > self._mmf.size()):
+                break
+            
             self._mmf.seek(4*(eventSize - 1),1)
 
-        print(self._n_events)
         self._mmf.seek(0, 0)
         self._get_next_event()        
 
@@ -98,8 +102,6 @@ class ReaderCAEN1730_RAW(Reader):
 
         #Return the waveform and mark that this channel has been read
         self._currentEventChannelRead[ch] = True;
-        print("\n")
-        print(ch,self._currentEventWaveforms[ch])
         return self._currentEventWaveforms[ch]
 
     def _get_next_event(self):
