@@ -19,6 +19,7 @@ class ReaderCAEN1730_RAW(Reader):
         "_currentChannelMask",
         "_currentEventWaveforms",
         "_currentEventChannelRead",
+        "_size"
     ]
 
     def __init__(self, name, store, logger, f_name, structure):
@@ -37,6 +38,7 @@ class ReaderCAEN1730_RAW(Reader):
         self._currentChannelMask = 0
         self._currentEventWaveforms = {}
         self._currentEventChannelRead = []
+        self._size = self._mmf.size()
         
     def offload(self):
         self.is_loaded = False
@@ -80,11 +82,13 @@ class ReaderCAEN1730_RAW(Reader):
             self._n_events +=1
             head1 = int.from_bytes(head1,"little")
             eventSize = head1 & 0b00001111111111111111111111111111
-
-            if(self._mmf.tell() + 4*(eventSize - 1) > self._mmf.size()):
+            
+            seekSize = 4*(eventSize - 1) # How far we need to jump
+            # Make we're not seeking beyond the EOF
+            if (self._mmf.tell() + seekSize) > self._size:
                 break
             
-            self._mmf.seek(4*(eventSize - 1),1)
+            self._mmf.seek(seekSize, 1)
 
         self._mmf.seek(0, 0)
         self._get_next_event()        
