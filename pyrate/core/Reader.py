@@ -1,6 +1,7 @@
 """ Generic Reader base class.
 """
 
+import numpy as np
 
 class Reader:
     __slots__ = ["name", "store", "logger", "is_loaded", "_idx", "_n_events"]
@@ -51,7 +52,7 @@ class Reader:
             self.set_n_events()
 
         if idx > self._n_events - 1:
-            self._idx = -math.inf
+            self._idx = -np.inf
         else:
             self._idx = idx
 
