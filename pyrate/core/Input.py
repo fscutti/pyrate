@@ -118,8 +118,8 @@ class Input(Reader):
                             self.store.put(name, g_readers[self._f_idx].__class__.__module__, "TRAN")
                         else:
                             sys.exit(f"ERROR: Invalid reader variable '{variable}'\nError occured when attempting to get '{name}' from the store.")
-            
-                    g_readers[f_idx].read(name)
+                    else:
+                        g_readers[f_idx].read(name)
 
             elif name.startswith("EVENT:"):
                 self._set_group_reader(g_name, self._f_idx)
