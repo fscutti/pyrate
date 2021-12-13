@@ -57,3 +57,10 @@ Thumbs.db
 *.pdf
 *.dat
 *.vscode
+*.root
+*.xml
+*.html
+*.hdf5
+*.meta
+*.csv
+
