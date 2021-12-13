@@ -108,23 +108,23 @@ class Input(Reader):
                     if isinstance(reader, str):
                         self._set_group_reader(g_name, f_idx)
 
+                    if name.startswith("INPUT:READER:"):
+                        variable = name.split(":")[-1]
+                        if variable == "name":
+                            self.store.put(name, g_readers[self._f_idx].__class__.__name__, "TRAN")
+                        elif variable == "slots":
+                            self.store.put(name, g_readers[self._f_idx].__slots__, "TRAN")
+                        elif variable == "module":
+                            self.store.put(name, g_readers[self._f_idx].__class__.__module__, "TRAN")
+                        else:
+                            sys.exit(f"ERROR: Invalid reader variable '{variable}'\nError occured when attempting to get '{name}' from the store.")
+            
                     g_readers[f_idx].read(name)
 
             elif name.startswith("EVENT:"):
                 self._set_group_reader(g_name, self._f_idx)
                 g_readers[self._f_idx].read(name)
-                
-            elif name.startswith("READER:"):
-                variable = name.split(":")[-1]
-                if variable == "name":
-                    self.store.put(name, g_readers[self._f_idx].__class__.__name__, "TRAN")
-                elif variable == "slots":
-                    self.store.put(name, g_readers[self._f_idx].__slots__, "TRAN")
-                elif variable == "module":
-                    self.store.put(name, g_readers[self._f_idx].__class__.__module__, "TRAN")
-                else:
-                    sys.exit(f"ERROR: Invalid reader variable '{variable}'\nError occured when attempting to get '{name}' from the store.")
-            
+
             elif name.startswith("GROUPS"):
                 # Adds the group keys to the store so the user can know
                 # what groups are in use without checking the config
