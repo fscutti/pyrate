@@ -51,7 +51,7 @@ class Reader:
             self.set_n_events()
 
         if idx > self._n_events - 1:
-            self._idx = -1
+            self._idx = -math.inf
         else:
             self._idx = idx
 
@@ -61,11 +61,7 @@ class Reader:
 
     def set_next_event(self):
         """If the next event reading will not be valid it outputs -1."""
-
-        if self._idx < self._n_events - 1:
-            self._idx += 1
-        else:
-            self._idx = -1
+        self.set_idx(self._idx + 1)
         return self._idx
 
     def set_previous_event(self):
@@ -76,5 +72,16 @@ class Reader:
         """Constructs idx conditions to handle event in segments."""
         pass
 
+    def break_path(self, path):
+        """Takes a path request from pyrate and splits it into a dictionary"""
+        splitPath = path.split(":")
 
+        ret = {}
+        ret["variable"] = splitPath[-1]
+        if(len(splitPath) > 2):            
+            ret["board"] = int(splitPath[1].split("_")[-1])
+            if(len(splitPath) > 3):            
+                ret["ch"] = int(splitPath[2].split("_")[-1])
+        
+        return ret
 # EOF
