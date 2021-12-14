@@ -62,7 +62,11 @@ class Reader:
 
     def set_next_event(self):
         """If the next event reading will not be valid it outputs -1."""
-        self.set_idx(self._idx + 1)
+
+        if self._idx < self._n_events - 1:
+            self._idx += 1
+        else:
+            self._idx = -1
         return self._idx
 
     def set_previous_event(self):

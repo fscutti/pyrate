@@ -16,6 +16,7 @@ class ReaderCAEN1730_ZLE(Reader):
         "_mmf",
         "_mmfSize",
         "_eventPos",
+        "_readIdx",
         "_currentEventTimestamp",
         "_currentChannelMask",
         "_currentEventWaveforms",
@@ -45,9 +46,13 @@ class ReaderCAEN1730_ZLE(Reader):
         self._mmf.close()
 
     def read(self, name):
+        if(self._readIdx != self._idx):
+            self._read_event()        
+            self._readIdx = self._idx
+
         if name.startswith("EVENT:"):            
             #Split the request
-            path = _break_path(name)
+            path = self._break_path(name)
 
             #Get the event value
             if path["variable"]=="timestamp":
@@ -89,10 +94,7 @@ class ReaderCAEN1730_ZLE(Reader):
 
         self._mmf.seek(0, 0)
         self._idx = 0
-
-    def set_idx(self,idx):
-        super().set_idx(idx)
-        self._read_event()
+        self._readIdx = -1
 
     def _break_path(self, path):
         """Takes a path request from pyrate and splits it into a dictionary"""
