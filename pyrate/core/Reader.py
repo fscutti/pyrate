@@ -1,7 +1,7 @@
 """ Generic Reader base class.
+N.B.: Inheriting objects reading individual files should only reimplement the functions below 
+which are not fully defined, i.e. those containing the 'pass' instruction.
 """
-
-import numpy as np
 
 class Reader:
     __slots__ = ["name", "store", "logger", "is_loaded", "_idx", "_n_events"]
@@ -52,7 +52,7 @@ class Reader:
             self.set_n_events()
 
         if idx > self._n_events - 1:
-            self._idx = -np.inf
+            self._idx = -1
         else:
             self._idx = idx
 
@@ -62,7 +62,11 @@ class Reader:
 
     def set_next_event(self):
         """If the next event reading will not be valid it outputs -1."""
-        self.set_idx(self._idx + 1)
+
+        if self._idx < self._n_events - 1:
+            self._idx += 1
+        else:
+            self._idx = -1
         return self._idx
 
     def set_previous_event(self):
