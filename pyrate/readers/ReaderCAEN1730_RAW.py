@@ -13,19 +13,18 @@ from pyrate.core.Reader import Reader
 class ReaderCAEN1730_RAW(Reader):
     __slots__ = [
         "f",
-        "structure",
         "_mmf",
+        "_mmfSize",
+        "_eventPos",
         "_currentEventTimestamp",
         "_currentChannelMask",
         "_currentEventWaveforms",
         "_currentEventChannelRead",
-        "_size"
     ]
 
     def __init__(self, name, store, logger, f_name, structure):
         super().__init__(name, store, logger)
         self.f = f_name
-        self.structure = structure
 
     def load(self):
         self.is_loaded = True
@@ -34,6 +33,7 @@ class ReaderCAEN1730_RAW(Reader):
         self._mmf = mmap.mmap(self.f.fileno(), length=0, access=mmap.ACCESS_READ)
         self.f.close()
 
+        self.eventPos = []
         self._currentEventTimestamp = 0
         self._currentChannelMask = 0
         self._currentEventWaveforms = {}
@@ -47,16 +47,13 @@ class ReaderCAEN1730_RAW(Reader):
     def read(self, name):
         if name.startswith("EVENT:"):            
             #Split the request
-            nameSplit = name.split(":")
-            board = int(nameSplit[1].split("_")[-1])
-            ch = int(nameSplit[2].split("_")[-1])
-            variable = nameSplit[-1]
+            path = super().break_path(name)
 
             #Get the event value
-            if variable=="timestamp":
+            if path["variable"]=="timestamp":
                 value = self._currentEventTimestamp
-            elif variable=="waveform":
-                value = self._get_waveform(ch)
+            elif path["variable"]=="waveform":
+                value = self._get_waveform(path["ch"])
                 
             #Add the value to the transiant store
             self.store.put(name, value, "TRAN")
@@ -66,7 +63,6 @@ class ReaderCAEN1730_RAW(Reader):
         
     def set_n_events(self):
         """Reads number of events using the last event header."""
-        #TODO: Is this necessary?  How does pyrate use the number of events
         #Seek to the start of the file
         self._mmf.seek(0, 0)
         self._n_events = 0
@@ -74,6 +70,7 @@ class ReaderCAEN1730_RAW(Reader):
         #Scan through the entire file
         while(True):
             #Read in the event info from the header
+            self._eventPos.append(self._mmf.tell());
             head1 = self._mmf.read(4)
             if(head1 == bytes()):
                 break
@@ -84,15 +81,19 @@ class ReaderCAEN1730_RAW(Reader):
             eventSize = head1 & 0b00001111111111111111111111111111
             
             seekSize = 4*(eventSize - 1) # How far we need to jump
-            # Make we're not seeking beyond the EOF
-            if (self._mmf.tell() + seekSize) > self._size:
+            # Make sure we're not seeking beyond the EOF
+            if (self._mmf.tell() + seekSize) > self._mmfSize:
                 break
             
             self._mmf.seek(seekSize, 1)
 
         self._mmf.seek(0, 0)
-        self._get_next_event()        
+        self._idx = 0
 
+    def set_idx(self,idx):
+        super().set_idx(idx)
+        self._read_event()
+    
     def _get_waveform(self, ch):
         """Reads variable from the event and puts it in the transient store."""
         #If the channel is not in the event return an empty list
@@ -100,15 +101,12 @@ class ReaderCAEN1730_RAW(Reader):
         if(ch not in self._currentEventChannelRead.keys()):
             return [0]
 
-        #If this channel has already been read assume it's a new event and load the next event
-        if(self._currentEventChannelRead[ch] == True):
-            self._get_next_event()
-
         #Return the waveform and mark that this channel has been read
         self._currentEventChannelRead[ch] = True;
         return self._currentEventWaveforms[ch]
 
-    def _get_next_event(self):
+    def _read_event(self):
+        self._mmf.seek(self._eventPos[self._idx],0)
         #Read in the event info from the header
         head1 = self._mmf.read(4)
         head1 = int.from_bytes(head1,"little")
@@ -130,8 +128,8 @@ class ReaderCAEN1730_RAW(Reader):
         TTT = head4
 
         self._currentEventTimestamp = pattern << 32 + TTT
-        self._currentChannelMask = (channelMaskHi << 8) + (channelMaskLo)        
-
+        self._currentChannelMask = (channelMaskHi << 8) + (channelMaskLo)
+        
         #Figure out what channels are in the event
         numCh = 0
         self._currentEventChannelRead = {}

@@ -328,7 +328,7 @@ class Input(Reader):
                     #reader = ReaderWaveCatcherMMAP(
                     #    r_name, self.store, self.logger, f_name, self.structure
                     #)
-                    reader = ReaderCAEN1730_RAW(
+                    reader = ReaderCAEN1730_ZLE(
                         r_name, self.store, self.logger, f_name, self.structure
                     )
 
