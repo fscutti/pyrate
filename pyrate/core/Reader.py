@@ -1,7 +1,7 @@
 """ Generic Reader base class.
+N.B.: Inheriting objects reading individual files should only reimplement the functions below 
+which are not fully defined, i.e. those containing the 'pass' instruction.
 """
-
-import numpy as np
 
 class Reader:
     __slots__ = ["name", "store", "logger", "is_loaded", "_idx", "_n_events"]
@@ -52,7 +52,7 @@ class Reader:
             self.set_n_events()
 
         if idx > self._n_events - 1:
-            self._idx = -np.inf
+            self._idx = -1
         else:
             self._idx = idx
 
@@ -73,16 +73,4 @@ class Reader:
         """Constructs idx conditions to handle event in segments."""
         pass
 
-    def break_path(self, path):
-        """Takes a path request from pyrate and splits it into a dictionary"""
-        splitPath = path.split(":")
-
-        ret = {}
-        ret["variable"] = splitPath[-1]
-        if(len(splitPath) > 2):            
-            ret["board"] = int(splitPath[1].split("_")[-1])
-            if(len(splitPath) > 3):            
-                ret["ch"] = int(splitPath[2].split("_")[-1])
-        
-        return ret
 # EOF

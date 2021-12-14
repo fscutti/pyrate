@@ -47,7 +47,7 @@ class ReaderCAEN1730_ZLE(Reader):
     def read(self, name):
         if name.startswith("EVENT:"):            
             #Split the request
-            path = super().break_path(name)
+            path = _break_path(name)
 
             #Get the event value
             if path["variable"]=="timestamp":
@@ -93,7 +93,20 @@ class ReaderCAEN1730_ZLE(Reader):
     def set_idx(self,idx):
         super().set_idx(idx)
         self._read_event()
-                
+
+    def _break_path(self, path):
+        """Takes a path request from pyrate and splits it into a dictionary"""
+        splitPath = path.split(":")
+
+        ret = {}
+        ret["variable"] = splitPath[-1]
+        if(len(splitPath) > 2):            
+            ret["board"] = int(splitPath[1].split("_")[-1])
+            if(len(splitPath) > 3):            
+                ret["ch"] = int(splitPath[2].split("_")[-1])
+        
+        return ret
+
     def _get_waveform(self,  ch):
         """Reads variable from the event and puts it in the transient store."""
         #If the channel is not in the event return an empty list
