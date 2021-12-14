@@ -337,7 +337,7 @@ class Input(Reader):
                     ReaderModule = import_module(reader_module)
                     ReaderClass = ReaderModule.__getattribute__(reader)
                 except ImportError as err:
-                    sys.exit(f"Error: {err}\n Unable to import reader '{reader}' from module '{reader_module}'\n"
+                    sys.exit(f"ERROR: {err}\n Unable to import reader '{reader}' from module '{reader_module}'\n"
                             "Check that the reader is in pyrate/readers, that the class and module have the same name, and is added the nearest __init__.py")
 
                 self.logger.info(f"User-set reader for {f_name} to {reader}")
