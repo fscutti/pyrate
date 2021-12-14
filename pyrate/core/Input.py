@@ -125,11 +125,6 @@ class Input(Reader):
                 self._set_group_reader(g_name, self._f_idx)
                 g_readers[self._f_idx].read(name)
 
-            elif name.startswith("GROUPS"):
-                # Adds the group keys to the store so the user can know
-                # what groups are in use without checking the config
-                self.store.put(name, list(self.groups.keys()), "TRAN")
-
     def _read_from_database(self, name):
         self.db.read(name)
 
