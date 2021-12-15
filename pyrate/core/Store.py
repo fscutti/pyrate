@@ -5,6 +5,7 @@ from copy import copy
 import traceback
 
 from pyrate.utils import functions as FN
+from pyrate.utils import enums
 
 
 class Store:
@@ -107,7 +108,7 @@ class Store:
             if opt:
 
                 try:
-                    return not (self._objects[opt][name] == "PYRATE:none")
+                    return not (self._objects[opt][name] == enums.Pyrate.NONE)
 
                 except KeyError:
                     return False
@@ -117,7 +118,7 @@ class Store:
                 for opt in ["TRAN", "PERM", "READY", "WRITTEN"]:
                     
                     if name in self._objects[opt]:
-                        return not (self._objects[opt][name] == "PYRATE:none")
+                        return not (self._objects[opt][name] == enums.Pyrate.NONE)
 
                 return False
 
