@@ -5,6 +5,7 @@ to read from a database, synchronously or not, wrt to files.
 """
 import os
 import sys
+from importlib import import_module
 
 from pyrate.core.Reader import Reader
 from pyrate.readers.ReaderROOT import ReaderROOT
@@ -61,7 +62,10 @@ class Input(Reader):
                     g_files = [g_files]
 
                 self.groups[g_names[g_idx]] = g_files
-                self._set_group_reader(g_names[g_idx], self._f_idx)
+                if hasattr(self, "reader"):
+                    self._set_group_reader(g_names[g_idx], self._f_idx, self.reader)
+                else:
+                    self._set_group_reader(g_names[g_idx], self._f_idx)
 
         else:
             self._set_db_reader(self.database)
@@ -90,11 +94,12 @@ class Input(Reader):
     def _read_from_groups(self, name):
         for g_name, g_readers in self.groups.items():
 
-            # if a group variable is required then transform the name
+            # Make sure we're in the group we want to get the info from
             if "GROUP:" in name:
                 req_g_name = name.split(":")
 
                 if not g_name == req_g_name[2]:
+                    # Not the right group, skip this group
                     continue
 
             if name.startswith("INPUT:"):
@@ -103,7 +108,18 @@ class Input(Reader):
                     if isinstance(reader, str):
                         self._set_group_reader(g_name, f_idx)
 
-                    g_readers[f_idx].read(name)
+                    if name.startswith("INPUT:READER:"):
+                        variable = name.split(":")[-1]
+                        if variable == "name":
+                            self.store.put(name, g_readers[self._f_idx].__class__.__name__, "TRAN")
+                        elif variable == "slots":
+                            self.store.put(name, g_readers[self._f_idx].__slots__, "TRAN")
+                        elif variable == "module":
+                            self.store.put(name, g_readers[self._f_idx].__class__.__module__, "TRAN")
+                        else:
+                            sys.exit(f"ERROR: Invalid reader variable '{variable}'\nError occured when attempting to get '{name}' from the store.")
+                    else:
+                        g_readers[f_idx].read(name)
 
             elif name.startswith("EVENT:"):
                 self._set_group_reader(g_name, self._f_idx)
@@ -298,7 +314,7 @@ class Input(Reader):
 
         self.db.load()
 
-    def _set_group_reader(self, g_name, f_idx):
+    def _set_group_reader(self, g_name, f_idx, reader=None):
         """Instantiate different readers here. If the instance exists nothing
         is done. This function transforms a string into a reader.
         """
@@ -307,33 +323,53 @@ class Input(Reader):
             r_name = "_".join([g_name, str(f_idx)])
 
             f_name = self.groups[g_name][f_idx]
+            
+            if reader:
+                # The user has specified the reader they want to use
+                # Try to import the reader class
+                reader_module = "pyrate.readers."+reader
+                try:
+                    ReaderModule = import_module(reader_module)
+                    ReaderClass = ReaderModule.__getattribute__(reader)
+                except ImportError as err:
+                    sys.exit(f"ERROR: {err}\n Unable to import reader '{reader}' from module '{reader_module}'\n"
+                            "Check that the reader is in pyrate/readers, that the class and module have the same name, and is added the nearest __init__.py")
 
-            if f_name.endswith(".root"):
-                reader = ReaderROOT(
-                    r_name, self.store, self.logger, f_name, self.structure
-                )
-
-            elif f_name.endswith(".dat"):
-                # choose the reader based on file size.
-
-                if "sabre" in os.path.basename(f_name):
+                self.logger.info(f"User-set reader for {f_name} to {reader}")
+                reader = ReaderClass(r_name, self.store, self.logger, f_name, self.structure)
+            else: 
+                if f_name.endswith(".root"):
+                    self.logger.info(f"Auto-setting reader for {f_name} to ReaderROOT")
+                    reader = ReaderROOT(
+                        r_name, self.store, self.logger, f_name, self.structure
+                    )
+                
+                elif FN.is_bt(f_name, self.store, self.logger, self.structure):
+                    # BlueTongue file
+                    self.logger.info(f"Auto-setting reader for {f_name} to ReaderBlueTongueMMAP")
                     reader = ReaderBlueTongueMMAP(
+                            r_name, self.store, self.logger, f_name, self.structure
+                        )
+
+                elif FN.is_wd_ascii(f_name):
+                    # WaveDump file
+                    self.logger.info(f"Auto-setting reader for {f_name} to ReaderWaveDumpMMAP")
+                    reader = ReaderWaveDumpMMAP(
                         r_name, self.store, self.logger, f_name, self.structure
                     )
-
-                else:
+                elif FN.is_wc_ascii(f_name):
+                    # WaveCatcher file
+                    self.logger.info(f"Auto-setting reader for {f_name} to ReaderWaveCatcherMMAP")
                     reader = ReaderWaveCatcherMMAP(
-                        r_name, self.store, self.logger, f_name, self.structure
-                    )
+                            r_name, self.store, self.logger, f_name, self.structure
+                        )
 
-            elif f_name.endswith(".txt"):
-                reader = ReaderWaveDumpMMAP(
-                    r_name, self.store, self.logger, f_name, self.structure
-                )
-
+                if not reader:
+                    # Uh oh, we haven't got a reader yet!
+                    self.logger.info(f"Unable to auto-set reader")
+                    sys.exit("ERROR: pyrate could not determine file type. You can try specifying the reader manaully in the config.")
+            
             reader.load()
-
             self.groups[g_name][f_idx] = reader
-
 
 # EOF
