@@ -45,9 +45,12 @@ class ReaderCAEN1730_RAW(Reader):
         self._mmf.close()
 
     def read(self, name):
+
         if name.startswith("EVENT:"):            
+
+            self._read_event()
             #Split the request
-            path = super().break_path(name)
+            path = self.break_path(name)
 
             #Get the event value
             if path["variable"]=="timestamp":
@@ -55,7 +58,7 @@ class ReaderCAEN1730_RAW(Reader):
             elif path["variable"]=="waveform":
                 value = self._get_waveform(path["ch"])
                 
-            #Add the value to the transiant store
+            #Add the value to the transient store
             self.store.put(name, value, "TRAN")
                 
         elif name.startswith("INPUT:"):
@@ -90,10 +93,6 @@ class ReaderCAEN1730_RAW(Reader):
         self._mmf.seek(0, 0)
         self._idx = 0
 
-    def set_idx(self,idx):
-        super().set_idx(idx)
-        self._read_event()
-    
     def _get_waveform(self, ch):
         """Reads variable from the event and puts it in the transient store."""
         #If the channel is not in the event return an empty list
@@ -148,5 +147,10 @@ class ReaderCAEN1730_RAW(Reader):
                 for j in range(recordSize):
                     sample = self._mmf.read(2)
                     self._currentEventWaveforms[i].append(int.from_bytes(sample,"little"))
+
+
+    def break_path(self, name):
+        name.split(":")[]
+
 
 # EOF
