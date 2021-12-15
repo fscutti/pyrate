@@ -22,7 +22,7 @@ class Algorithm:
         """Override this method to define algorithms. config is a dictionary.
         At this stage the method knows the current input.
         """
-        self.store.put(config["name"], "PYRATE:none", "PERM")
+        self.store.put(config["name"], "PYRATE:none", "TRAN")
 
     def execute(self, config):
         """Override this method to define algorithms. config is a dictionary.
@@ -34,7 +34,7 @@ class Algorithm:
         """Override this method to define algorithms. config is a dictionary.
         At this stage the method knows the current input.
         """
-        self.store.put(config["name"], "PYRATE:none", "PERM")
+        self.store.put(config["name"], "PYRATE:none", "TRAN")
 
     def _prepare_input(self, config, state):
         """Prepares objects on the store before the execution of the state methods.
@@ -65,7 +65,7 @@ class Algorithm:
 
     def _initialise(self, config):
 
-        self.store.put(config["name"], "PYRATE:none", "PERM")
+        self.store.put(config["name"], "PYRATE:none", "TRAN")
 
         self._prepare_input(config, "initialise")
 
@@ -77,7 +77,7 @@ class Algorithm:
 
     def _finalise(self, config):
 
-        self.store.put(config["name"], "PYRATE:none", "PERM")
+        self.store.put(config["name"], "PYRATE:none", "TRAN")
 
         self._prepare_input(config, "finalise")
 
