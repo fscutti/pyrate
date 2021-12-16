@@ -14,6 +14,8 @@ from pyrate.readers.ReaderWaveCatcherMMAP import ReaderWaveCatcherMMAP
 from pyrate.readers.ReaderBlueTongueMMAP import ReaderBlueTongueMMAP
 from pyrate.readers.ReaderWaveDumpMMAP import ReaderWaveDumpMMAP
 from pyrate.readers.ReaderPostgreSQL import ReaderPostgreSQL
+from pyrate.readers.ReaderCAEN1730_RAW import ReaderCAEN1730_RAW
+from pyrate.readers.ReaderCAEN1730_ZLE import ReaderCAEN1730_ZLE
 
 from pyrate.utils import functions as FN
 from pyrate.utils import strings as ST
