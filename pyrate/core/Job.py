@@ -204,9 +204,9 @@ class Job:
 
             self._build_dependencies(obj_name, obj_attr)
 
-        # FN.pretty(self.job["configs"]["global"]["objects"])
+        #FN.pretty(self.job["configs"]["global"]["objects"])
 
-        # sys.exit()
+        #sys.exit()
 
         # -----------------------
         # Instantiate Run object
@@ -306,6 +306,13 @@ class Job:
 
         states = ["initialise", "execute", "finalise"]
 
+        if not "dependency" in obj_conf:
+            obj_conf["dependency"] = {
+                "initialise": set(),
+                "execute": set(),
+                "finalise": set(),
+            }
+
         for s_idx, s in enumerate(states):
 
             prev_states = states[:s_idx]
@@ -313,13 +320,6 @@ class Job:
             if s in obj_conf:
 
                 if "input" in obj_conf[s]:
-
-                    if not "dependency" in obj_conf:
-                        obj_conf["dependency"] = {
-                            "initialise": set(),
-                            "execute": set(),
-                            "finalise": set(),
-                        }
 
                     for o in ST.get_items(obj_conf[s]["input"]):
 
@@ -351,6 +351,10 @@ class Job:
                         if not "SELF" in ST.get_items(obj_conf[s]["output"]):
                             obj_conf[s]["output"] += f", SELF"
                 """
+
+        # This is to guarantee a consistent construction of dependency across all states.
+        obj_conf["dependency"]["execute"].update(obj_conf["dependency"]["finalise"])
+        obj_conf["dependency"]["initialise"].update(obj_conf["dependency"]["execute"])
 
     def _is_required(self, dep_obj_name, prev_states, obj_conf):
         """Returns False if an object is not computed upstream by an algorithm."""
