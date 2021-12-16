@@ -77,7 +77,4 @@ class Reader:
         """Constructs idx conditions to handle event in segments."""
         pass
 
-    def break_path(self, path):
-        """Breaks a path into a series of strings to be interpreted by the Reader."""
-        pass
 # EOF

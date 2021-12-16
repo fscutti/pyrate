@@ -16,6 +16,7 @@ class ReaderCAEN1730_RAW(Reader):
         "_mmf",
         "_mmfSize",
         "_eventPos",
+        "_readIdx",
         "_currentEventTimestamp",
         "_currentChannelMask",
         "_currentEventWaveforms",
@@ -45,12 +46,13 @@ class ReaderCAEN1730_RAW(Reader):
         self._mmf.close()
 
     def read(self, name):
+        if(self._readIdx != self._idx):
+            self._read_event()        
+            self._readIdx = self._idx
 
         if name.startswith("EVENT:"):            
-
-            self._read_event()
             #Split the request
-            path = self.break_path(name)
+            path = self._break_path(name)
 
             #Get the event value
             if path["variable"]=="timestamp":
@@ -91,8 +93,21 @@ class ReaderCAEN1730_RAW(Reader):
             self._mmf.seek(seekSize, 1)
 
         self._mmf.seek(0, 0)
-        self._idx = 0
+        self._readIdx = -1
 
+    def _break_path(self, path):
+        """Takes a path request from pyrate and splits it into a dictionary"""
+        splitPath = path.split(":")
+
+        ret = {}
+        ret["variable"] = splitPath[-1]
+        if(len(splitPath) > 2):            
+            ret["board"] = int(splitPath[1].split("_")[-1])
+            if(len(splitPath) > 3):            
+                ret["ch"] = int(splitPath[2].split("_")[-1])
+        
+        return ret
+    
     def _get_waveform(self, ch):
         """Reads variable from the event and puts it in the transient store."""
         #If the channel is not in the event return an empty list
