@@ -60,7 +60,3 @@ Thumbs.db
 *.root
 *.xml
 *.html
-*.hdf5
-*.meta
-*.csv
-
