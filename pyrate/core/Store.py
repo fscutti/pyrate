@@ -108,7 +108,7 @@ class Store:
             if opt:
 
                 try:
-                    return not (self._objects[opt][name] == enums.Pyrate.NONE)
+                    return not (self._objects[opt][name] is enums.Pyrate.NONE)
 
                 except KeyError:
                     return False
@@ -118,7 +118,7 @@ class Store:
                 for opt in ["TRAN", "PERM", "READY", "WRITTEN"]:
                     
                     if name in self._objects[opt]:
-                        return not (self._objects[opt][name] == enums.Pyrate.NONE)
+                        return not (self._objects[opt][name] is enums.Pyrate.NONE)
 
                 return False
 
