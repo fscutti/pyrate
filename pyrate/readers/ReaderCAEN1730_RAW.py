@@ -164,8 +164,5 @@ class ReaderCAEN1730_RAW(Reader):
                     self._currentEventWaveforms[i].append(int.from_bytes(sample,"little"))
 
 
-    def break_path(self, name):
-        name.split(":")[]
-
 
 # EOF
