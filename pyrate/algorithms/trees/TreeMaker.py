@@ -60,13 +60,13 @@ class Branch:
         self.datatype = datatype
         self.vector = vector
         self.event_based = event_based
-        self.initialised = False
+        self.created = False
         self.linked = False
         if create_now:
-            self.initialise()
+            self.create()
 
-    # def initialise(self, data, type_override=None):
-    def initialise(self):
+    # def create(self, data, type_override=None):
+    def create(self):
         # Check if what's being passed in is iterable (stored in array)
         # self.vector = FN.iterable(data)
         # Automatic type getting - WIP
@@ -80,12 +80,12 @@ class Branch:
         else:
             self.data = array(_Type[self.datatype]["python"], [0])
             # self.data = np.zeros(1, dtype=self.nptype)
-        self.initialised = True
+        self.created = True
 
     def fill_branch(self, data):
-        if not self.initialised:
+        if not self.created:
             # Need to create all the branch machinery
-            self.initialise(data)
+            self.create(data)
 
         isiter = FN.iterable(data)
         if not isiter and self.vector == True:
@@ -122,7 +122,7 @@ class Branch:
 
 class Tree:
     """ Class to store tree information
-        Build your Tree structure first, then call initialise() to make the
+        Build your Tree structure first, then call create() to make the
         TTree structure accordingly
     """
     def __init__(self, name, outfile, path=None, branch_list=[], event=False, create_now=False):
@@ -130,14 +130,14 @@ class Tree:
         self.outfile = outfile
         self.path = path if path!=None else self.name
         self.TTree =  None
-        self.initialised = False
+        self.created = False
         self.event = event      # Type of TTree, to be updated with each event loop or not
         self.branches = {}
         if branch_list:
             for branch in branch_list:
                 self.add_branch(branch)
         if create_now:
-            self.initialise()
+            self.create()
 
     def add_branch(self, branch):
         """ Adds branch to the tree storage
@@ -146,24 +146,24 @@ class Tree:
             # Uh oh, branch already in branch list 
             sys.exit(f"Error: branch ({branch.name}) already stored in branch list of this Tree.\nPlease remove it first (or don't add it twice?)")
         self.branches[branch.name] = branch
-        if self.initialised:
+        if self.created:
             # TTree already created, so we better link this new branch
             if branch.linked:
                 # uh oh, branch already linked to a TTree
                 sys.exit(f"Error: branch ({branch.name}) already linked to a TTree")
             self.link_branch(branch)
 
-    def initialise(self):
+    def create(self):
         """ Actually makes the trees structure in the structure and adds all the
             branches into the tree. Typically called by the detector class
         """
         
         self.TTree = R.TTree(self.name, self.name)
         # self.TTree.SetMaxTreeSize((int(1 * MB)))
-        self.initialised = True
+        self.created = True
     
     def link_all_branches(self):
-        """ Links all the branches. Requires that the branches all be initialised
+        """ Links all the branches. Requires that the branches all be created
             properly
         """
         for branch_name in self.branches:
@@ -172,14 +172,14 @@ class Tree:
                 self.link_branch(branch)
     
     def link_branch(self, branch):
-        """ Links branch to the TTree. Requires TTree to be initialised
+        """ Links branch to the TTree. Requires TTree to be created
         """
         if not self.TTree:
-            self.initialise()
+            self.create()
         if branch.linked:
             sys.exit("Error: Branch already linked")
-        if not branch.initialised:
-            sys.exit(f"Error initialising Tree - branch '{branch.name}' hasn't been initialised yet. Fill it with some data or initialise it manually.")
+        if not branch.created:
+            sys.exit(f"Error initialising Tree - branch '{branch.name}' hasn't been created yet. Fill it with some data or create it manually.")
         if branch.vector:
             branch_instance = self.TTree.Branch(branch.name, self.branches[branch.name].data)
         else:
@@ -192,15 +192,15 @@ class Tree:
         """
         if branch_name not in self.branches:
             sys.exit(f"Error filling branch: '{branch_name}' not in Tree '{self.name}'")
-        if not self.branches[branch_name].initialised:
-            # Need to initialise the branch
-            self.branches[branch_name].initialise(data)
+        if not self.branches[branch_name].created:
+            # Need to create the branch
+            self.branches[branch_name].create(data)
         # Now we can check if the branch has been linked
         if not self.branches[branch_name].linked:
             self.link_branch(self.branches[branch_name])
         self.branches[branch_name].fill_branch(data)
     
-    def store(self):
+    def fill(self):
         """ Runs the Fill function on the TTree
             Clears the branch variables
         """
@@ -281,7 +281,7 @@ class TreeMaker(Algorithm):
                     trees[tree].branches[branch_name].fill_branch(value)
 
             # Save all the values into the Tree
-            trees[tree].store()
+            trees[tree].fill()
     
     def finalise(self, config):
         """ Fill in the single/run-based variables
@@ -295,7 +295,7 @@ class TreeMaker(Algorithm):
                     value = self.store.get(branch_name, "PERM")
                     trees[tree].branches[branch_name].fill_branch(value)
             # Save all the values into the Tree
-            trees[tree].store()
+            trees[tree].fill()
 
         # Write the objects to the file - this is the most important step
         self.store.get(f"{config['name']}:File").Write("", R.TObject.kOverwrite)
