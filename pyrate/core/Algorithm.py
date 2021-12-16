@@ -8,6 +8,7 @@ config['name'] is the name of the object you want to compute.
 """
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
+from pyrate.utils import enums
 
 
 class Algorithm:
@@ -22,19 +23,19 @@ class Algorithm:
         """Override this method to define algorithms. config is a dictionary.
         At this stage the method knows the current input.
         """
-        self.store.put(config["name"], "PYRATE:none", "TRAN")
+        self.store.put(config["name"], enums.Pyrate.NONE, "TRAN")
 
     def execute(self, config):
         """Override this method to define algorithms. config is a dictionary.
         At this stage the method knows the current input and current event.
         """
-        self.store.put(config["name"], "PYRATE:none", "TRAN")
+        self.store.put(config["name"], enums.Pyrate.NONE, "TRAN")
 
     def finalise(self, config):
         """Override this method to define algorithms. config is a dictionary.
         At this stage the method knows the current input.
         """
-        self.store.put(config["name"], "PYRATE:none", "TRAN")
+        self.store.put(config["name"], enums.Pyrate.NONE, "TRAN")
 
     def _prepare_input(self, config, state):
         """Prepares objects on the store before the execution of the state methods.
@@ -65,19 +66,19 @@ class Algorithm:
 
     def _initialise(self, config):
 
-        self.store.put(config["name"], "PYRATE:none", "TRAN")
+        self.store.put(config["name"], enums.Pyrate.NONE, "TRAN")
 
         self._prepare_input(config, "initialise")
 
     def _execute(self, config):
 
-        self.store.put(config["name"], "PYRATE:none", "TRAN")
+        self.store.put(config["name"], enums.Pyrate.NONE, "TRAN")
 
         self._prepare_input(config, "execute")
 
     def _finalise(self, config):
 
-        self.store.put(config["name"], "PYRATE:none", "TRAN")
+        self.store.put(config["name"], enums.Pyrate.NONE, "TRAN")
 
         self._prepare_input(config, "finalise")
 
