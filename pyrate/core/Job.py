@@ -330,7 +330,7 @@ class Job:
 
                         if not o in g_config:
 
-                            if self._is_required(o, prev_states, obj_conf):
+                            if o and self._is_required(o, prev_states, obj_conf):
 
                                 sys.exit(
                                     f"ERROR: {o} is required by {obj_name} for {s} but is not in the global configuration!"
