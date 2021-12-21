@@ -12,7 +12,7 @@ def get_items(s, no_duplicates=True):
     """Gets comma-separated items in a string as a list."""
     items = []
     if not s:
-        return [s]
+        return ['']
     for i in str(s).split(","):
         if not '"' in i:
             items.append(i.replace(" ", ""))
