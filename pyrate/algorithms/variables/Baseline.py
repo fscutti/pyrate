@@ -12,6 +12,11 @@
         execute:
             input: <waveform>
             output: SELF
+
+    Required parameters:
+        samples: The number of samples from the start to calculate the 
+                 baseline over.
+        waveform: The waveform object for which the baseline will be caluclated.
     
     Example config:
 
