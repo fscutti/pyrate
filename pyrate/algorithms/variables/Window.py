@@ -6,6 +6,8 @@
         Fixed mode:
             window: x1, x2 - two numbers separated by commas indicating the
                              start and stop of the window
+                    full - use the string 'full' or 'all' to set the window
+                           tuple to (None, None) i.e. the full waveform         
         Dynamic mode:
             pivot: An object with a single sample or time (will be rounded to 
                    the nearest integer)
@@ -61,11 +63,15 @@ class Window(Algorithm):
         if "window" in config["algorithm"]:
             window = get_items(config["algorithm"]["window"])
             # Try to make into numbers
-            try:
-                window = [int(i) for i in window]
-            except:
-                # ok we want to get the global window, nothing to do now
-                sys.exit(f"ERROR: in config, window passed in but values couldn't be parsed: {window}")
+            if window.lower() == "full" or window.lower() == "all":
+                # Want the full window, window object will be (None, None)
+                window = (None, None)
+            else:
+                try:
+                    window = [int(i) for i in window]
+                except:
+                    # ok we want to get the global window, nothing to do now
+                    sys.exit(f"ERROR: in config, window passed in but values couldn't be parsed: {window}")
             self.store.put(f"{config['name']}:window", window)
 
     def execute(self, config):
