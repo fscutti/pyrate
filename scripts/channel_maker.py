@@ -3,6 +3,75 @@
 # Generated script to be fed into pyrate
 # Mike Mews 2021
 
+""" This script can be used to generate a large config file with the desired 
+    channels by inputting a specially designed config script which makes use 
+    of the channel keys.
+    This script can take in any number of input configs and combine them into 
+    a single config file. Only objects using the special keys will be turned 
+    into channel versions of themselves
+
+    Usage: 
+        ./channel_maker.py -f input_configs.yaml -c c1 c2 c3 -o output_config.yaml
+    Example:
+        ./chaneel_maker.py -f config/chx_objects.yaml -c 0 1 2 -o ch_objects.yaml
+    
+    Valid channel keys: "CHX", "chx", "ch_x", "Channel_X"
+
+    Example object to be expanded into n versions with the key replaced by the 
+    channel number:
+
+    Charge_CHX:
+        algorithm:
+            name: Charge
+            impedance: 50
+            rate: 500e6
+        initialise:
+            output:
+        execute:
+            input: CorrectedWaveform_CHX, Window_CHX
+            output: SELF
+        waveform: CorrectedWaveform_CHX
+        window: Window_CHX
+
+    If an object needs to use a different set of channels to the rest of the
+    file use the 'channels' parameter in the first layer of the object/
+    Objects which contain a 'channels' parameter will be duplicated using the
+    specified list.
+    
+    'channels' can either be a list of channel numbers
+    channels: 0, 1, 2, 5
+    or the string 'global' to use the global setting.
+
+    Special example for complicated objects like TreeMaker where you only want
+    part of the internal structure to be expanded into channels. Here in the
+    TreeMaker example, only the trees will be expanded into channel version
+    Channel_X contains the 'channels' parameter.
+
+    TreeMaker:
+        algorithm:
+            name: TreeMaker
+        initialise:
+            output:
+        execute:
+            input: Baseline_CHX, CorrectedWaveform_CHX, Charge_CHX
+        finalise:
+            input: AverageWaveform_CHX
+        trees:
+            - Channel_X:
+                channels: global
+                event:
+                    vector: 
+                        double: CorrectedWaveform_CHX
+                    scalar:
+                        float: Baseline_CHX, Charge_CHX, PeakLocation_CHX, PromptDelayChargeRatio_CHX, 
+                                PulseStart_CHXCFDTime, MeanTime_CHX
+                single:
+                    vector:
+                        double: AverageWaveform_CHX
+
+"""
+
+
 import os
 import sys
 import yaml
