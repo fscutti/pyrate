@@ -33,7 +33,6 @@
         window: Window_CHX
 """
 
-import numpy as np
 from pyrate.core.Algorithm import Algorithm
 
 class Charge(Algorithm):
@@ -60,7 +59,7 @@ class Charge(Algorithm):
 
         waveform = self.store.get(config["waveform"])
         # Calcualte the actual charge over the window
-        Charge = np.sum(waveform[window[0]:window[1]]) * charge_constant
+        Charge = sum(waveform[window[0]:window[1]]) * charge_constant
         self.store.put(config["name"], Charge)
 
 # EOF
