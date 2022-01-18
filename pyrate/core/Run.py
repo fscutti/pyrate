@@ -64,6 +64,7 @@ class Run:
             Fore.WHITE,
             Fore.RESET,
         )
+        self.test_counter = 0
 
     def launch(self):
         """Implement input/output loop."""
@@ -260,7 +261,7 @@ class Run:
         # print(f"calling {obj_name} is target: ({is_target})")
 
         alg = None
-        
+
         # Assign the name attribute in the config dictionary here.
         # This might be done best in the Job class though...
         if target_name:
@@ -318,7 +319,11 @@ class Run:
                     state == "finalise" and store.check(t["name"], "WRITTEN")
                 ):
                     continue
-                new_inputs_vs_targets[i_name].append(dict(t))
+
+                if not FN.check_dict_in_list(new_inputs_vs_targets[i_name], t):
+
+                    new_inputs_vs_targets[i_name].append(dict(t))
+
         return new_inputs_vs_targets
 
     def update_store(self, obj_name, store):
