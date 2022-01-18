@@ -174,12 +174,19 @@ def grab(key, dictionary):
 def check_dict_in_list(list, dictionary):
     """Checks if a dictionary is found in a list of dictionaries."""
     for d in list:
-        for k, v in d.items():
 
-            if k in dictionary:
-                if dictionary[k] == v:
+        counter = 0
 
-                    return True
+        for k, v in dictionary.items():
+
+            if k in d:
+                if d[k] == v:
+
+                    counter += 1
+
+        if counter == len(dictionary):
+            return True
+
     return False
 
 

@@ -148,7 +148,7 @@ class Run:
         prefix = prefix_types[state]
 
         info = self.state.rjust(70, ".")
-
+        
         for i_name, targets in tqdm(
             inputs_vs_targets.items(),
             desc=f"{prefix}{info}",
@@ -309,20 +309,23 @@ class Run:
         """Updates the dictionary containing all the targets relative to an input."""
 
         new_inputs_vs_targets = dict.fromkeys(inputs_vs_targets.keys(), [])
-
+        
         for i_name, targets in inputs_vs_targets.items():
             for t in targets:
+                
+                if not ":"+i_name in t["name"] or ","+i_name in t["name"]:
+                    continue
+                
                 # if the next state will be "execute" and the target is READY then skip it in the target loop.
                 # if the next state will be "finalise" and the target is WRITTEN then skip it in the target loop.
                 if (state == "execute" and store.check(t["name"], "READY")) or (
                     state == "finalise" and store.check(t["name"], "WRITTEN")
                 ):
                     continue
-
+                
                 if not FN.check_dict_in_list(new_inputs_vs_targets[i_name], t):
-
-                    new_inputs_vs_targets[i_name].append(dict(t))
-
+                    new_inputs_vs_targets[i_name].append(t)
+        
         return new_inputs_vs_targets
 
     def update_store(self, obj_name, store):
