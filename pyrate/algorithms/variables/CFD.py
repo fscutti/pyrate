@@ -29,7 +29,7 @@
             output:
         execute:
             input: <Waveform object>
-            output: SEFL, SEFLCFDTime
+            output: SELF, SEFLCFDTime
     
     Example config:
 
