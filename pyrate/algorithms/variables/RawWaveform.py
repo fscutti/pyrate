@@ -50,9 +50,9 @@ class RawWaveform(Algorithm):
         # Temporary, needs fixing, not generalised for all possible group structures
         if groups[0] == '0':
             # Default, no group specified
-            reader = self.store.get("READER:name")
+            reader = self.store.get("INPUT:READER:name")
         else:
-            reader = self.store.get(f"READER:GROUP:name")
+            reader = self.store.get(f"INPUT:READER:GROUP:name")
         
         # Store the reader in a unique way to be used later (PERM store)
         self.store.put(f"{config['name']}:reader", reader)
