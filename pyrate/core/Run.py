@@ -18,6 +18,7 @@ from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
 from pyrate.utils import enums
 
+
 class Run:
     def __init__(self, name, iterable=(), **kwargs):
         self.__dict__.update(iterable, **kwargs)
@@ -87,10 +88,6 @@ class Run:
 
         all_inputs_vs_targets = self._out.get_inputs_vs_targets()
 
-        # sys.exit()
-
-        # self.modify_config()
-
         # -----------------------------------------------------------------------
         # Instanciate algorithms for all targets specified in the job options.
         # -----------------------------------------------------------------------
@@ -98,8 +95,11 @@ class Run:
         self.algorithms = {}
         for i_name, targets in all_inputs_vs_targets.items():
             for t in targets:
+
                 alg_name = self._config[t["object"]]["algorithm"]["name"]
-                self.add(alg_name, store)
+                obj_name = t["name"]
+
+                self.add(obj_name, alg_name, store)
 
         # -----------------------------------------------------------------------
         # Inputs will be initialised dynamically in the run function.
@@ -159,8 +159,6 @@ class Run:
             # if there are no targets for this state, skip all loops.
             if not targets:
                 continue
-
-            # if self.state in ["initialise", "execute"]:
 
             if not i_name in self.instanciated_inputs:
                 self.instanciated_inputs[i_name] = Input(
@@ -254,19 +252,26 @@ class Run:
 
             self._history["CURRENT TARGET"] = t["name"]
 
-            self._config[t["object"]]["name"] = t["name"]
+            self.call(t["object"], target_name=t["name"])
 
-            self.call(t["object"], is_target=t["name"])
-
-    def call(self, obj_name, is_target=""):
+    def call(self, obj_name, target_name=""):
         """Calls an algorithm."""
 
         # print(f"calling {obj_name} is target: ({is_target})")
-        alg = self.algorithms[self._config[obj_name]["algorithm"]["name"]]
-        entry = f"{obj_name}:{alg.name}:TARGET({is_target})"
 
-        if not is_target:
+        alg = None
+        
+        # Assign the name attribute in the config dictionary here.
+        # This might be done best in the Job class though...
+        if target_name:
+            self._config[obj_name]["name"] = target_name
+            alg = self.algorithms[target_name]
+
+        else:
             self._config[obj_name]["name"] = obj_name
+            alg = self.algorithms[obj_name]
+
+        entry = f"{obj_name}:{alg.name}:TARGET({target_name})"
 
         if entry in self._target_history:
 
@@ -286,24 +291,13 @@ class Run:
             # executing main algorithm state
             getattr(alg, self.state)(self._config[obj_name])
 
-            # guaranteeing output variables
-            """
-            if self.state in {"initialise", "finalise"}:
-
-                if not getattr(alg, "_check_output")(
-                    self._config[obj_name], self.state
-                ):
-                    sys.exit(
-                        f"ERROR: algorithm {alg.name} should put object {obj_name} on the store during the {self.state} state"
-                    )
-            """
-
-    def add(self, alg_name, store):
+    def add(self, obj_name, alg_name, store):
         """Adds instances of algorithms dynamically."""
-        if not alg_name in self.algorithms:
+
+        if not obj_name in self.algorithms:
             self.algorithms.update(
                 {
-                    alg_name: getattr(importlib.import_module(m), m.split(".")[-1])(
+                    obj_name: getattr(importlib.import_module(m), m.split(".")[-1])(
                         alg_name, store, self.logger
                     )
                     for m in sys.modules
@@ -337,10 +331,10 @@ class Run:
             alg_name = self._config[obj_name]["algorithm"]["name"]
 
             try:
-                alg_instance = self.algorithms[alg_name]
+                alg_instance = self.algorithms[obj_name]
 
             except KeyError:
-                self.add(alg_name, store)
+                self.add(obj_name, alg_name, store)
 
             self.call(obj_name)
             return
@@ -438,30 +432,6 @@ class Run:
             sys.exit(
                 f"ERROR: required input range not valid. emin:{emin} <= emax:{emax} <= {tot - 1}"
             )
-
-    """
-    def modify_config(self):
-        # Modify original object configuration according to requirements in the job configuration.
-        intersection = {}
-        for w_name, w in self._out.writers.items():
-            if hasattr(w, "w_targets"):
-                for wt in w.w_targets:
-                    l = wt.split(":")
-                    obj_name = l[0]
-
-                    o = FN.nested(l)[obj_name]
-                    c = self._config[obj_name]["algorithm"]
-                    i = FN.intersect(o, c)
-
-                    if obj_name not in intersection:
-                        intersection[obj_name] = {}
-
-                    intersection[obj_name] = FN.merge(intersection[obj_name], i)
-
-        for t in self._out.targets:
-            c = self._config[t]["algorithm"]
-            c.update(intersection[t])
-    """
 
 
 # EOF
