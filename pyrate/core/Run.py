@@ -64,7 +64,6 @@ class Run:
             Fore.WHITE,
             Fore.RESET,
         )
-        self.test_counter = 0
 
     def launch(self):
         """Implement input/output loop."""
