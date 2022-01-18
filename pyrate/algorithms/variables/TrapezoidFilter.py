@@ -1,35 +1,19 @@
-""" Calculates the CFD of a waveform.
-    From this it also calculates the CFD zero crossing point - i.e. the cfd time
-    Optionally, it can use a trapezoid filter, and then calculate the CFD of 
-    the trapezoid.
-    Outputs the full CFD to the store, and saves the CFDTime as:
-    "ObjectNameCFDTime"
-
-    Because of the gap and rise time of the trapezoid, the CFDTime will be
-    shifted by this amount. If using the trapezoid fiter this may need to be
-    applied manually
+""" A trapezoidal filter for waveforms.
 
     Required parameters:
-        delay: (int)   The amount the CFD algorithm will delay the input trace
-        scale: (float) The amount the CFD algorithm will scale the first trace 
-                       in the calculation.
-        cfd_threshold: (float) The minimum height the CFD must cross before a
-                               zero crossing point can be calculated
-    Optional parameters:
-        trap: (bool) Determines whether the trapezoid filter is used for the 
-                     CFD calculation
-        === the following are required if using trap ===
         rise: (int) The rise time of the trapezoid filter
         gap:  (int) The width of the top of the trapezoid filter
         rate: (float) The sample rate of the digitiser
         tau:  (float) The decay constant of the pulse
+
+    Optional parameters:
     
     Required states:
         initialise:
             output:
         execute:
             input: <Waveform object>
-            output: SEFL, SEFLCFDTime
+            output: SE
     
     Example config:
 
