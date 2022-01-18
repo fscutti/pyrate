@@ -13,7 +13,7 @@
             output:
         execute:
             input: <Waveform object>
-            output: SE
+            output: SELF
     
     Example config:
 
