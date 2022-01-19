@@ -119,7 +119,7 @@ class CFD(Algorithm):
             r = []
             trap = []
         cfd = []
-        cross_threhold = False
+        cross_threshold = False
         CFDTime = -999
         for i in range(length):
             if use_trap:
@@ -133,8 +133,8 @@ class CFD(Algorithm):
                 cfd.append(scale * self._v(trap, i) - self._v(trap, i-delay))
             else:
                 cfd.append(scale * self._v(waveform, i) - self._v(waveform, i-delay))
-            if not cross_threhold:
-                cross_threhold = cfd[i] > cfd_threshold
+            if not cross_threshold:
+                cross_threshold = cfd[i] > cfd_threshold
             elif CFDTime == -999:
                 # Ok, the threshold has been crossed
                 # (and we only want to calculate it once, but still want to get 
