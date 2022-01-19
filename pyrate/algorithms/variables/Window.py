@@ -91,10 +91,14 @@ class Window(Algorithm):
             # Ok, we're actually calculating it
             # Get the 'pivot' - e.g. the start of the pulse
             pivot = self.store.get(config["pivot"])
-            # The window is defined by a left and right buffer on the start
-            left = config["algorithm"]["left"]
-            right = config["algorithm"]["right"]
-            window = (int(round(pivot - left)), int(round(pivot + right)))
+            # Check the pivot isn't invalid
+            if pivot == -999 or pivot is None:
+                window = -999
+            else:
+                # The window is defined by a left and right buffer on the start
+                left = config["algorithm"]["left"]
+                right = config["algorithm"]["right"]
+                window = (int(round(pivot - left)), int(round(pivot + right)))
         
         self.store.put(config["name"], window)
 
