@@ -42,17 +42,21 @@ class MeanTime(Algorithm):
 
     def execute(self, config):
         waveform = self.store.get(config["waveform"])
-        window = self.store.get(config["window"])
         sample_period = 1/self.store.get(f"{config['name']}:sample_rate")
-        num = 0
-        denom = 0
-        for i in range(0, window[1]-window[0]):
-            num += waveform[i] * i
-            denom += waveform[i]
-        if denom == 0:
-            # print("WARNING: MeanTime denominator = 0, is your window correct?")
-            MeanTime = float("inf")
+        window = self.store.get(config["window"])
+        # check for invalid windows
+        if window == -999 or window is None:
+            MeanTime = -999
         else:
-            MeanTime = sample_period * num/denom
+            num = 0
+            denom = 0
+            for i in range(0, window[1]-window[0]):
+                num += waveform[i] * i
+                denom += waveform[i]
+            if denom == 0:
+                # print("WARNING: MeanTime denominator = 0, is your window correct?")
+                MeanTime = float("inf")
+            else:
+                MeanTime = sample_period * num/denom
         self.store.put(config["name"], MeanTime)
 # EOF
