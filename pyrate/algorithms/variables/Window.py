@@ -70,9 +70,15 @@ class Window(Algorithm):
                 try:
                     window = [int(i) for i in window]
                 except:
-                    # ok we want to get the global window, nothing to do now
+                    # Uh oh we couldn't find the window, but it was passed in...
                     sys.exit(f"ERROR: in config, window passed in but values couldn't be parsed: {window}")
             self.store.put(f"{config['name']}:window", window)
+        else:
+            # Better check the left and right parameters have been given
+            if "left" not in config["algorithm"]:
+                sys.exit(f"ERROR: in config, window missing left parameter")
+            if "right" not in config["algorithm"]:
+                sys.exit(f"ERROR: in config, window missing right parameter")
 
     def execute(self, config):
         """ Calcualates the window if it's variable, otherwise puts the config
