@@ -55,11 +55,16 @@ class Charge(Algorithm):
         """ Calculates the charge by summing over the waveform
         """
         window = self.store.get(config["window"])
-        charge_constant = self.store.get(f"{config['name']}:charge_constant")
+        # check for invalid windows
+        if window == -999 or window is None:
+            Charge = -999
+        else:
+            # good to go, let's get the charge constant
+            charge_constant = self.store.get(f"{config['name']}:charge_constant")
 
-        waveform = self.store.get(config["waveform"])
-        # Calcualte the actual charge over the window
-        Charge = sum(waveform[window[0]:window[1]]) * charge_constant
+            waveform = self.store.get(config["waveform"])
+            # Calcualte the actual charge over the window
+            Charge = sum(waveform[window[0]:window[1]]) * charge_constant
         self.store.put(config["name"], Charge)
 
 # EOF
