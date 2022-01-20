@@ -265,11 +265,9 @@ class Run:
         # Assign the name attribute in the config dictionary here.
         # This might be done best in the Job class though...
         if target_name:
-            # self._config[obj_name]["name"] = target_name
             alg = self.algorithms[target_name]
 
         else:
-            # self._config[obj_name]["name"] = obj_name
             alg = self.algorithms[obj_name]
 
         entry = f"{obj_name}:{alg.name}:TARGET({target_name})"
@@ -333,7 +331,10 @@ class Run:
         return new_inputs_vs_targets
 
     def update_store(self, obj_name, store):
-        """Updates value of object on the store."""
+        """Updates value of object on the store.
+        N.B. obj_name here is never the name of a target.
+        This method is never called for targets as they are called explicitly in the loop."""
+
         if not obj_name in self._config:
             self._in.read(obj_name)
             return
