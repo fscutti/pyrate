@@ -45,16 +45,16 @@ R.gROOT.SetBatch()
 class Make2DHistPlot(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
-    def initialise(self, config):
+    def initialise(self):
         """Prepares histograms.
         If not found in the input already it will create new ones."""
 
         i_name = self.store.get("INPUT:name")
 
-        for f_name, f_attr in config["folders"].items():
+        for f_name, f_attr in self.config["folders"].items():
             for v_name, v_attr in f_attr["variables"].items():
                 for r_name in self.make_regions_list(f_attr):
 
@@ -64,7 +64,7 @@ class Make2DHistPlot(Algorithm):
                     if "path" in f_attr:
                         path = f_attr["path"]
 
-                    target_dir = config["name"].replace(",", "_").replace(":", "_")
+                    target_dir = self.name.replace(",", "_").replace(":", "_")
                     path = os.path.join(target_dir, path)
 
                     h = self.store.copy("INPUT:" + os.path.join(path, h_name))
@@ -80,13 +80,13 @@ class Make2DHistPlot(Algorithm):
         # This would be the place to put the a config['name'] object on the READY
         # store, should this be ready for the finalise step.
         # ----------------------------------------------------------------------
-        self.store.put(config["name"], None)
+        # self.store.put(self.name, None)
 
-    def execute(self, config):
+    def execute(self):
         """Fills histograms."""
         i_name = self.store.get("INPUT:name")
 
-        for f_name, f_attr in config["folders"].items():
+        for f_name, f_attr in self.config["folders"].items():
             for v_name, v_attr in f_attr["variables"].items():
                 for r_name in self.make_regions_list(f_attr):
 
@@ -132,14 +132,14 @@ class Make2DHistPlot(Algorithm):
 
                             self.store.put(obj_counter, "done")
 
-    def finalise(self, config):
+    def finalise(self):
         """Makes the plot."""
 
         plot_collection = {}
 
-        inputs = ST.get_items(config["name"].split(":", -1)[-1])
+        inputs = ST.get_items(self.name.split(":", -1)[-1])
 
-        for f_name, f_attr in config["folders"].items():
+        for f_name, f_attr in self.config["folders"].items():
             for v_name, v_attr in f_attr["variables"].items():
                 for r_name in self.make_regions_list(f_attr):
 
@@ -153,7 +153,7 @@ class Make2DHistPlot(Algorithm):
                         if "path" in f_attr:
                             path = os.path.join(f_attr["path"], path)
 
-                        target_dir = config["name"].replace(",", "_").replace(":", "_")
+                        target_dir = self.name.replace(",", "_").replace(":", "_")
                         path = os.path.join(target_dir, path)
 
                         self.make_plots_dict(
@@ -210,7 +210,7 @@ class Make2DHistPlot(Algorithm):
                             )
 
                         if mode == "stack":
-                            l_entry = "stack:"+l_entry
+                            l_entry = "stack:" + l_entry
 
                         l.AddEntry(h, l_entry, "pl")
 
@@ -249,7 +249,7 @@ class Make2DHistPlot(Algorithm):
 
         # the True option is just a placeholder, this algorithm might need some
         # restructuring by putting the definition of the main object in the initialise function.
-        self.store.put(config["name"], canvas_collection, replace=True)
+        self.store.put(self.name, canvas_collection, replace=True)
 
     def get_var_dict(self, variable):
         """Build dictionary for variable attributes."""
@@ -268,7 +268,6 @@ class Make2DHistPlot(Algorithm):
             "color": None,
             "legend_entry": None,
         }
-
 
         if len(a) >= 9:
             d["color"] = a[8]

@@ -12,75 +12,57 @@ from pyrate.utils import enums
 
 
 class Algorithm:
-    __slots__ = ["name", "store", "logger"]
+    __slots__ = ["name", "config", "store", "logger"]
 
-    def __init__(self, name, store, logger):
+    def __init__(self, name, config, store, logger):
         self.name = name
+        self.config = config
         self.store = store
         self.logger = logger
 
-    def initialise(self, config):
+    def initialise(self):
         """Override this method to define algorithms. config is a dictionary.
         At this stage the method knows the current input.
         """
-        self.store.put(config["name"], enums.Pyrate.NONE, "TRAN")
+        self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
 
-    def execute(self, config):
+    def execute(self):
         """Override this method to define algorithms. config is a dictionary.
         At this stage the method knows the current input and current event.
         """
-        self.store.put(config["name"], enums.Pyrate.NONE, "TRAN")
+        self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
 
-    def finalise(self, config):
+    def finalise(self):
         """Override this method to define algorithms. config is a dictionary.
         At this stage the method knows the current input.
         """
-        self.store.put(config["name"], enums.Pyrate.NONE, "TRAN")
+        self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
 
-    def _prepare_input(self, config, state):
+    def _prepare_input(self, state):
         """Prepares objects on the store before the execution of the state methods.
         N.B.: config might not have a state and/or input fields defined. In this
         case, the KeyError exception is caught and the function simply returns.
         """
-        for o in config["dependency"][state]:
+        for o in self.config["dependency"][state]:
             self.store.get(o)
 
-    """
-    def _check_output(self, config, state):
-        #This function checks that the required output has been put on the store.
-        try:
-            objs = ST.get_items_fast(config[state]["output"])
+    def _initialise(self):
 
-        except KeyError:
-            return True
+        self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
 
-        for o in objs:
+        self._prepare_input("initialise")
 
-            o = o.replace("SELF", config["name"])
+    def _execute(self):
 
-            if not self.store.check(o):
-                return False
+        self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
 
-        return True
-    """
+        self._prepare_input("execute")
 
-    def _initialise(self, config):
+    def _finalise(self):
 
-        self.store.put(config["name"], enums.Pyrate.NONE, "TRAN")
+        self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
 
-        self._prepare_input(config, "initialise")
-
-    def _execute(self, config):
-
-        self.store.put(config["name"], enums.Pyrate.NONE, "TRAN")
-
-        self._prepare_input(config, "execute")
-
-    def _finalise(self, config):
-
-        self.store.put(config["name"], enums.Pyrate.NONE, "TRAN")
-
-        self._prepare_input(config, "finalise")
+        self._prepare_input("finalise")
 
 
 # EOF

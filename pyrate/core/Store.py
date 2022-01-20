@@ -33,18 +33,15 @@ class Store:
 
     def put(self, name, obj, opt=None, replace=False):
         """Objects should be put on the store only once!"""
-          
+
         if not opt:
             opt = self._default[self._run.state]
 
         if self.check(name, opt) and not replace:
-            self._run.logger.warning(
-                f"object {name} is already on the {opt} store."
-            )
+            self._run.logger.warning(f"object {name} is already on the {opt} store.")
             return
 
         self._objects[opt][name] = obj
-
 
     def get(self, name, opt=None):
         """try/except among objects."""
@@ -116,7 +113,7 @@ class Store:
             else:
 
                 for opt in ["TRAN", "PERM", "READY", "WRITTEN"]:
-                    
+
                     if name in self._objects[opt]:
                         return not (self._objects[opt][name] is enums.Pyrate.NONE)
 

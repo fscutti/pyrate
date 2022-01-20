@@ -9,12 +9,12 @@ from pyrate.core.Algorithm import Algorithm
 class Baseline(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
-    def execute(self, config):
+    def execute(self):
 
-        if config["algorithm"]["format"] == "WC":
+        if self.config["algorithm"]["format"] == "WC":
             # WaveCatcher input:
             # if self.store.get("EVENT:idx") == 0:
             #    DATA_SAMPLES = self.store.get("INPUT:DATA SAMPLES")
@@ -44,7 +44,7 @@ class Baseline(Algorithm):
             TimeCount = self.store.get("EVENT:CH9:TimeCount")
             RawWaveform = self.store.get("EVENT:CH9:RawWaveform")
 
-        elif config["algorithm"]["format"] == "WD":
+        elif self.config["algorithm"]["format"] == "WD":
 
             # WaveDump input:
             # if self.store.get("EVENT:idx") == 0:
@@ -128,7 +128,7 @@ class Baseline(Algorithm):
                 RawWaveform = self.store.get("EVENT:RawWaveform")
             """
 
-        elif config["algorithm"]["format"] == "ROOT":
+        elif self.config["algorithm"]["format"] == "ROOT":
             # ROOT input:
             # if self.store.get("EVENT:idx") == 0:
             #    self.store.get("EVENT:GROUP:ch0:RunMetadata:StartTime")
@@ -140,8 +140,8 @@ class Baseline(Algorithm):
             #    self.store.get("EVENT:GROUP:ch2:RunMetadata:StartTime")
             #    self.store.get("EVENT:GROUP:ch2:RunMetadata:StopTime")
 
-            #self.store.get("EVENT:GROUP:ch0:SmallMuon:EventData:TriggerTime")
-            #self.store.get("EVENT:GROUP:ch0:SmallMuon:EventData:TriggeredChannels")
+            # self.store.get("EVENT:GROUP:ch0:SmallMuon:EventData:TriggerTime")
+            # self.store.get("EVENT:GROUP:ch0:SmallMuon:EventData:TriggeredChannels")
 
             # self.store.get("EVENT:GROUP:ch1:SmallMuon:EventData:TriggerTime")
             # self.store.get("EVENT:GROUP:ch1:SmallMuon:EventData:TriggeredChannels")
@@ -149,9 +149,9 @@ class Baseline(Algorithm):
             # self.store.get("EVENT:GROUP:ch2:SmallMuon:EventData:TriggerTime")
             # self.store.get("EVENT:GROUP:ch2:SmallMuon:EventData:TriggeredChannels")
 
-            #w = self.store.get("EVENT:GROUP:ch0:SmallMuon:Channel_0:RawWaveform")
+            # w = self.store.get("EVENT:GROUP:ch0:SmallMuon:Channel_0:RawWaveform")
             # print(w.at(0))
-            #self.store.get("EVENT:GROUP:ch0:SmallMuon:Channel_0:Baseline")
+            # self.store.get("EVENT:GROUP:ch0:SmallMuon:Channel_0:Baseline")
             # idx = self.store.get("EVENT:idx")
             # self.store.put(f"{idx}", copy(w), "PERM")
 
@@ -164,9 +164,7 @@ class Baseline(Algorithm):
             e = self.store.get("EVENT:nT:edepScint")
             print(self.store.get("INPUT:name"))
 
-
-
-        elif config["algorithm"]["format"] == "pgSQL":
+        elif self.config["algorithm"]["format"] == "pgSQL":
             # var1 = self.store.get("INPUT:QUERY:SELECT eventrate FROM muonmonitoring ORDER BY time DESC LIMIT 3")
             # print(var1)
             var2 = self.store.get("EVENT:QUERY:muonmonitoring:4:eventrate")

@@ -13,7 +13,7 @@ def get_items(s, no_duplicates=True):
     items = []
 
     if not s:
-        return ['']
+        return [""]
 
     for i in str(s).split(","):
         if not '"' in i:
