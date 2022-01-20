@@ -46,16 +46,16 @@ R.gROOT.SetBatch()
 class Make1DHistPlot(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
-    def initialise(self, config):
+    def initialise(self):
         """Prepares histograms.
         If not found in the input already it will create new ones."""
 
         i_name = self.store.get("INPUT:name")
 
-        for f_name, f_attr in config["folders"].items():
+        for f_name, f_attr in self.config["folders"].items():
             for v_name, v_attr in f_attr["variables"].items():
                 for r_name in self.make_regions_list(f_attr):
 
@@ -65,12 +65,12 @@ class Make1DHistPlot(Algorithm):
                     if "path" in f_attr:
                         path = f_attr["path"]
 
-                    target_dir = config["name"].replace(",", "_").replace(":", "_")
+                    target_dir = self.name.replace(",", "_").replace(":", "_")
                     path = os.path.join(target_dir, path)
 
                     # WARNING: if the histogram is not present in the input, the value of
-                    # h is None. This operation is performed on the TRAN store as the 
-                    # input name changes in the loop. Later, if found, the histogram will 
+                    # h is None. This operation is performed on the TRAN store as the
+                    # input name changes in the loop. Later, if found, the histogram will
                     # need to be put on the PERM store including the name of the input
                     # it was created for.
                     h = self.store.copy("INPUT:" + os.path.join(path, h_name))
@@ -97,18 +97,18 @@ class Make1DHistPlot(Algorithm):
                     # includes the input name, as our final plot will be a stack
                     # potentially including histograms from different samples.
                     self.store.put(obj_name, h)
-                    
+
         # ----------------------------------------------------------------------
         # This would be the place to put the a config['name'] object on the READY
         # store, should this be ready for the finalise step.
         # ----------------------------------------------------------------------
-        self.store.put(config["name"], None)
+        # self.store.put(self.name, None)
 
-    def execute(self, config):
+    def execute(self):
         """Fills histograms."""
         i_name = self.store.get("INPUT:name")
 
-        for f_name, f_attr in config["folders"].items():
+        for f_name, f_attr in self.config["folders"].items():
             for v_name, v_attr in f_attr["variables"].items():
                 for r_name in self.make_regions_list(f_attr):
 
@@ -151,24 +151,22 @@ class Make1DHistPlot(Algorithm):
                         if region["r_weight"]:
 
                             variable = self.store.get(v_name)
-                            
-                            self.store.get(obj_name).Fill(
-                                variable, region["r_weight"]
-                            )
+
+                            self.store.get(obj_name).Fill(variable, region["r_weight"])
 
                             # Save the counter on the transient store with some value.
                             # Which value is arbitrary as the "check" method only checks for
                             # the presence of an object, not its value.
                             self.store.put(obj_counter, "done")
 
-    def finalise(self, config):
+    def finalise(self):
         """Makes the plot."""
 
         plot_collection = {}
 
-        inputs = ST.get_items(config["name"].split(":", -1)[-1])
+        inputs = ST.get_items(self.name.split(":", -1)[-1])
 
-        for f_name, f_attr in config["folders"].items():
+        for f_name, f_attr in self.config["folders"].items():
             for v_name, v_attr in f_attr["variables"].items():
                 for r_name in self.make_regions_list(f_attr):
 
@@ -182,7 +180,7 @@ class Make1DHistPlot(Algorithm):
                         if "path" in f_attr:
                             path = os.path.join(f_attr["path"], path)
 
-                        target_dir = config["name"].replace(",", "_").replace(":", "_")
+                        target_dir = self.name.replace(",", "_").replace(":", "_")
                         path = os.path.join(target_dir, path)
 
                         self.make_plots_dict(
@@ -195,7 +193,7 @@ class Make1DHistPlot(Algorithm):
                             f_attr,
                         )
 
-        #FN.pretty(plot_collection)
+        # FN.pretty(plot_collection)
 
         canvas_collection = {}
 
@@ -239,8 +237,8 @@ class Make1DHistPlot(Algorithm):
                             )
 
                         if mode == "stack":
-                            l_entry = "stack:"+l_entry
-                          
+                            l_entry = "stack:" + l_entry
+
                         l.AddEntry(h, l_entry, "pl")
 
                         if mode == "overlay":
@@ -277,10 +275,10 @@ class Make1DHistPlot(Algorithm):
                 c.Close()
 
         # FN.pretty(canvas_collection)
-        
+
         # the True option is just a placeholder, this algorithm might need some
         # restructuring by putting the definition of the main object in the initialise function.
-        self.store.put(config["name"], canvas_collection, replace=True)
+        self.store.put(self.name, canvas_collection, replace=True)
 
     def get_var_dict(self, variable):
         """Build dictionary for variable attributes."""

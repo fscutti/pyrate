@@ -148,7 +148,7 @@ class Run:
         prefix = prefix_types[state]
 
         info = self.state.rjust(70, ".")
-        
+
         for i_name, targets in tqdm(
             inputs_vs_targets.items(),
             desc=f"{prefix}{info}",
@@ -248,6 +248,7 @@ class Run:
         for t in targets:
 
             self._history[t["name"]] = []
+
             self._target_history = self._history[t["name"]]
 
             self._history["CURRENT TARGET"] = t["name"]
@@ -264,11 +265,11 @@ class Run:
         # Assign the name attribute in the config dictionary here.
         # This might be done best in the Job class though...
         if target_name:
-            self._config[obj_name]["name"] = target_name
+            # self._config[obj_name]["name"] = target_name
             alg = self.algorithms[target_name]
 
         else:
-            self._config[obj_name]["name"] = obj_name
+            # self._config[obj_name]["name"] = obj_name
             alg = self.algorithms[obj_name]
 
         entry = f"{obj_name}:{alg.name}:TARGET({target_name})"
@@ -286,19 +287,22 @@ class Run:
             self._target_history.append(entry)
 
             # preparing input variables
-            getattr(alg, "_" + self.state)(self._config[obj_name])
+            getattr(alg, f"_{self.state}")()
 
             # executing main algorithm state
-            getattr(alg, self.state)(self._config[obj_name])
+            getattr(alg, self.state)()
 
     def add(self, obj_name, alg_name, store):
-        """Adds instances of algorithms dynamically."""
+        """Adds instances of algorithms dynamically.
+        obj_name can be the name of a target."""
+
+        obj_config = self._config[obj_name.split(":", 1)[0]]
 
         if not obj_name in self.algorithms:
             self.algorithms.update(
                 {
                     obj_name: getattr(importlib.import_module(m), m.split(".")[-1])(
-                        alg_name, store, self.logger
+                        obj_name, obj_config, store, self.logger
                     )
                     for m in sys.modules
                     if alg_name == m.split(".")[-1]
@@ -309,23 +313,23 @@ class Run:
         """Updates the dictionary containing all the targets relative to an input."""
 
         new_inputs_vs_targets = dict.fromkeys(inputs_vs_targets.keys(), [])
-        
+
         for i_name, targets in inputs_vs_targets.items():
             for t in targets:
-                
-                if not ":"+i_name in t["name"] or ","+i_name in t["name"]:
+
+                if not ":" + i_name in t["name"] or "," + i_name in t["name"]:
                     continue
-                
+
                 # if the next state will be "execute" and the target is READY then skip it in the target loop.
                 # if the next state will be "finalise" and the target is WRITTEN then skip it in the target loop.
                 if (state == "execute" and store.check(t["name"], "READY")) or (
                     state == "finalise" and store.check(t["name"], "WRITTEN")
                 ):
                     continue
-                
+
                 if not FN.check_dict_in_list(new_inputs_vs_targets[i_name], t):
                     new_inputs_vs_targets[i_name].append(t)
-        
+
         return new_inputs_vs_targets
 
     def update_store(self, obj_name, store):
