@@ -25,7 +25,7 @@
         initialise:
             input:
         execute:
-            input:
+            input: PromptCharge_CHX
 """
 
 from pyrate.core.Algorithm import Algorithm
