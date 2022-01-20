@@ -38,6 +38,8 @@ class ChargeRatio(Algorithm):
         if q2 == 0:
             ChargeRatio = float("inf")
             # print("WARNING: Q2 = 0, ChargeRatio is infinite. Check integration windows")
+        elif q1 == -999 or q2 == -999 or q1 is None or q2 is None:
+            ChargeRatio = -999
         else:
             ChargeRatio = q1/q2
         self.store.put(config["name"], ChargeRatio)
