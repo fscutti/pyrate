@@ -75,7 +75,6 @@ class Make1DProfilePlot(Algorithm):
 
                     self.store.put(obj_name, g, "PERM")
 
-
     def execute(self):
         """Fills graphs."""
         i_name = self.store.get("INPUT:name")

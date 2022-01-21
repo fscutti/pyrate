@@ -318,9 +318,12 @@ class Run:
                 if not ":" + i_name in t["name"] or "," + i_name in t["name"]:
                     continue
 
-                # if the next state will be "finalise" and the target is WRITTEN then skip it in the target loop.
-                if (state == "finalise" and store.check(t["name"], "WRITTEN")):
-                    continue
+                # we cannot immediately "get" the target value, as this might trigger
+                # the update_store function and we don't want to do that at this stage.
+                if store.check(t["name"], "PERM"):
+
+                    if store.get(t["name"], "PERM") is enums.Pyrate.SKIP_NEXT_STATE:
+                        continue
 
                 if not FN.check_dict_in_list(new_inputs_vs_targets[i_name], t):
                     new_inputs_vs_targets[i_name].append(t)

@@ -76,7 +76,6 @@ class Make2DHistPlot(Algorithm):
 
                     self.store.put(obj_name, h)
 
-
     def execute(self):
         """Fills histograms."""
         i_name = self.store.get("INPUT:name")
