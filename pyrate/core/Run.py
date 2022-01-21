@@ -318,11 +318,8 @@ class Run:
                 if not ":" + i_name in t["name"] or "," + i_name in t["name"]:
                     continue
 
-                # if the next state will be "execute" and the target is READY then skip it in the target loop.
                 # if the next state will be "finalise" and the target is WRITTEN then skip it in the target loop.
-                if (state == "execute" and store.check(t["name"], "READY")) or (
-                    state == "finalise" and store.check(t["name"], "WRITTEN")
-                ):
+                if (state == "finalise" and store.check(t["name"], "WRITTEN")):
                     continue
 
                 if not FN.check_dict_in_list(new_inputs_vs_targets[i_name], t):

@@ -75,11 +75,6 @@ class Make1DProfilePlot(Algorithm):
 
                     self.store.put(obj_name, g, "PERM")
 
-        # ----------------------------------------------------------------------
-        # This would be the place to put the a config['name'] object on the READY
-        # store, should this be ready for the finalise step.
-        # ----------------------------------------------------------------------
-        # self.store.put(self.name, None)
 
     def execute(self):
         """Fills graphs."""
