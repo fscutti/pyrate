@@ -51,8 +51,8 @@ class MeanTime(Algorithm):
             num = 0
             denom = 0
             for i in range(0, window[1]-window[0]):
-                num += waveform[i] * i
-                denom += waveform[i]
+                num += waveform[window[0]+i] * i
+                denom += waveform[window[0]+i]
             if denom == 0:
                 # print("WARNING: MeanTime denominator = 0, is your window correct?")
                 MeanTime = float("inf")
