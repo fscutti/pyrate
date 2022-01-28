@@ -1,7 +1,8 @@
 """ Calculates the charge - the sum over a region of a waveform scaled by 
     physical PMT and circuit parameters.
     Sums the waveform over a passed in window object. The charge constant is
-    calculated from the impedance, and the sample rate.
+    calculated from the impedance, the sample rate, waveform units, and a 
+    conversion for the desired output charge units.
     Charge = 1/(Z * Sample rate) * Sum trace[i]
 
     Required parameters:
