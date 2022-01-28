@@ -78,7 +78,7 @@ class Charge(Algorithm):
             except:
                 sys.exit("ERROR: In algorithm Charge, waveform_unit could not be converted to a float.")
 
-        charge_constant = waveform_units * 1e12/(impedance * sample_rate) # in pC
+        charge_constant = waveform_units * charge_units/(impedance * sample_rate) # in pC
         self.store.put(f"{config['name']}:charge_constant", charge_constant)
 
     def execute(self, config):
