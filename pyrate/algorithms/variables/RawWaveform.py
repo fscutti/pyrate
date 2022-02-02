@@ -25,9 +25,9 @@
         waveform_md: EVENT:board_0:ch_x:waveform
         waveform_wd: EVENT:RawWaveform
 
-        Todo: Standardise the way the readers interpret the string. This will 
-              remove the need to check for the reader, and the need for mulitple
-              inputs strings.
+    Todo: Standardise the way the readers interpret the string. This will 
+            remove the need to check for the reader, and the need for mulitple
+            inputs strings.
 """
 
 import sys
