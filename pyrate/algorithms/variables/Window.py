@@ -81,8 +81,8 @@ class Window(Algorithm):
                 sys.exit(f"ERROR: in config, window missing right parameter")
 
     def execute(self, config):
-        """ Calcualates the window if it's variable, otherwise puts the config
-            one on the store
+        """ Calcualates the window if it's a variable, otherwise puts the window
+            from the config on the store.
         """
         if self.store.check(f"{config['name']}:window"):
             window = self.store.get(f"{config['name']}:window")
