@@ -13,7 +13,7 @@
     Usage: 
         ./channel_maker.py -f input_configs.yaml -c c1 c2 c3 -o output_config.yaml
     Example:
-        ./chaneel_maker.py -f config/chx_objects.yaml -c 0 1 2 -o ch_objects.yaml
+        ./channel_maker.py -f config/chx_objects.yaml -c 0 1 2 -o ch_objects.yaml
     
     Valid channel keys: "CHX", "chx", "ch_x", "Channel_X"
 
