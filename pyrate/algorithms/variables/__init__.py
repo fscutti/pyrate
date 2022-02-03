@@ -4,4 +4,4 @@ from pyrate.algorithms.variables.Waveform import Waveform
 from pyrate.algorithms.variables.Weight import Weight
 from pyrate.algorithms.variables.Trigger import Trigger
 from pyrate.algorithms.variables.TestingReader import TestingReader
-from pyrate.algorithms.variables.CFD import CFD
+from pyrate.algorithms.variables.TrapezoidFilter import TrapezoidFilter
