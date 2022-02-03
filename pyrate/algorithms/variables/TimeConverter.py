@@ -25,7 +25,7 @@
             output:
         execute:
             input: PulseStart_CHX
-        time: PulseStart_CHXCFDTime
+        time: PulseStart_CHXCFD
 """
 
 from pyrate.core.Algorithm import Algorithm
