@@ -19,7 +19,7 @@
             output:
         execute:
             input: (optional) Pivot object
-            output: SELF
+            output: (required only if no input provided)
 
     Example config:
     # With a fixed window
@@ -30,7 +30,7 @@
         initialise:
             output:
         execute:
-            output: SELF
+            output:
     
     # With a dynamic window
     PromptWindow_CHX:
@@ -42,7 +42,6 @@
             output:
         execute:
             input: <Pivot object>
-            output: SELF
         pivot: <Pivot object (variable)>
 """
 
