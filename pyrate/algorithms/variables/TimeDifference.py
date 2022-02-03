@@ -9,7 +9,6 @@
     Required states:
         execute:
             input: <Time 1 object>, <Time 2 object>
-            output: SELF
     
     Example config:
 
