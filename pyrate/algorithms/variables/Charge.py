@@ -23,7 +23,6 @@
             output:
         execute:
             input: <Waveform object>, <Window object>
-            output: SELF
     
     Example config:
     
@@ -38,7 +37,6 @@
             output:
         execute:
             input: CorrectedWaveform_CHX, Window_CHX
-            output: SELF
         waveform: CorrectedWaveform_CHX
         window: Window_CHX
 """
