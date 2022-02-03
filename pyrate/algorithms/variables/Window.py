@@ -99,6 +99,11 @@ class Window(Algorithm):
                 left = config["algorithm"]["left"]
                 right = config["algorithm"]["right"]
                 window = (int(round(pivot - left)), int(round(pivot + right)))
+                if window[0] < 0:
+                    # outside the range of the waveform, I've chosen to make 
+                    # it give a valid window even thought it failed, in case 
+                    # it is useful
+                    window = (0, window[0])
         
         self.store.put(config["name"], window)
 
