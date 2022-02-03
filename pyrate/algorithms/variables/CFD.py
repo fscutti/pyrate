@@ -68,7 +68,7 @@ class CFD(Algorithm):
         if "savecfd" in config["algorithms"]:
             savecfd = bool(config["algorithm"]["savecfd"])
         else:
-            savecfd = True
+            savecfd = False
 
         self.store.put(f"{config['name']}:delay", delay)
         self.store.put(f"{config['name']}:scale", scale)
@@ -111,6 +111,9 @@ class CFD(Algorithm):
                     # Now we've crosssed the 0 point
                     f = cfd[i-1] / (cfd[i-1] - cfd[i])
                     CFDTime = i-1+f
+                    if not savecfd:
+                        # We're done here :)
+                        break
         
         # if use_trap:
         #     # Store the trap
