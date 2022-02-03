@@ -11,7 +11,6 @@
     Required states:
         execute:
             input: <waveform>
-            output: SELF
 
     Required parameters:
         samples: The number of samples from the start to calculate the 
