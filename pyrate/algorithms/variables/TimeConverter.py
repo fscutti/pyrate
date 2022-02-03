@@ -13,7 +13,6 @@
             output:
         execute:
             input: <Time object>
-            output: SELF
     
     Example config:
 
