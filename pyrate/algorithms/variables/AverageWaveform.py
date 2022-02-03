@@ -11,7 +11,7 @@
         execute:
             input: <Waveform object>
         finalise:
-            output: SELF
+            output:
 
     Example config:
     
@@ -23,7 +23,7 @@
         execute:
             input: CorrectedWaveform_CHX
         finalise:
-            output: SELF
+            output:
         waveform: CorrectedWaveform_CHX
 
     Todo:
