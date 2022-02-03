@@ -18,7 +18,6 @@
             output:
         execute:
             input: <Waveform object>
-            output: SELF
     
     Example config:
 
@@ -32,7 +31,6 @@
             output:
         execute:
             input: CorrectedWaveform_CHX
-            output: SELF
         waveform: CorrectedWaveform_CHX
 
     Todo: Decide if we want to subtract the gap and rise time from the CFDTime
