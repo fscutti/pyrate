@@ -35,7 +35,7 @@ class Sum(Algorithm):
         super().__init__(name, store, logger)
 
     def execute(self, config):
-        """ Calculates the charge by summing over the waveform
+        """ Sum over the waveform
         """
         window = self.store.get(config["window"])
         # check for invalid windows
