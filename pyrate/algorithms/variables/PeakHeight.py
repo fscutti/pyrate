@@ -8,7 +8,6 @@
     Required states:
         execute:
             input: <Waveform object>
-            output: SELF
     
     Example config:
 
@@ -17,7 +16,6 @@
             name: PeakHeight
         execute:
             input: CorrectedWaveform_CHX
-            output: SELF
         waveform: CorrectedWaveform_CHX
 """
 
