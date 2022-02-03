@@ -1,6 +1,6 @@
 """ The charge constant is calculated from the impedance, the sample rate, 
     waveform units, and a  conversion for the desired output charge units.
-    Charge = 1/(Z * Sample rate) * Sum trace[i]
+    ChargeConstant = Waveform units * 1/(Z * Sample rate) * charge units
 
     Required parameters:
         impedance: (float) the impedance of the signal
