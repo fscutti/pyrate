@@ -14,7 +14,6 @@
             output:
         execute:
             input: <Waveform object>
-            output: SELF
     
     Example config:
 
@@ -30,7 +29,6 @@
             output:
         execute:
             input: CorrectedWaveform_CHX
-            output: SELF
         waveform: CorrectedWaveform_CHX
 
 """
