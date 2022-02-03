@@ -10,7 +10,6 @@
     Required states:
         execute:
             input: <Charge object 1>, <Charge object 2>
-            output: SELF
     
     Example config:
     PromptDelayChargeRatio_CHX:
