@@ -8,7 +8,6 @@
             output:
         execute:
             input: <Waveform string>
-            output: SELF
     
     Example config:
     
@@ -20,7 +19,6 @@
         execute:
             input: EVENT:board_0:ch_x:waveform, 
                     EVENT:board_0:raw_waveform_ch_x, EVENT:RawWaveform
-            output: SELF
         waveform_bt: EVENT:board_0:raw_waveform_ch_x
         waveform_md: EVENT:board_0:ch_x:waveform
         waveform_wd: EVENT:RawWaveform
