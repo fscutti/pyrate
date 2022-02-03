@@ -19,7 +19,7 @@
         execute:
             input: <Waveform object>
     
-    Example config:
+    Example configs:
 
     CFD_CHX:
         algorithm:
@@ -32,6 +32,19 @@
         execute:
             input: CorrectedWaveform_CHX
         waveform: CorrectedWaveform_CHX
+    
+    CFD_CHX:
+        algorithm:
+            name: CFD
+            delay: 5
+            scale: 1
+            cfd_threshold: 10
+            savecfd: True
+        initialise:
+            output:
+        execute:
+            input: TrapezoidWaveform_CHX
+        waveform: TrapezoidWaveform_CHX
 
     Todo: Decide if we want to subtract the gap and rise time from the CFDTime
           in trapezoid mode.
