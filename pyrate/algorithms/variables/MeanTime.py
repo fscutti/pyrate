@@ -12,7 +12,6 @@
             output:
         execute:
             input: <Waveform object>, <Window object>
-            output: SELF
     
     Example config:
 
