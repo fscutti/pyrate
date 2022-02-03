@@ -16,7 +16,7 @@
     
     Sum_CHX:
         algorithm:
-            name: Charge
+            name: Sum
         initialise:
             output:
         execute:
