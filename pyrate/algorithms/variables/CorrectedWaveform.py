@@ -3,7 +3,7 @@
     This takes in the raw waveform as input, but also the polarity of 
     the raw waveform as well as the baseline calculated by the baseline algorithm.
     The polarity is the only user defined input.
-    Multiplies physcial waveform by the polarity to correct it, 
+    Multiplies the waveform by the polarity to correct it, 
     after having subtracted the baseline.
 
     Required parameters:
@@ -16,6 +16,9 @@
         In main:
             baseline: A Baseline object
             waveform: A Waveform object
+    
+    Optional parameter:
+        units: (string)/(float) V, mV, uV, or float for the units conversion
 
     Requires states:
         initialise:
