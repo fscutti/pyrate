@@ -3,6 +3,7 @@ N.B.: Inheriting objects reading individual files should only reimplement the fu
 which are not fully defined, i.e. those containing the 'pass' instruction.
 """
 
+
 class Reader:
     __slots__ = ["name", "store", "logger", "is_loaded", "_idx", "_n_events"]
 
@@ -76,5 +77,6 @@ class Reader:
     def set_split_event(self):
         """Constructs idx conditions to handle event in segments."""
         pass
+
 
 # EOF
