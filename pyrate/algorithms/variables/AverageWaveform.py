@@ -41,10 +41,10 @@ class AverageWaveform(Algorithm):
     """
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
-    def initialise(self, config):
+    def initialise(self):
         """ Create entry for the cummulative waveform structure
         """
         # Todo: replace this pile of code with a simple recordlength getter 
@@ -70,27 +70,27 @@ class AverageWaveform(Algorithm):
         
         # nevents = 1 + self.store.get("INPUT:config")["eslices"]["emax"] - self.store.get("INPUT:config")["eslices"]["emin"]
         nevents = 0
-        self.store.put(f"{config['name']}:nevents", nevents)
-        self.store.put(f"{config['name']}:cum_waveform", np.zeros(RecordLength))
+        self.store.put(f"{self.name}:nevents", nevents)
+        self.store.put(f"{self.name}:cum_waveform", np.zeros(RecordLength))
 
-    def execute(self, config):
+    def execute(self):
         """ Calculates the baseline corrected waveform
         """
-        nevents = self.store.get(f"{config['name']}:nevents", "PERM")
-        waveform = self.store.get(config["waveform"]) # Because pyrate broke
-        cum_waveform = self.store.get(f"{config['name']}:cum_waveform")
+        nevents = self.store.get(f"{self.name}:nevents", "PERM")
+        waveform = self.store.get(self.config["waveform"]) # Because pyrate broke
+        cum_waveform = self.store.get(f"{self.name}:cum_waveform")
         cum_waveform += waveform
         # If you dont trust emax - emin
-        nevents = self.store.get(f"{config['name']}:nevents") + 1
+        nevents = self.store.get(f"{self.name}:nevents") + 1
         # replace=True properly updates the object in the store. "PERM" required here.
-        self.store.put(f"{config['name']}:nevents", nevents, "PERM", replace=True)
-        self.store.put(f"{config['name']}:cum_waveform", cum_waveform, "PERM", replace=True)
+        self.store.put(f"{self.name}:nevents", nevents, "PERM", replace=True)
+        self.store.put(f"{self.name}:cum_waveform", cum_waveform, "PERM", replace=True)
 
-    def finalise(self, config):
+    def finalise(self):
         """ Divides cum_waveform by number of events
         """
-        cum_waveform = self.store.get(f"{config['name']}:cum_waveform")
-        nevents = self.store.get(f"{config['name']}:nevents")
+        cum_waveform = self.store.get(f"{self.name}:cum_waveform")
+        nevents = self.store.get(f"{self.name}:nevents")
         AverageWaveform = cum_waveform / nevents
-        self.store.put(config["name"], AverageWaveform)
+        self.store.put(self.name, AverageWaveform)
 # EOF
