@@ -39,21 +39,21 @@ class Calculator(Algorithm):
         "result"
         ]
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
         self.opPrecedence={"(":-1,"+":2,"-":2,"*":3,"/":3}
 
-    def initialise(self, config):
-        self.eqnStr = config["equation"]
-        self.variables=config["variables"]
+    def initialise(self):
+        self.eqnStr = self.config["equation"]
+        self.variables = self.config["variables"]
         self.ShuntingYard()
                 
-    def execute(self, config):
+    def execute(self):
         """ Calculates the ratio of the two input charges
         """
         self.calc()
         if(len(self.result) == 1):
-            self.store.put(config["name"], float(self.result[0]))
+            self.store.put(self.name, float(self.result[0]))
 
 #-------------------------------------------------------------------
     def Arithmetic(self, op, varL, varR):
