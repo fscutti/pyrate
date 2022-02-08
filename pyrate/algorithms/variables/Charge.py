@@ -50,16 +50,16 @@ q_units = {"C":1.0, "mC":1e3, "uC":1e6, "nC":1e9, "pC":1e12, "fC":1e15}
 class Charge(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
     
-    def initialise(self, config):
+    def initialise(self):
         """ Prepare the constant for calculating charge
         """
         # Deal with charge constants
-        impedance = config["algorithm"]["impedance"]
-        sample_rate = float(config["algorithm"]["rate"])
-        charge_units = config["algorithm"]["unit"]
+        impedance = self.config["algorithm"]["impedance"]
+        sample_rate = float(self.config["algorithm"]["rate"])
+        charge_units = self.config["algorithm"]["unit"]
         if charge_units in q_units:
             charge_units = q_units[charge_units]
         else:
@@ -68,7 +68,7 @@ class Charge(Algorithm):
             except:
                 sys.exit("ERROR: In algorithm Charge, unit parameter could not be converted to a float.")
         
-        waveform_units = config["algorithm"]["waveform_unit"]
+        waveform_units = self.config["algorithm"]["waveform_unit"]
         if waveform_units in wf_units:
             waveform_units = wf_units[waveform_units]
         else:
@@ -78,22 +78,22 @@ class Charge(Algorithm):
                 sys.exit("ERROR: In algorithm Charge, waveform_unit could not be converted to a float.")
 
         charge_constant = waveform_units * charge_units/(impedance * sample_rate)
-        self.store.put(f"{config['name']}:charge_constant", charge_constant)
+        self.store.put(f"{self.name}:charge_constant", charge_constant)
 
-    def execute(self, config):
+    def execute(self):
         """ Calculates the charge by summing over the waveform
         """
-        window = self.store.get(config["window"])
+        window = self.store.get(self.config["window"])
         # check for invalid windows
         if window == -999 or window is None:
             Charge = -999
         else:
             # good to go, let's get the charge constant
-            charge_constant = self.store.get(f"{config['name']}:charge_constant")
+            charge_constant = self.store.get(f"{self.name}:charge_constant")
 
-            waveform = self.store.get(config["waveform"])
+            waveform = self.store.get(self.config["waveform"])
             # Calcualte the actual charge over the window
             Charge = sum(waveform[window[0]:window[1]]) * charge_constant
-        self.store.put(config["name"], Charge)
+        self.store.put(self.name, Charge)
 
 # EOF
