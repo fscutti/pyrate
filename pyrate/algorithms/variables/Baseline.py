@@ -36,18 +36,18 @@ import sys
 class Baseline(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
-    def execute(self, config):
+    def execute(self):
         """ Calculates the baseline from the first n samples of the waveform
         """
-        waveform = self.store.get(config["waveform"])
-        if "samples" not in config["algorithm"]:
+        waveform = self.store.get(self.config["waveform"])
+        if "samples" not in self.config["algorithm"]:
             sys.exit("ERROR in Baseline, 'samples' not found in the config")
-        nsamples = config["algorithm"]["samples"]
+        nsamples = self.config["algorithm"]["samples"]
         # Get the baseline.
         Baseline = sum(waveform[:nsamples])/nsamples
-        self.store.put(config["name"], Baseline)
+        self.store.put(self.name, Baseline)
 
 # EOF
