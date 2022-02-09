@@ -26,14 +26,14 @@ from pyrate.core.Algorithm import Algorithm
 class ChargeRatio(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
-    def execute(self, config):
+    def execute(self):
         """ Calculates the ratio of the two input charges
         """
-        q1 = self.store.get(config["charge1"])
-        q2 = self.store.get(config["charge2"])
+        q1 = self.store.get(self.config["charge1"])
+        q2 = self.store.get(self.config["charge2"])
         if q2 == 0:
             ChargeRatio = float("inf")
             # print("WARNING: Q2 = 0, ChargeRatio is infinite. Check integration windows")
@@ -41,6 +41,6 @@ class ChargeRatio(Algorithm):
             ChargeRatio = -999
         else:
             ChargeRatio = q1/q2
-        self.store.put(config["name"], ChargeRatio)
+        self.store.put(self.name, ChargeRatio)
 
 # EOF
