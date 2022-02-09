@@ -32,7 +32,7 @@ from pyrate.core.Algorithm import Algorithm
 class MeanTime(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, config store, logger):
+    def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
     def initialise(self):
