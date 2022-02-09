@@ -32,17 +32,17 @@ from pyrate.core.Algorithm import Algorithm
 class MeanTime(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config store, logger):
+        super().__init__(name, config, store, logger)
 
-    def initialise(self, config):
-        sample_rate = float(config["algorithm"]["rate"])
-        self.store.put(f"{config['name']}:sample_rate", sample_rate)
+    def initialise(self):
+        sample_rate = float(self.config["algorithm"]["rate"])
+        self.store.put(f"{self.name}:sample_rate", sample_rate)
 
-    def execute(self, config):
-        waveform = self.store.get(config["waveform"])
-        sample_period = 1/self.store.get(f"{config['name']}:sample_rate")
-        window = self.store.get(config["window"])
+    def execute(self):
+        waveform = self.store.get(self.config["waveform"])
+        sample_period = 1/self.store.get(f"{self.name}:sample_rate")
+        window = self.store.get(self.config["window"])
         # check for invalid windows
         if window == -999 or window is None:
             MeanTime = -999
@@ -57,5 +57,5 @@ class MeanTime(Algorithm):
                 MeanTime = float("inf")
             else:
                 MeanTime = sample_period * num/denom
-        self.store.put(config["name"], MeanTime)
+        self.store.put(self.name, MeanTime)
 # EOF
