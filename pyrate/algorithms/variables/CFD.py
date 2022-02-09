@@ -55,44 +55,44 @@ from pyrate.core.Algorithm import Algorithm
 class CFD(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
     
-    def initialise(self, config):
+    def initialise(self):
         """ Set up the CFD and trapezoid parameters
         """
         # CFD parameters
-        delay = int(config["algorithm"]["delay"])
-        scale = int(config["algorithm"]["scale"])
-        cfd_threshold = float(config["algorithm"]["cfd_threshold"])
-        if "savecfd" in config["algorithms"]:
-            savecfd = bool(config["algorithm"]["savecfd"])
+        delay = int(self.config["algorithm"]["delay"])
+        scale = int(self.config["algorithm"]["scale"])
+        cfd_threshold = float(self.config["algorithm"]["cfd_threshold"])
+        if "savecfd" in self.config["algorithms"]:
+            savecfd = bool(self.config["algorithm"]["savecfd"])
         else:
             savecfd = False
 
-        self.store.put(f"{config['name']}:delay", delay)
-        self.store.put(f"{config['name']}:scale", scale)
-        self.store.put(f"{config['name']}:cfd_threshold", cfd_threshold)
-        self.store.put(f"{config['name']}:savecfd", savecfd)
+        self.store.put(f"{self.name}:delay", delay)
+        self.store.put(f"{self.name}:scale", scale)
+        self.store.put(f"{self.name}:cfd_threshold", cfd_threshold)
+        self.store.put(f"{self.name}:savecfd", savecfd)
 
 
-    def execute(self, config):
+    def execute(self):
         """ Caclulates the waveform CFD
         """
         # Get the parameters and mode
-        delay = self.store.get(f"{config['name']}:delay")
-        scale = self.store.get(f"{config['name']}:scale")
-        cfd_threshold = self.store.get(f"{config['name']}:cfd_threshold")
-        savecfd = self.store.get(f"{config['name']}:savecffd")
+        delay = self.store.get(f"{self.name}:delay")
+        scale = self.store.get(f"{self.name}:scale")
+        cfd_threshold = self.store.get(f"{self.name}:cfd_threshold")
+        savecfd = self.store.get(f"{self.name}:savecffd")
 
         # Get the actual waveform, finally.
-        waveform = self.store.get(config["waveform"])
-        waveform = self.store.get(config["waveform"])
-        if self.store.check(f"{config['name']}:length"):
-            length = self.store.get(f"{config['name']}:length")
+        waveform = self.store.get(self.config["waveform"])
+        waveform = self.store.get(self.config["waveform"])
+        if self.store.check(f"{self.name}:length"):
+            length = self.store.get(f"{self.name}:length")
         else:
             length = len(waveform)
-            self.store.put(f"{config['name']}:length", length, "PERM")
+            self.store.put(f"{self.name}:length", length, "PERM")
 
         # Parameters and formula from Digital techniques for real-time pulse shaping in radiation measurements
         # https://doi.org/10.1016/0168-9002(94)91652-7
@@ -117,11 +117,11 @@ class CFD(Algorithm):
         
         # if use_trap:
         #     # Store the trap
-        #     self.store.put(f"{config['name']}:trapezoid", trap)
+        #     self.store.put(f"{self.name}:trapezoid", trap)
         #     # CFDTime -= (gap+rise)
-        self.store.put(config["name"], CFDTime)
+        self.store.put(self.name, CFDTime)
         if savecfd:
-            self.store.put(f"{config['name']}Trace", cfd)
+            self.store.put(f"{self.name}Trace", cfd)
 
     def _v(self, waveform, i):
         """ returns the i'th element of a waveform or 0 if out of range
