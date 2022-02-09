@@ -24,16 +24,16 @@ from pyrate.core.Algorithm import Algorithm
 class PeakLocation(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
-    def execute(self, config):
+    def execute(self):
         """ Caclulates the pulse time based on the mode chosen
         """
-        waveform = self.store.get(config["waveform"])
+        waveform = self.store.get(self.config["waveform"])
         # Peak location is the highest point on the waveform
         # PeakLocation = np.argmax(waveform)
         PeakLocation = max(range(len(waveform)), key=waveform.__getitem__)
-        self.store.put(config["name"], PeakLocation)
+        self.store.put(self.name, PeakLocation)
 
 # EOF
