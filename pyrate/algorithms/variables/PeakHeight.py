@@ -24,14 +24,14 @@ from pyrate.core.Algorithm import Algorithm
 class PeakHeight(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
-    def execute(self, config):
+    def execute(self):
         """ Caclulates the waveform peak height (maximum)
         """
-        waveform = self.store.get(config["waveform"])
+        waveform = self.store.get(self.config["waveform"])
         PeakHeight = max(waveform)
-        self.store.put(config['name'], PeakHeight)
+        self.store.put(self.name, PeakHeight)
 
 # EOF
