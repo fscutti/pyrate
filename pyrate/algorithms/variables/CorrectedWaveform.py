@@ -52,10 +52,10 @@ wf_units = {"V":1.0, "mV":1e3, "uV":1e6}
 class CorrectedWaveform(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
-    def initialise(self, config):
+    def initialise(self):
         """ Prepare the input waveform scaling and polarity
         """
         # Again we need to check the reader as it determines what kind of input
@@ -71,8 +71,8 @@ class CorrectedWaveform(Algorithm):
             reader = self.store.get(f"INPUT:READER:GROUP:name")
         
         # Convert to physical units
-        if "units" in config["algorithm"]:
-            units = config["algorithm"]["units"]
+        if "units" in self.config["algorithm"]:
+            units = self.config["algorithm"]["units"]
         else:
             units = "mV"
         if units in wf_units:
@@ -85,8 +85,8 @@ class CorrectedWaveform(Algorithm):
 
         # Handle the converison from ADC is appropriate
         if reader != "ReaderWaveCatcherMMAP":
-            Vpp = float(config["algorithm"]["vpp"])
-            BitRange = int(config["algorithm"]["adcrange"])
+            Vpp = float(self.config["algorithm"]["vpp"])
+            BitRange = int(self.config["algorithm"]["adcrange"])
 
             # Conversion factor between ADC and mV
             conversion = (Vpp / BitRange) * units
@@ -96,8 +96,8 @@ class CorrectedWaveform(Algorithm):
             conversion = units     # just convert to mV
 
         # Sets polarity constant based on user input.
-        if "polarity" in config["algorithm"]:
-            polarity = config["algorithm"]["polarity"]
+        if "polarity" in self.config["algorithm"]:
+            polarity = self.config["algorithm"]["polarity"]
         else:
             sys.exit("ERROR in CorrectedWaveform config, please provide a polarity")
         if "neg" in polarity.lower():
@@ -110,25 +110,25 @@ class CorrectedWaveform(Algorithm):
             except:
                 sys.exit(f"Error: invalid polarity {polarity}")
 
-        self.store.put(f"{config['name']}:polarity", polarity)
-        self.store.put(f"{config['name']}:reader", reader)     
-        self.store.put(f"{config['name']}:conversion", conversion)
+        self.store.put(f"{self.name}:polarity", polarity)
+        self.store.put(f"{self.name}:reader", reader)     
+        self.store.put(f"{self.name}:conversion", conversion)
 
-    def execute(self, config):
+    def execute(self):
         """ Calculates the baseline corrected waveform
         """
-        reader = self.store.get(f"{config['name']}:reader")
+        reader = self.store.get(f"{self.name}:reader")
         if reader == "ReaderWaveCatcherMMAP":
-            waveform = self.store.get(config["wc_waveform"])
+            waveform = self.store.get(self.config["wc_waveform"])
         else:
-            waveform = self.store.get(config["raw_waveform"])
-        waveform = self.store.get(config["waveform"])
-        conversion = self.store.get(f"{config['name']}:conversion")
-        polarity = self.store.get(f"{config['name']}:polarity")
-        baseline = self.store.get(config["baseline"])
+            waveform = self.store.get(self.config["raw_waveform"])
+        waveform = self.store.get(self.config["waveform"])
+        conversion = self.store.get(f"{self.name}:conversion")
+        polarity = self.store.get(f"{self.name}:polarity")
+        baseline = self.store.get(self.config["baseline"])
         
         # Flip the waveform if needed, and subtract baseline
         corrected_waveform = conversion * polarity * (waveform - baseline)
-        self.store.put(config["name"], corrected_waveform)
+        self.store.put(self.name, corrected_waveform)
 
 # EOF
