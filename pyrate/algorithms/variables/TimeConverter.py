@@ -37,29 +37,29 @@ seconds_to_unit = {"s": 1.0, "ms":1e3, "us":1e6, "ns":1e9, "ps":1e12}
 class TimeConverter(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
     
-    def initialise(self, config):
+    def initialise(self):
         """ Set up time conversion parameters
         """
         # Time units
-        time_unit = config["algorithm"]["unit"]
+        time_unit = self.config["algorithm"]["unit"]
         if type(time_unit) == str:
             unit = seconds_to_unit[time_unit]
         else:
             unit = float(time_unit)
-        sample_rate = float(config["algorithm"]["rate"])
+        sample_rate = float(self.config["algorithm"]["rate"])
 
         time_conversion = unit/sample_rate
-        self.store.put(f"{config['name']}:time_conversion", time_conversion)
+        self.store.put(f"{self.name}:time_conversion", time_conversion)
 
-    def execute(self, config):
+    def execute(self):
         """ Converts the sample time to physical units
         """
-        time_conversion = self.store.get(f"{config['name']}:time_conversion")
-        sample_time = self.store.get(config["time"])
+        time_conversion = self.store.get(f"{self.name}:time_conversion")
+        sample_time = self.store.get(self.config["time"])
         real_time = sample_time * time_conversion
-        self.store.put(config['name'], real_time)
+        self.store.put(self.name, real_time)
 
 # EOF
