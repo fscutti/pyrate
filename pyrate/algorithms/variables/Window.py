@@ -52,15 +52,15 @@ from pyrate.utils.strings import get_items
 class Window(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
     
-    def initialise(self, config):
+    def initialise(self):
         """ Prepare for the calculation
         """
         # Check we haven't been given a fixed window
-        if "window" in config["algorithm"]:
-            window = get_items(config["algorithm"]["window"])
+        if "window" in self.config["algorithm"]:
+            window = get_items(self.config["algorithm"]["window"])
             # Try to make into numbers
             if window.lower() == "full" or window.lower() == "all":
                 # Want the full window, window object will be (None, None)
@@ -71,32 +71,32 @@ class Window(Algorithm):
                 except:
                     # Uh oh we couldn't find the window, but it was passed in...
                     sys.exit(f"ERROR: in config, window passed in but values couldn't be parsed: {window}")
-            self.store.put(f"{config['name']}:window", window)
+            self.store.put(f"{self.name}:window", window)
         else:
             # Better check the left and right parameters have been given
-            if "left" not in config["algorithm"]:
+            if "left" not in self.config["algorithm"]:
                 sys.exit(f"ERROR: in config, window missing left parameter")
-            if "right" not in config["algorithm"]:
+            if "right" not in self.config["algorithm"]:
                 sys.exit(f"ERROR: in config, window missing right parameter")
 
-    def execute(self, config):
+    def execute(self):
         """ Calcualates the window if it's a variable, otherwise puts the window
             from the config on the store.
         """
-        if self.store.check(f"{config['name']}:window"):
-            window = self.store.get(f"{config['name']}:window")
+        if self.store.check(f"{self.name}:window"):
+            window = self.store.get(f"{self.name}:window")
 
         else:
             # Ok, we're actually calculating it
             # Get the 'pivot' - e.g. the start of the pulse
-            pivot = self.store.get(config["pivot"])
+            pivot = self.store.get(self.config["pivot"])
             # Check the pivot isn't invalid
             if pivot == -999 or pivot is None:
                 window = -999
             else:
                 # The window is defined by a left and right buffer on the start
-                left = config["algorithm"]["left"]
-                right = config["algorithm"]["right"]
+                left = self.config["algorithm"]["left"]
+                right = self.config["algorithm"]["right"]
                 window = (int(round(pivot - left)), int(round(pivot + right)))
                 if window[0] < 0:
                     # outside the range of the waveform, I've chosen to make 
@@ -104,6 +104,6 @@ class Window(Algorithm):
                     # it is useful
                     window = (0, window[0])
         
-        self.store.put(config["name"], window)
+        self.store.put(self.name, window)
 
 # EOF
