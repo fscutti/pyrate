@@ -26,15 +26,15 @@ from pyrate.core.Algorithm import Algorithm
 class TimeDifference(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
-    def execute(self, config):
+    def execute(self):
         """ Caclulates the time difference time2 - time1
         """
-        t1 = self.store.get(config["time1"])
-        t2 = self.store.get(config["time2"])
+        t1 = self.store.get(self.config["time1"])
+        t2 = self.store.get(self.config["time2"])
         TimeDiff = t2-t1
-        self.store.put(config["name"], TimeDiff)
+        self.store.put(self.name, TimeDiff)
 
 # EOF
