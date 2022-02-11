@@ -62,7 +62,7 @@ class Window(Algorithm):
         if "window" in self.config["algorithm"]:
             window = get_items(self.config["algorithm"]["window"])
             # Try to make into numbers
-            if window.lower() == "full" or window.lower() == "all":
+            if window[0].lower() == "full" or window[0].lower() == "all":
                 # Want the full window, window object will be (None, None)
                 window = (None, None)
             else:
