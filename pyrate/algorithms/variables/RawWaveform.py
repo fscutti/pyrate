@@ -43,7 +43,7 @@ class RawWaveform(Algorithm):
             input
         """
         # First we find out what kind of grouping is being used
-        groups = self.store.get("GROUPS")
+        groups = ['0']
 
         # Temporary, needs fixing, not generalised for all possible group structures
         if groups[0] == '0':
