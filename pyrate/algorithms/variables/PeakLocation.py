@@ -15,8 +15,9 @@
         algorithm:
             name: PeakLocation
         execute:
-            input: CorrectedWaveform_CHX
+            input: CorrectedWaveform_CHX, Window
         waveform: CorrectedWaveform_CHX
+        window: Window
 """
 
 from pyrate.core.Algorithm import Algorithm
@@ -33,7 +34,8 @@ class PeakLocation(Algorithm):
         waveform = self.store.get(self.config["waveform"])
         # Peak location is the highest point on the waveform
         # PeakLocation = np.argmax(waveform)
-        PeakLocation = max(range(len(waveform)), key=waveform.__getitem__)
+        window = self.store.get(self.config["window"])
+        PeakLocation = max(range(len(waveform[window[0]:window[1]])), key=waveform.__getitem__)
         self.store.put(self.name, PeakLocation)
 
 # EOF
