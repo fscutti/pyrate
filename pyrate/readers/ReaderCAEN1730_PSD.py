@@ -80,14 +80,33 @@ class ReaderCAEN1730_PSD(Reader):
         self._n_events = 0
 
         #Scan through the entire file
-        #TODO: This is pretty inefficient, hard to do better.  The idea of a pyrate event is somewhat different from the idea of a digitizer event (especially between instances).  Need to discuss
+        #TODO: This is hard to do without scanning through the entire file.  Skipping through like this will over estimate the number of events.
+        #TODO: The idea of a pyrate event is somewhat different from the idea of a digitizer event (especially between instances).  Need to discuss
         while(True):
+            #TODO: An alternate which gets the actual number of events.  Not very fast though
+            #self._eventPos.append(self._mmf.tell())
+            #self._read_event()
+            #self._n_events +=1
+            #if(self._mmf.tell() == self._mmfSize):
+            #    break
+
+            #Read in the event info from the header
             self._eventPos.append(self._mmf.tell())
-            self._read_event()
-            self._n_events +=1
-            if(self._mmf.tell() == self._mmfSize):
+            head1 = self._mmf.read(4)
+            if(head1 == bytes()):
                 break
 
+            #If we read something, increment the event counter and skip to the next event
+            self._n_events +=1
+            head1 = int.from_bytes(head1,"little")
+            eventSize = head1 & 0b00001111111111111111111111111111
+            
+            seekSize = 4*(eventSize - 1) # How far we need to jump
+            # Make sure we're not seeking beyond the EOF
+            if (self._mmf.tell() + seekSize) > self._mmfSize:
+                break
+            
+            self._mmf.seek(seekSize, 1)
 
         self._mmf.seek(0, 0)
         self._idx = 0
@@ -127,7 +146,9 @@ class ReaderCAEN1730_PSD(Reader):
         self._AddSubEvent()
 
         while(True):
-            self._read_sub_event()
+            if(self._read_sub_event() == False):
+                break
+            
             if(self._AddSubEvent() == False):
                 break
 
@@ -168,6 +189,9 @@ class ReaderCAEN1730_PSD(Reader):
         self._hasSubEvent = True
         #Read in the event info from the header
         head1 = self._mmf.read(4)
+        if(head1 == bytes()):
+            return False
+                
         head1 = int.from_bytes(head1,"little")
         head2 = self._mmf.read(4)
         head2 = int.from_bytes(head2,"little")

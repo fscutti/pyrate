@@ -18,10 +18,9 @@ class ReaderCAEN1730_ZLE(Reader):
         "_mmfSize",
         "_eventPos",
         "_readIdx",
-        "_currentEventTimestamp",
-        "_currentChannelMask",
-        "_currentEventWaveforms",
-        "_currentEventChannelRead",
+        "_inEvt",
+        "_evtTimestamp",
+        "_evtWaveforms",
     ]
 
     def __init__(self, name, store, logger, f_name, structure):
@@ -36,10 +35,6 @@ class ReaderCAEN1730_ZLE(Reader):
         self.f.close()
 
         self._eventPos = []
-        self._currentEventTimestamp = 0
-        self._currentChannelMask = 0
-        self._currentEventWaveforms = {}
-        self._currentEventChannelRead = {}
         self._mmfSize = self._mmf.size()
 
     def offload(self):
@@ -111,18 +106,22 @@ class ReaderCAEN1730_ZLE(Reader):
 
     def _get_waveform(self, ch):
         """Reads variable from the event and puts it in the transient store."""
-        # If the channel is not in the event return an empty list
-        # ToDo: Confirm this behaviour in pyrate
-        if ch not in self._currentEventChannelRead.keys():
+        #If the channel is not in the event return an empty list
+        #ToDo: Confirm this behaviour in pyrate
+        if(ch not in self._inEvt.keys()):
             return [0]
 
-        # Return the waveform and mark that this channel has been read
-        self._currentEventChannelRead[ch] = True
         return self._currentEventWaveforms[ch]
 
     def _read_event(self):
-        self._mmf.seek(self._eventPos[self._idx], 0)
-        # Read in the event info from the header
+        #Reset event
+        self._evtTime = 2**64
+        self._inEvt = {};
+        self._evtWaveforms = {}
+
+        self._mmf.seek(self._eventPos[self._idx],0)
+        #Read in the event info from the header
+
         head1 = self._mmf.read(4)
         head1 = int.from_bytes(head1, "little")
         eventSize = head1 & 0b00001111111111111111111111111111
@@ -142,19 +141,17 @@ class ReaderCAEN1730_ZLE(Reader):
         head4 = int.from_bytes(head4, "little")
         TTT = head4
 
-        self._currentEventTimestamp = pattern << 32 + TTT
-        self._currentChannelMask = (channelMaskHi << 8) + (channelMaskLo)
-
-        self._currentEventChannelRead = {}
-        self._currentEventWaveforms = {}
-        # Read in the waveform data
+        self._evtTime = (pattern << 32) + TTT
+        channelMask = (channelMaskHi << 8) + (channelMaskLo)
+        
+        #Read in the waveform data
         for i in range(15):
-            if self._currentChannelMask & (1 << i):
-                self._currentEventChannelRead[i] = False
-                self._currentEventWaveforms[i] = []
-
-                # Get the baseline and record size (in words)
-                sample = int.from_bytes(self._mmf.read(4), "little")
+            if channelMask & (1 << i):
+                self._inEvt[i] = True
+                self._evtWaveforms[i] = []
+                
+                #Get the baseline and record size (in words)
+                sample = int.from_bytes(self._mmf.read(4),"little")
 
                 baseLine = (sample & 0b11111111111111110000000000000000) >> 16
                 recordSize = sample & 0b00000000000000001111111111111111
@@ -177,7 +174,7 @@ class ReaderCAEN1730_ZLE(Reader):
                             (sample & 0b00111111111111110000000000000000) >> 16
                         )
 
-                self._currentEventWaveforms[i] = rawTrace
+                self._evtWaveforms[i] = rawTrace
 
 
 # EOF
