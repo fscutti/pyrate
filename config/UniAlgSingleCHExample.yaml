@@ -52,6 +52,17 @@ objects:
         baseline: Baseline
         wc_waveform: EVENT:GROUP:CH0:RawWaveform
 
+    AverageWaveform:
+        algorithm:
+            name: AverageWaveform
+        initialise:
+            output:
+        execute:
+            input: CorrectedWaveform
+        finalise:
+            output:
+        waveform: CorrectedWaveform
+
     ############################## WINDOWS #################################
 
     TotalWindow:
@@ -230,6 +241,8 @@ objects:
         execute:
             input: PromptCharge
 
+            
+
 
 
 
@@ -252,7 +265,7 @@ objects:
         initialise:
             output:
         execute:
-            input: RawWaveform, CorrectedWaveform, Baseline, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart, PromptDelayChargeRatio, PromptCharge, DelayedCharge, MeanTime, PromptDelayChargeRatioCalculator
+            input: RawWaveform, CorrectedWaveform, Baseline, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart, PromptDelayChargeRatio, PromptCharge, DelayedCharge, MeanTime, PromptDelayChargeRatioCalculator, AverageWaveform
         finalise:
             output:
         trees:
@@ -263,6 +276,6 @@ objects:
                         double: CorrectedWaveform
                     scalar:
                         float: Baseline, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart, PromptDelayChargeRatio, MeanTime, PromptDelayChargeRatioCalculator
-                #single:
-                #    vector:
-                #        double: AverageWaveform_CHX
+                single:
+                   vector:
+                       double: AverageWaveform
