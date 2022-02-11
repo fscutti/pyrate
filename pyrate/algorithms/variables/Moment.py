@@ -46,19 +46,28 @@ class Moment(Algorithm):
         """
         waveform = self.config["waveform"]
         window = self.config["window"]
+        # Fix Me 
+        ########################################################################
+        time = [1,2,3,4,5] # Times or something pu that here 
+        ########################################################################
         if window is None or window == -999:
             Moment = -999
         else:
             # First, have to make the waveform positive definite
             min_val = min(waveform)
-            entries = [x - min_val for x in waveform[window[0]:window[1]]] # place the minimum value at 0 volts
-            bin_mids = npwaveform["time"][window[0], window[1]]
+            entries = [x - min_val for x in waveform[window[0]:window[1]]] # place the minimum value at 0 volts/ADC
+            # FIX ME
+            ####################################################################
+            bin_mids = time[window[0], window[1]] # Make them bin mids
+            ####################################################################
 
-            # Calculate mean and variacne
-            mean = np.sum(entries*bin_mids) / np.sum(entries) # Have I made a typo here? Should it be / N ?
-            variance = np.sum(entries*math.pow(bin_mids-mean, 2)) /  np.sum(entries)
+            # Calculate mean and variance
+            entry_sum = sum(entries)
+            mean = sum([i*j for i,j in zip(entries, bin_mids)]) / entry_sum # Have I made a typo here? Should it be / N ?
+            shifted_mids = [i-mean for i in bin_mids]
+            variance = sum([i*math.pow(j,2) for i, j in zip(entries, shifted_mids)]) / entry_sum
 
-            Mn = np.sum(entries*math.pow(bin_mids-mean, self.degree)) /  np.sum(entries)
+            Mn = sum([i * math.pow(j, self.degree) for i, j in zip(entries, shifted_mids)]) / entry_sum
             Moment = Mn / math.pow(variance, self.degree/2.0)
         return Moment
 
