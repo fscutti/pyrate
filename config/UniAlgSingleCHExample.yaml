@@ -41,7 +41,7 @@ objects:
         algorithm: 
             name: CorrectedWaveform
             vpp: 2.5
-            adcrange: 16384
+            adcrange: 65536
             polarity: pos
             units: mV
         initialise:
@@ -99,8 +99,8 @@ objects:
     DelayedWindow:
         algorithm:
             name: Window
-            left: 20
-            right: 0
+            left: 0
+            right: 20
             window pivot: right
         initialise:
             output:
@@ -130,7 +130,7 @@ objects:
         algorithm:
             name: Charge
             impedance: 50
-            rate: 500e6
+            rate: 3.2e9
             unit: pC
             waveform_unit: mV
         initialise:
@@ -144,7 +144,7 @@ objects:
         algorithm:
             name: Charge
             impedance: 50
-            rate: 500e6
+            rate: 3.2e9
             unit: pC
             waveform_unit: mV
         initialise:
@@ -158,7 +158,7 @@ objects:
         algorithm:
             name: Charge
             impedance: 50
-            rate: 500e6
+            rate: 3.2e9
             unit: pC
             waveform_unit: mV
         initialise:
@@ -172,7 +172,7 @@ objects:
         algorithm:
             name: Charge
             impedance: 50
-            rate: 500e6
+            rate: 3.2e9
             unit: pC
             waveform_unit: mV
         initialise:
