@@ -65,7 +65,7 @@ class CFD(Algorithm):
         delay = int(self.config["algorithm"]["delay"])
         scale = int(self.config["algorithm"]["scale"])
         cfd_threshold = float(self.config["algorithm"]["cfd_threshold"])
-        if "savecfd" in self.config["algorithms"]:
+        if "savecfd" in self.config["algorithm"]:
             savecfd = bool(self.config["algorithm"]["savecfd"])
         else:
             savecfd = False
@@ -83,7 +83,7 @@ class CFD(Algorithm):
         delay = self.store.get(f"{self.name}:delay")
         scale = self.store.get(f"{self.name}:scale")
         cfd_threshold = self.store.get(f"{self.name}:cfd_threshold")
-        savecfd = self.store.get(f"{self.name}:savecffd")
+        savecfd = self.store.get(f"{self.name}:savecfd")
 
         # Get the actual waveform, finally.
         waveform = self.store.get(self.config["waveform"])
