@@ -61,7 +61,7 @@ class CorrectedWaveform(Algorithm):
         # Again we need to check the reader as it determines what kind of input
         # we could have and how we access its information
         # First we find out what kind of grouping is being used
-        groups = self.store.get("GROUPS")
+        groups = ['0']
 
         # Temporary, needs fixing, not generalised for all possible group structures
         if groups[0] == '0':
@@ -121,7 +121,7 @@ class CorrectedWaveform(Algorithm):
         if reader == "ReaderWaveCatcherMMAP":
             waveform = self.store.get(self.config["wc_waveform"])
         else:
-            waveform = self.store.get(self.config["raw_waveform"])
+            waveform = self.store.get(self.config["waveform"])
         waveform = self.store.get(self.config["waveform"])
         conversion = self.store.get(f"{self.name}:conversion")
         polarity = self.store.get(f"{self.name}:polarity")
