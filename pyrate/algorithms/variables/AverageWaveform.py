@@ -52,14 +52,14 @@ class AverageWaveform(Algorithm):
         
         # All this just to get the record length
         # First we find out what kind of grouping is being used
-        groups = self.store.get("GROUPS")
+        groups = ['0']
 
         # Temporary, needs fixing, not generalised for all possible group structures
         if groups[0] == '0':
             # Default, no group specified
-            reader = self.store.get("READER:name")
+            reader = self.store.get("INPUT:READER:name")
         else:
-            reader = self.store.get(f"READER:GROUP:name")
+            reader = self.store.get(f"INPUT:READER:GROUP:name")
         if reader == "ReaderBlueTongueMMAP":
             board_dict = self.store.get(f"INPUT:board_1") # This needs to be fixed when we have more boards 
             RecordLength = board_dict["record_length"]
