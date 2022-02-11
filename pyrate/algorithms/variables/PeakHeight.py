@@ -15,8 +15,9 @@
         algorithm:
             name: PeakHeight
         execute:
-            input: CorrectedWaveform_CHX
+            input: CorrectedWaveform_CHX, Window
         waveform: CorrectedWaveform_CHX
+        window: Window
 """
 
 from pyrate.core.Algorithm import Algorithm
@@ -31,7 +32,8 @@ class PeakHeight(Algorithm):
         """ Caclulates the waveform peak height (maximum)
         """
         waveform = self.store.get(self.config["waveform"])
-        PeakHeight = max(waveform)
+        window = self.store.get(self.config["window"])
+        PeakHeight = max(waveform[window[0]:window[1]])
         self.store.put(self.name, PeakHeight)
 
 # EOF
