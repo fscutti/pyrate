@@ -33,7 +33,10 @@ class PeakHeight(Algorithm):
         """
         waveform = self.store.get(self.config["waveform"])
         window = self.store.get(self.config["window"])
-        PeakHeight = max(waveform[window[0]:window[1]])
+        if window == -999 or window is None:
+            PeakHeight = -999
+        else:
+            PeakHeight = max(waveform[window[0]:window[1]])
         self.store.put(self.name, PeakHeight)
 
 # EOF
