@@ -35,7 +35,10 @@ class PeakLocation(Algorithm):
         # Peak location is the highest point on the waveform
         # PeakLocation = np.argmax(waveform)
         window = self.store.get(self.config["window"])
-        PeakLocation = max(range(len(waveform[window[0]:window[1]])), key=waveform.__getitem__)
+        if window == -999 or window == None:
+            PeakLocation = -999
+        else:
+            PeakLocation = max(range(len(waveform[window[0]:window[1]])), key=waveform.__getitem__)
         self.store.put(self.name, PeakLocation)
 
 # EOF
