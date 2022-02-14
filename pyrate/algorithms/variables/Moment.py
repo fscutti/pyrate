@@ -1,5 +1,5 @@
 """ Calculates the nth moment of a waveform, treating the waveform as a pdf
-    
+    m_n = sum(x_i - mu)^n
 
     Required parameters:
         degree: (int) The degree/order of the moment. e.g. degree 3 for skewness,
