@@ -1,0 +1,30 @@
+--- 
+inputs: 
+    Data:
+        # samples: 
+        #    tags: 
+        #        any:
+        #        groups:
+        eslices:
+            emin: 0
+            emax: -1
+
+        reader: ReaderCAEN1730_RAW
+        path:
+          - ../test/data/1730_RAWTest-Board_0-001.dat
+
+configs:
+    config2:
+        path: PYRATE/config
+        tags: 
+            any: UniAlgSingleCHExample
+
+
+outputs:
+    1730RawTest:
+        path: ../test/Data/
+        format: .root
+        targets:
+          - TreeMaker: Data
+    
+# EOF

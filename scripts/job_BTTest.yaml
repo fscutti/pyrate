@@ -1,0 +1,29 @@
+--- 
+inputs: 
+    Data:
+        # samples: 
+        #    tags: 
+        #        any:
+        #        groups:
+        eslices:
+            emin: 0
+            emax: -1
+
+        path:
+          - ../test/data/BTTestData.txt
+
+configs:
+    config2:
+        path: PYRATE/config
+        tags: 
+            any: UniAlgSingleCHExample
+
+
+outputs:
+    BTTest:
+        path: ../test/Data/
+        format: .root
+        targets:
+          - TreeMaker: Data
+    
+# EOF
