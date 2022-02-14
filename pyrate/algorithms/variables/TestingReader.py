@@ -5,15 +5,16 @@ from copy import copy
 
 from pyrate.core.Algorithm import Algorithm
 
+
 class TestingReader(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
-    def execute(self, config):
+    def execute(self):
 
-        if config["algorithm"]["format"] == "WC":
+        if self.config["algorithm"]["format"] == "WC":
             # WaveCatcher input:
             # if self.store.get("EVENT:idx") == 0:
             #    DATA_SAMPLES = self.store.get("INPUT:DATA SAMPLES")
@@ -43,7 +44,7 @@ class TestingReader(Algorithm):
             TimeCount = self.store.get("EVENT:CH9:TimeCount")
             RawWaveform = self.store.get("EVENT:CH9:RawWaveform")
 
-        elif config["algorithm"]["format"] == "WD":
+        elif self.config["algorithm"]["format"] == "WD":
 
             # WaveDump input:
             # if self.store.get("EVENT:idx") == 0:
@@ -127,7 +128,7 @@ class TestingReader(Algorithm):
                 RawWaveform = self.store.get("EVENT:RawWaveform")
             """
 
-        elif config["algorithm"]["format"] == "ROOT":
+        elif self.config["algorithm"]["format"] == "ROOT":
             # ROOT input:
             # if self.store.get("EVENT:idx") == 0:
             #    self.store.get("EVENT:GROUP:ch0:RunMetadata:StartTime")
@@ -139,8 +140,8 @@ class TestingReader(Algorithm):
             #    self.store.get("EVENT:GROUP:ch2:RunMetadata:StartTime")
             #    self.store.get("EVENT:GROUP:ch2:RunMetadata:StopTime")
 
-            #self.store.get("EVENT:GROUP:ch0:SmallMuon:EventData:TriggerTime")
-            #self.store.get("EVENT:GROUP:ch0:SmallMuon:EventData:TriggeredChannels")
+            # self.store.get("EVENT:GROUP:ch0:SmallMuon:EventData:TriggerTime")
+            # self.store.get("EVENT:GROUP:ch0:SmallMuon:EventData:TriggeredChannels")
 
             # self.store.get("EVENT:GROUP:ch1:SmallMuon:EventData:TriggerTime")
             # self.store.get("EVENT:GROUP:ch1:SmallMuon:EventData:TriggeredChannels")
@@ -148,9 +149,9 @@ class TestingReader(Algorithm):
             # self.store.get("EVENT:GROUP:ch2:SmallMuon:EventData:TriggerTime")
             # self.store.get("EVENT:GROUP:ch2:SmallMuon:EventData:TriggeredChannels")
 
-            #w = self.store.get("EVENT:GROUP:ch0:SmallMuon:Channel_0:RawWaveform")
+            # w = self.store.get("EVENT:GROUP:ch0:SmallMuon:Channel_0:RawWaveform")
             # print(w.at(0))
-            #self.store.get("EVENT:GROUP:ch0:SmallMuon:Channel_0:Baseline")
+            # self.store.get("EVENT:GROUP:ch0:SmallMuon:Channel_0:Baseline")
             # idx = self.store.get("EVENT:idx")
             # self.store.put(f"{idx}", copy(w), "PERM")
 
@@ -163,32 +164,28 @@ class TestingReader(Algorithm):
             e = self.store.get("EVENT:nT:edepScint")
             print(self.store.get("INPUT:name"))
 
-
-
-        elif config["algorithm"]["format"] == "pgSQL":
+        elif self.config["algorithm"]["format"] == "pgSQL":
             # var1 = self.store.get("INPUT:QUERY:SELECT eventrate FROM muonmonitoring ORDER BY time DESC LIMIT 3")
             # print(var1)
             var2 = self.store.get("EVENT:QUERY:muonmonitoring:4:eventrate")
             print(var2)
-        
-        
-        
-        elif config["algorithm"]["format"] == "BlueTongue":
+
+        elif self.config["algorithm"]["format"] == "BlueTongue":
             # var1 = self.store.get("INPUT:QUERY:SELECT eventrate FROM muonmonitoring ORDER BY time DESC LIMIT 3")
             # print(var1)
-            #var2 = self.store.get("EVENT:QUERY:muonmonitoring:4:eventrate")
-            #print(self.store.get("EVENT:idx"))
-            
-            #self.store.get("EVENT:board_1:raw_waveform_ch_10")
-            #self.store.get("EVENT:board_1:time_count_ch_8")
-            #self.store.get("EVENT:board_1:trigger_count_ch_10")
-            #self.store.get("EVENT:timestamp")
-            #v = self.store.get("EVENT:board_1:event_counter")
-            #v = self.store.get(config["algorithm"]["var"])
-            
-            v = self.store.get(config["algorithm"]["var"])
-            #v = 1024 * [1]
-            
+            # var2 = self.store.get("EVENT:QUERY:muonmonitoring:4:eventrate")
+            # print(self.store.get("EVENT:idx"))
+
+            # self.store.get("EVENT:board_1:raw_waveform_ch_10")
+            # self.store.get("EVENT:board_1:time_count_ch_8")
+            # self.store.get("EVENT:board_1:trigger_count_ch_10")
+            # self.store.get("EVENT:timestamp")
+            # v = self.store.get("EVENT:board_1:event_counter")
+            # v = self.store.get(config["algorithm"]["var"])
+
+            v = self.store.get(self.config["algorithm"]["var"])
+            # v = 1024 * [1]
+
             """
             print(self.store.get("INPUT:board_1:n_channels"))
             print(self.store.get("INPUT:n_boards"))
@@ -198,7 +195,7 @@ class TestingReader(Algorithm):
             print(self.store.get("INPUT:board_1:channel_numbers"))
             v = self.store.get("INPUT:n_boards")
             """
-            self.store.put(config["name"], v)
+            self.store.put(self.name, v)
 
 
 # EOF
