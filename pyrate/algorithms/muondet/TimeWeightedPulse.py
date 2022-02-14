@@ -13,8 +13,8 @@ from pyrate.core.Algorithm import Algorithm
 class TimeWeightedPulse(Algorithm):
     # __slots__ = ("quantum_efficiency")
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
         # PMT quantum efficiency given as a function of incident photon wavelength in nm.
         self.quantum_efficiency = copy(
@@ -27,9 +27,9 @@ class TimeWeightedPulse(Algorithm):
         self.quantum_efficiency.Fill(650, 1)
         self.quantum_efficiency.Fill(750, 0.001)
 
-    def execute(self, config):
+    def execute(self):
 
-        wf = self.store.get(config["waveform"])
+        wf = self.store.get(self.config["waveform"])
 
         measured_energy = 0.0
         e_num, e_den = 0.0, 0.0
@@ -40,8 +40,8 @@ class TimeWeightedPulse(Algorithm):
                 self.photon_wavelength(e)
             )
 
-            if "only_photons" in config:
-                if config["only_photons"]:
+            if "only_photons" in self.config:
+                if self.config["only_photons"]:
                     e_num += t * self.quantum_efficiency.GetBinContent(bin_idx) / 100.0
             else:
                 e_num += e * t
@@ -51,7 +51,7 @@ class TimeWeightedPulse(Algorithm):
         if e_den > 0.0:
             measured_energy = e_num / e_den
 
-        self.store.put(config["name"], measured_energy)
+        self.store.put(self.name, measured_energy)
 
     def photon_wavelength(self, energy, eunits=1e6):
 

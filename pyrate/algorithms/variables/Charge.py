@@ -7,16 +7,16 @@ from pyrate.core.Algorithm import Algorithm
 class Charge(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
-    def execute(self, config):
+    def execute(self):
 
-        waveform = self.store.get(config["waveform"])
+        waveform = self.store.get(self.config["waveform"])
 
         charge = waveform.Integral()
 
-        self.store.put(config["name"], charge)
+        self.store.put(self.name, charge)
 
 
 # EOF

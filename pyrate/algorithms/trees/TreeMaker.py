@@ -17,7 +17,7 @@ myTreeObject:
                etc ...
 """
 
-#import psutil
+# import psutil
 
 import os
 import sys
@@ -41,20 +41,33 @@ _Type = {
     "ushort": {"python": "H", "root": "s", "vector": "unsigned short"},
     "long": {"python": "l", "root": "L", "vector": "long"},
     "ulong": {"python": "L", "root": "l", "vector": "unsigned long"},
-    "float": {"python": "d", "root": "D", "vector": "double"}, # Python arrays don't have float32's
+    "float": {
+        "python": "d",
+        "root": "D",
+        "vector": "double",
+    },  # Python arrays don't have float32's
     "double": {"python": "d", "root": "D", "vector": "double"},
     "bool": {"python": "H", "root": "O", "vector": "bool"},
-    "string": {"python": "u", "root": "C", "vector": "string"} # Strings should be stored in vectors
+    "string": {
+        "python": "u",
+        "root": "C",
+        "vector": "string",
+    },  # Strings should be stored in vectors
 }
 
+
 class Branch:
-    """ Class to store branch information 
-    """
-    def __init__(self, name, datatype=None, vector=False, event_based=True, create_now=False):
+    """Class to store branch information"""
+
+    def __init__(
+        self, name, datatype=None, vector=False, event_based=True, create_now=False
+    ):
         self.name = name
         if not self.name.replace("_", "").isalnum():
-            print(f"Warning: Branch name contains non-alphanumeric characters '{self.name}'")
-        
+            print(
+                f"Warning: Branch name contains non-alphanumeric characters '{self.name}'"
+            )
+
         if datatype == None:
             sys.exit(f"ERROR: in branch {self.name} - datatype not provided.")
         self.datatype = datatype
@@ -89,18 +102,34 @@ class Branch:
 
         isiter = FN.iterable(data)
         if not isiter and self.vector == True:
-            print("Error: input data is not iterable, but this branch ({}) expects an array".format(self.name))
-            print("Input data type: {}, branch datatype: {}, storage datatype: {}".format(type(data), self.datatype, type(self.data)))
+            print(
+                "Error: input data is not iterable, but this branch ({}) expects an array".format(
+                    self.name
+                )
+            )
+            print(
+                "Input data type: {}, branch datatype: {}, storage datatype: {}".format(
+                    type(data), self.datatype, type(self.data)
+                )
+            )
             sys.exit(1)
         if isiter and not self.vector:
-            print("Error: input data is iterable, but this branch ({}) expects a single element".format(self.name))
-            print("Input data type: {}, branch datatype: {}, storage datatype: {}".format(type(data), self.datatype, type(self.data)))
+            print(
+                "Error: input data is iterable, but this branch ({}) expects a single element".format(
+                    self.name
+                )
+            )
+            print(
+                "Input data type: {}, branch datatype: {}, storage datatype: {}".format(
+                    type(data), self.datatype, type(self.data)
+                )
+            )
             sys.exit(1)
-        assert(isiter==self.vector)
+        assert isiter == self.vector
         if self.vector:
             # Clear just in case
             try:
-                self.data[0] # Test if we can access it
+                self.data[0]  # Test if we can access it
                 self.data.clear()
             except:
                 pass
@@ -114,24 +143,27 @@ class Branch:
             self.data[0] = data
 
     def clear_vector(self):
-        """ Clears the vector of a branch. Only works if vector=True
-        """
+        """Clears the vector of a branch. Only works if vector=True"""
         if not self.vector:
             return
         self.data.clear()
 
+
 class Tree:
-    """ Class to store tree information
-        Build your Tree structure first, then call create() to make the
-        TTree structure accordingly
+    """Class to store tree information
+    Build your Tree structure first, then call create() to make the
+    TTree structure accordingly
     """
-    def __init__(self, name, outfile, path=None, branch_list=[], event=False, create_now=False):
+
+    def __init__(
+        self, name, outfile, path=None, branch_list=[], event=False, create_now=False
+    ):
         self.name = name
         self.outfile = outfile
-        self.path = path if path!=None else self.name
-        self.TTree =  None
+        self.path = path if path != None else self.name
+        self.TTree = None
         self.created = False
-        self.event = event      # Type of TTree, to be updated with each event loop or not
+        self.event = event  # Type of TTree, to be updated with each event loop or not
         self.branches = {}
         if branch_list:
             for branch in branch_list:
@@ -140,11 +172,12 @@ class Tree:
             self.create()
 
     def add_branch(self, branch):
-        """ Adds branch to the tree storage
-        """
+        """Adds branch to the tree storage"""
         if branch in self.branches:
-            # Uh oh, branch already in branch list 
-            sys.exit(f"Error: branch ({branch.name}) already stored in branch list of this Tree.\nPlease remove it first (or don't add it twice?)")
+            # Uh oh, branch already in branch list
+            sys.exit(
+                f"Error: branch ({branch.name}) already stored in branch list of this Tree.\nPlease remove it first (or don't add it twice?)"
+            )
         self.branches[branch.name] = branch
         if self.created:
             # TTree already created, so we better link this new branch
@@ -154,42 +187,48 @@ class Tree:
             self.link_branch(branch)
 
     def create(self):
-        """ Actually makes the trees structure in the structure and adds all the
-            branches into the tree. Typically called by the detector class
+        """Actually makes the trees structure in the structure and adds all the
+        branches into the tree. Typically called by the detector class
         """
-        
+
         self.TTree = R.TTree(self.name, self.name)
         # self.TTree.SetMaxTreeSize((int(1 * MB)))
         self.created = True
-    
+
     def link_all_branches(self):
-        """ Links all the branches. Requires that the branches all be created
-            properly
+        """Links all the branches. Requires that the branches all be created
+        properly
         """
         for branch_name in self.branches:
             branch = self.branches[branch_name]
             if not branch.linked:
                 self.link_branch(branch)
-    
+
     def link_branch(self, branch):
-        """ Links branch to the TTree. Requires TTree to be created
-        """
+        """Links branch to the TTree. Requires TTree to be created"""
         if not self.TTree:
             self.create()
         if branch.linked:
             sys.exit("Error: Branch already linked")
         if not branch.created:
-            sys.exit(f"Error initialising Tree - branch '{branch.name}' hasn't been created yet. Fill it with some data or create it manually.")
+            sys.exit(
+                f"Error initialising Tree - branch '{branch.name}' hasn't been created yet. Fill it with some data or create it manually."
+            )
         if branch.vector:
-            branch_instance = self.TTree.Branch(branch.name, self.branches[branch.name].data)
+            branch_instance = self.TTree.Branch(
+                branch.name, self.branches[branch.name].data
+            )
         else:
-            branch_instance = self.TTree.Branch(branch.name, self.branches[branch.name].data, branch.name + '/' + _Type[branch.datatype]["root"])
+            branch_instance = self.TTree.Branch(
+                branch.name,
+                self.branches[branch.name].data,
+                branch.name + "/" + _Type[branch.datatype]["root"],
+            )
         branch_instance.SetFile(self.outfile)
         branch.linked = True
-    
+
     def fill_branch(self, branch_name, data):
-        """ Runs the fill branch comamnd, filling branch_name with data
-        """
+        """Runs the fill branch comamnd, filling branch_name with data"""
         if branch_name not in self.branches:
             sys.exit(f"Error filling branch: '{branch_name}' not in Tree '{self.name}'")
         if not self.branches[branch_name].created:
@@ -199,10 +238,10 @@ class Tree:
         if not self.branches[branch_name].linked:
             self.link_branch(self.branches[branch_name])
         self.branches[branch_name].fill_branch(data)
-    
+
     def fill(self):
-        """ Runs the Fill function on the TTree
-            Clears the branch variables
+        """Runs the Fill function on the TTree
+        Clears the branch variables
         """
         self.TTree.Fill()
         # Now it's been filled we better clear the vectors
@@ -212,9 +251,9 @@ class Tree:
                 self.branches[branch].clear_vector()
 
     def remove_branch(self, branch):
-        """ Removes branch to the tree storage
-            Does not remove the TBranch from the TTree as this isnt possible.
-            Won't be accessed anymore (hopefully)
+        """Removes branch to the tree storage
+        Does not remove the TBranch from the TTree as this isnt possible.
+        Won't be accessed anymore (hopefully)
         """
         del self.branches[branch.name]
 
@@ -222,25 +261,26 @@ class Tree:
 class TreeMaker(Algorithm):
     # __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
         self.tree_dict = None
         self.out_file = None
 
-    def initialise(self, config):
+    def initialise(self):
         """Defines a tree dictionary."""
-        # self.store.put(config["name"], "PYRATE:none")
-        out_file = self.store.get(f"OUTPUT:{config['name']}", "PERM")
-        self.store.put(f"{config['name']}:File", out_file)
+        out_file = self.store.get(f"OUTPUT:{self.name}", "PERM")
+        self.store.put(f"{self.name}:File", out_file)
 
         trees = {}
         # Get all trees
-        for tree in [t for t in config["trees"]]:
+        for tree in [t for t in self.config["trees"]]:
             for t_path_name, t_variables in tree.items():
-                t_path = os.path.dirname(t_path_name) # If using a path, otherise empty
+                t_path = os.path.dirname(t_path_name)  # If using a path, otherise empty
                 t_name = os.path.basename(t_path_name)
                 # create the instance of the new tree
-                trees[t_name] = Tree(t_name, out_file, path=t_path, event=True, create_now=True)
+                trees[t_name] = Tree(
+                    t_name, out_file, path=t_path, event=True, create_now=True
+                )
                 # Now set up all the variables in the tree
 
                 # Loop through whether it's event-based on single
@@ -253,24 +293,37 @@ class TreeMaker(Algorithm):
                     # Loop through vector and scalar type branches
                     for vec_scalar in t_variables[fill_type]:
                         # loop over datatypes
-                        for datatype, vars in t_variables[fill_type][vec_scalar].items():
+                        for datatype, vars in t_variables[fill_type][
+                            vec_scalar
+                        ].items():
                             for var in ST.get_items(vars):
                                 # loop over individual variables
                                 if "vector" in vec_scalar:
                                     # Storing vectors
-                                    new_branch = Branch(var, datatype=datatype, vector=True, event_based=event_based, create_now=True)
+                                    new_branch = Branch(
+                                        var,
+                                        datatype=datatype,
+                                        vector=True,
+                                        event_based=event_based,
+                                        create_now=True,
+                                    )
                                 if "scalar" in vec_scalar or "number" in vec_scalar:
                                     # Storing scalars
-                                    new_branch = Branch(var, datatype=datatype, vector=False, event_based=event_based, create_now=True)
+                                    new_branch = Branch(
+                                        var,
+                                        datatype=datatype,
+                                        vector=False,
+                                        event_based=event_based,
+                                        create_now=True,
+                                    )
                                 # Add the new branch to the TTree
                                 trees[t_name].add_branch(new_branch)
 
-        self.store.put(f"{config['name']}:trees", trees, "PERM")
+        self.store.put(f"{self.name}:trees", trees, "PERM")
 
-    def execute(self, config):
-        """Fills in the ROOT tree dictionary with event data.
-        """
-        trees = self.store.get(f"{config['name']}:trees", "PERM")
+    def execute(self):
+        """Fills in the ROOT tree dictionary with event data."""
+        trees = self.store.get(f"{self.name}:trees", "PERM")
 
         # Fill all the branches in the trees if they're event-based
         for tree in trees:
@@ -282,11 +335,10 @@ class TreeMaker(Algorithm):
 
             # Save all the values into the Tree
             trees[tree].fill()
-    
-    def finalise(self, config):
-        """ Fill in the single/run-based variables
-        """
-        trees = self.store.get(f"{config['name']}:trees", "PERM")
+
+    def finalise(self):
+        """Fill in the single/run-based variables"""
+        trees = self.store.get(f"{self.name}:trees", "PERM")
         # Fill all the branches in the trees if they're run-based
         for tree in trees:
             for branch_name in trees[tree].branches:
@@ -298,10 +350,11 @@ class TreeMaker(Algorithm):
             trees[tree].fill()
 
         # Write the objects to the file - this is the most important step
-        self.store.get(f"{config['name']}:File").Write("", R.TObject.kOverwrite)
+        self.store.get(f"{self.name}:File").Write("", R.TObject.kOverwrite)
 
-        # Store itself on the store with SKIP_WRITE code to show we have nothing 
+        # Store itself on the store with SKIP_WRITE code to show we have nothing
         # to return.
-        self.store.put(config["name"], enums.Pyrate.SKIP_WRITE)
+        self.store.put(self.name, enums.Pyrate.SKIP_WRITE)
+
 
 # EOF
