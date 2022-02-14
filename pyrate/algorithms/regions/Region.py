@@ -26,25 +26,25 @@ from pyrate.core.Algorithm import Algorithm
 class Region(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
-    def _execute(self, config):
+    def _execute(self):
         """Computes region dictionary."""
 
         region = {"is_passed": 1, "weights": {}}
 
         selection = []
-        if "selection" in config:
-            selection = config["selection"]
+        if "selection" in self.config:
+            selection = self.config["selection"]
 
         weights = []
-        if "weights" in config:
-            weights = config["weights"]
+        if "weights" in self.config:
+            weights = self.config["weights"]
 
         supersets = []
-        if "is_subregion_of" in config:
-            supersets = config["is_subregion_of"]
+        if "is_subregion_of" in self.config:
+            supersets = self.config["is_subregion_of"]
 
         for s in supersets:
             super_region = self.store.get(s)
@@ -103,7 +103,7 @@ class Region(Algorithm):
                     else:
                         region["weights"][w_name] = self.store.get(w_name)
 
-        self.store.put(config["name"], region)
+        self.store.put(self.name, region)
 
     def get_selection(self, selection):
         """Breaks down the selection criterion."""
