@@ -16,8 +16,6 @@
     Sum_CHX:
         algorithm:
             name: Sum
-        initialise:
-            output:
         execute:
             input: CorrectedWaveform_CHX, Window_CHX
         waveform: CorrectedWaveform_CHX
