@@ -48,7 +48,7 @@ wf_units = {"V":1.0, "mV":1e-3, "uV":1e-6}
 q_units = {"C":1.0, "mC":1e3, "uC":1e6, "nC":1e9, "pC":1e12, "fC":1e15}
 
 class Charge(Algorithm):
-    __slots__ = ()
+    __slots__ = ('charge_constant')
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
@@ -77,8 +77,7 @@ class Charge(Algorithm):
             except:
                 sys.exit("ERROR: In algorithm Charge, waveform_unit could not be converted to a float.")
 
-        charge_constant = waveform_units * charge_units/(impedance * sample_rate)
-        self.store.put(f"{self.name}:charge_constant", charge_constant)
+        self.charge_constant = waveform_units * charge_units/(impedance * sample_rate)
 
     def execute(self):
         """ Calculates the charge by summing over the waveform
@@ -88,12 +87,9 @@ class Charge(Algorithm):
         if window == -999 or window is None:
             Charge = -999
         else:
-            # good to go, let's get the charge constant
-            charge_constant = self.store.get(f"{self.name}:charge_constant")
-
             waveform = self.store.get(self.config["waveform"])
             # Calcualte the actual charge over the window
-            Charge = sum(waveform[window[0]:window[1]]) * charge_constant
+            Charge = sum(waveform[window[0]:window[1]]) * self.charge_constant
         self.store.put(self.name, Charge)
 
 # EOF
