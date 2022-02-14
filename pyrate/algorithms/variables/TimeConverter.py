@@ -35,7 +35,7 @@ from pyrate.core.Algorithm import Algorithm
 seconds_to_unit = {"s": 1.0, "ms":1e3, "us":1e6, "ns":1e9, "ps":1e12}
 
 class TimeConverter(Algorithm):
-    __slots__ = ()
+    __slots__ = ('time_conversion')
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
@@ -51,15 +51,13 @@ class TimeConverter(Algorithm):
             unit = float(time_unit)
         sample_rate = float(self.config["algorithm"]["rate"])
 
-        time_conversion = unit/sample_rate
-        self.store.put(f"{self.name}:time_conversion", time_conversion)
+        self.time_conversion = unit/sample_rate
 
     def execute(self):
         """ Converts the sample time to physical units
         """
-        time_conversion = self.store.get(f"{self.name}:time_conversion")
         sample_time = self.store.get(self.config["time"])
-        real_time = sample_time * time_conversion
+        real_time = sample_time * self.time_conversion
         self.store.put(self.name, real_time)
 
 # EOF
