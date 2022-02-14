@@ -7,14 +7,14 @@ from pyrate.core.Algorithm import Algorithm
 class Trigger(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
-    def execute(self, config):
+    def execute(self):
 
-        time = self.store.get(config["triggeredch"])
+        time = self.store.get(self.config["triggeredch"])
 
-        if "get_diff" in config["algorithm"]:
+        if "get_diff" in self.config["algorithm"]:
 
             # WARNING: since we are using config["name"] to retrieve an object,
             # and config["name"] corresponds to the name of *this* object, we first
@@ -25,20 +25,20 @@ class Trigger(Algorithm):
             # as an example of avoiding circular dependencies with "check", but a better choice
             # of variable name should be chosen, not associated with any object linked to
             # an algorithm in the configuration.
-            if self.store.check(config["name"], "PERM"):
+            if self.store.check(self.name, "PERM"):
 
-                previous_time = self.store.get(config["name"], "PERM")
+                previous_time = self.store.get(self.name, "PERM")
 
                 # NB: this refreshes the value on the permanent store as replace is true.
-                self.store.put(config["name"], time, "PERM", replace=True)
+                self.store.put(self.name, time, "PERM", replace=True)
 
                 time -= previous_time
 
             else:
                 # NB: this operation will be executed only one time, as we are not forcing a replace.
-                self.store.put(config["name"], time, "PERM")
+                self.store.put(self.name, time, "PERM")
 
-        self.store.put(config["name"], time)
+        self.store.put(self.name, time)
 
 
 # EOF
