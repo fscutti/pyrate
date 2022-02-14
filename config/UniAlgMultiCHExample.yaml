@@ -13,6 +13,8 @@ objects:
         initialise:
             output:
 
+    ############################## WAVEFORMS AND BASELINE #################################
+
     RawWaveform_CH0:
         algorithm: 
             name: RawWaveform
@@ -23,7 +25,7 @@ objects:
                    EVENT:board_0:raw_waveform_ch_0,
                    EVENT:RawWaveform
             output:
-        waveform_bt: EVENT:board_0:raw_waveform_ch_0
+        waveform_bt: EVENT:board_0:raw_waveform_ch_0 # Channels need to be specified here
         waveform_md: EVENT:board_0:ch_0:waveform
         waveform_wd: EVENT:RawWaveform
 
@@ -37,7 +39,7 @@ objects:
                    EVENT:board_0:raw_waveform_ch_1,
                    EVENT:RawWaveform
             output:
-        waveform_bt: EVENT:board_0:raw_waveform_ch_1
+        waveform_bt: EVENT:board_0:raw_waveform_ch_1 # Channels need to be specified here
         waveform_md: EVENT:board_0:ch_1:waveform
         waveform_wd: EVENT:RawWaveform
 
@@ -46,8 +48,8 @@ objects:
             name: Baseline
             samples: 40
         execute:
-            input: RawWaveform_CH0
-        waveform: RawWaveform_CH0
+            input: RawWaveform_CH0 
+        waveform: RawWaveform_CH0 
 
     Baseline_CH1:
         algorithm: 
@@ -87,29 +89,9 @@ objects:
         baseline: Baseline_CH1
         wc_waveform: EVENT:GROUP:CH1:RawWaveform
 
-    PeakHeight:
-        algorithm:
-            name: PeakHeight
-            window: True
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CH0, TotalWindow
-        waveform: CorrectedWaveform_CH0
-        window: TotalWindow
+    ############################## WINDOWS #################################
 
-    PeakLocation:
-        algorithm:
-            name: PeakLocation
-            window: True
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CH0, TotalWindow
-        waveform: CorrectedWaveform_CH0
-        window: TotalWindow
-
-    TotalWindow:
+        TotalWindow:
         algorithm:
             name: Window
             window: full
@@ -151,6 +133,30 @@ objects:
         execute:
             input: PromptWindow
         pivot: PromptWindow
+
+    ############################## VARIABLES #################################
+
+    PeakHeight:
+        algorithm:
+            name: PeakHeight
+            window: True
+        initialise:
+            output:
+        execute:
+            input: CorrectedWaveform_CH0, TotalWindow
+        waveform: CorrectedWaveform_CH0
+        window: TotalWindow
+
+    PeakLocation:
+        algorithm:
+            name: PeakLocation
+            window: True
+        initialise:
+            output:
+        execute:
+            input: CorrectedWaveform_CH0, TotalWindow
+        waveform: CorrectedWaveform_CH0
+        window: TotalWindow
 
     PromptCharge:
         algorithm:

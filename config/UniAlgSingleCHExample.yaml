@@ -21,12 +21,12 @@ objects:
         initialise:
             output:
         execute:
-            input: EVENT:board_0:ch_0:waveform,
-                   EVENT:board_0:raw_waveform_ch_0,
+            input: EVENT:board_0:ch_3:waveform,
+                   EVENT:board_0:raw_waveform_ch_3,
                    EVENT:RawWaveform
             output:
-        waveform_bt: EVENT:board_0:raw_waveform_ch_0
-        waveform_md: EVENT:board_0:ch_0:waveform
+        waveform_bt: EVENT:board_0:raw_waveform_ch_3
+        waveform_md: EVENT:board_0:ch_3:waveform
         waveform_wd: EVENT:RawWaveform
 
     Baseline:
@@ -61,6 +61,20 @@ objects:
             input: CorrectedWaveform
         finalise:
             output:
+        waveform: CorrectedWaveform
+
+    TrapezoidFilter:
+        algorithm:
+            name: TrapezoidFilter
+            rise: 10
+            gap: 10
+            rate: 500e6
+            tau: 2e-6
+            zeropole: True
+        initialise:
+            output:
+        execute:
+            input: CorrectedWaveform
         waveform: CorrectedWaveform
 
     ############################## WINDOWS #################################
@@ -132,6 +146,16 @@ objects:
         waveform: CorrectedWaveform
         window: TotalWindow
 
+    ChargeConstant:
+        algorithm:
+            name: ChargeConstant
+            impedance: 50
+            rate: 500e6
+            unit: pC
+            waveform_unit: mV
+        initialise:
+            output:
+
     PromptCharge:
         algorithm:
             name: Charge
@@ -174,6 +198,22 @@ objects:
         waveform: CorrectedWaveform
         window: TotalWindow
 
+    TotalSum:
+        algorithm:
+            name: Sum
+        execute:
+            input: CorrectedWaveform, TotalWindow
+        waveform: CorrectedWaveform
+        window: TotalWindow
+
+    PulseSum:
+        algorithm:
+            name: Sum
+        execute:
+            input: CorrectedWaveform, PulseWindow
+        waveform: CorrectedWaveform
+        window: PulseWindow
+
     PulseCharge:
         algorithm:
             name: Charge
@@ -193,7 +233,7 @@ objects:
             name: CFD
             delay: 5
             scale: 1
-            cfd_threshold: 1
+            cfd_threshold: 0
         initialise:
             output:
         execute:
@@ -201,18 +241,18 @@ objects:
         waveform: CorrectedWaveform
 
     
-    # CFD_CHX:
-    #     algorithm:
-    #         name: CFD
-    #         delay: 5
-    #         scale: 1
-    #         cfd_threshold: 10
-    #         savecfd: True
-    #     initialise:
-    #         output:
-    #     execute:
-    #         input: TrapezoidWaveform
-    #     waveform: TrapezoidWaveform
+    CFD_Trap:
+        algorithm:
+            name: CFD
+            delay: 5
+            scale: 1
+            cfd_threshold: 0
+            savecfd: True
+        initialise:
+            output:
+        execute:
+            input: TrapezoidFilter
+        waveform: TrapezoidFilter
 
     PromptDelayChargeRatio:
         algorithm:
@@ -247,14 +287,6 @@ objects:
         execute:
             input: PromptCharge
 
-            
-
-
-
-
-
-    
-
 
      # -----------------------------------------------------------
      # Histograms
@@ -271,7 +303,7 @@ objects:
         initialise:
             output:
         execute:
-            input: RawWaveform, CorrectedWaveform, Baseline, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart, PromptDelayChargeRatio, PromptCharge, DelayedCharge, MeanTime, PromptDelayChargeRatioCalculator, AverageWaveform
+            input: RawWaveform, CorrectedWaveform, Baseline, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart, PromptDelayChargeRatio, PromptCharge, DelayedCharge, MeanTime, PromptDelayChargeRatioCalculator, TotalSum, PulseSum, ChargeConstant, TrapezoidFilter, CFD_Trap
         finalise:
             output:
         trees:
@@ -279,9 +311,11 @@ objects:
                 event:
                     vector: 
                         int: RawWaveform
-                        double: CorrectedWaveform
+                        double: CorrectedWaveform, TrapezoidFilter
                     scalar:
-                        float: Baseline, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart, PromptDelayChargeRatio, MeanTime, PromptDelayChargeRatioCalculator
+                        float: Baseline, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart, PromptDelayChargeRatio, MeanTime, PromptDelayChargeRatioCalculator, TotalSum, PulseSum, CFD_Trap
                 single:
-                   vector:
-                       double: AverageWaveform
+                #    vector:
+                #        double: AverageWaveform
+                    scalar:
+                        double: ChargeConstant
