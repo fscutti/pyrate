@@ -17,11 +17,11 @@ class WriterROOT(Writer):
         self.is_loaded = True
 
         self.set_inputs_vs_targets(self.w_targets)
-     
+
         self.f = R.TFile(self.f, "RECREATE")
-        
+
         # WARNING: if the file pointer needs to be retrieved from the store
-        # by accessing the OUTPUT keys like follows, then is better for the 
+        # by accessing the OUTPUT keys like follows, then is better for the
         # target to belong to just one output file.
         for t in self.get_targets():
             self.store.put(f"OUTPUT:{t}", self.f, "PERM")
