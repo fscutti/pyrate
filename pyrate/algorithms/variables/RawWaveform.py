@@ -63,7 +63,7 @@ class RawWaveform(Algorithm):
 
         if reader == "ReaderWaveDumpMMAP":
             RawWaveform = self.store.get(self.config["waveform_wd"])
-        elif reader == "ReaderCAEN1730_ZLE" or reader == "ReaderCAEN1730_RAW":
+        elif reader == "ReaderCAEN1730_ZLE" or reader == "ReaderCAEN1730_RAW" or reader == "ReaderCAEN1730_PSD":
             RawWaveform = self.store.get(self.config["waveform_md"])
         elif reader == "ReaderBlueTongueMMAP":
             RawWaveform = self.store.get(self.config["waveform_bt"])

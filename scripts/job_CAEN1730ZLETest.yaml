@@ -21,8 +21,8 @@ configs:
 
 
 outputs:
-    1730ZLETest:
-        path: ../test/Data/
+    ZLETest:
+        path: PYRATE/test # Save in any directory you want :)
         format: .root
         targets:
           - TreeMaker: Data

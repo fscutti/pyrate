@@ -46,16 +46,16 @@ objects:
         baseline: Baseline
         wc_waveform: EVENT:GROUP:CH0:RawWaveform
 
-    AverageWaveform:
-        algorithm:
-            name: AverageWaveform
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform
-        finalise:
-            output:
-        waveform: CorrectedWaveform
+    # AverageWaveform:
+    #     algorithm:
+    #         name: AverageWaveform
+    #     initialise:
+    #         output:
+    #     execute:
+    #         input: CorrectedWaveform
+    #     finalise:
+    #         output:
+    #     waveform: CorrectedWaveform
 
     TrapezoidFilter:
         algorithm:

@@ -85,7 +85,7 @@ objects:
 
     ############################## WINDOWS #################################
 
-        TotalWindow:
+    TotalWindow:
         algorithm:
             name: Window
             window: full
@@ -318,8 +318,8 @@ objects:
         initialise:
             output:
         execute:
-            input: CorrectedWaveform, TotalWindow
-        waveform: CorrectedWaveform
+            input: CorrectedWaveform_CH0, TotalWindow
+        waveform: CorrectedWaveform_CH0
         window: TotalWindow
 
     Kurtosis:
@@ -330,8 +330,8 @@ objects:
         initialise:
             output:
         execute:
-            input: CorrectedWaveform, TotalWindow
-        waveform: CorrectedWaveform
+            input: CorrectedWaveform_CH0, TotalWindow
+        waveform: CorrectedWaveform_CH0
         window: TotalWindow
 
     SD:
@@ -342,8 +342,8 @@ objects:
         initialise:
             output:
         execute:
-            input: CorrectedWaveform, TotalWindow
-        waveform: CorrectedWaveform
+            input: CorrectedWaveform_CH0, TotalWindow
+        waveform: CorrectedWaveform_CH0
         window: TotalWindow
 
     Mean:
@@ -354,8 +354,8 @@ objects:
         initialise:
             output:
         execute:
-            input: CorrectedWaveform, PulseWindow
-        waveform: CorrectedWaveform
+            input: CorrectedWaveform_CH0, PulseWindow
+        waveform: CorrectedWaveform_CH0
         window: PulseWindow
 
     

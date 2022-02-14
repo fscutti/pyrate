@@ -71,8 +71,8 @@ class Moment(Algorithm):
         """ Calculates the nth order moment
 
         """
-        waveform = self.config["waveform"]
-        window = self.config["window"]
+        waveform = self.store.get(self.config["waveform"])
+        window = self.store.get(self.config["window"])
         # Hacky way to get the time bin mids to be used
         # Not in initialise cause we don't know the length at that stage
         ########################################################################

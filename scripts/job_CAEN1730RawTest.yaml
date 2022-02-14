@@ -21,8 +21,8 @@ configs:
 
 
 outputs:
-    1730RawTest:
-        path: ../test/Data/
+    RAWTest:
+        path: PYRATE/test # Save in any directory you want :)
         format: .root
         targets:
           - TreeMaker: Data

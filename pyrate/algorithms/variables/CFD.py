@@ -65,7 +65,7 @@ class CFD(Algorithm):
         self.delay = int(self.config["algorithm"]["delay"])
         self.scale = int(self.config["algorithm"]["scale"])
         self.cfd_threshold = float(self.config["algorithm"]["cfd_threshold"])
-        if "savecfd" in self.config["algorithms"]:
+        if "savecfd" in self.config["algorithm"]:
             self.savecfd = bool(self.config["algorithm"]["savecfd"])
         else:
             self.savecfd = False

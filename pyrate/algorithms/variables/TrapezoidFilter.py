@@ -49,7 +49,7 @@ class TrapezoidFilter(Algorithm):
         self.gap = int(self.config["algorithm"]["gap"])
         self.period = 1/float(self.config["algorithm"]["rate"])
         self.tau = float(self.config["algorithm"]["tau"])
-        if "zeropole" in self.config["algorithms"]:
+        if "zeropole" in self.config["algorithm"]:
             self.zeropole = bool(self.config["algorithm"]["zeropole"])
         else:
             self.zeropole = True

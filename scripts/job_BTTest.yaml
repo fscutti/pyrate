@@ -10,7 +10,7 @@ inputs:
             emax: -1
 
         path:
-          - ../test/data/BTTestData.txt
+          - ../test/data/BTTestData.dat
 
 configs:
     config2:
@@ -21,9 +21,9 @@ configs:
 
 outputs:
     BTTest:
-        path: ../test/Data/
+        path: PYRATE/test # Save in any directory you want :)
         format: .root
         targets:
           - TreeMaker: Data
-    
+      
 # EOF

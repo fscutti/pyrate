@@ -16,14 +16,14 @@ configs:
     config2:
         path: PYRATE/config
         tags: 
-            any: UniAlgMultiCHExample
+            any: UniAlgSingleCHExample
 
 
 outputs:
     WDTest:
-        path: ../test/Data/
+        path: PYRATE/test # Save in any directory you want :)
         format: .root
         targets:
           - TreeMaker: Data
-    
+        
 # EOF
