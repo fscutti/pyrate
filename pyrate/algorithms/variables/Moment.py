@@ -16,7 +16,7 @@
     
     Example config:
     
-    Moment3_CHX:
+    Skew_CHX:
         algorithm:
             name: Moment
             degree: 3
