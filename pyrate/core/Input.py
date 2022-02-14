@@ -9,7 +9,8 @@ from importlib import import_module
 
 from pyrate.core.Reader import Reader
 from pyrate.readers.ReaderROOT import ReaderROOT
-#from pyrate.readers.ReaderWaveCatcherLC import ReaderWaveCatcherLC    # this reader is not the preferred one but we'll keep this line for reference.
+
+# from pyrate.readers.ReaderWaveCatcherLC import ReaderWaveCatcherLC    # this reader is not the preferred one but we'll keep this line for reference.
 from pyrate.readers.ReaderWaveCatcherMMAP import ReaderWaveCatcherMMAP
 from pyrate.readers.ReaderBlueTongueMMAP import ReaderBlueTongueMMAP
 from pyrate.readers.ReaderWaveDumpMMAP import ReaderWaveDumpMMAP
@@ -113,13 +114,23 @@ class Input(Reader):
                     if name.startswith("INPUT:READER:"):
                         variable = name.split(":")[-1]
                         if variable == "name":
-                            self.store.put(name, g_readers[self._f_idx].__class__.__name__, "TRAN")
+                            self.store.put(
+                                name, g_readers[self._f_idx].__class__.__name__, "TRAN"
+                            )
                         elif variable == "slots":
-                            self.store.put(name, g_readers[self._f_idx].__slots__, "TRAN")
+                            self.store.put(
+                                name, g_readers[self._f_idx].__slots__, "TRAN"
+                            )
                         elif variable == "module":
-                            self.store.put(name, g_readers[self._f_idx].__class__.__module__, "TRAN")
+                            self.store.put(
+                                name,
+                                g_readers[self._f_idx].__class__.__module__,
+                                "TRAN",
+                            )
                         else:
-                            sys.exit(f"ERROR: Invalid reader variable '{variable}'\nError occured when attempting to get '{name}' from the store.")
+                            sys.exit(
+                                f"ERROR: Invalid reader variable '{variable}'\nError occured when attempting to get '{name}' from the store."
+                            )
                     else:
                         g_readers[f_idx].read(name)
 
@@ -325,53 +336,66 @@ class Input(Reader):
             r_name = "_".join([g_name, str(f_idx)])
 
             f_name = self.groups[g_name][f_idx]
-            
+
             if reader:
                 # The user has specified the reader they want to use
                 # Try to import the reader class
-                reader_module = "pyrate.readers."+reader
+                reader_module = "pyrate.readers." + reader
                 try:
                     ReaderModule = import_module(reader_module)
                     ReaderClass = ReaderModule.__getattribute__(reader)
                 except ImportError as err:
-                    sys.exit(f"ERROR: {err}\n Unable to import reader '{reader}' from module '{reader_module}'\n"
-                            "Check that the reader is in pyrate/readers, that the class and module have the same name, and is added the nearest __init__.py")
+                    sys.exit(
+                        f"ERROR: {err}\n Unable to import reader '{reader}' from module '{reader_module}'\n"
+                        "Check that the reader is in pyrate/readers, that the class and module have the same name, and is added the nearest __init__.py"
+                    )
 
                 self.logger.info(f"User-set reader for {f_name} to {reader}")
-                reader = ReaderClass(r_name, self.store, self.logger, f_name, self.structure)
-            else: 
+                reader = ReaderClass(
+                    r_name, self.store, self.logger, f_name, self.structure
+                )
+            else:
                 if f_name.endswith(".root"):
                     self.logger.info(f"Auto-setting reader for {f_name} to ReaderROOT")
                     reader = ReaderROOT(
                         r_name, self.store, self.logger, f_name, self.structure
                     )
-                
+
                 elif FN.is_bt(f_name, self.store, self.logger, self.structure):
                     # BlueTongue file
-                    self.logger.info(f"Auto-setting reader for {f_name} to ReaderBlueTongueMMAP")
+                    self.logger.info(
+                        f"Auto-setting reader for {f_name} to ReaderBlueTongueMMAP"
+                    )
                     reader = ReaderBlueTongueMMAP(
-                            r_name, self.store, self.logger, f_name, self.structure
-                        )
+                        r_name, self.store, self.logger, f_name, self.structure
+                    )
 
                 elif FN.is_wd_ascii(f_name):
                     # WaveDump file
-                    self.logger.info(f"Auto-setting reader for {f_name} to ReaderWaveDumpMMAP")
+                    self.logger.info(
+                        f"Auto-setting reader for {f_name} to ReaderWaveDumpMMAP"
+                    )
                     reader = ReaderWaveDumpMMAP(
                         r_name, self.store, self.logger, f_name, self.structure
                     )
                 elif FN.is_wc_ascii(f_name):
                     # WaveCatcher file
-                    self.logger.info(f"Auto-setting reader for {f_name} to ReaderWaveCatcherMMAP")
+                    self.logger.info(
+                        f"Auto-setting reader for {f_name} to ReaderWaveCatcherMMAP"
+                    )
                     reader = ReaderWaveCatcherMMAP(
-                            r_name, self.store, self.logger, f_name, self.structure
-                        )
+                        r_name, self.store, self.logger, f_name, self.structure
+                    )
 
                 if not reader:
                     # Uh oh, we haven't got a reader yet!
                     self.logger.info(f"Unable to auto-set reader")
-                    sys.exit("ERROR: pyrate could not determine file type. You can try specifying the reader manaully in the config.")
-            
+                    sys.exit(
+                        "ERROR: pyrate could not determine file type. You can try specifying the reader manaully in the config."
+                    )
+
             reader.load()
             self.groups[g_name][f_idx] = reader
+
 
 # EOF
