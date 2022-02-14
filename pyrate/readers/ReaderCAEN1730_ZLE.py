@@ -19,7 +19,7 @@ class ReaderCAEN1730_ZLE(Reader):
         "_eventPos",
         "_readIdx",
         "_inEvt",
-        "_evtTimestamp",
+        "_evtTime",
         "_evtWaveforms",
     ]
 
@@ -111,7 +111,7 @@ class ReaderCAEN1730_ZLE(Reader):
         if(ch not in self._inEvt.keys()):
             return [0]
 
-        return self._currentEventWaveforms[ch]
+        return self._evtWaveforms[ch]
 
     def _read_event(self):
         #Reset event
