@@ -287,6 +287,54 @@ objects:
         execute:
             input: PromptCharge
 
+    Skew:
+        algorithm:
+            name: Moment
+            order: 3
+            rate: 500e6
+        initialise:
+            output:
+        execute:
+            input: CorrectedWaveform, TotalWindow
+        waveform: CorrectedWaveform
+        window: TotalWindow
+
+    Kurtosis:
+        algorithm:
+            name: Moment
+            order: 4
+            rate: 500e6
+        initialise:
+            output:
+        execute:
+            input: CorrectedWaveform, TotalWindow
+        waveform: CorrectedWaveform
+        window: TotalWindow
+
+    SD:
+        algorithm:
+            name: Moment
+            order: 2
+            rate: 500e6
+        initialise:
+            output:
+        execute:
+            input: CorrectedWaveform, TotalWindow
+        waveform: CorrectedWaveform
+        window: TotalWindow
+
+    Mean:
+        algorithm:
+            name: Moment
+            order: 1
+            rate: 500e6
+        initialise:
+            output:
+        execute:
+            input: CorrectedWaveform, PulseWindow
+        waveform: CorrectedWaveform
+        window: PulseWindow
+
 
      # -----------------------------------------------------------
      # Histograms
@@ -303,7 +351,7 @@ objects:
         initialise:
             output:
         execute:
-            input: RawWaveform, CorrectedWaveform, Baseline, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart, PromptDelayChargeRatio, PromptCharge, DelayedCharge, MeanTime, PromptDelayChargeRatioCalculator, TotalSum, PulseSum, ChargeConstant, TrapezoidFilter, CFD_Trap
+            input: RawWaveform, CorrectedWaveform, Baseline, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart, PromptDelayChargeRatio, PromptCharge, DelayedCharge, MeanTime, PromptDelayChargeRatioCalculator, TotalSum, PulseSum, ChargeConstant, TrapezoidFilter, CFD_Trap, Skew, Kurtosis, SD, Mean
         finalise:
             output:
         trees:
@@ -313,7 +361,7 @@ objects:
                         int: RawWaveform
                         double: CorrectedWaveform, TrapezoidFilter
                     scalar:
-                        float: Baseline, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart, PromptDelayChargeRatio, MeanTime, PromptDelayChargeRatioCalculator, TotalSum, PulseSum, CFD_Trap
+                        float: Baseline, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart, PromptDelayChargeRatio, MeanTime, PromptDelayChargeRatioCalculator, TotalSum, PulseSum, CFD_Trap, Skew, Kurtosis, SD, Mean
                 single:
                 #    vector:
                 #        double: AverageWaveform
