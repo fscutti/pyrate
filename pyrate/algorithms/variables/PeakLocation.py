@@ -6,6 +6,8 @@
         waveform: The waveform for which the maximum will be calculated
     
     Required states:
+        initialise:
+            output:
         execute:
             input: <Waveform object>
 
@@ -14,6 +16,8 @@
     PeakLocation_CHX:
         algorithm:
             name: PeakLocation
+        initialise:
+            output:
         execute:
             input: CorrectedWaveform_CHX, Window
         waveform: CorrectedWaveform_CHX
