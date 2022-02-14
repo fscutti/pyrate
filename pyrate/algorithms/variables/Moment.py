@@ -7,6 +7,11 @@
                       degree 4 for kurtosis
         rate: (float) The digitisation rate
     
+    Optional parameters:
+        excess: (bool) Implements the excess definition of kurtosis (degree 4)
+                       Excess kurtosis = 4th Moment - 3
+                       Default setting is True
+    
     Required states:
         initialise:
             output:
