@@ -29,20 +29,20 @@ from pyrate.core.Algorithm import Algorithm
 class Sum(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(self, name, config, store, logger)
 
-    def execute(self, config):
+    def execute(self):
         """ Sum over the waveform
         """
-        window = self.store.get(config["window"])
+        window = self.store.get(self.config["window"])
         # check for invalid windows
         if window == -999 or window is None:
             Sum = -999
         else:
-            waveform = self.store.get(config["waveform"])
+            waveform = self.store.get(self.config["waveform"])
             # Sum the waveform
             Sum = sum(waveform[window[0]:window[1]])
-        self.store.put(config["name"], Sum)
+        self.store.put(self.name, Sum)
 
 # EOF
