@@ -94,8 +94,8 @@ objects:
         initialise:
             output:
         execute:
-            input: CorrectedWaveform, TotalWindow
-        waveform: CorrectedWaveform
+            input: CorrectedWaveform_CH0, TotalWindow
+        waveform: CorrectedWaveform_CH0
         window: TotalWindow
 
     PeakLocation:
@@ -105,8 +105,8 @@ objects:
         initialise:
             output:
         execute:
-            input: CorrectedWaveform, TotalWindow
-        waveform: CorrectedWaveform
+            input: CorrectedWaveform_CH0, TotalWindow
+        waveform: CorrectedWaveform_CH0
         window: TotalWindow
 
     TotalWindow:
