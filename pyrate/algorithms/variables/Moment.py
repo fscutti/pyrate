@@ -1,10 +1,10 @@
 """ Calculates the nth moment of a waveform, treating the waveform as a pdf
- 
-    ### ADD IN FORMULA HERE ###
-
+    
 
     Required parameters:
-        Add parameters here
+        degree: (int) The degree/order of the moment. e.g. degree 3 for skewness,
+                      degree 4 for kurtosis
+        rate: (float) The digitisation rate
     
     Required states:
         initialise:
@@ -14,10 +14,11 @@
     
     Example config:
     
-    Moment3_CHX:
+    Skew_CHX:
         algorithm:
             name: Moment
             degree: 3
+            rate: 500e6
         initialise:
             output:
         execute:
@@ -31,7 +32,7 @@ import math
 from pyrate.core.Algorithm import Algorithm
 
 class Moment(Algorithm):
-    __slots__ = ('degree')
+    __slots__ = ('degree', 'time_period', 'length', 'time')
 
     def __init__(self, name, config, store, logger):
         super().__init__(self, name, config, store, logger)
@@ -43,14 +44,21 @@ class Moment(Algorithm):
             sys.exit("ERROR: in config, Moment algorithm requires a degree parameter")
         self.degree = int(self.config["algorithm"]["degree"])
 
+        self.time_period = 1/float(self.config["algorithm"]["rate"])
+        self.length = None
+        self.time = None
+
     def execute(self):
         """ Calculates the nth degree moment
         """
         waveform = self.config["waveform"]
         window = self.config["window"]
-        # Fix Me 
+        # Hacky way to get the time bin mids to be used
         ########################################################################
-        time = [1,2,3,4,5] # Times or something pu that here 
+        if self.length is None or self.time is None:
+            self.length = len(waveform)
+            # Time shifted to middle of bin
+            self.time = [i * self.time_period + self.time_period/2 for i in range(self.length)]
         ########################################################################
         if window is None or window == -999:
             Moment = -999
@@ -58,10 +66,7 @@ class Moment(Algorithm):
             # First, have to make the waveform positive definite
             min_val = min(waveform)
             entries = [x - min_val for x in waveform[window[0]:window[1]]] # place the minimum value at 0 volts/ADC
-            # FIX ME
-            ####################################################################
-            bin_mids = time[window[0], window[1]] # Make them bin mids
-            ####################################################################
+            bin_mids = self.time[window[0], window[1]] # Make them bin mids
 
             # Calculate mean and variance
             entry_sum = sum(entries)
