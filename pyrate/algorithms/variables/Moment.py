@@ -1,4 +1,5 @@
-""" Calculates the nth moment of a waveform, treating the waveform as a pdf
+""" Calculates the nth moment of a waveform, treating the waveform as a  over
+    the passed in window range
     Momrnt = sum(x_i - mu)^n/N / stddev^n
     
 
