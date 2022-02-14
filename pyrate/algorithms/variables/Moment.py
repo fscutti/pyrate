@@ -82,16 +82,19 @@ class Moment(Algorithm):
 
             # Calculate mean and variance
             entry_sum = sum(entries)
-            mean = sum([i*j for i,j in zip(entries, bin_mids)]) / entry_sum # Have I made a typo here? Should it be / N ?
-            shifted_mids = [i-mean for i in bin_mids]
-            variance = sum([i*math.pow(j,2) for i, j in zip(entries, shifted_mids)]) / entry_sum
+            if entry_sum == 0:
+                Moment = -999
+            else:
+                mean = sum([i*j for i,j in zip(entries, bin_mids)]) / entry_sum # Have I made a typo here? Should it be / N ?
+                shifted_mids = [i-mean for i in bin_mids]
+                variance = sum([i*math.pow(j,2) for i, j in zip(entries, shifted_mids)]) / entry_sum
 
-            Mn = sum([i * math.pow(j, self.order) for i, j in zip(entries, shifted_mids)]) / entry_sum
-            Moment = Mn / math.pow(variance, self.order/2.0) # /2.0 because using variance instead of std dev 
+                Mn = sum([i * math.pow(j, self.order) for i, j in zip(entries, shifted_mids)]) / entry_sum
+                Moment = Mn / math.pow(variance, self.order/2.0) # /2.0 because using variance instead of std dev 
 
-            if self.excess and self.order == 4:
-                # Excess definition of Kurtosis, minus 3 because reasons
-                Moment -= 3
+                if self.excess and self.order == 4:
+                    # Excess definition of Kurtosis, minus 3 because reasons
+                    Moment -= 3
 
         self.store.put(self.name, Moment)
 
