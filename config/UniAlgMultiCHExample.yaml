@@ -90,16 +90,24 @@ objects:
     PeakHeight:
         algorithm:
             name: PeakHeight
+            window: True
+        initialise:
+            output:
         execute:
-            input: CorrectedWaveform_CH0
-        waveform: CorrectedWaveform_CH0
+            input: CorrectedWaveform, TotalWindow
+        waveform: CorrectedWaveform
+        window: TotalWindow
 
     PeakLocation:
         algorithm:
             name: PeakLocation
+            window: True
+        initialise:
+            output:
         execute:
-            input: CorrectedWaveform_CH0
-        waveform: CorrectedWaveform_CH0
+            input: CorrectedWaveform, TotalWindow
+        waveform: CorrectedWaveform
+        window: TotalWindow
 
     TotalWindow:
         algorithm:
