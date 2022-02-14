@@ -39,7 +39,7 @@ class TrapezoidFilter(Algorithm):
     __slots__ = ('rise', 'gap', 'period', 'tau', 'zeropole', 'length')
 
     def __init__(self, name, config, store, logger):
-        super().__init__(self, name, config, store, logger)
+        super().__init__(name, config, store, logger)
     
     def initialise(self):
         """ Set up the trapezoid parameters
