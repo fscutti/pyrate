@@ -42,7 +42,7 @@ class Moment(Algorithm):
     __slots__ = ('order', 'excess', 'time_period', 'length', 'time')
 
     def __init__(self, name, config, store, logger):
-        super().__init__(self, name, config, store, logger)
+        super().__init__(name, config, store, logger)
 
     def initialise(self):
         """ Prepares the config order of the moment
