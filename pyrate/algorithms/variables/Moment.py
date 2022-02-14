@@ -26,13 +26,15 @@
         window: Window_CHX
 """
 
-from pyrate.core.Algorithm import Algorithm
+import sys
 import math
+from pyrate.core.Algorithm import Algorithm
 
 class Moment(Algorithm):
+    __slots__ = ('degree')
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(self, name, config, store, logger)
 
     def initialise(self):
         """ Prepares the config degree of the moment
@@ -69,6 +71,7 @@ class Moment(Algorithm):
 
             Mn = sum([i * math.pow(j, self.degree) for i, j in zip(entries, shifted_mids)]) / entry_sum
             Moment = Mn / math.pow(variance, self.degree/2.0)
-        return Moment
+        
+        self.store.put(self.name, Moment)
 
 # EOF
