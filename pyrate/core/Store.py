@@ -12,7 +12,7 @@ class Store:
     def __init__(self, run):
         self._run = run
         self.name = self._run.name
-        self._objects = {"PERM": {}, "TRAN": {}, "READY": {}, "WRITTEN": {}}
+        self._objects = {"PERM": {}, "TRAN": {}}
         self._default = {
             None: "TRAN",
             "initialise": "PERM",
@@ -25,26 +25,19 @@ class Store:
         #     objects which are persistent throughout the run.
         # TRAN:
         #     objects which are volatile and removed after each input/event loop.
-        # READY:
-        #     map holding the boolean status of objects which are ready for the finalise step.
-        # WRITTEN:
-        #     map holding the boolean status of objects which have already been written to output.
         # ----------------------------------------------------------------------------------------
 
     def put(self, name, obj, opt=None, replace=False):
         """Objects should be put on the store only once!"""
-          
+
         if not opt:
             opt = self._default[self._run.state]
 
         if self.check(name, opt) and not replace:
-            self._run.logger.warning(
-                f"object {name} is already on the {opt} store."
-            )
+            self._run.logger.warning(f"object {name} is already on the {opt} store.")
             return
 
         self._objects[opt][name] = obj
-
 
     def get(self, name, opt=None):
         """try/except among objects."""
@@ -54,8 +47,8 @@ class Store:
         if opt:
             opts1, opts2 = [opt], [opt]
         else:
-            opts1 = ["TRAN", "PERM", "READY", "WRITTEN"]
-            opts2 = ["TRAN", "PERM", "READY", "WRITTEN"]
+            opts1 = ["TRAN", "PERM"]
+            opts2 = ["TRAN", "PERM"]
 
         # first try to retrieve the object from the store.
         while opts1:
@@ -115,8 +108,8 @@ class Store:
 
             else:
 
-                for opt in ["TRAN", "PERM", "READY", "WRITTEN"]:
-                    
+                for opt in ["TRAN", "PERM"]:
+
                     if name in self._objects[opt]:
                         return not (self._objects[opt][name] is enums.Pyrate.NONE)
 
