@@ -11,3 +11,4 @@ from pyrate.algorithms.variables.PeakHeight import PeakHeight
 from pyrate.algorithms.variables.PeakLocation import PeakLocation
 from pyrate.algorithms.variables.MeanTime import MeanTime
 from pyrate.algorithms.variables.ChargeRatio import ChargeRatio
+from pyrate.algorithms.variables.TimeConverter import TimeConverter
