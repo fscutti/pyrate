@@ -9,3 +9,4 @@ from pyrate.algorithms.variables.Window import Window
 from pyrate.algorithms.variables.PeakHeight import PeakHeight
 
 from pyrate.algorithms.variables.PeakLocation import PeakLocation
+from pyrate.algorithms.variables.MeanTime import MeanTime
