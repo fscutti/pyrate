@@ -9,14 +9,14 @@ from pyrate.core.Algorithm import Algorithm
 class AverageBinEnergy(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
-    def execute(self, config):
+    def execute(self):
 
         e = self.store.get("EVENT:nT:edepScint")
 
-        self.store.put(config["name"], e)
+        self.store.put(self.name, e)
 
 
 # EOF

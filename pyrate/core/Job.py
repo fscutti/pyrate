@@ -209,9 +209,9 @@ class Job:
 
             self._build_dependencies(obj_name, obj_attr)
 
-        #FN.pretty(self.job["configs"]["global"]["objects"])
+        # FN.pretty(self.job["configs"]["global"]["objects"])
 
-        #sys.exit()
+        # sys.exit()
 
         # -----------------------
         # Instantiate Run object

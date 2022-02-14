@@ -11,23 +11,23 @@ import ROOT as R
 class Weight(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
-    def execute(self, config):
+    def execute(self):
 
         weight = 1
 
-        if "value" in config:
+        if "value" in self.config:
             # This is the weight
             # https://www.youtube.com/watch?v=23n1qN-C6oE
-            weight = config["value"]
+            weight = self.config["value"]
 
-        elif "applycalib" in config:
+        elif "applycalib" in self.config:
 
             h_calib = None
 
-            if not self.store.check(config["applycalib"]["histname"], "PERM"):
+            if not self.store.check(self.config["applycalib"]["histname"], "PERM"):
                 # if calibration histogram is not on the PERM store, need to open
                 # a calibration file, retrieve the histogram, and put it on the store.
                 # Note that this is an operation on the PERM store, so it will be
@@ -35,32 +35,32 @@ class Weight(Algorithm):
                 # method of the Algorithm.
                 file_calib = R.TFile.Open(
                     os.path.join(
-                        config["applycalib"]["filepath"],
-                        config["applycalib"]["filename"],
+                        self.config["applycalib"]["filepath"],
+                        self.config["applycalib"]["filename"],
                     )
                 )
 
                 # WARNING: we need to copy the histogram, as, when the file goes out of scope,
                 # the histogram will be deleted by ROOT!!!
-                h_calib = copy(file_calib.Get(config["applycalib"]["histname"]))
+                h_calib = copy(file_calib.Get(self.config["applycalib"]["histname"]))
 
-                self.store.put(config["applycalib"]["histname"], h_calib, "PERM")
-                h_new = self.store.get(config["applycalib"]["histname"], "PERM")
+                self.store.put(self.config["applycalib"]["histname"], h_calib, "PERM")
+                h_new = self.store.get(self.config["applycalib"]["histname"], "PERM")
 
             else:
                 # if the calibration histogram already exist just retrieve it.
-                h_calib = self.store.get(config["applycalib"]["histname"], "PERM")
+                h_calib = self.store.get(self.config["applycalib"]["histname"], "PERM")
 
             # the calibration to choose will depend on the value of another variable
             # which we will retrieve from the TRAN store.
-            bin_value = self.store.get(config["applycalib"]["variable"]) / 10000
+            bin_value = self.store.get(self.config["applycalib"]["variable"]) / 10000
             bin_idx = h_calib.FindBin(bin_value)
 
             # This is the weight
             # https://www.youtube.com/watch?v=23n1qN-C6oE
             weight = h_calib.GetBinContent(bin_idx)
 
-        self.store.put(config["name"], weight)
+        self.store.put(self.name, weight)
 
 
 # EOF
