@@ -1,5 +1,6 @@
 """ Calculates the nth moment of a waveform, treating the waveform as a pdf
-    m_n = sum(x_i - mu)^n
+    Momrnt = sum(x_i - mu)^n/N / stddev^n
+    
 
     Required parameters:
         degree: (int) The degree/order of the moment. e.g. degree 3 for skewness,
@@ -32,7 +33,7 @@ import math
 from pyrate.core.Algorithm import Algorithm
 
 class Moment(Algorithm):
-    __slots__ = ('degree', 'time_period', 'length', 'time')
+    __slots__ = ('degree', 'excess', 'time_period', 'length', 'time')
 
     def __init__(self, name, config, store, logger):
         super().__init__(self, name, config, store, logger)
@@ -40,9 +41,13 @@ class Moment(Algorithm):
     def initialise(self):
         """ Prepares the config degree of the moment
         """
-        if "degree" not in self.config:
+        if "degree" not in self.config["algorithm"]:
             sys.exit("ERROR: in config, Moment algorithm requires a degree parameter")
         self.degree = int(self.config["algorithm"]["degree"])
+
+        self.excess = True
+        if "excess" in self.config["algorithm"]:
+            self.excess = bool(self.config["algorithm"]["excess"])
 
         self.time_period = 1/float(self.config["algorithm"]["rate"])
         self.length = None
@@ -54,6 +59,7 @@ class Moment(Algorithm):
         waveform = self.config["waveform"]
         window = self.config["window"]
         # Hacky way to get the time bin mids to be used
+        # Not in initialise cause we don't know the length at that stage
         ########################################################################
         if self.length is None or self.time is None:
             self.length = len(waveform)
@@ -75,8 +81,12 @@ class Moment(Algorithm):
             variance = sum([i*math.pow(j,2) for i, j in zip(entries, shifted_mids)]) / entry_sum
 
             Mn = sum([i * math.pow(j, self.degree) for i, j in zip(entries, shifted_mids)]) / entry_sum
-            Moment = Mn / math.pow(variance, self.degree/2.0)
-        
+            Moment = Mn / math.pow(variance, self.degree/2.0) # /2.0 because using variance instead of std dev 
+
+            if self.excess and self.degree == 4:
+                # Excess definition of Kurtosis, minus 3 because reasons
+                Moment -= 3
+
         self.store.put(self.name, Moment)
 
 # EOF
