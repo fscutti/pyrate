@@ -30,7 +30,7 @@ class Sum(Algorithm):
     __slots__ = ()
 
     def __init__(self, name, config, store, logger):
-        super().__init__(self, name, config, store, logger)
+        super().__init__(name, config, store, logger)
 
     def execute(self):
         """ Sum over the waveform
