@@ -34,6 +34,7 @@ from pyrate.core.Algorithm import Algorithm
 import sys
 
 class Baseline(Algorithm):
+    __slots__ = ()
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
