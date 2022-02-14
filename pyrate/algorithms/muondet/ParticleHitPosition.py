@@ -9,12 +9,12 @@ from pyrate.core.Algorithm import Algorithm
 class ParticleHitPosition(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
-    def execute(self, config):
+    def execute(self):
 
-        coor = config["coordinate"]
+        coor = self.config["coordinate"]
 
         pos = None
 
@@ -27,7 +27,7 @@ class ParticleHitPosition(Algorithm):
         if coor == "z":
             pos = self.store.get("EVENT:TotT:ZPosTot")[0]
 
-        self.store.put(config["name"], pos)
+        self.store.put(self.name, pos)
 
 
 # EOF

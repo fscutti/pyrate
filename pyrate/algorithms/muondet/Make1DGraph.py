@@ -18,14 +18,14 @@ import ROOT as R
 class Make1DGraph(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
-    def initialise(self, config):
+    def initialise(self):
         """Creates data structures."""
 
         i_name = self.store.get("INPUT:name", "TRAN")
-        for region, var_type in config["algorithm"]["regions"].items():
+        for region, var_type in self.config["algorithm"]["regions"].items():
             for v_type, variable in var_type.items():
                 for v_name, v_attr in variable.items():
 
@@ -61,12 +61,12 @@ class Make1DGraph(Algorithm):
                     self.store.put(obj_a_name, a, "PERM")
                     self.store.put(obj_g_name, g, "PERM")
 
-    def execute(self, config):
+    def execute(self):
         """Fills data structures."""
 
         i_name = self.store.get("INPUT:name")
 
-        for region, var_type in config["algorithm"]["regions"].items():
+        for region, var_type in self.config["algorithm"]["regions"].items():
             for v_type, variable in var_type.items():
                 for v_name, v_attr in variable.items():
 
@@ -98,19 +98,19 @@ class Make1DGraph(Algorithm):
 
                             self.store.put(obj_counter, "done")
 
-    def finalise(self, config):
+    def finalise(self):
         """Makes the plot."""
 
-        if "gather" in config["algorithm"]:
-            gather = config["algorithm"]["gather"]
+        if "gather" in self.config["algorithm"]:
+            gather = self.config["algorithm"]["gather"]
         else:
             gather = False
 
         p_collection = {}
 
-        inputs = ST.get_items(config["name"].split(":", -1)[-1])
+        inputs = ST.get_items(self.name.split(":", -1)[-1])
 
-        for r_name, var_type in config["algorithm"]["regions"].items():
+        for r_name, var_type in self.config["algorithm"]["regions"].items():
 
             for v_type, variable in var_type.items():
                 for v_name, v_attr in variable.items():
@@ -118,7 +118,7 @@ class Make1DGraph(Algorithm):
                     for i_name in inputs:
 
                         path, p_name = (
-                            f"{config['name']}",
+                            f"{self.name}",
                             f"plot_{i_name}_{r_name}_{v_name}",
                         )
 
@@ -176,7 +176,7 @@ class Make1DGraph(Algorithm):
             p_dict["canvas"].SetGridy()
 
             """
-            if not "makeoverlay" in config["algorithm"]:
+            if not "makeoverlay" in self.config["algorithm"]:
 
                 p_name = p_dict["canvas"].GetName()
 
@@ -202,7 +202,7 @@ class Make1DGraph(Algorithm):
 
             p_dict["canvas"].Close()
 
-        self.store.put(config["name"], plots, "PERM")
+        self.store.put(self.name, plots, "PERM")
 
     def prepare_graph(self, g_name, g_attributes):
 
