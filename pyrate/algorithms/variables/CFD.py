@@ -53,7 +53,7 @@
 from pyrate.core.Algorithm import Algorithm
 
 class CFD(Algorithm):
-    __slots__ = ()
+    __slots__ = ('delay', 'scale', 'cfd_threshold', 'savecfd')
 
     def __init__(self, name, store, logger):
         super().__init__(name, store, logger)
@@ -62,29 +62,17 @@ class CFD(Algorithm):
         """ Set up the CFD and trapezoid parameters
         """
         # CFD parameters
-        delay = int(config["algorithm"]["delay"])
-        scale = int(config["algorithm"]["scale"])
-        cfd_threshold = float(config["algorithm"]["cfd_threshold"])
+        self.delay = int(config["algorithm"]["delay"])
+        self.scale = int(config["algorithm"]["scale"])
+        self.cfd_threshold = float(config["algorithm"]["cfd_threshold"])
         if "savecfd" in config["algorithms"]:
-            savecfd = bool(config["algorithm"]["savecfd"])
+            self.savecfd = bool(config["algorithm"]["savecfd"])
         else:
-            savecfd = False
-
-        self.store.put(f"{config['name']}:delay", delay)
-        self.store.put(f"{config['name']}:scale", scale)
-        self.store.put(f"{config['name']}:cfd_threshold", cfd_threshold)
-        self.store.put(f"{config['name']}:savecfd", savecfd)
-
+            self.savecfd = False
 
     def execute(self, config):
         """ Caclulates the waveform CFD
         """
-        # Get the parameters and mode
-        delay = self.store.get(f"{config['name']}:delay")
-        scale = self.store.get(f"{config['name']}:scale")
-        cfd_threshold = self.store.get(f"{config['name']}:cfd_threshold")
-        savecfd = self.store.get(f"{config['name']}:savecffd")
-
         # Get the actual waveform, finally.
         waveform = self.store.get(config["waveform"])
         waveform = self.store.get(config["waveform"])
@@ -100,9 +88,9 @@ class CFD(Algorithm):
         cross_threshold = False
         CFDTime = -999
         for i in range(length):
-            cfd.append(scale * self._v(waveform, i) - self._v(waveform, i-delay))
+            cfd.append(self.scale * self._v(waveform, i) - self._v(waveform, i-self.delay))
             if not cross_threshold:
-                cross_threshold = cfd[i] > cfd_threshold
+                cross_threshold = cfd[i] > self.cfd_threshold
             elif CFDTime == -999:
                 # Ok, the threshold has been crossed
                 # (and we only want to calculate it once, but still want to get 
@@ -111,7 +99,7 @@ class CFD(Algorithm):
                     # Now we've crosssed the 0 point
                     f = cfd[i-1] / (cfd[i-1] - cfd[i])
                     CFDTime = i-1+f
-                    if not savecfd:
+                    if not self.savecfd:
                         # We're done here :)
                         break
         
@@ -120,7 +108,7 @@ class CFD(Algorithm):
         #     self.store.put(f"{config['name']}:trapezoid", trap)
         #     # CFDTime -= (gap+rise)
         self.store.put(config["name"], CFDTime)
-        if savecfd:
+        if self.savecfd:
             self.store.put(f"{config['name']}Trace", cfd)
 
     def _v(self, waveform, i):
