@@ -3,6 +3,7 @@ This version of the reader uses memory mapping to read the file:
 https://docs.python.org/3.0/library/mmap.html.
 """
 import mmap
+
 # import numpy as np
 
 from pyrate.core.Reader import Reader
@@ -101,7 +102,11 @@ class ReaderWaveDumpMMAP(Reader):
             # Get the string of the header variable
             line = self._mmf.readline().decode("utf-8").split(variable)[-1]
             # Get rid of the junk, and type cast to int depedning on base
-            value = int(line.split(" ")[-1], 16) if "0x" in line else int(line.split(" ")[-1])
+            value = (
+                int(line.split(" ")[-1], 16)
+                if "0x" in line
+                else int(line.split(" ")[-1])
+            )
 
         else:
             self._move(variable, "bkw")
