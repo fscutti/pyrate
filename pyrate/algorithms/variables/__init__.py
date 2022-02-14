@@ -18,3 +18,4 @@ from pyrate.algorithms.variables.TimeDifference import TimeDifference
 from pyrate.algorithms.variables.CFD import CFD
 from pyrate.algorithms.variables.TrapezoidFilter import TrapezoidFilter
 from pyrate.algorithms.variables.Moment import Moment
+from pyrate.algorithms.variables.Calculator import Calculator
