@@ -40,7 +40,7 @@ class ChargeConstant(Algorithm):
     __slots__ = ()
 
     def __init__(self, name, config, store, logger):
-        super().__init__(self, name, config, store, logger)
+        super().__init__(name, config, store, logger)
     
     def initialise(self):
         """ Prepare the constant for calculating charge
