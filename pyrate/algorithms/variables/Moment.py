@@ -78,7 +78,7 @@ class Moment(Algorithm):
             # First, have to make the waveform positive definite
             min_val = min(waveform)
             entries = [x - min_val for x in waveform[window[0]:window[1]]] # place the minimum value at 0 volts/ADC
-            bin_mids = self.time[window[0], window[1]] # Make them bin mids
+            bin_mids = self.time[window[0]:window[1]] # Make them bin mids
 
             # Calculate mean and variance
             entry_sum = sum(entries)
