@@ -3,12 +3,12 @@
     
 
     Required parameters:
-        degree: (int) The degree/order of the moment. e.g. degree 3 for skewness,
-                      degree 4 for kurtosis
+        order: (int) The order of the moment. e.g. order 3 for skewness,
+                      order 4 for kurtosis
         rate: (float) The digitisation rate
     
     Optional parameters:
-        excess: (bool) Implements the excess definition of kurtosis (degree 4)
+        excess: (bool) Implements the excess definition of kurtosis (order 4)
                        Excess kurtosis = 4th Moment - 3
                        Default setting is True
     
@@ -23,7 +23,7 @@
     Skew_CHX:
         algorithm:
             name: Moment
-            degree: 3
+            order: 3
             rate: 500e6
         initialise:
             output:
@@ -38,17 +38,17 @@ import math
 from pyrate.core.Algorithm import Algorithm
 
 class Moment(Algorithm):
-    __slots__ = ('degree', 'excess', 'time_period', 'length', 'time')
+    __slots__ = ('order', 'excess', 'time_period', 'length', 'time')
 
     def __init__(self, name, config, store, logger):
         super().__init__(self, name, config, store, logger)
 
     def initialise(self):
-        """ Prepares the config degree of the moment
+        """ Prepares the config order of the moment
         """
-        if "degree" not in self.config["algorithm"]:
-            sys.exit("ERROR: in config, Moment algorithm requires a degree parameter")
-        self.degree = int(self.config["algorithm"]["degree"])
+        if "order" not in self.config["algorithm"]:
+            sys.exit("ERROR: in config, Moment algorithm requires a order parameter")
+        self.order = int(self.config["algorithm"]["order"])
 
         self.excess = True
         if "excess" in self.config["algorithm"]:
@@ -59,7 +59,7 @@ class Moment(Algorithm):
         self.time = None
 
     def execute(self):
-        """ Calculates the nth degree moment
+        """ Calculates the nth order moment
         """
         waveform = self.config["waveform"]
         window = self.config["window"]
@@ -85,10 +85,10 @@ class Moment(Algorithm):
             shifted_mids = [i-mean for i in bin_mids]
             variance = sum([i*math.pow(j,2) for i, j in zip(entries, shifted_mids)]) / entry_sum
 
-            Mn = sum([i * math.pow(j, self.degree) for i, j in zip(entries, shifted_mids)]) / entry_sum
-            Moment = Mn / math.pow(variance, self.degree/2.0) # /2.0 because using variance instead of std dev 
+            Mn = sum([i * math.pow(j, self.order) for i, j in zip(entries, shifted_mids)]) / entry_sum
+            Moment = Mn / math.pow(variance, self.order/2.0) # /2.0 because using variance instead of std dev 
 
-            if self.excess and self.degree == 4:
+            if self.excess and self.order == 4:
                 # Excess definition of Kurtosis, minus 3 because reasons
                 Moment -= 3
 
