@@ -33,6 +33,7 @@ import numpy as np
 from pyrate.core.Algorithm import Algorithm
 
 class RawWaveform(Algorithm):
+    __slots__ = ('reader')
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
