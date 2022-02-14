@@ -33,7 +33,6 @@ import numpy as np
 from pyrate.core.Algorithm import Algorithm
 
 class RawWaveform(Algorithm):
-    __slots__ = ()
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
@@ -52,22 +51,18 @@ class RawWaveform(Algorithm):
         else:
             reader = self.store.get(f"INPUT:READER:GROUP:name")
         
-        # Store the reader in a unique way to be used later (PERM store)
-        self.store.put(f"{self.name}:reader", reader)
+        self.reader = reader
     
     def execute(self):
         """ Gets the raw trace from the reader and puts it on the store
         """
-        # First find out what reader we're using
-        reader = self.store.get(f"{self.name}:reader")
-
-        if reader == "ReaderWaveDumpMMAP":
+        if self.reader == "ReaderWaveDumpMMAP":
             RawWaveform = self.store.get(self.config["waveform_wd"])
-        elif reader == "ReaderCAEN1730_ZLE" or reader == "ReaderCAEN1730_RAW":
+        elif self.reader == "ReaderCAEN1730_ZLE" or self.reader == "ReaderCAEN1730_RAW":
             RawWaveform = self.store.get(self.config["waveform_md"])
-        elif reader == "ReaderBlueTongueMMAP":
+        elif self.reader == "ReaderBlueTongueMMAP":
             RawWaveform = self.store.get(self.config["waveform_bt"])
-        elif reader == "ReaderWaveCatcherMMAP":
+        elif self.reader == "ReaderWaveCatcherMMAP":
             sys.exit("Uh oh, WaveCatcher doesn't have a RawWaveform...")
 
         # convert to numpy array
