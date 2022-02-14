@@ -11,19 +11,19 @@ from pyrate.core.Algorithm import Algorithm
 class SimulatedWaveformsGetter(Algorithm):
     __slots__ = ()
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
-    def execute(self, config):
+    def execute(self):
 
         waveform = {"energy": [], "time": []}
 
-        wf_map = self.store.get(config["waveform_map"])
+        wf_map = self.store.get(self.config["waveform_map"])
 
-        if config["pmt_name"] in wf_map:
-            waveform = wf_map[config["pmt_name"]]
+        if self.config["pmt_name"] in wf_map:
+            waveform = wf_map[self.config["pmt_name"]]
 
-        self.store.put(config["name"], waveform)
+        self.store.put(self.name, waveform)
 
 
 # EOF

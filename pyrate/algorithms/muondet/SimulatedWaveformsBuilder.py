@@ -11,8 +11,8 @@ from pyrate.core.Algorithm import Algorithm
 class SimulatedWaveformsBuilder(Algorithm):
     __slots__ = ("pmt_map", "pmt_intervals", "pc_width", "pc_depth")
 
-    def __init__(self, name, store, logger):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
         self.pc_width = 60.0
         self.pc_depth = 40.0
@@ -53,18 +53,18 @@ class SimulatedWaveformsBuilder(Algorithm):
                 position["z"] + self.pc_width,
             ]
 
-    def execute(self, config):
+    def execute(self):
 
         waveforms = {}
         for pmt, position in self.pmt_intervals.items():
             waveforms[pmt] = {"energy": [], "time": []}
 
-        x_hits = self.store.get(config["hits_x_positions"])
-        y_hits = self.store.get(config["hits_y_positions"])
-        z_hits = self.store.get(config["hits_z_positions"])
+        x_hits = self.store.get(self.config["hits_x_positions"])
+        y_hits = self.store.get(self.config["hits_y_positions"])
+        z_hits = self.store.get(self.config["hits_z_positions"])
 
-        energy_hits = self.store.get(config["energy"])
-        time_hits = self.store.get(config["time"])
+        energy_hits = self.store.get(self.config["energy"])
+        time_hits = self.store.get(self.config["time"])
 
         for pmt, position in self.pmt_intervals.items():
             for idxHit, (x, y, z) in enumerate(zip(x_hits, y_hits, z_hits)):
@@ -74,7 +74,7 @@ class SimulatedWaveformsBuilder(Algorithm):
                     waveforms[pmt]["energy"].append(energy_hits[idxHit])
                     waveforms[pmt]["time"].append(time_hits[idxHit])
 
-        self.store.put(config["name"], waveforms)
+        self.store.put(self.name, waveforms)
 
     def hitIsCompatible(self, hit_position, interval):
         """Check if the position of the hit is compatible with a given PMT photocathode position."""
