@@ -14,3 +14,4 @@ from pyrate.algorithms.variables.ChargeRatio import ChargeRatio
 from pyrate.algorithms.variables.TimeConverter import TimeConverter
 from pyrate.algorithms.variables.TimeDifference import TimeDifference
 from pyrate.algorithms.variables.CFD import CFD
+from pyrate.algorithms.variables.TrapezoidFilter import TrapezoidFilter
