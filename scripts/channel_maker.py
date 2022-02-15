@@ -44,8 +44,16 @@
 
     Special example for complicated objects like TreeMaker where you only want
     part of the internal structure to be expanded into channels. Here in the
-    TreeMaker example, only the trees will be expanded into channel version
-    Channel_X contains the 'channels' parameter.
+    TreeMaker example, only the trees that have a valid channel key in the name
+    and contain a 'channels' parameter will be properly expanded.
+    E.g. 
+    trees:
+        - Channel_X:
+            channels: global
+    Will be expanded, but 
+        - Channel_X:
+            event:
+    won't be expanded.
 
     TreeMaker:
         algorithm:
