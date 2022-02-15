@@ -60,22 +60,28 @@ class Charge(Algorithm):
         impedance = self.config["algorithm"]["impedance"]
         sample_rate = float(self.config["algorithm"]["rate"])
         charge_units = self.config["algorithm"]["unit"]
+
         if charge_units in q_units:
             charge_units = q_units[charge_units]
+
         else:
             try:
                 charge_units = float(charge_units)
+
             except:
                 sys.exit(
                     "ERROR: In algorithm Charge, unit parameter could not be converted to a float."
                 )
 
         waveform_units = self.config["algorithm"]["waveform_unit"]
+
         if waveform_units in wf_units:
             waveform_units = wf_units[waveform_units]
+
         else:
             try:
                 waveform_units = float(waveform_units)
+
             except:
                 sys.exit(
                     "ERROR: In algorithm Charge, waveform_unit could not be converted to a float."
@@ -86,13 +92,17 @@ class Charge(Algorithm):
     def execute(self):
         """Calculates the charge by summing over the waveform"""
         window = self.store.get(self.config["window"])
+
         # check for invalid windows
         if window == -999 or window is None:
             Charge = -999
+
         else:
             waveform = self.store.get(self.config["waveform"])
+
             # Calcualte the actual charge over the window
             Charge = sum(waveform[window[0] : window[1]]) * self.charge_constant
+
         self.store.put(self.name, Charge)
 
 
