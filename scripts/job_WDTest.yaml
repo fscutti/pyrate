@@ -10,7 +10,7 @@ inputs:
             emax: -1
 
         path:
-          - ../test/data/WDTestData.txt
+          - PYRATE/test/data/WDTestData.txt
 
 configs:
     config2:
