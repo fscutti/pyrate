@@ -10,7 +10,7 @@ inputs:
             emax: -1
 
         path:
-          - ../test/data/BTTestData.dat
+          - PYRATE/test/data/BTTestData.dat
 
 configs:
     config2:

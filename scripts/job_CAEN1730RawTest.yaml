@@ -11,7 +11,7 @@ inputs:
 
         reader: ReaderCAEN1730_RAW
         path:
-          - ../test/data/1730_RAWTest-Board_0-001.dat
+          - PYRATE/test/data/1730_RAWTest-Board_0-001.dat
 
 configs:
     config2:
