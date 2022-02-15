@@ -164,9 +164,12 @@ class Job:
             self.job["outputs"][o_name] = {"files": []}
 
             o_attr["path"] = FN.find_env(o_attr["path"], "PYRATE")
+
             outdir = os.path.dirname(os.path.abspath(o_attr["path"]))
+
             if not os.path.exists(outdir):
                 sys.exit("ERROR: Output directory does not exist, please create it.")
+
             if not os.path.isdir(outdir):
                 sys.exist("ERROR: Output path is a file, not a directory.")
 
@@ -209,9 +212,9 @@ class Job:
 
             self._build_dependencies(obj_name, obj_attr)
 
-        # FN.pretty(self.job["configs"]["global"]["objects"])
+        #FN.pretty(self.job["configs"]["global"]["objects"])
 
-        # sys.exit()
+        #sys.exit()
 
         # -----------------------
         # Instantiate Run object
