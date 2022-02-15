@@ -94,7 +94,7 @@ objects:
         execute:
             output:
 
-    PulseWindow:
+    PulseWindow_CH0:
         algorithm:
             name: Window
             left: 50
@@ -105,7 +105,7 @@ objects:
             input: PulseStart_CH0
         pivot: PulseStart_CH0
 
-    PromptWindow:
+    PromptWindow_CH0:
         algorithm:
             name: Window
             left: 10
@@ -113,10 +113,10 @@ objects:
         initialise:
             output:
         execute:
-            input: PeakLocation
-        pivot: PeakLocation
+            input: PeakLocation_CH0
+        pivot: PeakLocation_CH0
 
-    DelayedWindow:
+    DelayedWindow_CH0:
         algorithm:
             name: Window
             left: 20
@@ -125,12 +125,12 @@ objects:
         initialise:
             output:
         execute:
-            input: PromptWindow
-        pivot: PromptWindow
+            input: PromptWindow_CH0
+        pivot: PromptWindow_CH0
 
     ############################## VARIABLES #################################
 
-    PeakHeight:
+    PeakHeight_CH0:
         algorithm:
             name: PeakHeight
             window: True
@@ -141,7 +141,7 @@ objects:
         waveform: CorrectedWaveform_CH0
         window: TotalWindow
 
-    PeakLocation:
+    PeakLocation_CH0:
         algorithm:
             name: PeakLocation
             window: True
@@ -152,7 +152,7 @@ objects:
         waveform: CorrectedWaveform_CH0
         window: TotalWindow
 
-    PromptCharge:
+    PromptCharge_CH0:
         algorithm:
             name: Charge
             impedance: 50
@@ -164,9 +164,9 @@ objects:
         execute:
             input: CorrectedWaveform_CH0, PromptWindow_CH0
         waveform: CorrectedWaveform_CH0
-        window: PromptWindow
+        window: PromptWindow_CH0
 
-    DelayedCharge:
+    DelayedCharge_CH0:
         algorithm:
             name: Charge
             impedance: 50
@@ -176,11 +176,11 @@ objects:
         initialise:
             output:
         execute:
-            input: CorrectedWaveform_CH0, DelayedWindow
+            input: CorrectedWaveform_CH0, DelayedWindow_CH0
         waveform: CorrectedWaveform_CH0
-        window: DelayedWindow
+        window: DelayedWindow_CH0
 
-    TotalCharge:
+    TotalCharge_CH0:
         algorithm:
             name: Charge
             impedance: 50
@@ -194,7 +194,7 @@ objects:
         waveform: CorrectedWaveform_CH0
         window: TotalWindow
 
-    PulseCharge:
+    PulseCharge_CH0:
         algorithm:
             name: Charge
             impedance: 50
@@ -204,9 +204,9 @@ objects:
         initialise:
             output:
         execute:
-            input: CorrectedWaveform_CH0, PulseWindow
+            input: CorrectedWaveform_CH0, PulseWindow_CH0
         waveform: CorrectedWaveform_CH0
-        window: PulseWindow
+        window: PulseWindow_CH0
 
     PulseStart_CH0:
         algorithm:
@@ -246,38 +246,38 @@ objects:
     #         input: TrapezoidWaveform
     #     waveform: TrapezoidWaveform
 
-    PromptDelayChargeRatio:
+    PromptDelayChargeRatio_CH0:
         algorithm:
             name: ChargeRatio
         execute:
-            input: PromptCharge, DelayCharge
-        charge1: PromptCharge
-        charge2: DelayedCharge
+            input: PromptCharge_CH0, DelayedCharge_CH0
+        charge1: PromptCharge_CH0
+        charge2: DelayedCharge_CH0
 
-    MeanTime:
+    MeanTime_CH0:
         algorithm:
             name: MeanTime
             rate: 500e6
         initialise:
             input:
         execute:
-            input: CorrectedWaveform_CH0, PulseWindow
+            input: CorrectedWaveform_CH0, PulseWindow_CH0
         waveform: CorrectedWaveform_CH0
-        window: PulseWindow
+        window: PulseWindow_CH0
 
-    PromptDelayChargeRatioCalculator:
+    PromptDelayChargeRatioCalculator_CH0:
         algorithm:
             name: Calculator
         equation: A+(A+B)*(C+D)
         variables:
           A: 1
           B: 11.5
-          C: PromptCharge
+          C: PromptCharge_CH0
           D: 3e-1
         initialise:
             input:
         execute:
-            input: PromptCharge
+            input: PromptCharge_CH0
 
     PulseTime_CH0:
         algorithm:
@@ -310,7 +310,7 @@ objects:
         time2: PulseTime_CH1
 
 
-    Skew:
+    Skew_CH0:
         algorithm:
             name: Moment
             order: 3
@@ -322,7 +322,7 @@ objects:
         waveform: CorrectedWaveform_CH0
         window: TotalWindow
 
-    Kurtosis:
+    Kurtosis_CH0:
         algorithm:
             name: Moment
             order: 4
@@ -334,7 +334,7 @@ objects:
         waveform: CorrectedWaveform_CH0
         window: TotalWindow
 
-    SD:
+    SD_CH0:
         algorithm:
             name: Moment
             order: 2
@@ -346,7 +346,7 @@ objects:
         waveform: CorrectedWaveform_CH0
         window: TotalWindow
 
-    Mean:
+    Mean_CH0:
         algorithm:
             name: Moment
             order: 1
@@ -354,9 +354,9 @@ objects:
         initialise:
             output:
         execute:
-            input: CorrectedWaveform_CH0, PulseWindow
+            input: CorrectedWaveform_CH0, PulseWindow_CH0
         waveform: CorrectedWaveform_CH0
-        window: PulseWindow
+        window: PulseWindow_CH0
 
     
 
@@ -379,7 +379,7 @@ objects:
         initialise:
             output:
         execute:
-            input: RawWaveform_CH0, CorrectedWaveform_CH0, Baseline_CH0, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart_CH0, PulseStart_CH1, PulseTime_CH0, PulseTime_CH1, PromptDelayChargeRatio, PromptCharge, DelayedCharge, MeanTime, PromptDelayChargeRatioCalculator, TimeDifference_CH01, Skew, Kurtosis, SD, Mean
+            input: RawWaveform_CH0, CorrectedWaveform_CH0, Baseline_CH0, PeakHeight_CH0, PeakLocation_CH0, PulseCharge_CH0, TotalCharge_CH0, PulseStart_CH0, PulseStart_CH1, PulseTime_CH0, PulseTime_CH1, PromptDelayChargeRatio_CH0, PromptCharge_CH0, DelayedCharge_CH0, MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0, TimeDifference_CH01, Skew_CH0, Kurtosis_CH0, SD_CH0, Mean_CH0
         finalise:
             output:
         trees:
@@ -389,7 +389,15 @@ objects:
                         int: RawWaveform_CH0
                         double: CorrectedWaveform_CH0
                     scalar:
-                        float: Baseline_CH0, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart_CH0, PulseStart_CH1, PulseTime_CH0, PulseTime_CH1, PromptDelayChargeRatio, MeanTime, PromptDelayChargeRatioCalculator, TimeDifference_CH01, Skew, Kurtosis, SD, Mean
+                        float: Baseline_CH0, PeakHeight_CH0, PeakLocation_CH0, PulseCharge_CH0, TotalCharge_CH0, PulseStart_CH0, PulseTime_CH0, PromptDelayChargeRatio_CH0, MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0, Skew_CH0, Kurtosis_CH0, SD_CH0, Mean_CH0
                 #single:
+            - Channel_1:
+                event:
+                    scalar:
+                        float: PulseStart_CH1, PulseTime_CH1 
+            - MultiChannel:
+                event:
+                    scalar:
+                        float: TimeDifference_CH01 
                 #    vector:
                 #        double: AverageWaveform_CHX
