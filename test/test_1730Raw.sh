@@ -1,2 +1,2 @@
 
-python3.8 $PYRATE/scripts/pyrate -j $PYRATE/scripts/job_CAEN1730RawTest.yaml
+python3 $PYRATE/scripts/pyrate -j $PYRATE/scripts/job_CAEN1730RawTest.yaml
