@@ -18,10 +18,9 @@ class ReaderCAEN1730_RAW(Reader):
         "_mmfSize",
         "_eventPos",
         "_readIdx",
-        "_currentEventTimestamp",
-        "_currentChannelMask",
-        "_currentEventWaveforms",
-        "_currentEventChannelRead",
+        "_inEvt",        
+        "_evtTime",
+        "_evtWaveforms",
     ]
 
     def __init__(self, name, store, logger, f_name, structure):
@@ -35,12 +34,8 @@ class ReaderCAEN1730_RAW(Reader):
         self._mmf = mmap.mmap(self.f.fileno(), length=0, access=mmap.ACCESS_READ)
         self.f.close()
 
-        self.eventPos = []
-        self._currentEventTimestamp = 0
-        self._currentChannelMask = 0
-        self._currentEventWaveforms = {}
-        self._currentEventChannelRead = []
-        self._size = self._mmf.size()
+        self._eventPos = []
+        self._mmfSize = self._mmf.size()
 
     def offload(self):
         self.is_loaded = False
@@ -55,8 +50,8 @@ class ReaderCAEN1730_RAW(Reader):
             # Split the request
             path = self._break_path(name)
 
-            # Get the event value
-            if path["variable"] == "timestamp":
+            #Get the event value
+            if path["variable"]=="timestamp":
                 value = self._currentEventTimestamp
             elif path["variable"] == "waveform":
                 value = self._get_waveform(path["ch"])
@@ -111,18 +106,22 @@ class ReaderCAEN1730_RAW(Reader):
 
     def _get_waveform(self, ch):
         """Reads variable from the event and puts it in the transient store."""
-        # If the channel is not in the event return an empty list
-        # ToDo: Confirm this behaviour in pyrate
-        if ch not in self._currentEventChannelRead.keys():
+        #If the channel is not in the event return an empty list
+        #ToDo: Confirm this behaviour in pyrate
+        if(ch not in self._inEvt.keys()):
             return [0]
 
-        # Return the waveform and mark that this channel has been read
-        self._currentEventChannelRead[ch] = True
-        return self._currentEventWaveforms[ch]
+        return self._evtWaveforms[ch]
 
     def _read_event(self):
-        self._mmf.seek(self._eventPos[self._idx], 0)
-        # Read in the event info from the header
+        #Reset event
+        self._evtTime = 2**64
+        self._inEvt = {};
+        self._evtWaveforms = {}
+        
+        self._mmf.seek(self._eventPos[self._idx],0)
+        #Read in the event info from the header
+
         head1 = self._mmf.read(4)
         head1 = int.from_bytes(head1, "little")
         eventSize = head1 & 0b00001111111111111111111111111111
@@ -142,29 +141,25 @@ class ReaderCAEN1730_RAW(Reader):
         head4 = int.from_bytes(head4, "little")
         TTT = head4
 
-        self._currentEventTimestamp = pattern << 32 + TTT
-        self._currentChannelMask = (channelMaskHi << 8) + (channelMaskLo)
-
-        # Figure out what channels are in the event
+        self._evtTime = (pattern << 32) + TTT
+        channelMask = (channelMaskHi << 8) + (channelMaskLo)
+        
+        #Figure out what channels are in the event
         numCh = 0
-        self._currentEventChannelRead = {}
-        self._currentEventWaveforms = {}
+
         for i in range(15):
-            if self._currentChannelMask & (1 << i):
+            if channelMask & (1 << i):
                 numCh += 1
-                self._currentEventChannelRead[i] = False
-                self._currentEventWaveforms[i] = []
+                self._inEvt[i] = True
+                self._evtWaveforms[i] = []
 
-        recordSize = int(2 * (eventSize - 4) / numCh)
+        recordSize = int(2*(eventSize - 4)/numCh)
+        #Read in the waveform data
 
-        # Read in the waveform data
         for i in range(15):
-            if self._currentChannelMask & (1 << i):
+            if channelMask & (1 << i):
                 for j in range(recordSize):
                     sample = self._mmf.read(2)
-                    self._currentEventWaveforms[i].append(
-                        int.from_bytes(sample, "little")
-                    )
-
+                    self._evtWaveforms[i].append(int.from_bytes(sample,"little"))
 
 # EOF

@@ -17,7 +17,7 @@ objects:
          format: "asdf"
        execute:
          input:
-       waveform: EVENT:board_0:ch_0:waveform
+       waveform: EVENT:board_0:ch_4:waveform
 
      RawWaveform_CH1:
        algorithm:
@@ -25,7 +25,7 @@ objects:
          format: "asdf"
        execute:
          input:
-       waveform: EVENT:board_1:ch_0:waveform
+       waveform: EVENT:board_0:ch_5:waveform
 
 
      # -----------------------------------------------------------

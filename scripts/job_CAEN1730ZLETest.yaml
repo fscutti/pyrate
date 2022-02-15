@@ -1,0 +1,29 @@
+inputs:
+  Data:
+        # samples: 
+        #    tags: 
+        #        any:
+        #        groups:
+    eslices:
+      emin: 0
+      emax: -1
+
+    reader: ReaderCAEN1730_ZLE
+    path:
+    - PYRATE/test/data/1730_ZLETest-Board_0-001.dat
+
+configs:
+  config2:
+    path: PYRATE/config
+    tags:
+      any: UniAlgMultiCHExample
+
+
+outputs:
+  ZLETest:
+    path: PYRATE/test     # Save in any directory you want :)
+    format: .root
+    targets:
+    - TreeMaker: Data
+
+# EOF

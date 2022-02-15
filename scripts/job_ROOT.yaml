@@ -1,33 +1,32 @@
---- 
-inputs: 
-   Data:
-       samples: 
-           tags: 
-               any: SmallMuon
-               groups: ch0, ch1, ch2
-       eslices: 
-           emin: 0
-           emax: -1
-       path:
-          - PYRATE/myNotebooks/myData/MuonDetData/groups/ch0
-          - PYRATE/myNotebooks/myData/MuonDetData/groups/ch1
-          - PYRATE/myNotebooks/myData/MuonDetData/groups/ch2
-       structure:
-           tree: SmallMuon/EventData
-   
+inputs:
+  Data:
+    samples:
+      tags:
+        any: SmallMuon
+        groups: ch0, ch1, ch2
+    eslices:
+      emin: 0
+      emax: -1
+    path:
+    - PYRATE/myNotebooks/myData/MuonDetData/groups/ch0
+    - PYRATE/myNotebooks/myData/MuonDetData/groups/ch1
+    - PYRATE/myNotebooks/myData/MuonDetData/groups/ch2
+    structure:
+      tree: SmallMuon/EventData
+
 
 configs:
-    config2:
-       path:  /Users/fscutti/pyrate/config
-       tags: 
-           any: objects
+  config2:
+    path: /Users/fscutti/pyrate/config
+    tags:
+      any: objects
 
 
 outputs:
-    WCTest1:
-        path: PYRATE/myNotebooks/myOutput
-        format: .root
-        targets:
-          - testingReader: Data
-    
+  WCTest1:
+    path: PYRATE/myNotebooks/myOutput
+    format: .root
+    targets:
+    - testingReader: Data
+
 # EOF

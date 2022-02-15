@@ -1,107 +1,102 @@
---- 
-   
 inputs:
 
-   Neutron:
-        samples:
-          tags: 
-              any: neutron
-              all: pos5
-        eslices:
-            emin: 0
-            emax: -1
-        path:
-           - /Users/fscutti/simulation/run/WaveformSim/Tests
-        structure:
-            tree: nT
-        color: "R:1.| G:0.| B:1."
-        
-   NeutronDeg45:
-        samples:
-            tags: 
-                any: pos5
-        eslices:
-            emin: 0
-            emax: -1
-        path:
-           - /Users/fscutti/simulation/run/WaveformSim/deg45
-        structure:
-            tree: nT
-        color: "R:0.| G:0.0| B:1.0"
-   
-   
-   NeutronRadPi8:
-        samples:
-            tags: 
-                any: pos5
-        eslices:
-            emin: 0
-            emax: -1
-        path:
-           - /Users/fscutti/simulation/run/WaveformSim/radPi8
-        structure:
-            tree: nT
-        color: "R:0.0| G:0.1| B:0.9"
+  Neutron:
+    samples:
+      tags:
+        any: neutron
+        all: pos5
+    eslices:
+      emin: 0
+      emax: -1
+    path:
+    - /Users/fscutti/simulation/run/WaveformSim/Tests
+    structure:
+      tree: nT
+    color: R:1.| G:0.| B:1.
+  NeutronDeg45:
+    samples:
+      tags:
+        any: pos5
+    eslices:
+      emin: 0
+      emax: -1
+    path:
+    - /Users/fscutti/simulation/run/WaveformSim/deg45
+    structure:
+      tree: nT
+    color: R:0.| G:0.0| B:1.0
+  NeutronRadPi8:
+    samples:
+      tags:
+        any: pos5
+    eslices:
+      emin: 0
+      emax: -1
+    path:
+    - /Users/fscutti/simulation/run/WaveformSim/radPi8
+    structure:
+      tree: nT
+    color: R:0.0| G:0.1| B:0.9
 
-   AmBe:
-        samples:
-            tags: 
-                any: pos5
-        eslices:
-            emin: 0
-            emax: -1
-        path:
-           - /Users/fscutti/simulation/run/WaveformSim/AmBe
-        structure:
-            tree: nT
-            color: "R:0.0| G:0.8| B:0.0"
+  AmBe:
+    samples:
+      tags:
+        any: pos5
+    eslices:
+      emin: 0
+      emax: -1
+    path:
+    - /Users/fscutti/simulation/run/WaveformSim/AmBe
+    structure:
+      tree: nT
+      color: R:0.0| G:0.8| B:0.0
 
-   Gamma:
-       samples:
-         tags: 
-             any: gamma
-       eslices:
-           emin: 0
-           emax: -1
-       path:
-          - /Users/fscutti/simulation/run/WaveformSim/Tests
-       structure:
-           tree: nT
-       color: "R:1.| G:0.| B:0."
+  Gamma:
+    samples:
+      tags:
+        any: gamma
+    eslices:
+      emin: 0
+      emax: -1
+    path:
+    - /Users/fscutti/simulation/run/WaveformSim/Tests
+    structure:
+      tree: nT
+    color: R:1.| G:0.| B:0.
 
-   Photons:
-       samples:
-         tags: 
-             any: gamma
-       eslices:
-           emin: 0
-           emax: -1
-       path:
-          - /Users/fscutti/simulation/run/WaveformSim/Tests
-       structure:
-           tree: nT
-       color: "R:0.| G:0.| B:1."
+  Photons:
+    samples:
+      tags:
+        any: gamma
+    eslices:
+      emin: 0
+      emax: -1
+    path:
+    - /Users/fscutti/simulation/run/WaveformSim/Tests
+    structure:
+      tree: nT
+    color: R:0.| G:0.| B:1.
 
 configs:
-    muondetobjs:
-       path:  /Users/fscutti/pyrate/config/muondet
-       tags: 
-           any: objects
-    muondetregions:
-       path:  /Users/fscutti/pyrate/config/muondet
-       tags: 
-           any: analysis
+  muondetobjs:
+    path: /Users/fscutti/pyrate/config/muondet
+    tags:
+      any: objects
+  muondetregions:
+    path: /Users/fscutti/pyrate/config/muondet
+    tags:
+      any: analysis
 
 
 outputs:
     #SimulationPlotsEnergyVsPhotonsMultineutron:
-    TestFile:
-        path: /Users/fscutti/pyrate/myNotebooks/myOutput
-        format: .root
-        targets:
+  TestFile:
+    path: /Users/fscutti/pyrate/myNotebooks/myOutput
+    format: .root
+    targets:
           #- muonDetEnergyCaliB: NeutronRadPi8, NeutronDeg45, Neutron, AmBe
           #- muonDetEnergyCaliB: Gamma, Neutron
-          - muonDetPlot1D: Gamma, Neutron, Photons
+    - muonDetPlot1D: Gamma, Neutron, Photons
           #- muonDetPlot1D: Neutron, Photons
           #- muonDetPlot2D: Neutron
           #- muonDetPlot2D: Gamma, Photons, Neutron
