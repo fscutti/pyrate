@@ -55,8 +55,8 @@ Thumbs.db
 *.eps
 *.png
 *.pdf
-*.dat
 *.vscode
 *.root
 *.xml
 *.html
+*.dat
