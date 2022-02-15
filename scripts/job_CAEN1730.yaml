@@ -1,28 +1,26 @@
---- 
-   
 inputs:
-   Gamma:
-       eslices:
-           emin: 0
-           emax: -1
-       reader: ReaderCAEN1730_PSD
-       path:
-           - PYRATE/test/data/22-02-10_10-44-16_HILDAQ_PSD_Test/PSD_Test-Board_0-001.dat
-       structure:
-           tree: nT
-       color: "R:1.| G:0.| B:0."
+  Gamma:
+    eslices:
+      emin: 0
+      emax: -1
+    reader: ReaderCAEN1730_PSD
+    path:
+    - PYRATE/test/data/22-02-10_10-44-16_HILDAQ_PSD_Test/PSD_Test-Board_0-001.dat
+    structure:
+      tree: nT
+    color: R:1.| G:0.| B:0.
 
 configs:
-    muondetobjs:
-       path:  PYRATE/config/CAEN1730
-       tags: 
-           any: objects
+  muondetobjs:
+    path: PYRATE/config/CAEN1730
+    tags:
+      any: objects
 
 outputs:
-    TestFile:
-        path: PYRATE/test
-        format: .root
-        targets:
-          - treeMaker: Gamma
+  TestFile:
+    path: PYRATE/test
+    format: .root
+    targets:
+    - treeMaker: Gamma
 
 # EOF

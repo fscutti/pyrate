@@ -1,29 +1,28 @@
---- 
-inputs: 
-    Data:
+inputs:
+  Data:
         # samples: 
         #    tags: 
         #        any:
         #        groups:
-        eslices:
-            emin: 0
-            emax: -1
+    eslices:
+      emin: 0
+      emax: -1
 
-        path:
-          - PYRATE/test/data/WDTestData.txt
+    path:
+    - PYRATE/test/data/WDTestData.txt
 
 configs:
-    config2:
-        path: PYRATE/config
-        tags: 
-            any: UniAlgSingleCHExample
+  config2:
+    path: PYRATE/config
+    tags:
+      any: UniAlgSingleCHExample
 
 
 outputs:
-    WDTest:
-        path: PYRATE/test # Save in any directory you want :)
-        format: .root
-        targets:
-          - TreeMaker: Data
-        
+  WDTest:
+    path: PYRATE/test     # Save in any directory you want :)
+    format: .root
+    targets:
+    - TreeMaker: Data
+
 # EOF

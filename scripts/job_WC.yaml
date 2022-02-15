@@ -1,29 +1,28 @@
---- 
-inputs: 
-   Data:
-       samples: 
-            tags: 
-                any: AmBe-pos5-80ns-100000
-                group: file1, file2
-       eslices: 
-           emin: 0
-           emax: 10000
-       path:
-          - /data/projects/punim1378/AmBeRuns_2_12_2020
-   
+inputs:
+  Data:
+    samples:
+      tags:
+        any: AmBe-pos5-80ns-100000
+        group: file1, file2
+    eslices:
+      emin: 0
+      emax: 10000
+    path:
+    - /data/projects/punim1378/AmBeRuns_2_12_2020
+
 
 configs:
-    config2:
-       path:  PYRATE/config
-       tags: 
-           any: objects
+  config2:
+    path: PYRATE/config
+    tags:
+      any: objects
 
 
 outputs:
-    WCTest1:
-        path: PYRATE/test
-        format: .root
-        targets:
-          - testingReader: Data
-    
+  WCTest1:
+    path: PYRATE/test
+    format: .root
+    targets:
+    - testingReader: Data
+
 # EOF
