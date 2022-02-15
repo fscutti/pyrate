@@ -52,32 +52,35 @@
 
 from pyrate.core.Algorithm import Algorithm
 
+
 class CFD(Algorithm):
-    __slots__ = ('delay', 'scale', 'cfd_threshold', 'savecfd')
+    __slots__ = ("delay", "scale", "cfd_threshold", "savecfd")
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
-    
+
     def initialise(self):
-        """ Set up the CFD and trapezoid parameters
-        """
+        """Set up the CFD and trapezoid parameters"""
         # CFD parameters
         self.delay = int(self.config["algorithm"]["delay"])
         self.scale = int(self.config["algorithm"]["scale"])
         self.cfd_threshold = float(self.config["algorithm"]["cfd_threshold"])
+
         if "savecfd" in self.config["algorithm"]:
             self.savecfd = bool(self.config["algorithm"]["savecfd"])
+
         else:
             self.savecfd = False
 
     def execute(self):
-        """ Caclulates the waveform CFD
-        """
+        """Caclulates the waveform CFD"""
         # Get the actual waveform, finally.
         waveform = self.store.get(self.config["waveform"])
         waveform = self.store.get(self.config["waveform"])
+
         if self.store.check(f"{self.name}:length"):
             length = self.store.get(f"{self.name}:length")
+
         else:
             length = len(waveform)
             self.store.put(f"{self.name}:length", length, "PERM")
@@ -87,22 +90,29 @@ class CFD(Algorithm):
         cfd = []
         cross_threshold = False
         CFDTime = -999
+
         for i in range(length):
-            cfd.append(self.scale * self._v(waveform, i) - self._v(waveform, i-self.delay))
+            cfd.append(
+                self.scale * self._v(waveform, i) - self._v(waveform, i - self.delay)
+            )
+
             if not cross_threshold:
                 cross_threshold = cfd[i] > self.cfd_threshold
+
             elif CFDTime == -999:
                 # Ok, the threshold has been crossed
-                # (and we only want to calculate it once, but still want to get 
+                # (and we only want to calculate it once, but still want to get
                 # the whole cfd for now)
-                if cfd[i] < 0 and cfd[i-1] >= 0:
+
+                if cfd[i] < 0 and cfd[i - 1] >= 0:
                     # Now we've crosssed the 0 point
-                    f = cfd[i-1] / (cfd[i-1] - cfd[i])
-                    CFDTime = i-1+f
+                    f = cfd[i - 1] / (cfd[i - 1] - cfd[i])
+                    CFDTime = i - 1 + f
+
                     if not self.savecfd:
                         # We're done here :)
                         break
-        
+
         # if use_trap:
         #     # Store the trap
         #     self.store.put(f"{self.name}:trapezoid", trap)
@@ -112,11 +122,12 @@ class CFD(Algorithm):
             self.store.put(f"{self.name}Trace", cfd)
 
     def _v(self, waveform, i):
-        """ returns the i'th element of a waveform or 0 if out of range
-        """
+        """returns the i'th element of a waveform or 0 if out of range"""
         try:
             return waveform[i]
+
         except:
             return 0
+
 
 # EOF

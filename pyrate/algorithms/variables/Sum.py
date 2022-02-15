@@ -24,6 +24,7 @@
 
 from pyrate.core.Algorithm import Algorithm
 
+
 class Sum(Algorithm):
     __slots__ = ()
 
@@ -31,8 +32,7 @@ class Sum(Algorithm):
         super().__init__(name, config, store, logger)
 
     def execute(self):
-        """ Sum over the waveform
-        """
+        """Sum over the waveform"""
         window = self.store.get(self.config["window"])
         # check for invalid windows
         if window == -999 or window is None:
@@ -40,7 +40,8 @@ class Sum(Algorithm):
         else:
             waveform = self.store.get(self.config["waveform"])
             # Sum the waveform
-            Sum = sum(waveform[window[0]:window[1]])
+            Sum = sum(waveform[window[0] : window[1]])
         self.store.put(self.name, Sum)
+
 
 # EOF

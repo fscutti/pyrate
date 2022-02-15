@@ -43,17 +43,16 @@ import sys
 import math
 from pyrate.core.Algorithm import Algorithm
 
+
 class Moment(Algorithm):
-    __slots__ = ('order', 'excess', 'time_period', 'length', 'time')
+    __slots__ = ("order", "excess", "time_period", "length", "time")
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
     def initialise(self):
 
-        """ Prepares the config order of the moment
-
-        """
+        """Prepares the config order of the moment"""
         if "order" not in self.config["algorithm"]:
             sys.exit("ERROR: in config, Moment algorithm requires a order parameter")
         self.order = int(self.config["algorithm"]["order"])
@@ -62,15 +61,13 @@ class Moment(Algorithm):
         if "excess" in self.config["algorithm"]:
             self.excess = bool(self.config["algorithm"]["excess"])
 
-        self.time_period = 1/float(self.config["algorithm"]["rate"])
+        self.time_period = 1 / float(self.config["algorithm"]["rate"])
         self.length = None
         self.time = None
 
     def execute(self):
 
-        """ Calculates the nth order moment
-
-        """
+        """Calculates the nth order moment"""
         waveform = self.store.get(self.config["waveform"])
         window = self.store.get(self.config["window"])
         # Hacky way to get the time bin mids to be used
@@ -79,27 +76,46 @@ class Moment(Algorithm):
         if self.length is None or self.time is None:
             self.length = len(waveform)
             # Time shifted to middle of bin
-            self.time = [i * self.time_period + self.time_period/2 for i in range(self.length)]
+            self.time = [
+                i * self.time_period + self.time_period / 2 for i in range(self.length)
+            ]
         ########################################################################
         if window is None or window == -999:
             Moment = -999
         else:
             # First, have to make the waveform positive definite
             min_val = min(waveform)
-            entries = [x - min_val for x in waveform[window[0]:window[1]]] # place the minimum value at 0 volts/ADC
-            bin_mids = self.time[window[0]:window[1]] # Make them bin mids
+            entries = [
+                x - min_val for x in waveform[window[0] : window[1]]
+            ]  # place the minimum value at 0 volts/ADC
+            bin_mids = self.time[window[0] : window[1]]  # Make them bin mids
 
             # Calculate mean and variance
             entry_sum = sum(entries)
             if entry_sum == 0:
                 Moment = -999
             else:
-                mean = sum([i*j for i,j in zip(entries, bin_mids)]) / entry_sum # Have I made a typo here? Should it be / N ?
-                shifted_mids = [i-mean for i in bin_mids]
-                variance = sum([i*math.pow(j,2) for i, j in zip(entries, shifted_mids)]) / entry_sum
+                mean = (
+                    sum([i * j for i, j in zip(entries, bin_mids)]) / entry_sum
+                )  # Have I made a typo here? Should it be / N ?
+                shifted_mids = [i - mean for i in bin_mids]
+                variance = (
+                    sum([i * math.pow(j, 2) for i, j in zip(entries, shifted_mids)])
+                    / entry_sum
+                )
 
-                Mn = sum([i * math.pow(j, self.order) for i, j in zip(entries, shifted_mids)]) / entry_sum
-                Moment = Mn / math.pow(variance, self.order/2.0) # /2.0 because using variance instead of std dev 
+                Mn = (
+                    sum(
+                        [
+                            i * math.pow(j, self.order)
+                            for i, j in zip(entries, shifted_mids)
+                        ]
+                    )
+                    / entry_sum
+                )
+                Moment = Mn / math.pow(
+                    variance, self.order / 2.0
+                )  # /2.0 because using variance instead of std dev
 
                 if self.excess and self.order == 4:
                     # Excess definition of Kurtosis, minus 3 because reasons

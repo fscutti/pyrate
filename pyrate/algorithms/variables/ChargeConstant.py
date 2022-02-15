@@ -33,18 +33,18 @@
 import sys
 from pyrate.core.Algorithm import Algorithm
 
-wf_units = {"V":1.0, "mV":1e-3, "uV":1e-6}
-q_units = {"C":1.0, "mC":1e3, "uC":1e6, "nC":1e9, "pC":1e12, "fC":1e15}
+wf_units = {"V": 1.0, "mV": 1e-3, "uV": 1e-6}
+q_units = {"C": 1.0, "mC": 1e3, "uC": 1e6, "nC": 1e9, "pC": 1e12, "fC": 1e15}
+
 
 class ChargeConstant(Algorithm):
     __slots__ = ()
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
-    
+
     def initialise(self):
-        """ Prepare the constant for calculating charge
-        """
+        """Prepare the constant for calculating charge"""
         # Deal with charge constants
         impedance = self.config["algorithm"]["impedance"]
         sample_rate = float(self.config["algorithm"]["rate"])
@@ -55,8 +55,10 @@ class ChargeConstant(Algorithm):
             try:
                 charge_units = float(charge_units)
             except:
-                sys.exit("ERROR: In algorithm ChargeConstant, unit parameter could not be converted to a float.")
-        
+                sys.exit(
+                    "ERROR: In algorithm ChargeConstant, unit parameter could not be converted to a float."
+                )
+
         waveform_units = self.config["algorithm"]["waveform_unit"]
         if waveform_units in wf_units:
             waveform_units = wf_units[waveform_units]
@@ -64,9 +66,12 @@ class ChargeConstant(Algorithm):
             try:
                 waveform_units = float(waveform_units)
             except:
-                sys.exit("ERROR: In algorithm ChargeConstant, waveform_unit could not be converted to a float.")
+                sys.exit(
+                    "ERROR: In algorithm ChargeConstant, waveform_unit could not be converted to a float."
+                )
 
-        charge_constant = waveform_units * charge_units/(impedance * sample_rate)
+        charge_constant = waveform_units * charge_units / (impedance * sample_rate)
         self.store.put(f"{self.name}", charge_constant)
+
 
 # EOF

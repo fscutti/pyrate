@@ -44,18 +44,18 @@
 import sys
 from pyrate.core.Algorithm import Algorithm
 
-wf_units = {"V":1.0, "mV":1e-3, "uV":1e-6}
-q_units = {"C":1.0, "mC":1e3, "uC":1e6, "nC":1e9, "pC":1e12, "fC":1e15}
+wf_units = {"V": 1.0, "mV": 1e-3, "uV": 1e-6}
+q_units = {"C": 1.0, "mC": 1e3, "uC": 1e6, "nC": 1e9, "pC": 1e12, "fC": 1e15}
+
 
 class Charge(Algorithm):
-    __slots__ = ('charge_constant')
+    __slots__ = "charge_constant"
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
-    
+
     def initialise(self):
-        """ Prepare the constant for calculating charge
-        """
+        """Prepare the constant for calculating charge"""
         # Deal with charge constants
         impedance = self.config["algorithm"]["impedance"]
         sample_rate = float(self.config["algorithm"]["rate"])
@@ -66,8 +66,10 @@ class Charge(Algorithm):
             try:
                 charge_units = float(charge_units)
             except:
-                sys.exit("ERROR: In algorithm Charge, unit parameter could not be converted to a float.")
-        
+                sys.exit(
+                    "ERROR: In algorithm Charge, unit parameter could not be converted to a float."
+                )
+
         waveform_units = self.config["algorithm"]["waveform_unit"]
         if waveform_units in wf_units:
             waveform_units = wf_units[waveform_units]
@@ -75,13 +77,14 @@ class Charge(Algorithm):
             try:
                 waveform_units = float(waveform_units)
             except:
-                sys.exit("ERROR: In algorithm Charge, waveform_unit could not be converted to a float.")
+                sys.exit(
+                    "ERROR: In algorithm Charge, waveform_unit could not be converted to a float."
+                )
 
-        self.charge_constant = waveform_units * charge_units/(impedance * sample_rate)
+        self.charge_constant = waveform_units * charge_units / (impedance * sample_rate)
 
     def execute(self):
-        """ Calculates the charge by summing over the waveform
-        """
+        """Calculates the charge by summing over the waveform"""
         window = self.store.get(self.config["window"])
         # check for invalid windows
         if window == -999 or window is None:
@@ -89,7 +92,8 @@ class Charge(Algorithm):
         else:
             waveform = self.store.get(self.config["waveform"])
             # Calcualte the actual charge over the window
-            Charge = sum(waveform[window[0]:window[1]]) * self.charge_constant
+            Charge = sum(waveform[window[0] : window[1]]) * self.charge_constant
         self.store.put(self.name, Charge)
+
 
 # EOF

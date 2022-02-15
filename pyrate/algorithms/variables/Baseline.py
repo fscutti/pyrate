@@ -33,6 +33,7 @@
 from pyrate.core.Algorithm import Algorithm
 import sys
 
+
 class Baseline(Algorithm):
     __slots__ = ()
 
@@ -40,14 +41,18 @@ class Baseline(Algorithm):
         super().__init__(name, config, store, logger)
 
     def execute(self):
-        """ Calculates the baseline from the first n samples of the waveform
-        """
+        """Calculates the baseline from the first n samples of the waveform"""
         waveform = self.store.get(self.config["waveform"])
+
         if "samples" not in self.config["algorithm"]:
             sys.exit("ERROR in Baseline, 'samples' not found in the config")
+
         nsamples = self.config["algorithm"]["samples"]
+
         # Get the baseline.
-        Baseline = sum(waveform[:nsamples])/nsamples
+        Baseline = sum(waveform[:nsamples]) / nsamples
+
         self.store.put(self.name, Baseline)
+
 
 # EOF

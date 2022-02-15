@@ -29,16 +29,16 @@
 
 from pyrate.core.Algorithm import Algorithm
 
+
 class MeanTime(Algorithm):
-    __slots__ = ('sample_period')
+    __slots__ = "sample_period"
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
     def initialise(self):
-        """ Gets the sample rate for later use in execute
-        """
-        self.sample_period = 1/float(self.config["algorithm"]["rate"])
+        """Gets the sample rate for later use in execute"""
+        self.sample_period = 1 / float(self.config["algorithm"]["rate"])
 
     def execute(self):
         waveform = self.store.get(self.config["waveform"])
@@ -49,13 +49,15 @@ class MeanTime(Algorithm):
         else:
             num = 0
             denom = 0
-            for i in range(0, window[1]-window[0]):
-                num += waveform[window[0]+i] * i
-                denom += waveform[window[0]+i]
+            for i in range(0, window[1] - window[0]):
+                num += waveform[window[0] + i] * i
+                denom += waveform[window[0] + i]
             if denom == 0:
                 # print("WARNING: MeanTime denominator = 0, is your window correct?")
                 MeanTime = float("inf")
             else:
-                MeanTime = self.sample_period * num/denom
+                MeanTime = self.sample_period * num / denom
         self.store.put(self.name, MeanTime)
+
+
 # EOF

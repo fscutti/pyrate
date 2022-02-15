@@ -23,6 +23,7 @@
 
 from pyrate.core.Algorithm import Algorithm
 
+
 class ChargeRatio(Algorithm):
     __slots__ = ()
 
@@ -30,8 +31,7 @@ class ChargeRatio(Algorithm):
         super().__init__(name, config, store, logger)
 
     def execute(self):
-        """ Calculates the ratio of the two input charges
-        """
+        """Calculates the ratio of the two input charges"""
         q1 = self.store.get(self.config["charge1"])
         q2 = self.store.get(self.config["charge2"])
         if q2 == 0:
@@ -40,7 +40,8 @@ class ChargeRatio(Algorithm):
         elif q1 == -999 or q2 == -999 or q1 is None or q2 is None:
             ChargeRatio = -999
         else:
-            ChargeRatio = q1/q2
+            ChargeRatio = q1 / q2
         self.store.put(self.name, ChargeRatio)
+
 
 # EOF

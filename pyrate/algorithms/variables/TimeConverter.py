@@ -30,19 +30,19 @@
 
 from pyrate.core.Algorithm import Algorithm
 
-# Predefined units: seconds, milliseconds, microseconds, nanoseconds and 
+# Predefined units: seconds, milliseconds, microseconds, nanoseconds and
 # picoseconds. Feel free to add more if they're common.
-seconds_to_unit = {"s": 1.0, "ms":1e3, "us":1e6, "ns":1e9, "ps":1e12}
+seconds_to_unit = {"s": 1.0, "ms": 1e3, "us": 1e6, "ns": 1e9, "ps": 1e12}
+
 
 class TimeConverter(Algorithm):
-    __slots__ = ('time_conversion')
+    __slots__ = "time_conversion"
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
-    
+
     def initialise(self):
-        """ Set up time conversion parameters
-        """
+        """Set up time conversion parameters"""
         # Time units
         time_unit = self.config["algorithm"]["unit"]
         if type(time_unit) == str:
@@ -51,13 +51,13 @@ class TimeConverter(Algorithm):
             unit = float(time_unit)
         sample_rate = float(self.config["algorithm"]["rate"])
 
-        self.time_conversion = unit/sample_rate
+        self.time_conversion = unit / sample_rate
 
     def execute(self):
-        """ Converts the sample time to physical units
-        """
+        """Converts the sample time to physical units"""
         sample_time = self.store.get(self.config["time"])
         real_time = sample_time * self.time_conversion
         self.store.put(self.name, real_time)
+
 
 # EOF

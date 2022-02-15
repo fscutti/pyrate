@@ -23,6 +23,7 @@
 
 from pyrate.core.Algorithm import Algorithm
 
+
 class TimeDifference(Algorithm):
     __slots__ = ()
 
@@ -30,11 +31,11 @@ class TimeDifference(Algorithm):
         super().__init__(name, config, store, logger)
 
     def execute(self):
-        """ Caclulates the time difference time2 - time1
-        """
+        """Caclulates the time difference time2 - time1"""
         t1 = self.store.get(self.config["time1"])
         t2 = self.store.get(self.config["time2"])
-        TimeDiff = t2-t1
+        TimeDiff = t2 - t1
         self.store.put(self.name, TimeDiff)
+
 
 # EOF
