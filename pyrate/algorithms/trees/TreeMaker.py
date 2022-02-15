@@ -294,8 +294,7 @@ class TreeMaker(Algorithm):
                     for vec_scalar in t_variables[fill_type]:
                         # loop over datatypes
                         for datatype, vars in t_variables[fill_type][
-                            vec_scalar
-                        ].items():
+                            vec_scalar].items():
                             for var in ST.get_items(vars):
                                 # loop over individual variables
                                 if "vector" in vec_scalar:
