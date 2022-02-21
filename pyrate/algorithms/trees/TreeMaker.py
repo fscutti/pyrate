@@ -17,8 +17,6 @@ myTreeObject:
                etc ...
 """
 
-from code import interact
-
 import os
 import sys
 import ROOT as R
