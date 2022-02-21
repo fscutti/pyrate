@@ -17,8 +17,6 @@ myTreeObject:
                etc ...
 """
 
-# import psutil
-
 import os
 import sys
 import ROOT as R
@@ -256,20 +254,34 @@ class Tree:
         Won't be accessed anymore (hopefully)
         """
         del self.branches[branch.name]
+    
+    def set_branches(self, branch_names, status=1):
+        """ Sets the branch status of a list of branches
+        """
+        for branch_name in branch_names:
+            self.TTree.SetBranchStatus(branch_name, status)
+    
+    def enable_branches(self, branch_names):
+        """ Enables all the branches in the input list
+        """
+        self.set_branches(branch_names, status=1)
+    
+    def disable_branches(self, branch_names):
+        """ Disables all the branches in the input list
+        """
+        self.set_branches(branch_names, status=0)
 
 
 class TreeMaker(Algorithm):
-    # __slots__ = ()
+    __slots__ = ('file', 'trees')
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
-        self.tree_dict = None
-        self.out_file = None
 
     def initialise(self):
         """Defines a tree dictionary."""
         out_file = self.store.get(f"OUTPUT:{self.name}", "PERM")
-        self.store.put(f"{self.name}:File", out_file)
+        self.file = out_file
 
         trees = {}
         # Get all trees
@@ -318,38 +330,53 @@ class TreeMaker(Algorithm):
                                 # Add the new branch to the TTree
                                 trees[t_name].add_branch(new_branch)
 
-        self.store.put(f"{self.name}:trees", trees, "PERM")
+        # Disable the non-event based branches
+        for tree in trees:
+            branches_to_disable = [bn for bn in trees[tree].branches if not trees[tree].branches[bn].event_based]
+            trees[tree].disable_branches(branches_to_disable)
+        
+        # Save the trees for later
+        self.trees = trees
 
     def execute(self):
         """Fills in the ROOT tree dictionary with event data."""
-        trees = self.store.get(f"{self.name}:trees", "PERM")
-
         # Fill all the branches in the trees if they're event-based
-        for tree in trees:
-            for branch_name in trees[tree].branches:
+        for tree in self.trees:
+            for branch_name in self.trees[tree].branches:
                 # Only want to fill the branches that are event-based
-                if trees[tree].branches[branch_name].event_based:
+                if self.trees[tree].branches[branch_name].event_based:
                     value = self.store.get(branch_name, "TRAN")
-                    trees[tree].branches[branch_name].fill_branch(value)
+                    self.trees[tree].branches[branch_name].fill_branch(value)
 
             # Save all the values into the Tree
-            trees[tree].fill()
+            self.trees[tree].fill()
 
     def finalise(self):
         """Fill in the single/run-based variables"""
-        trees = self.store.get(f"{self.name}:trees", "PERM")
-        # Fill all the branches in the trees if they're run-based
-        for tree in trees:
-            for branch_name in trees[tree].branches:
-                # Only want to fill the branches that are run-based
-                if not trees[tree].branches[branch_name].event_based:
-                    value = self.store.get(branch_name, "PERM")
-                    trees[tree].branches[branch_name].fill_branch(value)
-            # Save all the values into the Tree
-            trees[tree].fill()
+        # First, disable all the event-based branches
+        # and enable the single entry branches
+        for tree in self.trees:
+            branches_to_disable = [bn for bn in self.trees[tree].branches if self.trees[tree].branches[bn].event_based]
+            branches_to_enable =  [bn for bn in self.trees[tree].branches if not self.trees[tree].branches[bn].event_based]
+            self.trees[tree].enable_branches(branches_to_enable)
+            self.trees[tree].disable_branches(branches_to_disable)
 
+        # Fill all the branches in the trees if they're run-based
+        for tree in self.trees:
+            for branch_name in self.trees[tree].branches:
+                # Only want to fill the branches that are run-based
+                if not self.trees[tree].branches[branch_name].event_based:
+                    value = self.store.get(branch_name, "PERM")
+                    self.trees[tree].branches[branch_name].fill_branch(value)
+            # Save all the values into the Tree
+            self.trees[tree].fill()
+            
+            # Finally we have to re-enable all the branches so they can be accessed
+            all_branches = [bn for bn in self.trees[tree].branches]
+            self.trees[tree].enable_branches(all_branches)
+        
         # Write the objects to the file - this is the most important step
-        self.store.get(f"{self.name}:File").Write("", R.TObject.kOverwrite)
+        self.file.Write("", R.TObject.kOverwrite)
 
         # Store itself on the store with SKIP_WRITE code to show we have nothing
         # to return.
