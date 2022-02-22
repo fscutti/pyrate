@@ -52,7 +52,7 @@ class ReaderCAEN1730_ZLE(Reader):
 
             # Get the event value
             if path["variable"] == "timestamp":
-                value = self._currentEventTimestamp
+                value = self._evtTime
             elif path["variable"] == "waveform":
                 value = self._get_waveform(path["ch"])
 

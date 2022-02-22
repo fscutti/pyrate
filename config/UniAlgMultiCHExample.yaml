@@ -138,6 +138,12 @@ objects:
     # Variables
     # -----------------------------------------------------------
 
+  Timestamp_CH0:
+    algorithm:
+      name: GetTimestamp
+    execute:
+      output:
+
   PeakHeight_CH0:
     algorithm:
       name: PeakHeight
@@ -397,7 +403,7 @@ objects:
         PeakLocation_CH0, PulseCharge_CH0, TotalCharge_CH0, PulseStart_CH0, PulseStart_CH1,
         PulseTime_CH0, PulseTime_CH1, PromptDelayChargeRatio_CH0, PromptCharge_CH0,
         DelayedCharge_CH0, MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0, TimeDifference_CH01,
-        Skew_CH0, Kurtosis_CH0, SD_CH0, Mean_CH0
+        Skew_CH0, Kurtosis_CH0, SD_CH0, Mean_CH0, Timestamp_CH0
     finalise:
       output:
 
@@ -411,7 +417,7 @@ objects:
             float: Baseline_CH0, PeakHeight_CH0, PeakLocation_CH0, PulseCharge_CH0,
               TotalCharge_CH0, PulseStart_CH0, PulseTime_CH0, PromptDelayChargeRatio_CH0,
               MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0, Skew_CH0, Kurtosis_CH0,
-              SD_CH0, Mean_CH0
+              SD_CH0, Mean_CH0, Timestamp_CH0
 
     - Channel_1:
         event:
