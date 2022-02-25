@@ -52,7 +52,7 @@ class ReaderCAEN1730_RAW(Reader):
 
             #Get the event value
             if path["variable"]=="timestamp":
-                value = self._currentEventTimestamp
+                value = self._evtTime
             elif path["variable"] == "waveform":
                 value = self._get_waveform(path["ch"])
 
@@ -129,7 +129,7 @@ class ReaderCAEN1730_RAW(Reader):
         head2 = self._mmf.read(4)
         head2 = int.from_bytes(head2, "little")
         boardID = head2 & 0b11111000000000000000000000000000
-        pattern = head2 & 0b00000000111111111111111100000000
+        pattern = (head2 & 0b00000000111111111111111100000000)
         channelMaskLo = head2 & 0b11111111
 
         head3 = self._mmf.read(4)
@@ -141,7 +141,7 @@ class ReaderCAEN1730_RAW(Reader):
         head4 = int.from_bytes(head4, "little")
         TTT = head4
 
-        self._evtTime = (pattern << 32) + TTT
+        self._evtTime = (pattern << 24) + TTT
         channelMask = (channelMaskHi << 8) + (channelMaskLo)
         
         #Figure out what channels are in the event

@@ -52,7 +52,7 @@ class ReaderCAEN1730_ZLE(Reader):
 
             # Get the event value
             if path["variable"] == "timestamp":
-                value = self._currentEventTimestamp
+                value = self._evtTime
             elif path["variable"] == "waveform":
                 value = self._get_waveform(path["ch"])
 
@@ -141,7 +141,7 @@ class ReaderCAEN1730_ZLE(Reader):
         head4 = int.from_bytes(head4, "little")
         TTT = head4
 
-        self._evtTime = (pattern << 32) + TTT
+        self._evtTime = (pattern << 24) + TTT
         channelMask = (channelMaskHi << 8) + (channelMaskLo)
         
         #Read in the waveform data

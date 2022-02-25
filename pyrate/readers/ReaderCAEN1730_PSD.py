@@ -239,7 +239,10 @@ class ReaderCAEN1730_PSD(Reader):
 
                 qLong = (charge & 0b11111111111111110000000000000000) >> 16;
                 qShrt = (charge & 0b00000000000000000111111111111111);
-                self._subChTimes[ch] = ((extras & 0b11111111111111110000000000000000) << 16) + (chTime & 0b01111111111111111111111111111111);
+                timeHi =  ((extras & 0b11111111111111110000000000000000) << 15)
+                timeLo =  (chTime & 0b01111111111111111111111111111111);
+                self._subChTimes[ch] = timeHi + timeLo
+
                 if (self._subChTimes[ch] < self._subTime):		
                     self._subTime = self._subChTimes[ch];
 		
