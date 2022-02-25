@@ -116,6 +116,12 @@ objects:
 
     ############################## VARIABLES #################################
 
+  Timestamp:
+    algorithm:
+      name: GetTimestamp
+    execute:
+      output:
+
   PeakHeight:
     algorithm:
       name: PeakHeight
@@ -344,7 +350,7 @@ objects:
       input: RawWaveform, CorrectedWaveform, Baseline, PeakHeight, PeakLocation, PulseCharge,
         TotalCharge, PulseStart, PromptDelayChargeRatio, PromptCharge, DelayedCharge,
         MeanTime, PromptDelayChargeRatioCalculator, TotalSum, PulseSum, ChargeConstant,
-        TrapezoidFilter, CFD_Trap, Skew, Kurtosis, SD, Mean
+        TrapezoidFilter, CFD_Trap, Skew, Kurtosis, SD, Mean, Timestamp
     finalise:
       output:
     trees:
@@ -356,7 +362,7 @@ objects:
           scalar:
             float: Baseline, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart,
               PromptDelayChargeRatio, MeanTime, PromptDelayChargeRatioCalculator,
-              TotalSum, PulseSum, CFD_Trap, Skew, Kurtosis, SD, Mean
+              TotalSum, PulseSum, CFD_Trap, Skew, Kurtosis, SD, Mean, Timestamp
         single:
                 #    vector:
                 #        double: AverageWaveform
