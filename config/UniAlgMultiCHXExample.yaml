@@ -93,6 +93,12 @@ objects:
 
     ############################## VARIABLES #################################
 
+    Timestamp_CHX:
+        algorithm:
+            name: GetTimestamp
+        execute:
+            output:
+
     PeakHeight_CHX:
         algorithm:
             name: PeakHeight
@@ -297,7 +303,7 @@ objects:
                    PeakLocation_CHX, PulseCharge_CHX, TotalCharge_CHX, PulseStart_CHX, 
                    PulseTime_CHX, PromptDelayChargeRatio_CHX, PromptCharge_CHX, DelayedCharge_CHX, 
                    MeanTime_CHX, PromptDelayChargeRatioCalculator_CHX, TimeDifference_CH01, Skew_CHX, 
-                   Kurtosis_CHX, SD_CHX, Mean_CHX
+                   Kurtosis_CHX, SD_CHX, Mean_CHX, Timestamp_CHX
         finalise:
             output:
         trees:
@@ -311,7 +317,7 @@ objects:
                         float: Baseline_CHX, PeakHeight_CHX, PeakLocation_CHX, PulseCharge_CHX, 
                                TotalCharge_CHX, PulseStart_CHX, PulseTime_CHX, PromptDelayChargeRatio_CHX, 
                                MeanTime_CHX, PromptDelayChargeRatioCalculator_CHX,
-                               Skew_CHX, Kurtosis_CHX, SD_CHX, Mean_CHX
+                               Skew_CHX, Kurtosis_CHX, SD_CHX, Mean_CHX, Timestamp_CHX
                 #single:
                 #    vector:
                 #        double: AverageWaveform_CHX
