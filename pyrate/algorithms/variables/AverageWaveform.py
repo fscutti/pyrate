@@ -39,7 +39,7 @@ import numpy as np
 class AverageWaveform(Algorithm):
     """ Makes a cummulative waveform in the finalise method
     """
-    __slots__ = ()
+    __slots__ = ('nevents', 'cum_waveform')
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
@@ -68,29 +68,21 @@ class AverageWaveform(Algorithm):
         elif reader == "ReaderWaveCatcherMMAP":
             RecordLength = int(self.store.get(f"INPUT:DATA SAMPLES"))
         
-        # nevents = 1 + self.store.get("INPUT:config")["eslices"]["emax"] - self.store.get("INPUT:config")["eslices"]["emin"]
-        nevents = 0
-        self.store.put(f"{self.name}:nevents", nevents)
-        self.store.put(f"{self.name}:cum_waveform", np.zeros(RecordLength))
+        # self.nevents = 1 + self.store.get("INPUT:config")["eslices"]["emax"] - self.store.get("INPUT:config")["eslices"]["emin"]
+        self.nevents = 0
+        self.cum_waveform = np.zeros(RecordLength)
 
     def execute(self):
         """ Calculates the baseline corrected waveform
         """
-        nevents = self.store.get(f"{self.name}:nevents", "PERM")
         waveform = self.store.get(self.config["waveform"]) # Because pyrate broke
-        cum_waveform = self.store.get(f"{self.name}:cum_waveform")
-        cum_waveform += waveform
+        self.cum_waveform += waveform
         # If you dont trust emax - emin
-        nevents = self.store.get(f"{self.name}:nevents") + 1
-        # replace=True properly updates the object in the store. "PERM" required here.
-        self.store.put(f"{self.name}:nevents", nevents, "PERM", replace=True)
-        self.store.put(f"{self.name}:cum_waveform", cum_waveform, "PERM", replace=True)
+        self.nevents += 1
 
     def finalise(self):
         """ Divides cum_waveform by number of events
         """
-        cum_waveform = self.store.get(f"{self.name}:cum_waveform")
-        nevents = self.store.get(f"{self.name}:nevents")
-        AverageWaveform = cum_waveform / nevents
+        AverageWaveform = self.cum_waveform / self.nevents
         self.store.put(self.name, AverageWaveform)
 # EOF
