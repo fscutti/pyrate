@@ -1,5 +1,25 @@
 ---
 objects:
+    AverageWaveform_CH0:
+        algorithm:
+            name: AverageWaveform
+        execute:
+            input: CorrectedWaveform_CH0
+        finalise:
+            output: null
+        initialise:
+            output: null
+        waveform: CorrectedWaveform_CH0
+    AverageWaveform_CH1:
+        algorithm:
+            name: AverageWaveform
+        execute:
+            input: CorrectedWaveform_CH1
+        finalise:
+            output: null
+        initialise:
+            output: null
+        waveform: CorrectedWaveform_CH1
     Baseline_CH0:
         algorithm:
             name: Baseline
@@ -501,11 +521,12 @@ objects:
                 PeakHeight_CH0, PeakLocation_CH0, PulseCharge_CH0, TotalCharge_CH0,
                 PulseStart_CH0, PulseTime_CH0, PromptDelayChargeRatio_CH0, PromptCharge_CH0,
                 DelayedCharge_CH0, MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0,
-                Skew_CH0, Kurtosis_CH0, SD_CH0, Mean_CH0, Timestamp_CH0, RawWaveform_CH1,
-                CorrectedWaveform_CH1, Baseline_CH1, PeakHeight_CH1, PeakLocation_CH1,
-                PulseCharge_CH1, TotalCharge_CH1, PulseStart_CH1, PulseTime_CH1, PromptDelayChargeRatio_CH1,
-                PromptCharge_CH1, DelayedCharge_CH1, MeanTime_CH1, PromptDelayChargeRatioCalculator_CH1,
-                Skew_CH1, Kurtosis_CH1, SD_CH1, Mean_CH1, Timestamp_CH1
+                Skew_CH0, Kurtosis_CH0, SD_CH0, Mean_CH0, Timestamp_CH0, AverageWaveform_CH0,
+                RawWaveform_CH1, CorrectedWaveform_CH1, Baseline_CH1, PeakHeight_CH1,
+                PeakLocation_CH1, PulseCharge_CH1, TotalCharge_CH1, PulseStart_CH1,
+                PulseTime_CH1, PromptDelayChargeRatio_CH1, PromptCharge_CH1, DelayedCharge_CH1,
+                MeanTime_CH1, PromptDelayChargeRatioCalculator_CH1, Skew_CH1, Kurtosis_CH1,
+                SD_CH1, Mean_CH1, Timestamp_CH1, AverageWaveform_CH1
         finalise:
             output: null
         initialise:
@@ -521,6 +542,9 @@ objects:
                     vector:
                         double: CorrectedWaveform_CH0
                         int: RawWaveform_CH0
+                single:
+                    vector:
+                        double: AverageWaveform_CH0
             Channel_1:
                 event:
                     scalar:
@@ -531,6 +555,9 @@ objects:
                     vector:
                         double: CorrectedWaveform_CH1
                         int: RawWaveform_CH1
+                single:
+                    vector:
+                        double: AverageWaveform_CH1
         -   Channel_01:
                 event:
                     scalar:

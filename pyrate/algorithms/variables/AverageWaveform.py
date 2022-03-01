@@ -52,30 +52,33 @@ class AverageWaveform(Algorithm):
         
         # All this just to get the record length
         # First we find out what kind of grouping is being used
-        groups = ['0']
+        # groups = ['0']
 
-        # Temporary, needs fixing, not generalised for all possible group structures
-        if groups[0] == '0':
-            # Default, no group specified
-            reader = self.store.get("INPUT:READER:name")
-        else:
-            reader = self.store.get(f"INPUT:READER:GROUP:name")
-        if reader == "ReaderBlueTongueMMAP":
-            board_dict = self.store.get(f"INPUT:board_1") # This needs to be fixed when we have more boards 
-            RecordLength = board_dict["record_length"]
-        elif reader == "ReaderWaveDumpMMAP":
-            RecordLength = self.store.get(f"INPUT:Record Length")
-        elif reader == "ReaderWaveCatcherMMAP":
-            RecordLength = int(self.store.get(f"INPUT:DATA SAMPLES"))
+        # # Temporary, needs fixing, not generalised for all possible group structures
+        # if groups[0] == '0':
+        #     # Default, no group specified
+        #     reader = self.store.get("INPUT:READER:name")
+        # else:
+        #     reader = self.store.get(f"INPUT:READER:GROUP:name")
+        # if reader == "ReaderBlueTongueMMAP":
+        #     board_dict = self.store.get(f"INPUT:board_1") # This needs to be fixed when we have more boards 
+        #     RecordLength = board_dict["record_length"]
+        # elif reader == "ReaderWaveDumpMMAP":
+        #     RecordLength = self.store.get(f"INPUT:Record Length")
+        # elif reader == "ReaderWaveCatcherMMAP":
+        #     RecordLength = int(self.store.get(f"INPUT:DATA SAMPLES"))
         
         # self.nevents = 1 + self.store.get("INPUT:config")["eslices"]["emax"] - self.store.get("INPUT:config")["eslices"]["emin"]
         self.nevents = 0
-        self.cum_waveform = np.zeros(RecordLength)
+        self.cum_waveform = np.array([])
 
     def execute(self):
         """ Calculates the baseline corrected waveform
         """
         waveform = self.store.get(self.config["waveform"]) # Because pyrate broke
+        if self.cum_waveform.shape[0] == 0:
+            RecordLength = len(waveform)
+            self.cum_waveform = np.zeros(RecordLength)
         self.cum_waveform += waveform
         # If you dont trust emax - emin
         self.nevents += 1
