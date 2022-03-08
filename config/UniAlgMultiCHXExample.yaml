@@ -289,6 +289,20 @@ objects:
         waveform: CorrectedWaveform_CHX
         window: PulseWindow_CHX
 
+    FFT_CHX:
+        algorithm:
+            name: FFT
+            rate: 500e6
+            bins: 100
+            window: true
+        initialise:
+            output:
+        execute:
+            input: CorrectedWaveform_CHX, PulseWindow_CHX
+        waveform: CorrectedWaveform_CHX
+        window: PulseWindow_CHX
+
+
     # -----------------------------------------------------------
     # Trees
     # -----------------------------------------------------------
@@ -303,7 +317,7 @@ objects:
                    PeakLocation_CHX, PulseCharge_CHX, TotalCharge_CHX, PulseStart_CHX, 
                    PulseTime_CHX, PromptDelayChargeRatio_CHX, PromptCharge_CHX, DelayedCharge_CHX, 
                    MeanTime_CHX, PromptDelayChargeRatioCalculator_CHX, TimeDifference_CH01, Skew_CHX, 
-                   Kurtosis_CHX, SD_CHX, Mean_CHX, Timestamp_CHX
+                   Kurtosis_CHX, SD_CHX, Mean_CHX, Timestamp_CHX, FFT_CHX
         finalise:
             output:
         trees:
@@ -312,13 +326,12 @@ objects:
                 event:
                     vector: 
                         int: RawWaveform_CHX
-                        double: CorrectedWaveform_CHX
+                        double: CorrectedWaveform_CHX, FFT_CHX
                     scalar:
                         float: Baseline_CHX, PeakHeight_CHX, PeakLocation_CHX, PulseCharge_CHX, 
                                TotalCharge_CHX, PulseStart_CHX, PulseTime_CHX, PromptDelayChargeRatio_CHX, 
                                MeanTime_CHX, PromptDelayChargeRatioCalculator_CHX,
                                Skew_CHX, Kurtosis_CHX, SD_CHX, Mean_CHX, Timestamp_CHX
-                #single:
                 #    vector:
                 #        double: AverageWaveform_CHX
         
