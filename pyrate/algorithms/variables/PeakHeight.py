@@ -14,7 +14,6 @@
     PeakHeight_CHX:
         algorithm:
             name: PeakHeight
-            window: True
         execute:
             input: CorrectedWaveform_CHX, Window
         waveform: CorrectedWaveform_CHX
@@ -34,8 +33,8 @@ class PeakHeight(Algorithm):
     def initialise(self):
         """Allows the user to determine if the peak is in a smaller window"""
         self.use_window = False
-        if "window" in self.config["algorithm"]:
-            self.use_window = bool(self.config["algorithm"]["window"])
+        if "window" in self.config:
+            self.use_window = True
 
     def execute(self):
         """Caclulates the waveform peak height (maximum)"""
