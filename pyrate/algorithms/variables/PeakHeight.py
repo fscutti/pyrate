@@ -4,6 +4,9 @@
 
     Required parameters:
         waveform: A waveform for which the maximum value will be calculated
+
+    Optional parameters:
+        window: A sub window to search for the peak over
     
     Required states:
         execute:

@@ -4,7 +4,10 @@
 
     Required parameters:
         waveform: The waveform for which the maximum will be calculated
-    
+
+    Optional parameters:
+        window: A sub window to search for the peak over
+
     Required states:
         initialise:
             output:
