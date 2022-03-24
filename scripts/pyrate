@@ -26,7 +26,7 @@ parser.add_argument(
     "-l",
     help="logging level",
     required=False,
-    default="CRITICAL",
+    default="None",
 )
 
 parser.add_argument(
@@ -39,6 +39,8 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
+# Removing logging if needed
+if args.logging_level == "None": args.logging_level = None
 
 
 if __name__ == "__main__":
