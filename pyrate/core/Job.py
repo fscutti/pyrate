@@ -35,12 +35,14 @@ class Job:
             "outputs": {},
         }
 
-        # --------------------------
-        # Setup the logger
-        # --------------------------
-
+        # ----------------------------
+        # Setup the logger if required
+        # ----------------------------
         self.job["logger"] = logging.getLogger("pyrate")
-        self.job["logger"].setLevel(getattr(logging, self.log_level))
+        if self.log_level is None:
+            logging.disable(logging.CRITICAL)
+        else:
+            self.job["logger"].setLevel(getattr(logging, self.log_level))
 
         # --------------------------
         # Build global configuration
