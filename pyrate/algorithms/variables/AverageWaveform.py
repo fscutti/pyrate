@@ -31,6 +31,8 @@
            or summed up over execute. Currently emax is just -1...
         2. Replace the messy RecordLength getting code once the reader inputs 
            are unified
+        3. How we represent missing channels in an event with multiple channels may change, 
+           so the corresponding check will need to be updated in such a situation (LINE 82)
 """
 
 from pyrate.core.Algorithm import Algorithm
@@ -77,7 +79,7 @@ class AverageWaveform(Algorithm):
         """
         waveform = self.store.get(self.config["waveform"]) # Because pyrate broke
 
-        # Handles the case when a channel wasn't present in the event - specific to ZLE and PSD firmware which don't collect waveforms in the case
+        # Handles the case when a channel wasn't present in the event - specific to ZLE and PSD firmware which don't collect waveforms in that case
         # ToDo: How we represent missing channels may change, so this check will need to be updated in such a situation
         if len(waveform) > 1:
             if self.cum_waveform.shape[0] == 0:
