@@ -226,7 +226,7 @@ class Run:
                 # Printing average time taken to execute an alg for a single event
                 if self.alg_timing:
                     for alg in self.algorithms:
-                        print(f"{self.algorithms[alg].name:<40}{self.algorithms[alg].time/erange:>20.2f} ns")
+                        print(f"{self.algorithms[alg].name:<40}{self.algorithms[alg].alg_time/erange:>20.2f} ns")
 
                 self._in.offload()
 
@@ -298,7 +298,7 @@ class Run:
                 # executing main algorithm state
                 getattr(alg, self.state)()
                 t2 = time.time_ns()
-                alg.time += t2-t1
+                alg.alg_time += t2-t1
             else:
                 # executing main algorithm state
                 getattr(alg, self.state)()
