@@ -24,7 +24,6 @@
             name: FFT
             rate: 500e6
             bins: 100
-            window: true
         initialise:
             output:
         execute:
@@ -38,7 +37,6 @@
             name: FFT
             rate: 500e6
             bins: 100
-            window: false
         initialise:
             output:
         execute:
@@ -59,8 +57,8 @@ class FFT(Algorithm):
     def initialise(self):
         """Allows the user to determine if the FFT is calculated for a window of the waveform"""
         self.use_window = False
-        if "window" in self.config["algorithm"]:
-            self.use_window = bool(self.config["algorithm"]["window"])
+        if "window" in self.config:
+            self.use_window = True
 
         self.sample_rate = float(self.config["algorithm"]["rate"])
         self.fft_bins = self.config["algorithm"]["bins"]

@@ -338,7 +338,6 @@ objects:
       name: FFT
       rate: 500e6
       bins: 100
-      window: true
     initialise:
       output:
     execute:

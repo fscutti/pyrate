@@ -95,25 +95,21 @@ objects:
             bins: 100
             name: FFT
             rate: 500e6
-            window: true
         execute:
             input: CorrectedWaveform_CH0, PulseWindow_CH0
         initialise:
             output: null
         waveform: CorrectedWaveform_CH0
-        window: PulseWindow_CH0
     FFT_CH1:
         algorithm:
             bins: 100
             name: FFT
             rate: 500e6
-            window: true
         execute:
             input: CorrectedWaveform_CH1, PulseWindow_CH1
         initialise:
             output: null
         waveform: CorrectedWaveform_CH1
-        window: PulseWindow_CH1
     Kurtosis_CH0:
         algorithm:
             name: Moment

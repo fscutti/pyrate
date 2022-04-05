@@ -294,13 +294,12 @@ objects:
             name: FFT
             rate: 500e6
             bins: 100
-            window: true
         initialise:
             output:
         execute:
             input: CorrectedWaveform_CHX, PulseWindow_CHX
         waveform: CorrectedWaveform_CHX
-        window: PulseWindow_CHX
+        #window: PulseWindow_CHX
 
 
     # -----------------------------------------------------------
