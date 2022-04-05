@@ -77,7 +77,7 @@ class AverageWaveform(Algorithm):
     def execute(self):
         """ Calculates the baseline corrected waveform
         """
-        waveform = self.store.get(self.config["waveform"]) # Because pyrate broke
+        waveform = self.store.get(self.config["waveform"])
 
         # Handles the case when a channel wasn't present in the event - specific to ZLE and PSD firmware which don't collect waveforms in that case
         # ToDo: How we represent missing channels may change, so this check will need to be updated in such a situation
