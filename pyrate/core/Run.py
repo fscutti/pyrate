@@ -222,6 +222,11 @@ class Run:
                         store.clear("TRAN")
 
                         self._in.set_next_event()
+                
+                # Printing average time taken to execute an alg for a single event
+                if self.alg_timing:
+                    for alg in self.algorithms:
+                        print(f"{self.algorithms[alg].name:<40}{self.algorithms[alg].time/erange:>20.2f} ns")
 
                 self._in.offload()
 
@@ -287,9 +292,16 @@ class Run:
 
             # preparing input variables
             getattr(alg, f"_{self.state}")()
-
-            # executing main algorithm state
-            getattr(alg, self.state)()
+            # Timing the algorithm if timing is flagged
+            if self.alg_timing:
+                t1 = time.time_ns()
+                # executing main algorithm state
+                getattr(alg, self.state)()
+                t2 = time.time_ns()
+                alg.time += t2-t1
+            else:
+                # executing main algorithm state
+                getattr(alg, self.state)()
 
     def add(self, obj_name, alg_name, store):
         """Adds instances of algorithms dynamically.

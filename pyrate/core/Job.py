@@ -29,6 +29,7 @@ class Job:
 
         self.job = {
             "no_progress_bar": self.config["no_progress_bar"],
+            "alg_timing": self.config["alg_timing"],
             "logger": None,
             "inputs": {},
             "configs": {},
