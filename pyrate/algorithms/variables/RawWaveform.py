@@ -75,7 +75,7 @@ class RawWaveform(Algorithm):
             sys.exit("Uh oh, WaveCatcher doesn't have a RawWaveform...")
 
         # convert to numpy array
-        RawWaveform = np.array(RawWaveform, dtype='int32')
+        RawWaveform = np.array(RawWaveform)
         self.store.put(self.name, RawWaveform)
 
 
