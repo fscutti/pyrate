@@ -45,7 +45,7 @@ from pyrate.core.Algorithm import Algorithm
 
 
 class Moment(Algorithm):
-    __slots__ = ("order", "excess", "time_period", "length", "time")
+    __slots__ = ("order", "excess", "time_period", "length", "samples")
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
@@ -63,7 +63,7 @@ class Moment(Algorithm):
 
         self.time_period = 1 / float(self.config["algorithm"]["rate"])
         self.length = None
-        self.time = None
+        self.samples = None
 
     def execute(self):
 
@@ -73,10 +73,10 @@ class Moment(Algorithm):
         # Hacky way to get the time bin mids to be used
         # Not in initialise cause we don't know the length at that stage
         ########################################################################
-        if self.length is None or self.time is None:
+        if self.length is None or self.samples is None:
             self.length = len(waveform)
             # Time shifted to middle of bin
-            self.time = [
+            self.samples = [
                 i * self.time_period + self.time_period / 2 for i in range(self.length)
             ]
         ########################################################################
@@ -88,7 +88,7 @@ class Moment(Algorithm):
             entries = [
                 x - min_val for x in waveform[window[0] : window[1]]
             ]  # place the minimum value at 0 volts/ADC
-            bin_mids = self.time[window[0] : window[1]]  # Make them bin mids
+            bin_mids = self.samples[window[0] : window[1]]  # Make them bin mids
 
             # Calculate mean and variance
             entry_sum = sum(entries)

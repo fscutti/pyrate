@@ -25,13 +25,14 @@ from pyrate.utils import enums
 
 
 class Algorithm:
-    __slots__ = ["name", "config", "store", "logger"]
+    __slots__ = ["name", "config", "store", "logger", "time"]
 
     def __init__(self, name, config, store, logger):
         self.name = name
         self.config = config
         self.store = store
         self.logger = logger
+        self.time = 0
 
     def initialise(self):
         """At this stage the method knows the current input."""
