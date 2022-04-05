@@ -77,15 +77,16 @@ class AverageWaveform(Algorithm):
     def execute(self):
         """ Calculates the baseline corrected waveform
         """
-        waveform = self.store.get(self.config["waveform"]) # Because pyrate broke
+        waveform = self.store.get(self.config["waveform"])
 
         # Handles the case when a channel wasn't present in the event - specific to ZLE and PSD firmware which don't collect waveforms in that case
         # ToDo: How we represent missing channels may change, so this check will need to be updated in such a situation
-        if len(waveform) > 1:
-            if self.cum_waveform.shape[0] == 0:
-                RecordLength = len(waveform)
-                self.cum_waveform = np.zeros(RecordLength)
-                
+
+        # Only runs if the waveform isn't empty
+        if waveform.size > 1:
+            if self.cum_waveform.size < self.cum_waveform.size:
+                self.cum_waveform = np.zeros(waveform.size)
+
             self.cum_waveform += waveform
             # If you dont trust emax - emin
             self.nevents += 1
