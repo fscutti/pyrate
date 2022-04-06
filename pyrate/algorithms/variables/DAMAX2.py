@@ -108,7 +108,10 @@ class DAMAX2(Algorithm):
         charge1 = np.sum(waveform[window1[0] : window1[1]]) * self.charge_constant
         charge2 = np.sum(waveform[window2[0] : window2[1]]) * self.charge_constant
 
-        X2_ChargeRatio = charge1/charge2
+        if (charge1<=0 or charge2<=0):
+            X2_ChargeRatio = -999 
+        else:
+            X2_ChargeRatio = charge1/charge2
 
         self.store.put(self.name, X2_ChargeRatio)
 
