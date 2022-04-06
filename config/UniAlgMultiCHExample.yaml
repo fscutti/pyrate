@@ -388,6 +388,36 @@ objects:
     waveform: CorrectedWaveform_CH0
     window: PulseWindow_CH0
 
+  DAMAX1_CH0:
+    algorithm:
+      name: DAMAX1
+      impedance: 50
+      rate: 500e6
+      unit: pC
+      waveform_unit: mV
+      cfd_delay: 10
+    initialise:
+      output:
+    execute:
+      input: CorrectedWaveform_CH0, PulseStart_CH0
+    waveform: CorrectedWaveform_CH0
+    pulse_start: PulseStart_CH0
+
+  DAMAX2_CH0:
+    algorithm:
+      name: DAMAX2
+      impedance: 50
+      rate: 500e6
+      unit: pC
+      waveform_unit: mV
+      cfd_delay: 10
+    initialise:
+      output:
+    execute:
+      input: CorrectedWaveform_CH0, PulseStart_CH0
+    waveform: CorrectedWaveform_CH0
+    pulse_start: PulseStart_CH0
+
 
     # -----------------------------------------------------------
     # Trees
@@ -403,7 +433,7 @@ objects:
         PeakLocation_CH0, PulseCharge_CH0, TotalCharge_CH0, PulseStart_CH0, PulseStart_CH1,
         PulseTime_CH0, PulseTime_CH1, PromptDelayChargeRatio_CH0, PromptCharge_CH0,
         DelayedCharge_CH0, MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0, TimeDifference_CH01,
-        Skew_CH0, Kurtosis_CH0, SD_CH0, Mean_CH0, Timestamp_CH0
+        Skew_CH0, Kurtosis_CH0, SD_CH0, Mean_CH0, Timestamp_CH0, DAMAX1_CH0, DAMAX2_CH0
     finalise:
       output:
 
@@ -417,7 +447,7 @@ objects:
             float: Baseline_CH0, PeakHeight_CH0, PeakLocation_CH0, PulseCharge_CH0,
               TotalCharge_CH0, PulseStart_CH0, PulseTime_CH0, PromptDelayChargeRatio_CH0,
               MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0, Skew_CH0, Kurtosis_CH0,
-              SD_CH0, Mean_CH0, Timestamp_CH0
+              SD_CH0, Mean_CH0, Timestamp_CH0, DAMAX1_CH0, DAMAX2_CH0
 
     - Channel_1:
         event:

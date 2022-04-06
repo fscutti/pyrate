@@ -333,6 +333,36 @@ objects:
     waveform: CorrectedWaveform
     window: PulseWindow
 
+  DAMAX1:
+    algorithm:
+      name: DAMAX1
+      impedance: 50
+      rate: 500e6
+      unit: pC
+      waveform_unit: mV
+      cfd_delay: 10
+    initialise:
+      output:
+    execute:
+      input: CorrectedWaveform, PulseStart
+    waveform: CorrectedWaveform
+    pulse_start: PulseStart
+
+  DAMAX2:
+    algorithm:
+      name: DAMAX2
+      impedance: 50
+      rate: 500e6
+      unit: pC
+      waveform_unit: mV
+      cfd_delay: 10
+    initialise:
+      output:
+    execute:
+      input: CorrectedWaveform, PulseStart
+    waveform: CorrectedWaveform
+    pulse_start: PulseStart
+
 
      # -----------------------------------------------------------
      # Histograms
@@ -350,7 +380,7 @@ objects:
       input: RawWaveform, CorrectedWaveform, Baseline, PeakHeight, PeakLocation, PulseCharge,
         TotalCharge, PulseStart, PromptDelayChargeRatio, PromptCharge, DelayedCharge,
         MeanTime, PromptDelayChargeRatioCalculator, TotalSum, PulseSum, ChargeConstant,
-        TrapezoidFilter, CFD_Trap, Skew, Kurtosis, SD, Mean, Timestamp
+        TrapezoidFilter, CFD_Trap, Skew, Kurtosis, SD, Mean, Timestamp, DAMAX1, DAMAX2
     finalise:
       output:
     trees:
@@ -362,7 +392,7 @@ objects:
           scalar:
             float: Baseline, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart,
               PromptDelayChargeRatio, MeanTime, PromptDelayChargeRatioCalculator,
-              TotalSum, PulseSum, CFD_Trap, Skew, Kurtosis, SD, Mean, Timestamp
+              TotalSum, PulseSum, CFD_Trap, Skew, Kurtosis, SD, Mean, Timestamp, DAMAX1, DAMAX2
         single:
                 #    vector:
                 #        double: AverageWaveform
