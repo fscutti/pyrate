@@ -24,9 +24,9 @@
     
     Example config:
     
-    Charge_CHX:
+    DAMAX1_CHX:
         algorithm:
-            name: Charge
+            name: DAMAX1
             impedance: 50
             rate: 500e6
             unit: pC
@@ -49,7 +49,7 @@ q_units = {"C": 1.0, "mC": 1e3, "uC": 1e6, "nC": 1e9, "pC": 1e12, "fC": 1e15}
 
 
 class DAMAX1(Algorithm):
-    __slots__ = ("charge_constant", "delay")
+    __slots__ = ("charge_constant", "delay", "sample_rate")
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
@@ -58,12 +58,12 @@ class DAMAX1(Algorithm):
         """Prepare the constant for calculating charge"""
         # Deal with charge constants
         impedance = self.config["algorithm"]["impedance"]
-        sample_rate = float(self.config["algorithm"]["rate"])
+        self.sample_rate = float(self.config["algorithm"]["rate"])
         charge_units = self.config["algorithm"]["unit"]
         self.delay = 0
 
         if "cfd_delay" in self.config["algorithm"]:
-            self.delay = self.store.get(self.config["algorithm"]["cfd_delay"])
+            self.delay = self.config["algorithm"]["cfd_delay"]
 
         if charge_units in q_units:
             charge_units = q_units[charge_units]
@@ -91,7 +91,7 @@ class DAMAX1(Algorithm):
                     "ERROR: In algorithm Charge, waveform_unit could not be converted to a float."
                 )
 
-        self.charge_constant = waveform_units * charge_units / (impedance * sample_rate)
+        self.charge_constant = waveform_units * charge_units / (impedance * self.sample_rate)
 
     def execute(self):
         """Charge ratio X1 defined according to:
@@ -99,8 +99,8 @@ class DAMAX1(Algorithm):
 
         pulse_start = self.store.get(self.config["pulse_start"]) - self.delay
 
-        window1 = (pulse_start + int(100*(self.sample_rate*1e-9)), pulse_start + int(600*(self.sample_rate*1e-9)))
-        window2 = (pulse_start, pulse_start + int(600*(self.sample_rate*1e-9)))
+        window1 = (int(pulse_start + 100*(self.sample_rate*1e-9)), int(pulse_start + 600*(self.sample_rate*1e-9)))
+        window2 = (int(pulse_start), int(pulse_start + 600*(self.sample_rate*1e-9)))
         
         waveform = self.store.get(self.config["waveform"])
 
