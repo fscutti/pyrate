@@ -99,8 +99,8 @@ class DAMAX1(Algorithm):
 
         pulse_start = self.store.get(self.config["pulse_start"]) - self.delay
 
-        window1 = (pulse_start + 100*(self.sample_rate*1e9), pulse_start + 600*(self.sample_rate*1e9))
-        window2 = (pulse_start, pulse_start + 600*(self.sample_rate*1e9))
+        window1 = (pulse_start + int(100*(self.sample_rate*1e-9)), pulse_start + int(600*(self.sample_rate*1e-9)))
+        window2 = (pulse_start, pulse_start + int(600*(self.sample_rate*1e-9)))
         
         waveform = self.store.get(self.config["waveform"])
 
