@@ -38,7 +38,8 @@ class Run:
         self._history = {"CURRENT TARGET": None}
 
         fileHandler = logging.FileHandler(
-            f"{self.name}.{time.strftime('%Y-%m-%d-%Hh%M')}.log", mode="w"
+            f"{self.name}.{time.strftime('%Y-%m-%d-%Hh%M')}.log", mode="w", 
+            delay=True
         )
         fileHandler.setFormatter(
             logging.Formatter("[%(asctime)s %(name)-16s %(levelname)-7s]  %(message)s")
