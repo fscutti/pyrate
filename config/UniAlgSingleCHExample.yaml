@@ -333,6 +333,19 @@ objects:
     waveform: CorrectedWaveform
     window: PulseWindow
 
+  FFT:
+    algorithm:
+      name: FFT
+      rate: 500e6
+      bins: 100
+    initialise:
+      output:
+    execute:
+      input: CorrectedWaveform, PulseWindow
+    waveform: CorrectedWaveform
+    window: PulseWindow
+
+
 
      # -----------------------------------------------------------
      # Histograms
@@ -350,7 +363,7 @@ objects:
       input: RawWaveform, CorrectedWaveform, Baseline, PeakHeight, PeakLocation, PulseCharge,
         TotalCharge, PulseStart, PromptDelayChargeRatio, PromptCharge, DelayedCharge,
         MeanTime, PromptDelayChargeRatioCalculator, TotalSum, PulseSum, ChargeConstant,
-        TrapezoidFilter, CFD_Trap, Skew, Kurtosis, SD, Mean, Timestamp, AverageWaveform
+        TrapezoidFilter, CFD_Trap, Skew, Kurtosis, SD, Mean, Timestamp, AverageWaveform, FFT
     finalise:
       output:
     trees:
@@ -358,7 +371,7 @@ objects:
         event:
           vector:
             int: RawWaveform
-            double: CorrectedWaveform, TrapezoidFilter
+            double: CorrectedWaveform, TrapezoidFilter, FFT
           scalar:
             float: Baseline, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart,
               PromptDelayChargeRatio, MeanTime, PromptDelayChargeRatioCalculator,

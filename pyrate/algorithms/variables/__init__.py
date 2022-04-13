@@ -21,3 +21,4 @@ from pyrate.algorithms.variables.Moment import Moment
 from pyrate.algorithms.variables.Calculator import Calculator
 from pyrate.algorithms.variables.GetTimestamp import GetTimestamp
 from pyrate.algorithms.variables.AverageWaveform import AverageWaveform
+from pyrate.algorithms.variables.FFT import FFT

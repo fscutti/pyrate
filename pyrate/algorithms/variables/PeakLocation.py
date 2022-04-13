@@ -4,7 +4,10 @@
 
     Required parameters:
         waveform: The waveform for which the maximum will be calculated
-    
+
+    Optional parameters:
+        window: A sub window to search for the peak over
+
     Required states:
         initialise:
             output:
@@ -36,8 +39,8 @@ class PeakLocation(Algorithm):
     def initialise(self):
         """Allows the user to determine if the peak is in a smaller window"""
         self.use_window = False
-        if "window" in self.config["algorithm"]:
-            self.use_window = bool(self.config["algorithm"]["window"])
+        if "window" in self.config:
+            self.use_window = True
 
     def execute(self):
         """Caclulates the pulse time based on the mode chosen"""
