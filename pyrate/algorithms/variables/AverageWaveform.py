@@ -84,7 +84,7 @@ class AverageWaveform(Algorithm):
 
         # Only runs if the waveform isn't empty
         if waveform.size > 1:
-            if self.cum_waveform.size < self.cum_waveform.size:
+            if self.cum_waveform.size < waveform.size:
                 self.cum_waveform = np.zeros(waveform.size)
 
             self.cum_waveform += waveform
