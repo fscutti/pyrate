@@ -34,7 +34,7 @@ from pyrate.core.Algorithm import Algorithm
 
 
 class RawWaveform(Algorithm):
-    __slots__ = ()
+    __slots__ = ('reader')
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
@@ -52,26 +52,19 @@ class RawWaveform(Algorithm):
             reader = self.store.get("INPUT:READER:name")
         else:
             reader = self.store.get(f"INPUT:READER:GROUP:name")
-
-        # Store the reader in a unique way to be used later (PERM store)
-        self.store.put(f"{self.name}:reader", reader)
-
+        
+        self.reader = reader
+    
     def execute(self):
-        """Gets the raw trace from the reader and puts it on the store"""
-        # First find out what reader we're using
-        reader = self.store.get(f"{self.name}:reader")
-
-        if reader == "ReaderWaveDumpMMAP":
+        """ Gets the raw trace from the reader and puts it on the store
+        """
+        if self.reader == "ReaderWaveDumpMMAP":
             RawWaveform = self.store.get(self.config["waveform_wd"])
-        elif (
-            reader == "ReaderCAEN1730_ZLE"
-            or reader == "ReaderCAEN1730_RAW"
-            or reader == "ReaderCAEN1730_PSD"
-        ):
+        elif self.reader == "ReaderCAEN1730_ZLE" or self.reader == "ReaderCAEN1730_RAW" or reader == "ReaderCAEN1730_PSD":
             RawWaveform = self.store.get(self.config["waveform_md"])
-        elif reader == "ReaderBlueTongueMMAP":
+        elif self.reader == "ReaderBlueTongueMMAP":
             RawWaveform = self.store.get(self.config["waveform_bt"])
-        elif reader == "ReaderWaveCatcherMMAP":
+        elif self.reader == "ReaderWaveCatcherMMAP":
             sys.exit("Uh oh, WaveCatcher doesn't have a RawWaveform...")
 
         # convert to numpy array
