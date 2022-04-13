@@ -417,6 +417,7 @@ objects:
       input: CorrectedWaveform_CH0, PulseStart_CH0
     waveform: CorrectedWaveform_CH0
     pulse_start: PulseStart_CH0
+    
   FFT_CH0:
     algorithm:
       name: FFT
