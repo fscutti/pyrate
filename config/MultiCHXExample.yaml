@@ -252,10 +252,9 @@ objects:
         time1: PulseTime_CH0
         time2: PulseTime_CH1
 
-    Skew_CHX:
+    Moments_CHX:
         algorithm:
             name: Moment
-            order: 3
             rate: 500e6
         initialise:
             output:
@@ -263,42 +262,6 @@ objects:
             input: CorrectedWaveform_CHX, TotalWindow_CHX
         waveform: CorrectedWaveform_CHX
         window: TotalWindow_CHX
-
-    Kurtosis_CHX:
-        algorithm:
-            name: Moment
-            order: 4
-            rate: 500e6
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX, TotalWindow_CHX
-        waveform: CorrectedWaveform_CHX
-        window: TotalWindow_CHX
-
-    SD_CHX:
-        algorithm:
-            name: Moment
-            order: 2
-            rate: 500e6
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX, TotalWindow_CHX
-        waveform: CorrectedWaveform_CHX
-        window: TotalWindow_CHX
-
-    Mean_CHX:
-        algorithm:
-            name: Moment
-            order: 1
-            rate: 500e6
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX, PulseWindow_CHX
-        waveform: CorrectedWaveform_CHX
-        window: PulseWindow_CHX
     
     DAMAX1_CHX:
         algorithm:
@@ -356,8 +319,8 @@ objects:
             input: RawWaveform_CHX, CorrectedWaveform_CHX, Baseline_CHX, PeakHeight_CHX,
                    PeakLocation_CHX, PulseCharge_CHX, TotalCharge_CHX, PulseStart_CHX, 
                    PulseTime_CHX, PromptDelayChargeRatio_CHX, PromptCharge_CHX, DelayedCharge_CHX, 
-                   MeanTime_CHX, PromptDelayChargeRatioCalculator_CHX, TimeDifference_CH01, Skew_CHX, 
-                   Kurtosis_CHX, SD_CHX, Mean_CHX, Timestamp_CHX, AverageWaveform_CHX, DAMAX1_CHX, DAMAX2_CHX, FFT_CHX
+                   MeanTime_CHX, PromptDelayChargeRatioCalculator_CHX, TimeDifference_CH01, Moments_CHX, 
+                   Timestamp_CHX, AverageWaveform_CHX, DAMAX1_CHX, DAMAX2_CHX, FFT_CHX
         finalise:
             output:
         trees:
@@ -366,12 +329,12 @@ objects:
                 event:
                     vector: 
                         int: RawWaveform_CHX
-                        double: CorrectedWaveform_CHX, FFT_CHX
+                        double: CorrectedWaveform_CHX, FFT_CHX, Moments_CHX
                     scalar:
                         float: Baseline_CHX, PeakHeight_CHX, PeakLocation_CHX, PulseCharge_CHX, 
                                TotalCharge_CHX, PulseStart_CHX, PulseTime_CHX, PromptDelayChargeRatio_CHX, 
                                MeanTime_CHX, PromptDelayChargeRatioCalculator_CHX,
-                               Skew_CHX, Kurtosis_CHX, SD_CHX, Mean_CHX, Timestamp_CHX, DAMAX1_CHX, DAMAX2_CHX
+                               Timestamp_CHX, DAMAX1_CHX, DAMAX2_CHX
                 single:
                     vector:
                         double: AverageWaveform_CHX

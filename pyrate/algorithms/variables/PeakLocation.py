@@ -22,11 +22,12 @@
         initialise:
             output:
         execute:
-            input: CorrectedWaveform_CHX, Window
+            input: CorrectedWaveform_CHX, Window, PeakHeight
         waveform: CorrectedWaveform_CHX
         window: Window
+        peakheight: PeakHeight
 """
-
+import numpy as np
 from pyrate.core.Algorithm import Algorithm
 
 
@@ -45,6 +46,7 @@ class PeakLocation(Algorithm):
     def execute(self):
         """Caclulates the pulse time based on the mode chosen"""
         waveform = self.store.get(self.config["waveform"])
+        # PeakHeight = self.store.get(self.config["peakheight"])
         # Peak location is the highest point on the waveform
         # PeakLocation = np.argmax(waveform)
         if self.use_window:
@@ -54,10 +56,9 @@ class PeakLocation(Algorithm):
         if window == -999 or window is None:
             PeakLocation = -999
         else:
-            PeakLocation = max(
-                range(len(waveform[window[0] : window[1]])), key=waveform.__getitem__
-            )
+            PeakLocation = np.argmax(waveform[window])
         self.store.put(self.name, PeakLocation)
 
 
 # EOF
+

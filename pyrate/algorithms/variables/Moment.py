@@ -1,19 +1,17 @@
-""" Calculates the nth moment of a waveform, treating the waveform as a  over
-    the passed in window range
+""" Calculates the mean, stddev, skew and excess kurtosis of a waveform,
+    treating the waveform as a over the passed in window range.
+    The moments heavily depend on the window passed in. For best results, ensure
+    that your windows are tuned for your expected pulse lengths.
     Momrnt = sum(x_i - mu)^n/N / stddev^n
 
     
-
     Required parameters:
-        order: (int) The order of the moment. e.g. order 3 for skewness,
-                      order 4 for kurtosis
         rate: (float) The digitisation rate
 
-    
     Optional parameters:
-        excess: (bool) Implements the excess definition of kurtosis (order 4)
-                       Excess kurtosis = 4th Moment - 3
-                       Default setting is True
+        mode: (str) Let's the user change to algebraic moments instead of
+                    central, normalised moments. To get the algebraic moments
+                    pass in the flag "algebraic"
    
 
     Required states:
@@ -24,12 +22,10 @@
     
 
     Example config:
-
     
     Skew_CHX:
         algorithm:
             name: Moment
-            order: 3
             rate: 500e6
         initialise:
             output:
@@ -39,89 +35,97 @@
         window: Window_CHX
 """
 
-import sys
-import math
+import numpy as np
 from pyrate.core.Algorithm import Algorithm
 
-
 class Moment(Algorithm):
-    __slots__ = ("order", "excess", "time_period", "length", "time")
+    __slots__ = ("mode", "time_period", "times")
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
     def initialise(self):
-
         """Prepares the config order of the moment"""
-        if "order" not in self.config["algorithm"]:
-            sys.exit("ERROR: in config, Moment algorithm requires a order parameter")
-        self.order = int(self.config["algorithm"]["order"])
-
-        self.excess = True
-        if "excess" in self.config["algorithm"]:
-            self.excess = bool(self.config["algorithm"]["excess"])
+        self.mode = 0
+        if "mode" in self.config["algorithm"]:
+            if self.mode.lower() == "algebraic":
+                self.mode = 1
 
         self.time_period = 1 / float(self.config["algorithm"]["rate"])
-        self.length = None
-        self.time = None
+        self.times = np.arange(0)
 
     def execute(self):
-
-        """Calculates the nth order moment"""
+        """Calculates the 4th order moments"""
         waveform = self.store.get(self.config["waveform"])
+        waveform_len = waveform.size
         window = self.store.get(self.config["window"])
-        # Hacky way to get the time bin mids to be used
-        # Not in initialise cause we don't know the length at that stage
-        ########################################################################
-        if self.length is None or self.time is None:
-            self.length = len(waveform)
-            # Time shifted to middle of bin
-            self.time = [
-                i * self.time_period + self.time_period / 2 for i in range(self.length)
-            ]
-        ########################################################################
+
         if window is None or window == -999:
-            Moment = -999
+            moments = [-999]*4
         else:
-            # First, have to make the waveform positive definite
-            min_val = min(waveform)
-            entries = [
-                x - min_val for x in waveform[window[0] : window[1]]
-            ]  # place the minimum value at 0 volts/ADC
-            bin_mids = self.time[window[0] : window[1]]  # Make them bin mids
+            window_range = waveform[window[0]:window[1]].size # Number of indexes to sum over, just in case it goes over the end
+            # Check if the times array matches the data
+            if self.times.size < waveform_len:
+                # Times array not big enough, growing to the size of the waveform
+                self.times = (np.arange(waveform_len) * self.time_period + self.time_period / 2) * 1e9 # in ns
 
-            # Calculate mean and variance
-            entry_sum = sum(entries)
-            if entry_sum == 0:
-                Moment = -999
+            # The waveform over the region of interest
+            x = self.times[window[0]:window[1]]
+            fx = waveform[window[0]:window[1]]
+            fsum = np.sum(fx)
+            if fsum == 0:
+                moments = [-999]*4
             else:
-                mean = (
-                    sum([i * j for i, j in zip(entries, bin_mids)]) / entry_sum
-                )  # Have I made a typo here? Should it be / N ?
-                shifted_mids = [i - mean for i in bin_mids]
-                variance = (
-                    sum([i * math.pow(j, 2) for i, j in zip(entries, shifted_mids)])
-                    / entry_sum
-                )
+                inner = fx * x
+                mean = np.sum(inner) / fsum
+                inner *= x
+                m2 = np.sum(inner) / fsum
+                inner *= x
+                m3 = np.sum(inner) / fsum #/ np.power(variance, 1.5)
+                inner *= x
+                m4 = np.sum(inner) / fsum #/ np.power(variance, 2) - 3
 
-                Mn = (
-                    sum(
-                        [
-                            i * math.pow(j, self.order)
-                            for i, j in zip(entries, shifted_mids)
-                        ]
-                    )
-                    / entry_sum
-                )
-                Moment = Mn / math.pow(
-                    variance, self.order / 2.0
-                )  # /2.0 because using variance instead of std dev
+                # Convert to central moments
+                M2 = m2 - np.power(mean,2) # AKA Variance
+                if M2 < 0:
+                    # Can't really go any further, skew and kurtosis aren't real
+                    moments = [mean, np.nan, np.nan, np.nan]
+                else:
+                    # Get the rest of the central moments
+                    M4 = m4 - 3*np.power(mean,4) + 6*np.power(mean,2)*m2 - 4*mean*m3
+                    M3 = m3 + 2*np.power(mean,3) - 3*mean*m2
 
-                if self.excess and self.order == 4:
-                    # Excess definition of Kurtosis, minus 3 because reasons
-                    Moment -= 3
+                    # Convert the central moments to useful variables
+                    stddev = np.sqrt(M2)
+                    skew = M3 / np.power(stddev, 3)
+                    excess_kurtosis = M4 / np.power(stddev, 4) - 3
 
-        self.store.put(self.name, Moment)
+                    moments = [mean, stddev, skew, excess_kurtosis]
 
+
+                # if self.mode == 0:
+                #     inner = np.power(x - mu, 2) * fx
+                #     variance = np.sum(inner) / fsum
+                #     if variance < 0:
+                #         moments = [1, mu, variance, np.nan, np.nan]
+                #     else:
+                #         inner *= x - mu
+                #         skew = (np.sum(inner) / fsum) / np.power(variance, 1.5)
+                #         # skew = (np.sum(np.power(x - mu, 3) * fx) / fsum) / np.power(variance, 1.5)
+                #         inner *= x - mu
+                #         excess_kurtosis = (np.sum(inner) / fsum) / np.power(variance, 2) - 3
+                #         # excess_kurtosis = (np.sum(np.power(x - mu, 4) * fx) / fsum) / np.power(variance, 1.5) - 3
+                #         moments = [1, mu, variance, skew, excess_kurtosis]
+
+                # else:
+                #     # Algebraic moments
+                #     moments = []
+                #     for i in range(self.order + 1):
+                #         if i == 0:
+                #             moments[i] = 1 # definitionally
+                #         else:
+                #             moments[i] = np.sum(np.power(x, i) * fx) / fsum
+
+        self.store.put(self.name, moments)
 
 # EOF
