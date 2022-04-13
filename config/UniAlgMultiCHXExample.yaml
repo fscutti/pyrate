@@ -299,6 +299,36 @@ objects:
             input: CorrectedWaveform_CHX, PulseWindow_CHX
         waveform: CorrectedWaveform_CHX
         window: PulseWindow_CHX
+    
+    DAMAX1_CHX:
+        algorithm:
+            name: DAMAX1
+            impedance: 50
+            rate: 500e6
+            unit: pC
+            waveform_unit: mV
+            cfd_delay: 10
+        initialise:
+            output:
+        execute:
+            input: CorrectedWaveform_CHX, PulseStart_CHX
+        waveform: CorrectedWaveform_CHX
+        pulse_start: PulseStart_CHX
+
+    DAMAX2_CHX:
+        algorithm:
+            name: DAMAX2
+            impedance: 50
+            rate: 500e6
+            unit: pC
+            waveform_unit: mV
+            cfd_delay: 10
+        initialise:
+            output:
+        execute:
+            input: CorrectedWaveform_CHX, PulseStart_CHX
+        waveform: CorrectedWaveform_CHX
+        pulse_start: PulseStart_CHX
 
     FFT_CHX:
         algorithm:
@@ -327,7 +357,7 @@ objects:
                    PeakLocation_CHX, PulseCharge_CHX, TotalCharge_CHX, PulseStart_CHX, 
                    PulseTime_CHX, PromptDelayChargeRatio_CHX, PromptCharge_CHX, DelayedCharge_CHX, 
                    MeanTime_CHX, PromptDelayChargeRatioCalculator_CHX, TimeDifference_CH01, Skew_CHX, 
-                   Kurtosis_CHX, SD_CHX, Mean_CHX, Timestamp_CHX, AverageWaveform_CHX, FFT_CHX
+                   Kurtosis_CHX, SD_CHX, Mean_CHX, Timestamp_CHX, AverageWaveform_CHX, DAMAX1_CHX, DAMAX2_CHX, FFT_CHX
         finalise:
             output:
         trees:
@@ -341,7 +371,7 @@ objects:
                         float: Baseline_CHX, PeakHeight_CHX, PeakLocation_CHX, PulseCharge_CHX, 
                                TotalCharge_CHX, PulseStart_CHX, PulseTime_CHX, PromptDelayChargeRatio_CHX, 
                                MeanTime_CHX, PromptDelayChargeRatioCalculator_CHX,
-                               Skew_CHX, Kurtosis_CHX, SD_CHX, Mean_CHX, Timestamp_CHX
+                               Skew_CHX, Kurtosis_CHX, SD_CHX, Mean_CHX, Timestamp_CHX, DAMAX1_CHX, DAMAX2_CHX
                 single:
                     vector:
                         double: AverageWaveform_CHX
