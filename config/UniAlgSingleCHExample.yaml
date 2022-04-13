@@ -285,10 +285,9 @@ objects:
     execute:
       input: PromptCharge
 
-  Skew:
+  Moment:
     algorithm:
       name: Moment
-      order: 3
       rate: 500e6
     initialise:
       output:
@@ -296,42 +295,6 @@ objects:
       input: CorrectedWaveform, TotalWindow
     waveform: CorrectedWaveform
     window: TotalWindow
-
-  Kurtosis:
-    algorithm:
-      name: Moment
-      order: 4
-      rate: 500e6
-    initialise:
-      output:
-    execute:
-      input: CorrectedWaveform, TotalWindow
-    waveform: CorrectedWaveform
-    window: TotalWindow
-
-  SD:
-    algorithm:
-      name: Moment
-      order: 2
-      rate: 500e6
-    initialise:
-      output:
-    execute:
-      input: CorrectedWaveform, TotalWindow
-    waveform: CorrectedWaveform
-    window: TotalWindow
-
-  Mean:
-    algorithm:
-      name: Moment
-      order: 1
-      rate: 500e6
-    initialise:
-      output:
-    execute:
-      input: CorrectedWaveform, PulseWindow
-    waveform: CorrectedWaveform
-    window: PulseWindow
 
   DAMAX1:
     algorithm:
@@ -393,7 +356,7 @@ objects:
       input: RawWaveform, CorrectedWaveform, Baseline, PeakHeight, PeakLocation, PulseCharge,
         TotalCharge, PulseStart, PromptDelayChargeRatio, PromptCharge, DelayedCharge,
         MeanTime, PromptDelayChargeRatioCalculator, TotalSum, PulseSum, ChargeConstant,
-        TrapezoidFilter, CFD_Trap, Skew, Kurtosis, SD, Mean, Timestamp, AverageWaveform, DAMAX1, DAMAX2, FFT
+        TrapezoidFilter, CFD_Trap, Moments, Timestamp, AverageWaveform, DAMAX1, DAMAX2, FFT
     finalise:
       output:
     trees:
@@ -401,11 +364,11 @@ objects:
         event:
           vector:
             int: RawWaveform
-            double: CorrectedWaveform, TrapezoidFilter, FFT
+            double: CorrectedWaveform, TrapezoidFilter, FFT, Moments
           scalar:
             float: Baseline, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart,
               PromptDelayChargeRatio, MeanTime, PromptDelayChargeRatioCalculator,
-              TotalSum, PulseSum, CFD_Trap, Skew, Kurtosis, SD, Mean, Timestamp, DAMAX1, DAMAX2
+              TotalSum, PulseSum, CFD_Trap, Timestamp, DAMAX1, DAMAX2
         single:
           vector:
             double: AverageWaveform
