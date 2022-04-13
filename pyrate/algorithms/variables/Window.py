@@ -12,7 +12,7 @@
             pivot: An object with a single sample or time (will be rounded to 
                    the nearest integer)
             left: How many samples before the pivot to start the window
-            right: How many samples after the pivot to start the window
+            right: How many samples after the pivot to end the window
 
     Required states:
         initialise:

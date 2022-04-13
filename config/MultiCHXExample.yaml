@@ -46,6 +46,17 @@ objects:
         baseline: Baseline_CHX
         wc_waveform: EVENT:GROUP:CHX:RawWaveform
 
+    AverageWaveform_CHX:
+        algorithm:
+            name: AverageWaveform
+        initialise:
+            output:
+        execute:
+            input: CorrectedWaveform_CHX
+        finalise:
+            output:
+        waveform: CorrectedWaveform_CHX
+
     ############################## WINDOWS #################################
 
     TotalWindow_CHX:
@@ -92,6 +103,12 @@ objects:
         pivot: PromptWindow_CHX
 
     ############################## VARIABLES #################################
+
+    Timestamp_CHX:
+        algorithm:
+            name: GetTimestamp
+        execute:
+            output:
 
     PeakHeight_CHX:
         algorithm:
@@ -235,10 +252,9 @@ objects:
         time1: PulseTime_CH0
         time2: PulseTime_CH1
 
-    Skew_CHX:
+    Moments_CHX:
         algorithm:
             name: Moment
-            order: 3
             rate: 500e6
         initialise:
             output:
@@ -246,42 +262,49 @@ objects:
             input: CorrectedWaveform_CHX, TotalWindow_CHX
         waveform: CorrectedWaveform_CHX
         window: TotalWindow_CHX
-
-    Kurtosis_CHX:
+    
+    DAMAX1_CHX:
         algorithm:
-            name: Moment
-            order: 4
+            name: DAMAX1
+            impedance: 50
             rate: 500e6
+            unit: pC
+            waveform_unit: mV
+            cfd_delay: 10
         initialise:
             output:
         execute:
-            input: CorrectedWaveform_CHX, TotalWindow_CHX
+            input: CorrectedWaveform_CHX, PulseStart_CHX
         waveform: CorrectedWaveform_CHX
-        window: TotalWindow_CHX
+        pulse_start: PulseStart_CHX
 
-    SD_CHX:
+    DAMAX2_CHX:
         algorithm:
-            name: Moment
-            order: 2
+            name: DAMAX2
+            impedance: 50
             rate: 500e6
+            unit: pC
+            waveform_unit: mV
+            cfd_delay: 10
         initialise:
             output:
         execute:
-            input: CorrectedWaveform_CHX, TotalWindow_CHX
+            input: CorrectedWaveform_CHX, PulseStart_CHX
         waveform: CorrectedWaveform_CHX
-        window: TotalWindow_CHX
+        pulse_start: PulseStart_CHX
 
-    Mean_CHX:
+    FFT_CHX:
         algorithm:
-            name: Moment
-            order: 1
+            name: FFT
             rate: 500e6
+            bins: 100
         initialise:
             output:
         execute:
             input: CorrectedWaveform_CHX, PulseWindow_CHX
         waveform: CorrectedWaveform_CHX
-        window: PulseWindow_CHX
+        #window: PulseWindow_CHX
+
 
     # -----------------------------------------------------------
     # Trees
@@ -296,8 +319,8 @@ objects:
             input: RawWaveform_CHX, CorrectedWaveform_CHX, Baseline_CHX, PeakHeight_CHX,
                    PeakLocation_CHX, PulseCharge_CHX, TotalCharge_CHX, PulseStart_CHX, 
                    PulseTime_CHX, PromptDelayChargeRatio_CHX, PromptCharge_CHX, DelayedCharge_CHX, 
-                   MeanTime_CHX, PromptDelayChargeRatioCalculator_CHX, TimeDifference_CH01, Skew_CHX, 
-                   Kurtosis_CHX, SD_CHX, Mean_CHX
+                   MeanTime_CHX, PromptDelayChargeRatioCalculator_CHX, TimeDifference_CH01, Moments_CHX, 
+                   Timestamp_CHX, AverageWaveform_CHX, DAMAX1_CHX, DAMAX2_CHX, FFT_CHX
         finalise:
             output:
         trees:
@@ -306,15 +329,15 @@ objects:
                 event:
                     vector: 
                         int: RawWaveform_CHX
-                        double: CorrectedWaveform_CHX
+                        double: CorrectedWaveform_CHX, FFT_CHX, Moments_CHX
                     scalar:
                         float: Baseline_CHX, PeakHeight_CHX, PeakLocation_CHX, PulseCharge_CHX, 
                                TotalCharge_CHX, PulseStart_CHX, PulseTime_CHX, PromptDelayChargeRatio_CHX, 
                                MeanTime_CHX, PromptDelayChargeRatioCalculator_CHX,
-                               Skew_CHX, Kurtosis_CHX, SD_CHX, Mean_CHX
-                #single:
-                #    vector:
-                #        double: AverageWaveform_CHX
+                               Timestamp_CHX, DAMAX1_CHX, DAMAX2_CHX
+                single:
+                    vector:
+                        double: AverageWaveform_CHX
         
             - Channel_01:
                 event:

@@ -4,6 +4,9 @@
 
     Required parameters:
         waveform: A waveform for which the maximum value will be calculated
+
+    Optional parameters:
+        window: A sub window to search for the peak over
     
     Required states:
         execute:
@@ -14,14 +17,13 @@
     PeakHeight_CHX:
         algorithm:
             name: PeakHeight
-            window: True
         execute:
             input: CorrectedWaveform_CHX, Window
         waveform: CorrectedWaveform_CHX
         window: Window
 
 """
-
+import numpy as np
 from pyrate.core.Algorithm import Algorithm
 
 
@@ -34,17 +36,20 @@ class PeakHeight(Algorithm):
     def initialise(self):
         """Allows the user to determine if the peak is in a smaller window"""
         self.use_window = False
-        if "window" in self.config["algorithm"]:
-            self.use_window = bool(self.config["algorithm"]["window"])
+        if "window" in self.config:
+            self.use_window = True
 
     def execute(self):
         """Caclulates the waveform peak height (maximum)"""
         waveform = self.store.get(self.config["waveform"])
-        window = self.store.get(self.config["window"])
-        if window == -999 or window == None:
+        if self.use_window:
+            window = self.store.get(self.config["window"])
+        else:
+            window = (None, None)
+        if window == -999 or window is None:
             PeakHeight = -999
         else:
-            PeakHeight = max(waveform[window[0] : window[1]])
+            PeakHeight = np.max(waveform[window[0] : window[1]])
 
         self.store.put(self.name, PeakHeight)
 

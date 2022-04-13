@@ -9,7 +9,6 @@ from pyrate.algorithms.variables.TestingReader import TestingReader
 from pyrate.algorithms.variables.CorrectedWaveform import CorrectedWaveform
 from pyrate.algorithms.variables.Window import Window
 from pyrate.algorithms.variables.PeakHeight import PeakHeight
-
 from pyrate.algorithms.variables.PeakLocation import PeakLocation
 from pyrate.algorithms.variables.MeanTime import MeanTime
 from pyrate.algorithms.variables.ChargeRatio import ChargeRatio
@@ -19,3 +18,8 @@ from pyrate.algorithms.variables.CFD import CFD
 from pyrate.algorithms.variables.TrapezoidFilter import TrapezoidFilter
 from pyrate.algorithms.variables.Moment import Moment
 from pyrate.algorithms.variables.Calculator import Calculator
+from pyrate.algorithms.variables.GetTimestamp import GetTimestamp
+from pyrate.algorithms.variables.AverageWaveform import AverageWaveform
+from pyrate.algorithms.variables.DAMAX1 import DAMAX1
+from pyrate.algorithms.variables.DAMAX2 import DAMAX2
+from pyrate.algorithms.variables.FFT import FFT
