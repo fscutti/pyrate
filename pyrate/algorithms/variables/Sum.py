@@ -22,6 +22,7 @@
         window: Window_CHX
 """
 
+import numpy as np
 from pyrate.core.Algorithm import Algorithm
 
 
@@ -43,7 +44,7 @@ class Sum(Algorithm):
             waveform = self.store.get(self.config["waveform"])
 
             # Sum the waveform
-            Sum = sum(waveform[window[0] : window[1]])
+            Sum = np.sum(waveform[window[0] : window[1]])
 
         self.store.put(self.name, Sum)
 
