@@ -44,14 +44,14 @@
         wc_waveform: EVENT:GROUP:CHX:RawWaveform
 """
 
-from pyrate.core.Algorithm import Algorithm
 import sys
+from pyrate.core.Algorithm import Algorithm
 
 wf_units = {"V": 1.0, "mV": 1e3, "uV": 1e6}
 
 
 class CorrectedWaveform(Algorithm):
-    __slots__ = ()
+    __slots__ = ('reader', 'polarity', 'conversion')
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
@@ -110,24 +110,20 @@ class CorrectedWaveform(Algorithm):
             except:
                 sys.exit(f"Error: invalid polarity {polarity}")
 
-        self.store.put(f"{self.name}:polarity", polarity)
-        self.store.put(f"{self.name}:reader", reader)
-        self.store.put(f"{self.name}:conversion", conversion)
+        self.reader = reader
+        self.polarity = polarity
+        self.conversion = conversion
 
     def execute(self):
         """Calculates the baseline corrected waveform"""
-        reader = self.store.get(f"{self.name}:reader")
-        if reader == "ReaderWaveCatcherMMAP":
+        if self.reader == "ReaderWaveCatcherMMAP":
             waveform = self.store.get(self.config["wc_waveform"])
         else:
             waveform = self.store.get(self.config["waveform"])
-        waveform = self.store.get(self.config["waveform"])
-        conversion = self.store.get(f"{self.name}:conversion")
-        polarity = self.store.get(f"{self.name}:polarity")
         baseline = self.store.get(self.config["baseline"])
 
         # Flip the waveform if needed, and subtract baseline
-        corrected_waveform = conversion * polarity * (waveform - baseline)
+        corrected_waveform = self.conversion * self.polarity * (waveform - baseline)
         self.store.put(self.name, corrected_waveform)
 
 
