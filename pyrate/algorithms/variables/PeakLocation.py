@@ -46,7 +46,7 @@ class PeakLocation(Algorithm):
     def execute(self):
         """Caclulates the pulse time based on the mode chosen"""
         waveform = self.store.get(self.config["waveform"])
-        PeakHeight = self.store.get(self.config["peakheight"])
+        # PeakHeight = self.store.get(self.config["peakheight"])
         # Peak location is the highest point on the waveform
         # PeakLocation = np.argmax(waveform)
         if self.use_window:
@@ -56,7 +56,7 @@ class PeakLocation(Algorithm):
         if window == -999 or window is None:
             PeakLocation = -999
         else:
-            PeakLocation = np.where(waveform == PeakHeight)[0][0]
+            PeakLocation = np.argmax(waveform[window])
         self.store.put(self.name, PeakLocation)
 
 
