@@ -27,10 +27,7 @@
     DAMAX2_CHX:
         algorithm:
             name: DAMAX2
-            impedance: 50
             rate: 500e6
-            unit: pC
-            waveform_unit: mV
             cfd_delay: 10
         initialise:
             output:
@@ -44,54 +41,21 @@ import sys
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
 
-wf_units = {"V": 1.0, "mV": 1e-3, "uV": 1e-6}
-q_units = {"C": 1.0, "mC": 1e3, "uC": 1e6, "nC": 1e9, "pC": 1e12, "fC": 1e15}
-
 
 class DAMAX2(Algorithm):
-    __slots__ = ("charge_constant", "delay", "sample_rate")
+    __slots__ = ("delay", "sample_rate")
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
     def initialise(self):
-        """Prepare the constant for calculating charge"""
-        # Deal with charge constants
-        impedance = self.config["algorithm"]["impedance"]
+        """Prepare Initialised variables - CFD delay and digitiser sample rate"""
+        # Deal with CFD delay if CFD is being used as the timing
         self.sample_rate = float(self.config["algorithm"]["rate"])
-        charge_units = self.config["algorithm"]["unit"]
         self.delay = 0
 
         if "cfd_delay" in self.config["algorithm"]:
             self.delay = self.config["algorithm"]["cfd_delay"]
-
-        if charge_units in q_units:
-            charge_units = q_units[charge_units]
-
-        else:
-            try:
-                charge_units = float(charge_units)
-
-            except:
-                sys.exit(
-                    "ERROR: In algorithm Charge, unit parameter could not be converted to a float."
-                )
-
-        waveform_units = self.config["algorithm"]["waveform_unit"]
-
-        if waveform_units in wf_units:
-            waveform_units = wf_units[waveform_units]
-
-        else:
-            try:
-                waveform_units = float(waveform_units)
-
-            except:
-                sys.exit(
-                    "ERROR: In algorithm Charge, waveform_unit could not be converted to a float."
-                )
-
-        self.charge_constant = waveform_units * charge_units / (impedance * self.sample_rate)
 
     def execute(self):
         """Charge ratio X2 defined according to:
@@ -105,8 +69,8 @@ class DAMAX2(Algorithm):
         waveform = self.store.get(self.config["waveform"])
 
         # Calcualte the actual charge over the window
-        charge1 = np.sum(waveform[window1[0] : window1[1]]) * self.charge_constant
-        charge2 = np.sum(waveform[window2[0] : window2[1]]) * self.charge_constant
+        charge1 = np.sum(waveform[window1[0] : window1[1]])
+        charge2 = np.sum(waveform[window2[0] : window2[1]])
 
         if (charge1<=0 or charge2<=0):
             X2_ChargeRatio = -999 

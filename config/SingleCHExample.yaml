@@ -285,7 +285,7 @@ objects:
         execute:
             input: PromptCharge
 
-    Moment:
+    Moments:
         algorithm:
             name: Moment
             rate: 500e6
@@ -299,10 +299,7 @@ objects:
     DAMAX1:
         algorithm:
             name: DAMAX1
-            impedance: 50
             rate: 500e6
-            unit: pC
-            waveform_unit: mV
             cfd_delay: 10
         initialise:
             output:
@@ -314,10 +311,7 @@ objects:
     DAMAX2:
         algorithm:
             name: DAMAX2
-            impedance: 50
             rate: 500e6
-            unit: pC
-            waveform_unit: mV
             cfd_delay: 10
         initialise:
             output:
