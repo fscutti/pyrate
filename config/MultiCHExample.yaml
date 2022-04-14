@@ -373,10 +373,7 @@ objects:
     DAMAX1_CH0:
         algorithm:
             name: DAMAX1
-            impedance: 50
             rate: 500e6
-            unit: pC
-            waveform_unit: mV
             cfd_delay: 10
         initialise:
             output:
@@ -388,10 +385,7 @@ objects:
     DAMAX2_CH0:
         algorithm:
             name: DAMAX2
-            impedance: 50
             rate: 500e6
-            unit: pC
-            waveform_unit: mV
             cfd_delay: 10
         initialise:
             output:

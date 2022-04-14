@@ -65,11 +65,8 @@ objects:
     DAMAX1_CH0:
         algorithm:
             cfd_delay: 10
-            impedance: 50
             name: DAMAX1
             rate: 500e6
-            unit: pC
-            waveform_unit: mV
         execute:
             input: CorrectedWaveform_CH0, PulseStart_CH0
         initialise:
@@ -79,11 +76,8 @@ objects:
     DAMAX1_CH1:
         algorithm:
             cfd_delay: 10
-            impedance: 50
             name: DAMAX1
             rate: 500e6
-            unit: pC
-            waveform_unit: mV
         execute:
             input: CorrectedWaveform_CH1, PulseStart_CH1
         initialise:
@@ -93,11 +87,8 @@ objects:
     DAMAX2_CH0:
         algorithm:
             cfd_delay: 10
-            impedance: 50
             name: DAMAX2
             rate: 500e6
-            unit: pC
-            waveform_unit: mV
         execute:
             input: CorrectedWaveform_CH0, PulseStart_CH0
         initialise:
@@ -107,11 +98,8 @@ objects:
     DAMAX2_CH1:
         algorithm:
             cfd_delay: 10
-            impedance: 50
             name: DAMAX2
             rate: 500e6
-            unit: pC
-            waveform_unit: mV
         execute:
             input: CorrectedWaveform_CH1, PulseStart_CH1
         initialise:
