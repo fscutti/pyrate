@@ -50,11 +50,11 @@
           in trapezoid mode.
 """
 
+import numpy as np
 from pyrate.core.Algorithm import Algorithm
 
-
 class CFD(Algorithm):
-    __slots__ = ("delay", "scale", "cfd_threshold", "savecfd")
+    __slots__ = ("delay", "scale", "cfd_threshold", "savecfd", "cfd", "waveform", "waveform_delay_scaled")
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
@@ -72,62 +72,48 @@ class CFD(Algorithm):
         else:
             self.savecfd = False
 
+        self.cfd = np.zeros(0)
+        self.waveform = np.zeros(0)
+        self.waveform_delay_scaled = np.zeros(0)
+
     def execute(self):
         """Caclulates the waveform CFD"""
         # Get the actual waveform, finally.
         waveform = self.store.get(self.config["waveform"])
-        waveform = self.store.get(self.config["waveform"])
+        waveform_len = waveform.size
 
-        if self.store.check(f"{self.name}:length"):
-            length = self.store.get(f"{self.name}:length")
-
-        else:
-            length = len(waveform)
-            self.store.put(f"{self.name}:length", length, "PERM")
+        if (waveform_len + self.delay) > self.waveform.size:
+            # Our waveform is larger than the storage
+            # we need to grow our arrays
+            self.waveform.resize(waveform_len + self.delay)
+            self.waveform_delay_scaled.resize(waveform_len + self.delay)
 
         # Parameters and formula from Digital techniques for real-time pulse shaping in radiation measurements
         # https://doi.org/10.1016/0168-9002(94)91652-7
-        cfd = []
-        cross_threshold = False
-        CFDTime = -999
+        CFDTime = -999 # Just in case we get an invalid result
 
-        for i in range(length):
-            cfd.append(
-                self.scale * self._v(waveform, i) - self._v(waveform, i - self.delay)
-            )
+        self.waveform[:-self.delay] = waveform
+        self.waveform_delay_scaled[self.delay:] = self.scale * waveform
+        self.cfd = self.waveform - self.waveform_delay_scaled
 
-            if not cross_threshold:
-                cross_threshold = cfd[i] > self.cfd_threshold
-
-            elif CFDTime == -999:
-                # Ok, the threshold has been crossed
-                # (and we only want to calculate it once, but still want to get
-                # the whole cfd for now)
-
-                if cfd[i] < 0 and cfd[i - 1] >= 0:
-                    # Now we've crosssed the 0 point
-                    f = cfd[i - 1] / (cfd[i - 1] - cfd[i])
-                    CFDTime = i - 1 + f
-
-                    if not self.savecfd:
-                        # We're done here :)
-                        break
-
-        # if use_trap:
-        #     # Store the trap
-        #     self.store.put(f"{self.name}:trapezoid", trap)
-        #     # CFDTime -= (gap+rise)
+        # Possible numpy way to do it quickly
+        # https://stackoverflow.com/questions/3843017/efficiently-detect-sign-changes-in-python
+        zero_cross = np.where(np.diff(np.sign(self.cfd)))[0]
+        cross_threshold = np.where(self.cfd > self.cfd_threshold)[0]
+        if cross_threshold.size:
+            # Only look at the zero crosses after the threshold cross
+            zero_cross = zero_cross[zero_cross>cross_threshold[0]]
+            if zero_cross.size:
+                # Ok, now we check the first valid zero cross
+                fc = zero_cross[0] # First crossing (left side)
+                f = self.cfd[fc]/(self.cfd[fc] - self.cfd[fc+1]) # CFD fraction
+                CFDTime = zero_cross[0] + f
+        
         self.store.put(self.name, CFDTime)
         if self.savecfd:
-            self.store.put(f"{self.name}Trace", cfd)
+            self.store.put(f"{self.name}Trace", self.cfd)
 
-    def _v(self, waveform, i):
-        """returns the i'th element of a waveform or 0 if out of range"""
-        try:
-            return waveform[i]
-
-        except:
-            return 0
-
+        self.waveform.fill(0)
+        self.waveform_delay_scaled.fill(0)
 
 # EOF

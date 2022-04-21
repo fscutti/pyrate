@@ -1,5 +1,25 @@
 ---
 objects:
+    AverageWaveform_CH0:
+        algorithm:
+            name: AverageWaveform
+        execute:
+            input: CorrectedWaveform_CH0
+        finalise:
+            output: null
+        initialise:
+            output: null
+        waveform: CorrectedWaveform_CH0
+    AverageWaveform_CH1:
+        algorithm:
+            name: AverageWaveform
+        execute:
+            input: CorrectedWaveform_CH1
+        finalise:
+            output: null
+        initialise:
+            output: null
+        waveform: CorrectedWaveform_CH1
     Baseline_CH0:
         algorithm:
             name: Baseline
@@ -42,6 +62,50 @@ objects:
             output: null
         waveform: RawWaveform_CH1
         wc_waveform: EVENT:GROUP:CH1:RawWaveform
+    DAMAX1_CH0:
+        algorithm:
+            cfd_delay: 10
+            name: DAMAX1
+            rate: 500e6
+        execute:
+            input: CorrectedWaveform_CH0, PulseStart_CH0
+        initialise:
+            output: null
+        pulse_start: PulseStart_CH0
+        waveform: CorrectedWaveform_CH0
+    DAMAX1_CH1:
+        algorithm:
+            cfd_delay: 10
+            name: DAMAX1
+            rate: 500e6
+        execute:
+            input: CorrectedWaveform_CH1, PulseStart_CH1
+        initialise:
+            output: null
+        pulse_start: PulseStart_CH1
+        waveform: CorrectedWaveform_CH1
+    DAMAX2_CH0:
+        algorithm:
+            cfd_delay: 10
+            name: DAMAX2
+            rate: 500e6
+        execute:
+            input: CorrectedWaveform_CH0, PulseStart_CH0
+        initialise:
+            output: null
+        pulse_start: PulseStart_CH0
+        waveform: CorrectedWaveform_CH0
+    DAMAX2_CH1:
+        algorithm:
+            cfd_delay: 10
+            name: DAMAX2
+            rate: 500e6
+        execute:
+            input: CorrectedWaveform_CH1, PulseStart_CH1
+        initialise:
+            output: null
+        pulse_start: PulseStart_CH1
+        waveform: CorrectedWaveform_CH1
     DelayedCharge_CH0:
         algorithm:
             impedance: 50
@@ -90,28 +154,26 @@ objects:
         initialise:
             output: null
         pivot: PromptWindow_CH1
-    Kurtosis_CH0:
+    FFT_CH0:
         algorithm:
-            name: Moment
-            order: 4
+            bins: 100
+            name: FFT
             rate: 500e6
         execute:
-            input: CorrectedWaveform_CH0, TotalWindow_CH0
+            input: CorrectedWaveform_CH0, PulseWindow_CH0
         initialise:
             output: null
         waveform: CorrectedWaveform_CH0
-        window: TotalWindow_CH0
-    Kurtosis_CH1:
+    FFT_CH1:
         algorithm:
-            name: Moment
-            order: 4
+            bins: 100
+            name: FFT
             rate: 500e6
         execute:
-            input: CorrectedWaveform_CH1, TotalWindow_CH1
+            input: CorrectedWaveform_CH1, PulseWindow_CH1
         initialise:
             output: null
         waveform: CorrectedWaveform_CH1
-        window: TotalWindow_CH1
     MeanTime_CH0:
         algorithm:
             name: MeanTime
@@ -132,28 +194,26 @@ objects:
             input: null
         waveform: CorrectedWaveform_CH1
         window: PulseWindow_CH1
-    Mean_CH0:
+    Moments_CH0:
         algorithm:
             name: Moment
-            order: 1
             rate: 500e6
         execute:
-            input: CorrectedWaveform_CH0, PulseWindow_CH0
+            input: CorrectedWaveform_CH0, TotalWindow_CH0
         initialise:
             output: null
         waveform: CorrectedWaveform_CH0
-        window: PulseWindow_CH0
-    Mean_CH1:
+        window: TotalWindow_CH0
+    Moments_CH1:
         algorithm:
             name: Moment
-            order: 1
             rate: 500e6
         execute:
-            input: CorrectedWaveform_CH1, PulseWindow_CH1
+            input: CorrectedWaveform_CH1, TotalWindow_CH1
         initialise:
             output: null
         waveform: CorrectedWaveform_CH1
-        window: PulseWindow_CH1
+        window: TotalWindow_CH1
     PeakHeight_CH0:
         algorithm:
             name: PeakHeight
@@ -390,50 +450,6 @@ objects:
         waveform_bt: EVENT:board_0:raw_waveform_ch_1
         waveform_md: EVENT:board_0:ch_1:waveform
         waveform_wd: EVENT:RawWaveform
-    SD_CH0:
-        algorithm:
-            name: Moment
-            order: 2
-            rate: 500e6
-        execute:
-            input: CorrectedWaveform_CH0, TotalWindow_CH0
-        initialise:
-            output: null
-        waveform: CorrectedWaveform_CH0
-        window: TotalWindow_CH0
-    SD_CH1:
-        algorithm:
-            name: Moment
-            order: 2
-            rate: 500e6
-        execute:
-            input: CorrectedWaveform_CH1, TotalWindow_CH1
-        initialise:
-            output: null
-        waveform: CorrectedWaveform_CH1
-        window: TotalWindow_CH1
-    Skew_CH0:
-        algorithm:
-            name: Moment
-            order: 3
-            rate: 500e6
-        execute:
-            input: CorrectedWaveform_CH0, TotalWindow_CH0
-        initialise:
-            output: null
-        waveform: CorrectedWaveform_CH0
-        window: TotalWindow_CH0
-    Skew_CH1:
-        algorithm:
-            name: Moment
-            order: 3
-            rate: 500e6
-        execute:
-            input: CorrectedWaveform_CH1, TotalWindow_CH1
-        initialise:
-            output: null
-        waveform: CorrectedWaveform_CH1
-        window: TotalWindow_CH1
     TimeDifference_CH01:
         algorithm:
             name: TimeDifference
@@ -501,11 +517,12 @@ objects:
                 PeakHeight_CH0, PeakLocation_CH0, PulseCharge_CH0, TotalCharge_CH0,
                 PulseStart_CH0, PulseTime_CH0, PromptDelayChargeRatio_CH0, PromptCharge_CH0,
                 DelayedCharge_CH0, MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0,
-                Skew_CH0, Kurtosis_CH0, SD_CH0, Mean_CH0, Timestamp_CH0, RawWaveform_CH1,
-                CorrectedWaveform_CH1, Baseline_CH1, PeakHeight_CH1, PeakLocation_CH1,
-                PulseCharge_CH1, TotalCharge_CH1, PulseStart_CH1, PulseTime_CH1, PromptDelayChargeRatio_CH1,
-                PromptCharge_CH1, DelayedCharge_CH1, MeanTime_CH1, PromptDelayChargeRatioCalculator_CH1,
-                Skew_CH1, Kurtosis_CH1, SD_CH1, Mean_CH1, Timestamp_CH1
+                Moments_CH0, Timestamp_CH0, AverageWaveform_CH0, DAMAX1_CH0, DAMAX2_CH0,
+                FFT_CH0, RawWaveform_CH1, CorrectedWaveform_CH1, Baseline_CH1, PeakHeight_CH1,
+                PeakLocation_CH1, PulseCharge_CH1, TotalCharge_CH1, PulseStart_CH1,
+                PulseTime_CH1, PromptDelayChargeRatio_CH1, PromptCharge_CH1, DelayedCharge_CH1,
+                MeanTime_CH1, PromptDelayChargeRatioCalculator_CH1, Moments_CH1, Timestamp_CH1,
+                AverageWaveform_CH1, DAMAX1_CH1, DAMAX2_CH1, FFT_CH1
         finalise:
             output: null
         initialise:
@@ -516,21 +533,27 @@ objects:
                     scalar:
                         float: Baseline_CH0, PeakHeight_CH0, PeakLocation_CH0, PulseCharge_CH0,
                             TotalCharge_CH0, PulseStart_CH0, PulseTime_CH0, PromptDelayChargeRatio_CH0,
-                            MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0, Skew_CH0,
-                            Kurtosis_CH0, SD_CH0, Mean_CH0, Timestamp_CH0
+                            MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0, Timestamp_CH0,
+                            DAMAX1_CH0, DAMAX2_CH0
                     vector:
-                        double: CorrectedWaveform_CH0
+                        double: CorrectedWaveform_CH0, FFT_CH0, Moments_CH0
                         int: RawWaveform_CH0
+                single:
+                    vector:
+                        double: AverageWaveform_CH0
             Channel_1:
                 event:
                     scalar:
                         float: Baseline_CH1, PeakHeight_CH1, PeakLocation_CH1, PulseCharge_CH1,
                             TotalCharge_CH1, PulseStart_CH1, PulseTime_CH1, PromptDelayChargeRatio_CH1,
-                            MeanTime_CH1, PromptDelayChargeRatioCalculator_CH1, Skew_CH1,
-                            Kurtosis_CH1, SD_CH1, Mean_CH1, Timestamp_CH1
+                            MeanTime_CH1, PromptDelayChargeRatioCalculator_CH1, Timestamp_CH1,
+                            DAMAX1_CH1, DAMAX2_CH1
                     vector:
-                        double: CorrectedWaveform_CH1
+                        double: CorrectedWaveform_CH1, FFT_CH1, Moments_CH1
                         int: RawWaveform_CH1
+                single:
+                    vector:
+                        double: AverageWaveform_CH1
         -   Channel_01:
                 event:
                     scalar:

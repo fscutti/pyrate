@@ -27,43 +27,47 @@
         window: Window_CHX
 """
 
+import numpy as np
 from pyrate.core.Algorithm import Algorithm
 
 
 class MeanTime(Algorithm):
-    __slots__ = "sample_period"
+    __slots__ = ("sample_period", "range")
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
     def initialise(self):
         """Gets the sample rate for later use in execute"""
-        self.sample_period = 1 / float(self.config["algorithm"]["rate"])
+        self.sample_period = 1 / float(self.config["algorithm"]["rate"])*1e9
+        self.range = np.arange(0)
 
     def execute(self):
         waveform = self.store.get(self.config["waveform"])
         window = self.store.get(self.config["window"])
 
-        # check for invalid windows
+        # Check for valid values
         if window == -999 or window is None:
             MeanTime = -999
-
+            
         else:
-            num = 0
-            denom = 0
-
-            for i in range(0, window[1] - window[0]):
-                num += waveform[window[0] + i] * i
-                denom += waveform[window[0] + i]
+            window_range = waveform[window[0]:window[1]].size # Number of indexes to sum over, just in case it goes over the end
+            assert(window_range>=0)
+            if self.range.size < window_range:
+                # Need to resize the range
+                self.range = np.arange(window_range)
+            # Sum(waveform[i] * i)/ Sum()
+            weighted_waveform = np.multiply(waveform[window[0]:window[1]], self.range[:window_range])
+            num = np.sum(weighted_waveform)
+            denom = np.sum(waveform[window[0]:window[1]])
 
             if denom == 0:
-                # print("WARNING: MeanTime denominator = 0, is your window correct?")
-                MeanTime = float("inf")
-
+                # Can't divide by zero
+                MeanTime = float("inf") # FIX ME
             else:
-                MeanTime = self.sample_period * num / denom
+                MeanTime = self.sample_period * (num / denom)
 
         self.store.put(self.name, MeanTime)
 
-
 # EOF
+

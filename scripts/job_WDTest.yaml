@@ -15,7 +15,7 @@ configs:
   config2:
     path: PYRATE/config
     tags:
-      any: UniAlgSingleCHExample
+      any: SingleCHExample
 
 
 outputs:
