@@ -6,6 +6,7 @@ import importlib
 import timeit
 import time
 import logging
+from collections import defaultdict
 
 from colorama import Fore
 from tqdm import tqdm
@@ -101,6 +102,10 @@ class Run:
                 obj_name = t["name"]
 
                 self.add(obj_name, alg_name, store)
+
+        # Initialising the alg_times dictionary which stores the average run times of each alg
+        if self.alg_timing:
+            store.put( "_alg_times", defaultdict(int), "PERM")
 
         # -----------------------------------------------------------------------
         # Inputs will be initialised dynamically in the run function.
@@ -225,8 +230,9 @@ class Run:
                 
                 # Printing average time taken to execute an alg for a single event
                 if self.alg_timing:
+                    alg_times = store.get("_alg_times", "PERM")
                     for alg in self.algorithms:
-                        print(f"{self.algorithms[alg].name:<40}{self.algorithms[alg].alg_time/erange:>20.2f} ns")
+                        print(f"{self.algorithms[alg].name:<40}{alg_times[alg]/erange:>20.2f} ns")
 
                 self._in.offload()
 
@@ -259,9 +265,9 @@ class Run:
 
             self._history["CURRENT TARGET"] = t["name"]
 
-            self.call(t["object"], target_name=t["name"])
+            self.call(t["object"], target_name=t["name"], store=store)
 
-    def call(self, obj_name, target_name=""):
+    def call(self, obj_name, target_name="", store=None):
         """Calls an algorithm."""
 
         # print(f"calling {obj_name} is target: ({is_target})")
@@ -298,7 +304,9 @@ class Run:
                 # executing main algorithm state
                 getattr(alg, self.state)()
                 t2 = time.time_ns()
-                alg.alg_time += t2-t1
+                alg_times = store.get("_alg_times", "PERM")
+                alg_times[alg.name] += t2-t1
+                store.put( "_alg_times", alg_times, "PERM")
             else:
                 # executing main algorithm state
                 getattr(alg, self.state)()
@@ -361,7 +369,7 @@ class Run:
             except KeyError:
                 self.add(obj_name, alg_name, store)
 
-            self.call(obj_name)
+            self.call(obj_name, store=store)
             return
 
     def get_history(self, show=False):
