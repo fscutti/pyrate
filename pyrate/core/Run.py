@@ -261,9 +261,9 @@ class Run:
 
             self._history["CURRENT TARGET"] = t["name"]
 
-            self.call(t["object"], target_name=t["name"], store=store)
+            self.call(t["object"], target_name=t["name"])
 
-    def call(self, obj_name, target_name="", store=None):
+    def call(self, obj_name, target_name=""):
         """Calls an algorithm."""
 
         # print(f"calling {obj_name} is target: ({is_target})")
@@ -363,7 +363,7 @@ class Run:
             except KeyError:
                 self.add(obj_name, alg_name, store)
 
-            self.call(obj_name, store=store)
+            self.call(obj_name)
             return
 
     def get_history(self, show=False):
