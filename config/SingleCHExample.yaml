@@ -332,6 +332,17 @@ objects:
         waveform: CorrectedWaveform
         window: PulseWindow
 
+    LeadingEdge:
+        algorithm:
+            name: LeadingEdgeThreshold
+            offset: 5
+            threshold: 5
+        initialise:
+            output:
+        execute:
+            input: CorrectedWaveform
+        waveform: CorrectedWaveform
+
 
 
          # -----------------------------------------------------------
@@ -350,7 +361,7 @@ objects:
             input: RawWaveform, CorrectedWaveform, Baseline, PeakHeight, PeakLocation, PulseCharge,
                 TotalCharge, PulseStart, PromptDelayChargeRatio, PromptCharge, DelayedCharge,
                 MeanTime, PromptDelayChargeRatioCalculator, TotalSum, PulseSum, ChargeConstant,
-                TrapezoidFilter, CFD_Trap, Moments, Timestamp, AverageWaveform, DAMAX1, DAMAX2, FFT
+                TrapezoidFilter, CFD_Trap, Moments, Timestamp, AverageWaveform, DAMAX1, DAMAX2, FFT, LeadingEdge
         finalise:
             output:
         trees:
@@ -362,7 +373,7 @@ objects:
                     scalar:
                         float: Baseline, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart,
                             PromptDelayChargeRatio, MeanTime, PromptDelayChargeRatioCalculator,
-                            TotalSum, PulseSum, CFD_Trap, Timestamp, DAMAX1, DAMAX2
+                            TotalSum, PulseSum, CFD_Trap, Timestamp, DAMAX1, DAMAX2, LeadingEdge
                 single:
                     vector:
                         double: AverageWaveform
