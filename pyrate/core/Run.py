@@ -6,6 +6,7 @@ import importlib
 import timeit
 import time
 import logging
+from collections import defaultdict
 
 from colorama import Fore
 from tqdm import tqdm
@@ -23,6 +24,7 @@ class Run:
     def __init__(self, name, iterable=(), **kwargs):
         self.__dict__.update(iterable, **kwargs)
         self.name = name
+        self.alg_times = defaultdict(float) # Initialising the alg_times dictionary which stores the average run times of each alg
 
     def setup(self):
         """First instance of 'private' members."""
@@ -222,6 +224,11 @@ class Run:
                         store.clear("TRAN")
 
                         self._in.set_next_event()
+                
+                # Printing average time taken to execute an alg for a single event
+                if self.alg_timing:
+                    for alg in self.algorithms:
+                        self.logger.info(f"{self.algorithms[alg].name:<40}{self.alg_times[alg]/erange:>20.2f} ns")
 
                 self._in.offload()
 
@@ -287,9 +294,16 @@ class Run:
 
             # preparing input variables
             getattr(alg, f"_{self.state}")()
-
-            # executing main algorithm state
-            getattr(alg, self.state)()
+            # Timing the algorithm if timing is flagged
+            if self.alg_timing:
+                t1 = time.time_ns()
+                # executing main algorithm state
+                getattr(alg, self.state)()
+                t2 = time.time_ns()
+                self.alg_times[alg.name] += t2-t1
+            else:
+                # executing main algorithm state
+                getattr(alg, self.state)()
 
     def add(self, obj_name, alg_name, store):
         """Adds instances of algorithms dynamically.
