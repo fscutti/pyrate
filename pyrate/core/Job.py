@@ -29,6 +29,7 @@ class Job:
 
         self.job = {
             "no_progress_bar": self.config["no_progress_bar"],
+            "alg_timing": self.config["alg_timing"],
             "logger": None,
             "inputs": {},
             "configs": {},
@@ -39,10 +40,13 @@ class Job:
         # Setup the logger if required
         # ----------------------------
         self.job["logger"] = logging.getLogger("pyrate")
-        if self.log_level is None:
+        if self.log_level is None and not self.job["alg_timing"]:
             logging.disable(logging.CRITICAL)
         else:
-            self.job["logger"].setLevel(getattr(logging, self.log_level))
+            if self.job["alg_timing"]:
+                self.job["logger"].setLevel(logging.INFO)
+            else:
+                self.job["logger"].setLevel(getattr(logging, self.log_level))
 
         # --------------------------
         # Build global configuration
