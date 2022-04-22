@@ -24,6 +24,7 @@ class Run:
     def __init__(self, name, iterable=(), **kwargs):
         self.__dict__.update(iterable, **kwargs)
         self.name = name
+        self.alg_times = defaultdict(float) # Initialising the alg_times dictionary which stores the average run times of each alg
 
     def setup(self):
         """First instance of 'private' members."""
@@ -102,10 +103,6 @@ class Run:
                 obj_name = t["name"]
 
                 self.add(obj_name, alg_name, store)
-
-        # Initialising the alg_times dictionary which stores the average run times of each alg
-        if self.alg_timing:
-            store.put( "_alg_times", defaultdict(int), "PERM")
 
         # -----------------------------------------------------------------------
         # Inputs will be initialised dynamically in the run function.
@@ -230,9 +227,8 @@ class Run:
                 
                 # Printing average time taken to execute an alg for a single event
                 if self.alg_timing:
-                    alg_times = store.get("_alg_times", "PERM")
                     for alg in self.algorithms:
-                        print(f"{self.algorithms[alg].name:<40}{alg_times[alg]/erange:>20.2f} ns")
+                        self.logger.info(f"{self.algorithms[alg].name:<40}{self.alg_times[alg]/erange:>20.2f} ns")
 
                 self._in.offload()
 
@@ -304,9 +300,7 @@ class Run:
                 # executing main algorithm state
                 getattr(alg, self.state)()
                 t2 = time.time_ns()
-                alg_times = store.get("_alg_times", "PERM")
-                alg_times[alg.name] += t2-t1
-                store.put( "_alg_times", alg_times, "PERM")
+                self.alg_times[alg.name] += t2-t1
             else:
                 # executing main algorithm state
                 getattr(alg, self.state)()
