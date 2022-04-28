@@ -188,7 +188,8 @@ class Tree:
         """Actually makes the trees structure in the structure and adds all the
         branches into the tree. Typically called by the detector class
         """
-
+        # Make sure we're linked to the correct file
+        self.outfile.cd()
         self.TTree = R.TTree(self.name, self.name)
         # self.TTree.SetMaxTreeSize((int(1 * MB)))
         self.created = True
