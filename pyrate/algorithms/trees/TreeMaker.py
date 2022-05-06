@@ -42,25 +42,25 @@ def maxint(t, signed=False):
 
 _Type = {
     "int": {"python": "i", "root": "I", "vector": "int", 
-            "invalid_s":-999, "invalid_v":array("i")},
+            "invalid":-999},
     "uint": {"python": "I", "root": "i", "vector": "unsigned int", 
-             "invalid_s":maxint(ctypes.c_uint()), "invalid_v":array("I")},
+             "invalid":maxint(ctypes.c_uint())},
     "short": {"python": "h", "root": "S", "vector": "short",
-              "invalid_s":-999, "invalid_v":array("h")},
+              "invalid":-999},
     "ushort": {"python": "H", "root": "s", "vector": "unsigned short",
-               "invalid_s":maxint(ctypes.c_ushort()), "invalid_v":array("H")},
+               "invalid":maxint(ctypes.c_ushort())},
     "long": {"python": "l", "root": "L", "vector": "long",
-             "invalid_s":-999, "invalid_v":array("l")},
+             "invalid":-999},
     "ulong": {"python": "L", "root": "l", "vector": "unsigned long",
-              "invalid_s":maxint(ctypes.c_ulong()), "invalid_v":array("L")},
+              "invalid":maxint(ctypes.c_ulong())},
     "float": {"python": "d", "root": "D", "vector": "double",  # Python arrays don't have float32's
-              "invalid_s": -999., "invalid_v": array("d")},
+              "invalid": -999.0},
     "double": {"python": "d", "root": "D", "vector": "double",
-               "invalid_s": -999., "invalid_v": array("d")},
+               "invalid": -999.0,},
     "bool": {"python": "H", "root": "O", "vector": "bool",
-             "invalid_s":0, "invalid_v":array("H")},
+             "invalid":0},
     "string": {"python": "u", "root": "C", "vector": "string",  # Strings should be stored in vectors
-               "invalid_s": "", "invalid_v": ""},
+               "invalid": ""}
 }
 
 
@@ -98,9 +98,11 @@ class Branch:
         #     self.datatype, self.nptype = python_to_root_type(data)
         if self.vector:
             self.data = R.vector(_Type[self.datatype]["vector"])()
+            self.invalid_value = array(_Type[self.datatype]["python"])
         else:
             self.data = array(_Type[self.datatype]["python"], [0])
             # self.data = np.zeros(1, dtype=self.nptype)
+            self.invalid_value = _Type[self.datatype]["invalid"]
         self.created = True
 
     def fill_branch(self, data):
@@ -361,10 +363,7 @@ class TreeMaker(Algorithm):
                     # Handle invalid values using internal Pyrate.NONE
                     if value is enums.Pyrate.NONE:
                         # No valid value to store, storing the closest invalid value
-                        if self.trees[tree].branches[branch_name].vector:
-                            value = _Type[self.trees[tree].branches[branch_name].datatype]["invalid_v"]
-                        else:
-                            value = _Type[self.trees[tree].branches[branch_name].datatype]["invalid_s"]
+                        value = self.trees[tree].branches[branch_name].invalid
                     
                     # Fill the branch with the value
                     self.trees[tree].branches[branch_name].fill_branch(value)
@@ -392,10 +391,7 @@ class TreeMaker(Algorithm):
                     # Handle invalid values using internal Pyrate.NONE
                     if value is enums.Pyrate.NONE:
                         # No valid value to store, storing the closest invalid value
-                        if self.trees[tree].branches[branch_name].vector:
-                            value = _Type[self.trees[tree].branches[branch_name].datatype]["invalid_v"]
-                        else:
-                            value = _Type[self.trees[tree].branches[branch_name].datatype]["invalid_s"]
+                        value = self.trees[tree].branches[branch_name].invalid
 
                     # Fill the branch with the value
                     self.trees[tree].branches[branch_name].fill_branch(value)
