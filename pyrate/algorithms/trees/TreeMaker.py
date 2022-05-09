@@ -101,26 +101,18 @@ class Branch:
         isiter = FN.iterable(data)
         if not isiter and self.vector == True:
             print(
-                "Error: input data is not iterable, but this branch ({}) expects an array".format(
-                    self.name
-                )
+                f"Error: input data is not iterable, but this branch ({self.name}) expects an array"
             )
             print(
-                "Input data type: {}, branch datatype: {}, storage datatype: {}".format(
-                    type(data), self.datatype, type(self.data)
-                )
+                f"Input data type: {type(data)}, branch datatype: {self.datatype}"
             )
             sys.exit(1)
         if isiter and not self.vector:
             print(
-                "Error: input data is iterable, but this branch ({}) expects a single element".format(
-                    self.name
-                )
+                f"Error: input data is iterable, but this branch ({self.name}) expects a single element"
             )
             print(
-                "Input data type: {}, branch datatype: {}, storage datatype: {}".format(
-                    type(data), self.datatype, type(self.data)
-                )
+                f"Input data type: {type(data)}, branch datatype: {self.datatype}"
             )
             sys.exit(1)
         assert isiter == self.vector
