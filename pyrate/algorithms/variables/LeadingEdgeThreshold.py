@@ -26,10 +26,9 @@
         waveform: CorrectedWaveform_CHX
 """
 
-from pyrate.core.Algorithm import Algorithm
 import numpy as np
-from code import interact
-
+from pyrate.core.Algorithm import Algorithm
+from pyrate.utils.enums import Pyrate
 
 class LeadingEdgeThreshold(Algorithm):
     __slots__ = ("offset", "threshold", "interpolate")
@@ -50,6 +49,9 @@ class LeadingEdgeThreshold(Algorithm):
         """Caclulates the waveform threshold crossing point"""
         # Get the actual waveform, finally.
         waveform = self.store.get(self.config["waveform"])
+        if waveform is Pyrate.NONE:
+            self.store.put(self.name, Pyrate.NONE)
+            return
 
         cross_index = np.argmax(waveform > self.threshold)
         if cross_index:
@@ -66,10 +68,11 @@ class LeadingEdgeThreshold(Algorithm):
             else:
                 # We just want the index
                 LeadingEdgeTime = cross_index
-        else:
-            LeadingEdgeTime = -999
+            
+            # Shift it by the offset if needed
+            LeadingEdgeTime -= self.offset
 
-        self.store.put(self.name, LeadingEdgeTime-self.offset)
+        self.store.put(self.name, LeadingEdgeTime)
 
 
 # EOF

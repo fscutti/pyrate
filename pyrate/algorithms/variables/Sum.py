@@ -24,7 +24,7 @@
 
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
-
+from pyrate.utils.enums import Pyrate
 
 class Sum(Algorithm):
     __slots__ = ()
@@ -35,17 +35,15 @@ class Sum(Algorithm):
     def execute(self):
         """Sum over the waveform"""
         window = self.store.get(self.config["window"])
+        waveform = self.store.get(self.config["waveform"])
 
         # check for invalid windows
-        if window == -999 or window is None:
-            Sum = -999
+        if window is Pyrate.NONE or waveform is Pyrate.NONE:
+            self.store.put(self.name, Pyrate.NONE)
+            return
 
-        else:
-            waveform = self.store.get(self.config["waveform"])
-
-            # Sum the waveform
-            Sum = np.sum(waveform[window[0] : window[1]])
-
+        # Sum the waveform
+        Sum = np.sum(waveform[window[0] : window[1]])
         self.store.put(self.name, Sum)
 
 

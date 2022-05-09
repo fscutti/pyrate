@@ -25,7 +25,7 @@
 """
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
-
+from pyrate.utils.enums import Pyrate
 
 class PeakHeight(Algorithm):
     __slots__ = "use_window"
@@ -46,11 +46,13 @@ class PeakHeight(Algorithm):
             window = self.store.get(self.config["window"])
         else:
             window = (None, None)
-        if window == -999 or window is None:
-            PeakHeight = -999
-        else:
-            PeakHeight = np.max(waveform[window[0] : window[1]])
+        
 
+        if window is Pyrate.NONE or waveform is Pyrate.NONE:
+            self.store.put(self.name, Pyrate.NONE)
+            return
+
+        PeakHeight = np.max(waveform[window[0] : window[1]])
         self.store.put(self.name, PeakHeight)
 
 

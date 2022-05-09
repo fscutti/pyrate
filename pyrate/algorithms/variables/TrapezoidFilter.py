@@ -34,6 +34,7 @@
 
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
+from pyrate.utils.enums import Pyrate
 
 class TrapezoidFilter(Algorithm):
     __slots__ = ("rise", "gap", "period", "tau", "zeropole", "traplen", "M", "dn0", "dn1", "dn2", "dn3")
@@ -68,6 +69,11 @@ class TrapezoidFilter(Algorithm):
     def execute(self):
         """Caclulates the trap filtered waveform"""
         waveform = self.store.get(self.config["waveform"])
+        if waveform is Pyrate.NONE:
+            self.store.put(self.name, Pyrate.NONE)
+            self.clear_arrays() # just in case
+            return
+
         waveform_len = waveform.size
 
         if (waveform_len + self.traplen) > self.dn0.size:
@@ -98,8 +104,12 @@ class TrapezoidFilter(Algorithm):
 
         self.store.put(f"{self.name}", trap)
 
-
         # Reset all the arrays we use
+        self.clear_arrays()
+
+    def clear_arrays(self):
+        """ Fills all the internal arrays with 0
+        """
         self.dn0.fill(0)
         self.dn1.fill(0)
         self.dn2.fill(0)

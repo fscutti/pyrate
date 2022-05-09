@@ -22,7 +22,7 @@
 """
 
 from pyrate.core.Algorithm import Algorithm
-
+from pyrate.utils.enums import Pyrate
 
 class ChargeRatio(Algorithm):
     __slots__ = ()
@@ -34,13 +34,15 @@ class ChargeRatio(Algorithm):
         """Calculates the ratio of the two input charges"""
         q1 = self.store.get(self.config["charge1"])
         q2 = self.store.get(self.config["charge2"])
-        if q2 == 0:
-            ChargeRatio = float("inf")
+        if q1 is Pyrate.NONE or q2 is Pyrate.NONE:
+            self.store.put(self.name, Pyrate.NONE)
+            return
+        elif q2 == 0:
+            self.store.put(self.name, float("inf"))
+            return
             # print("WARNING: Q2 = 0, ChargeRatio is infinite. Check integration windows")
-        elif q1 == -999 or q2 == -999 or q1 is None or q2 is None:
-            ChargeRatio = -999
-        else:
-            ChargeRatio = q1 / q2
+        
+        ChargeRatio = q1 / q2
         self.store.put(self.name, ChargeRatio)
 
 

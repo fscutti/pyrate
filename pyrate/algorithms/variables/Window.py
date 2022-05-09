@@ -51,6 +51,7 @@
 import sys
 from pyrate.core.Algorithm import Algorithm
 from pyrate.utils.strings import get_items
+from pyrate.utils.enums import Pyrate
 
 
 class Window(Algorithm):
@@ -125,17 +126,18 @@ class Window(Algorithm):
         if self.mode == "dynamic" or self.mode == "window_pivot":
             # Check the pivot isn't invalid
             if pivot == -999 or pivot is None:
-                window = -999
-            else:
-                # The window is defined by a left and right buffer on the start
-                left = self.config["algorithm"]["left"]
-                right = self.config["algorithm"]["right"]
-                window = (int(round(pivot - left)), int(round(pivot + right)))
-                if window[0] < 0:
-                    # outside the range of the waveform, I've chosen to make
-                    # it give a valid window even thought it failed, in case
-                    # it is useful
-                    window = (0, window[0])
+                self.store.put(self.name, Pyrate.NONE)
+                return
+            
+            # The window is defined by a left and right buffer on the start
+            left = self.config["algorithm"]["left"]
+            right = self.config["algorithm"]["right"]
+            window = (int(round(pivot - left)), int(round(pivot + right)))
+            if window[0] < 0:
+                # outside the range of the waveform, I've chosen to make
+                # it give a valid window even thought it failed, in case
+                # it is useful
+                window = (0, window[0])
 
         self.store.put(self.name, window)
 
