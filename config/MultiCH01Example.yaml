@@ -329,17 +329,17 @@ objects:
     PromptDelayChargeRatio_CH0:
         algorithm:
             name: Ratio
-        charge1: PromptCharge_CH0
-        charge2: DelayedCharge_CH0
         execute:
             input: PromptCharge_CH0, DelayCharge_CH0
+        x1: PromptCharge_CH0
+        x2: DelayedCharge_CH0
     PromptDelayChargeRatio_CH1:
         algorithm:
             name: Ratio
-        charge1: PromptCharge_CH1
-        charge2: DelayedCharge_CH1
         execute:
             input: PromptCharge_CH1, DelayCharge_CH1
+        x1: PromptCharge_CH1
+        x2: DelayedCharge_CH1
     PromptWindow_CH0:
         algorithm:
             left: 10
@@ -475,8 +475,8 @@ objects:
             name: Difference
         execute:
             input: PulseTime_CH0, PulseTime_CH1
-        time1: PulseTime_CH0
-        time2: PulseTime_CH1
+        x1: PulseTime_CH0
+        x2: PulseTime_CH1
     Timestamp_CH0:
         algorithm:
             name: GetTimestamp

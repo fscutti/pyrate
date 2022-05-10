@@ -295,8 +295,8 @@ objects:
             name: Ratio
         execute:
             input: PromptCharge_CH0, DelayedCharge_CH0
-        charge1: PromptCharge_CH0
-        charge2: DelayedCharge_CH0
+        x1: PromptCharge_CH0
+        x2: DelayedCharge_CH0
 
 
     MeanTime_CH0:
@@ -355,8 +355,8 @@ objects:
             name: Difference
         execute:
             input: PulseTime_CH0, PulseTime_CH1
-        time1: PulseTime_CH0
-        time2: PulseTime_CH1
+        x1: PulseTime_CH0
+        x2: PulseTime_CH1
 
     Moments_CH0:
         algorithm:
