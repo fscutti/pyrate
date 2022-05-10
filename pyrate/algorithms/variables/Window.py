@@ -53,8 +53,8 @@
         initialise:
             output:
         execute:
-            input: <Pivot object>
-        pivot: <Pivot object (variable)>
+            input: <Pivot object (integer)>
+        pivot: <Pivot object (integer)>
 
     # With a dynamic window, pivoting from a window
 
@@ -67,8 +67,8 @@
         initialise:
             output:
         execute:
-            input: <Pivot object>
-        pivot: <Pivot object (variable)>
+            input: <Pivot object (window)>
+        pivot: <Pivot object (window)>
 """
 
 
