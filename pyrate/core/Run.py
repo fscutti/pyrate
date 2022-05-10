@@ -42,6 +42,7 @@ class Run:
         self._history = {"CURRENT TARGET": None}
 
         log_file_name = f"{self.name}.{time.strftime('%Y-%m-%d-%Hh%M')}.log"
+        # Handles the case where log files have the same name
         while os.path.exists(log_file_name):
             base_name = log_file_name.split(".log")[0]
             if base_name[-2] == '_':
