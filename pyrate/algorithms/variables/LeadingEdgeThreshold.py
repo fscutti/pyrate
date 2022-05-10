@@ -54,23 +54,26 @@ class LeadingEdgeThreshold(Algorithm):
             return
 
         cross_index = np.argmax(waveform > self.threshold)
-        if cross_index:
-            if self.interpolate:
-                # We want to interpolate between the points
-                x1, x2 = cross_index - 1, cross_index
-                y1, y2 = waveform[x1], waveform[x2]
-                if y1 == y2:
-                    # We'll get an invalid value, just want the midpoint
-                    LeadingEdgeTime = x1 + 0.5
-                else:
-                    # Interpolation point = x1 + (y-y1)*(x2-x1)/(y2-y1) ##
-                    LeadingEdgeTime = x1 + (self.threshold-y1)/(y2-y1)
+        if not cross_index:
+            self.store.put(self.name, Pyrate.NONE)
+            return
+
+        if self.interpolate:
+            # We want to interpolate between the points
+            x1, x2 = cross_index - 1, cross_index
+            y1, y2 = waveform[x1], waveform[x2]
+            if y1 == y2:
+                # We'll get an invalid value, just want the midpoint
+                LeadingEdgeTime = x1 + 0.5
             else:
-                # We just want the index
-                LeadingEdgeTime = cross_index
-            
-            # Shift it by the offset if needed
-            LeadingEdgeTime -= self.offset
+                # Interpolation point = x1 + (y-y1)*(x2-x1)/(y2-y1) ##
+                LeadingEdgeTime = x1 + (self.threshold-y1)/(y2-y1)
+        else:
+            # We just want the index
+            LeadingEdgeTime = cross_index
+        
+        # Shift it by the offset if needed
+        LeadingEdgeTime -= self.offset
 
         self.store.put(self.name, LeadingEdgeTime)
 

@@ -363,7 +363,7 @@ class TreeMaker(Algorithm):
                     # Handle invalid values using internal Pyrate.NONE
                     if value is enums.Pyrate.NONE:
                         # No valid value to store, storing the closest invalid value
-                        value = self.trees[tree].branches[branch_name].invalid
+                        value = self.trees[tree].branches[branch_name].invalid_value
                     
                     # Fill the branch with the value
                     self.trees[tree].branches[branch_name].fill_branch(value)
@@ -391,7 +391,7 @@ class TreeMaker(Algorithm):
                     # Handle invalid values using internal Pyrate.NONE
                     if value is enums.Pyrate.NONE:
                         # No valid value to store, storing the closest invalid value
-                        value = self.trees[tree].branches[branch_name].invalid
+                        value = self.trees[tree].branches[branch_name].invalid_value
 
                     # Fill the branch with the value
                     self.trees[tree].branches[branch_name].fill_branch(value)
