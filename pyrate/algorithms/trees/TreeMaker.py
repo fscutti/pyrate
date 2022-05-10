@@ -21,7 +21,7 @@ import os
 import sys
 import ROOT as R
 from array import array
-from ctypes import c_longlong
+import ctypes
 
 from pyrate.core.Algorithm import Algorithm
 
@@ -32,25 +32,35 @@ from pyrate.utils import enums
 GB = 1e9
 MB = 1e6
 
+def maxint(t, signed=False):
+    """ Calculates the max integer value for ctype integers
+        Takes in a ctypes.c_<type>() e.g. ctypes.c_int()
+    """
+    if signed:
+        return 2**(8*ctypes.sizeof(t)-1)-1
+    return 2**(8*ctypes.sizeof(t))-1
+
 _Type = {
-    "int": {"python": "i", "root": "I", "vector": "int"},
-    "uint": {"python": "I", "root": "i", "vector": "unsigned int"},
-    "short": {"python": "h", "root": "S", "vector": "short"},
-    "ushort": {"python": "H", "root": "s", "vector": "unsigned short"},
-    "long": {"python": "l", "root": "L", "vector": "long"},
-    "ulong": {"python": "L", "root": "l", "vector": "unsigned long"},
-    "float": {
-        "python": "d",
-        "root": "D",
-        "vector": "double",
-    },  # Python arrays don't have float32's
-    "double": {"python": "d", "root": "D", "vector": "double"},
-    "bool": {"python": "H", "root": "O", "vector": "bool"},
-    "string": {
-        "python": "u",
-        "root": "C",
-        "vector": "string",
-    },  # Strings should be stored in vectors
+    "int": {"python": "i", "root": "I", "vector": "int", 
+            "invalid":-999},
+    "uint": {"python": "I", "root": "i", "vector": "unsigned int", 
+             "invalid":maxint(ctypes.c_uint())},
+    "short": {"python": "h", "root": "S", "vector": "short",
+              "invalid":-999},
+    "ushort": {"python": "H", "root": "s", "vector": "unsigned short",
+               "invalid":maxint(ctypes.c_ushort())},
+    "long": {"python": "l", "root": "L", "vector": "long",
+             "invalid":-999},
+    "ulong": {"python": "L", "root": "l", "vector": "unsigned long",
+              "invalid":maxint(ctypes.c_ulong())},
+    "float": {"python": "d", "root": "D", "vector": "double",  # Python arrays don't have float32's
+              "invalid": -999.0},
+    "double": {"python": "d", "root": "D", "vector": "double",
+               "invalid": -999.0,},
+    "bool": {"python": "H", "root": "O", "vector": "bool",
+             "invalid":0},
+    "string": {"python": "u", "root": "C", "vector": "string",  # Strings should be stored in vectors
+               "invalid": ""}
 }
 
 
@@ -88,9 +98,11 @@ class Branch:
         #     self.datatype, self.nptype = python_to_root_type(data)
         if self.vector:
             self.data = R.vector(_Type[self.datatype]["vector"])()
+            self.invalid_value = array(_Type[self.datatype]["python"])
         else:
             self.data = array(_Type[self.datatype]["python"], [0])
             # self.data = np.zeros(1, dtype=self.nptype)
+            self.invalid_value = _Type[self.datatype]["invalid"]
         self.created = True
 
     def fill_branch(self, data):
@@ -347,6 +359,13 @@ class TreeMaker(Algorithm):
                 # Only want to fill the branches that are event-based
                 if self.trees[tree].branches[branch_name].event_based:
                     value = self.store.get(branch_name, "TRAN")
+                    
+                    # Handle invalid values using internal Pyrate.NONE
+                    if value is enums.Pyrate.NONE:
+                        # No valid value to store, storing the closest invalid value
+                        value = self.trees[tree].branches[branch_name].invalid_value
+                    
+                    # Fill the branch with the value
                     self.trees[tree].branches[branch_name].fill_branch(value)
 
             # Save all the values into the Tree
@@ -368,6 +387,13 @@ class TreeMaker(Algorithm):
                 # Only want to fill the branches that are run-based
                 if not self.trees[tree].branches[branch_name].event_based:
                     value = self.store.get(branch_name, "PERM")
+                    
+                    # Handle invalid values using internal Pyrate.NONE
+                    if value is enums.Pyrate.NONE:
+                        # No valid value to store, storing the closest invalid value
+                        value = self.trees[tree].branches[branch_name].invalid_value
+
+                    # Fill the branch with the value
                     self.trees[tree].branches[branch_name].fill_branch(value)
             # Save all the values into the Tree
             self.trees[tree].fill()

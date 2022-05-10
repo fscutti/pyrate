@@ -46,6 +46,7 @@
 
 import sys
 from pyrate.core.Algorithm import Algorithm
+from pyrate.utils.enums import Pyrate
 
 wf_units = {"V": 1.0, "mV": 1e3, "uV": 1e6}
 
@@ -120,8 +121,11 @@ class CorrectedWaveform(Algorithm):
             waveform = self.store.get(self.config["wc_waveform"])
         else:
             waveform = self.store.get(self.config["waveform"])
+        
         baseline = self.store.get(self.config["baseline"])
-
+        if waveform is Pyrate.NONE or baseline is Pyrate.NONE:
+            self.store.put(self.name, Pyrate.NONE)
+        
         # Flip the waveform if needed, and subtract baseline
         corrected_waveform = self.conversion * self.polarity * (waveform - baseline)
         self.store.put(self.name, corrected_waveform)

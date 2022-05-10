@@ -52,6 +52,7 @@
 
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
+from pyrate.utils.enums import Pyrate
 
 class CFD(Algorithm):
     __slots__ = ("delay", "scale", "cfd_threshold", "savecfd", "cfd", "waveform", "waveform_delay_scaled")
@@ -78,41 +79,48 @@ class CFD(Algorithm):
 
     def execute(self):
         """Caclulates the waveform CFD"""
-        # Get the actual waveform, finally.
+        CFDTime = Pyrate.NONE # Just in case we get an invalid result
+        self.cfd = Pyrate.NONE
         waveform = self.store.get(self.config["waveform"])
-        waveform_len = waveform.size
+        if waveform is not Pyrate.NONE:
+            waveform_len = waveform.size
 
-        if (waveform_len + self.delay) > self.waveform.size:
-            # Our waveform is larger than the storage
-            # we need to grow our arrays
-            self.waveform.resize(waveform_len + self.delay)
-            self.waveform_delay_scaled.resize(waveform_len + self.delay)
+            if (waveform_len + self.delay) > self.waveform.size:
+                # Our waveform is larger than the storage
+                # we need to grow our arrays
+                self.waveform.resize(waveform_len + self.delay)
+                self.waveform_delay_scaled.resize(waveform_len + self.delay)
 
-        # Parameters and formula from Digital techniques for real-time pulse shaping in radiation measurements
-        # https://doi.org/10.1016/0168-9002(94)91652-7
-        CFDTime = -999 # Just in case we get an invalid result
+            # Parameters and formula from Digital techniques for real-time pulse shaping in radiation measurements
+            # https://doi.org/10.1016/0168-9002(94)91652-7
 
-        self.waveform[:-self.delay] = waveform
-        self.waveform_delay_scaled[self.delay:] = self.scale * waveform
-        self.cfd = self.waveform - self.waveform_delay_scaled
+            self.waveform[:-self.delay] = waveform
+            self.waveform_delay_scaled[self.delay:] = self.scale * waveform
+            self.cfd = self.waveform - self.waveform_delay_scaled
 
-        # Possible numpy way to do it quickly
-        # https://stackoverflow.com/questions/3843017/efficiently-detect-sign-changes-in-python
-        zero_cross = np.where(np.diff(np.sign(self.cfd)))[0]
-        cross_threshold = np.where(self.cfd > self.cfd_threshold)[0]
-        if cross_threshold.size:
-            # Only look at the zero crosses after the threshold cross
-            zero_cross = zero_cross[zero_cross>cross_threshold[0]]
-            if zero_cross.size:
-                # Ok, now we check the first valid zero cross
-                fc = zero_cross[0] # First crossing (left side)
-                f = self.cfd[fc]/(self.cfd[fc] - self.cfd[fc+1]) # CFD fraction
-                CFDTime = zero_cross[0] + f
+            # Possible numpy way to do it quickly
+            # https://stackoverflow.com/questions/3843017/efficiently-detect-sign-changes-in-python
+            zero_cross = np.where(np.diff(np.sign(self.cfd)))[0]
+            cross_threshold = np.where(self.cfd > self.cfd_threshold)[0]
+            if cross_threshold.size:
+                # Only look at the zero crosses after the threshold cross
+                zero_cross = zero_cross[zero_cross>cross_threshold[0]]
+                if zero_cross.size:
+                    # Ok, now we check the first valid zero cross
+                    fc = zero_cross[0] # First crossing (left side)
+                    f = self.cfd[fc]/(self.cfd[fc] - self.cfd[fc+1]) # CFD fraction
+                    CFDTime = zero_cross[0] + f
         
         self.store.put(self.name, CFDTime)
         if self.savecfd:
             self.store.put(f"{self.name}Trace", self.cfd)
 
+        # Reset all the waveforms
+        self.clear_arrays()
+
+    def clear_arrays(self):
+        """ Fills all the internal arrays with 0
+        """
         self.waveform.fill(0)
         self.waveform_delay_scaled.fill(0)
 

@@ -30,9 +30,10 @@
     Todo: Get baseline automatically for ZLE firmware
 
 """
+import sys
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
-import sys
+from pyrate.utils.enums import Pyrate
 
 
 class Baseline(Algorithm):
@@ -49,6 +50,10 @@ class Baseline(Algorithm):
             sys.exit("ERROR in Baseline, 'samples' not found in the config")
 
         nsamples = self.config["algorithm"]["samples"]
+
+        if waveform is Pyrate.NONE or waveform.size < nsamples:
+            self.store.put(self.name, Pyrate.NONE)
+            return
 
         # Get the baseline.
         Baseline = np.sum(waveform[:nsamples]) / nsamples

@@ -22,7 +22,7 @@
 """
 
 from pyrate.core.Algorithm import Algorithm
-
+from pyrate.utils.enums import Pyrate
 
 class TimeDifference(Algorithm):
     __slots__ = ()
@@ -34,6 +34,9 @@ class TimeDifference(Algorithm):
         """Caclulates the time difference time2 - time1"""
         t1 = self.store.get(self.config["time1"])
         t2 = self.store.get(self.config["time2"])
+        if t1 is Pyrate.NONE or t2 is Pyrate.NONE:
+            self.store.put(self.name, Pyrate.NONE)
+            return
         TimeDiff = t2 - t1
         self.store.put(self.name, TimeDiff)
 

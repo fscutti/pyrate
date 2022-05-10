@@ -29,6 +29,7 @@
 """
 
 from pyrate.core.Algorithm import Algorithm
+from pyrate.utils.enums import Pyrate
 
 # Predefined units: seconds, milliseconds, microseconds, nanoseconds and
 # picoseconds. Feel free to add more if they're common.
@@ -56,6 +57,9 @@ class TimeConverter(Algorithm):
     def execute(self):
         """Converts the sample time to physical units"""
         sample_time = self.store.get(self.config["time"])
+        if sample_time is Pyrate.NONE:
+            self.store.put(self.name, Pyrate.NONE)
+            return
         real_time = sample_time * self.time_conversion
         self.store.put(self.name, real_time)
 
