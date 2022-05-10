@@ -29,7 +29,7 @@
 """
 
 from pyrate.core.Algorithm import Algorithm
-
+from pyrate.utils.enums import Pyrate
 
 class Calculator(Algorithm):
     __slots__ = ["opPrecedence", "eqnStr", "variables", "pnVec", "result"]
@@ -39,15 +39,18 @@ class Calculator(Algorithm):
         self.opPrecedence = {"(": -1, "+": 2, "-": 2, "*": 3, "/": 3}
 
     def initialise(self):
+        """Initialises the equation and variables to be calculated"""
         self.eqnStr = self.config["equation"]
         self.variables = self.config["variables"]
         self.ShuntingYard()
 
     def execute(self):
-        """Calculates the ratio of the two input charges"""
+        """Calculates a generic equation"""
         self.calc()
         if len(self.result) == 1:
-            self.store.put(self.name, float(self.result[0]))
+            self.store.put(self.name, self.result[0])
+        else:
+            self.store.put(self.name, Pyrate.NONE)
 
     # -------------------------------------------------------------------
     def Arithmetic(self, op, varL, varR):
@@ -78,12 +81,16 @@ class Calculator(Algorithm):
         # If the variable value is a number return the float otherwise get the value from the store
         if self.IsFloat(var):
             return float(var)
-        else:
-            var = self.variables[var]
-            if self.IsFloat(var):
-                return float(var)
-            else:
-                return float(self.store.get(var))
+        
+        var = self.variables[var]
+        if self.IsFloat(var):
+            return float(var)
+            
+        var = self.store.get(var)
+        if self.IsFloat(var):
+            return float(var)
+        
+        return Pyrate.NONE
 
     # -------------------------------------------------------------------
     def ShuntingYard(self):
@@ -130,5 +137,11 @@ class Calculator(Algorithm):
                 varL = self.GetVariable(varL)
                 varR = self.GetVariable(varR)
                 res = self.Arithmetic(i, varL, varR)
+            else:
+                # If i is a variable
+                res = self.GetVariable(i)
+                if res is Pyrate.NONE:
+                    self.result = [Pyrate.NONE]
+                    return
 
-            self.result.append(str(res))
+            self.result.append(res)

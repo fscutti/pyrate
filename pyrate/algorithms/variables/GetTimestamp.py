@@ -21,9 +21,6 @@
 """
 
 from pyrate.core.Algorithm import Algorithm
-import numpy as np
-import sys
-
 
 class GetTimestamp(Algorithm):
     __slots__ = ()
