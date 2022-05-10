@@ -292,7 +292,7 @@ objects:
 
     PromptDelayChargeRatio_CH0:
         algorithm:
-            name: ChargeRatio
+            name: Ratio
         execute:
             input: PromptCharge_CH0, DelayedCharge_CH0
         charge1: PromptCharge_CH0
@@ -352,7 +352,7 @@ objects:
 
     TimeDifference_CH01:
         algorithm:
-            name: TimeDifference
+            name: Difference
         execute:
             input: PulseTime_CH0, PulseTime_CH1
         time1: PulseTime_CH0
