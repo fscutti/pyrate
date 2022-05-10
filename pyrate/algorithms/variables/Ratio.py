@@ -31,7 +31,7 @@ class Ratio(Algorithm):
         super().__init__(name, config, store, logger)
 
     def execute(self):
-        """Calculates the ratio of the two input charges"""
+        """Calculates the ratio of the two input values"""
         x1 = self.store.get(self.config["x1"])
         x2 = self.store.get(self.config["x2"])
         if x1 is Pyrate.NONE or x2 is Pyrate.NONE:
@@ -40,7 +40,7 @@ class Ratio(Algorithm):
         elif x2 == 0:
             self.store.put(self.name, float("inf"))
             return
-            # print("WARNING: x2 = 0, ChargeRatio is infinite. Check integration windows")
+            # print("WARNING: x2 = 0, Ratio is infinite. Check integration windows")
         
         Ratio = x1 / x2
         self.store.put(self.name, Ratio)

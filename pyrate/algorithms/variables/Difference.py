@@ -32,7 +32,7 @@ class Difference(Algorithm):
         super().__init__(name, config, store, logger)
 
     def execute(self):
-        """Caclulates the time difference time2 - time1"""
+        """Caclulates the difference x2 - x1"""
         x1 = self.store.get(self.config["x1"])
         x2 = self.store.get(self.config["x2"])
         if x1 is Pyrate.NONE or x2 is Pyrate.NONE:
