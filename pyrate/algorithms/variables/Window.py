@@ -136,16 +136,6 @@ class Window(Algorithm):
             self.store.put(self.name, self.fixed_window)
             return
 
-        if self.mode == "window_pivot":
-            # This time we'll define the pivot as the left or right of a passed in window
-            pivot_window = self.store.get(self.config["pivot"])
-            pivot = pivot_window[self.window_pivot]
-        
-        else:
-            # Ok, we're actually calculating it
-            # Get the 'pivot' - e.g. the start of the pulse
-            pivot = self.store.get(self.config["pivot"])
-
         # Check the pivot is valid
         pivot = self.store.get(self.config["pivot"])
         if pivot is Pyrate.NONE:
