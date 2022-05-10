@@ -40,7 +40,7 @@ class Job:
         # Setup the logger if required
         # ----------------------------
         self.job["logger"] = logging.getLogger("pyrate")
-        if self.log_level is None and not self.job["alg_timing"]:
+        if self.log_level is None and self.job["alg_timing"] != True:
             logging.disable(logging.CRITICAL)
         else:
             if self.job["alg_timing"]:
