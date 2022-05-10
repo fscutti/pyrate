@@ -33,6 +33,7 @@
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
 import sys
+from scipy.ndimage.filters import uniform_filter1d
 
 
 class Baseline(Algorithm):
@@ -50,10 +51,23 @@ class Baseline(Algorithm):
 
         nsamples = self.config["algorithm"]["samples"]
 
+        moving_ave = self.moving_average(waveform=waveform[:nsamples], n=4)
+        diffs = moving_ave[:1] - moving_ave[:-1]
+        diffs_percent = np.divide(diffs, moving_ave[:-1])
+        mask = diffs_percent[diffs_percent>=0.10]
+        pulse_idx = np.where(mask == True)[0]
+        
+        if pulse_idx.shape[0]>0:
+            print(pulse_idx)
+
         # Get the baseline.
         Baseline = np.sum(waveform[:nsamples]) / nsamples
 
         self.store.put(self.name, Baseline)
+
+    def moving_average(self, waveform, n):
+        # Uniform 1D filter is equivalent to a moving average, and is more efficient and accurate than similar numpy methods
+        return uniform_filter1d(waveform, size=n)
 
 
 # EOF
