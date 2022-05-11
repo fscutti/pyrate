@@ -202,11 +202,11 @@ objects:
 
     PromptDelayChargeRatio_CHX:
         algorithm:
-            name: ChargeRatio
+            name: Ratio
         execute:
             input: PromptCharge_CHX, DelayCharge_CHX
-        charge1: PromptCharge_CHX
-        charge2: DelayedCharge_CHX
+        x1: PromptCharge_CHX
+        x2: DelayedCharge_CHX
 
     MeanTime_CHX:
         algorithm:
@@ -246,11 +246,11 @@ objects:
 
     TimeDifference_CH01:
         algorithm:
-            name: TimeDifference
+            name: Difference
         execute:
             input: PulseTime_CH0, PulseTime_CH1
-        time1: PulseTime_CH0
-        time2: PulseTime_CH1
+        x1: PulseTime_CH0
+        x2: PulseTime_CH1
 
     Moments_CHX:
         algorithm:

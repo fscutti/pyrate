@@ -254,11 +254,11 @@ objects:
 
     PromptDelayChargeRatio:
         algorithm:
-            name: ChargeRatio
+            name: Ratio
         execute:
             input: PromptCharge, DelayCharge
-        charge1: PromptCharge
-        charge2: DelayedCharge
+        x1: PromptCharge
+        x2: DelayedCharge
 
     MeanTime:
         algorithm:

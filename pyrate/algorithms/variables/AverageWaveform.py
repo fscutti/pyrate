@@ -35,8 +35,11 @@
            so the corresponding check will need to be updated in such a situation (LINE 82)
 """
 
-from pyrate.core.Algorithm import Algorithm
 import numpy as np
+<<<<<<< HEAD
+=======
+from pyrate.core.Algorithm import Algorithm
+>>>>>>> 1f3780c098c2d5a2c267e073c41dccd0863b0970
 from pyrate.utils.enums import Pyrate
 
 class AverageWaveform(Algorithm):
@@ -83,7 +86,7 @@ class AverageWaveform(Algorithm):
         if waveform is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             return
-
+        
         # Handles the case when a channel wasn't present in the event - specific to ZLE and PSD firmware which don't collect waveforms in that case
         # ToDo: How we represent missing channels may change, so this check will need to be updated in such a situation
 
@@ -101,4 +104,5 @@ class AverageWaveform(Algorithm):
         """
         AverageWaveform = self.cum_waveform / self.nevents
         self.store.put(self.name, AverageWaveform)
+
 # EOF
