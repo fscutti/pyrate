@@ -40,9 +40,10 @@
         waveform: CorrectedWaveform_CHX
         window: Window_CHX
 """
-import numpy as np
 import sys
+import numpy as np
 from pyrate.core.Algorithm import Algorithm
+from pyrate.utils.enums import Pyrate
 
 wf_units = {"V": 1.0, "mV": 1e-3, "uV": 1e-6}
 q_units = {"C": 1.0, "mC": 1e3, "uC": 1e6, "nC": 1e9, "pC": 1e12, "fC": 1e15}
@@ -92,16 +93,15 @@ class Charge(Algorithm):
     def execute(self):
         """Calculates the charge by summing over the waveform"""
         window = self.store.get(self.config["window"])
+        waveform = self.store.get(self.config["waveform"])
 
         # check for invalid windows
-        if window == -999 or window is None:
-            Charge = -999
+        if waveform is Pyrate.NONE or window is Pyrate.NONE:
+            self.store.put(self.name, Pyrate.NONE)
+            return
 
-        else:
-            waveform = self.store.get(self.config["waveform"])
-
-            # Calcualte the actual charge over the window
-            Charge = np.sum(waveform[window[0] : window[1]]) * self.charge_constant
+        # Calcualte the actual charge over the window
+        Charge = np.sum(waveform[window[0] : window[1]]) * self.charge_constant
 
         self.store.put(self.name, Charge)
 

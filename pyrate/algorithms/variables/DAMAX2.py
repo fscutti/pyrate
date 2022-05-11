@@ -37,9 +37,9 @@
         pulse_start: PulseStart_CHX
 """
 
-import sys
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
+from pyrate.utils.enums import Pyrate
 
 
 class DAMAX2(Algorithm):
@@ -61,22 +61,25 @@ class DAMAX2(Algorithm):
         """Charge ratio X2 defined according to:
         Characterization of SABRE crystal NaI-33 with direct underground counting (arXiv:2012.02610)"""
 
-        pulse_start = self.store.get(self.config["pulse_start"]) - self.delay
+        pulse_start = self.store.get(self.config["pulse_start"])
+        waveform = self.store.get(self.config["waveform"])
+        if pulse_start is Pyrate.NONE or waveform is Pyrate.NONE:
+            self.store.put(self.name, Pyrate.NONE)
+            return
 
+        pulse_start -= self.delay
         window1 = (int(pulse_start), int(pulse_start + int(50*(self.sample_rate*1e-9))))
         window2 = (int(pulse_start), int(pulse_start + int(600*(self.sample_rate*1e-9))))
         
-        waveform = self.store.get(self.config["waveform"])
-
         # Calcualte the actual charge over the window
         charge1 = np.sum(waveform[window1[0] : window1[1]])
         charge2 = np.sum(waveform[window2[0] : window2[1]])
 
         if (charge1<=0 or charge2<=0):
-            X2_ChargeRatio = -999 
-        else:
-            X2_ChargeRatio = charge1/charge2
+            self.store.put(self.name, Pyrate.NONE)
+            return
 
+        X2_ChargeRatio = charge1/charge2
         self.store.put(self.name, X2_ChargeRatio)
 
 

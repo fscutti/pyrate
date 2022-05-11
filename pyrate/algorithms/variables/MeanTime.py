@@ -29,6 +29,7 @@
 
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
+from pyrate.utils.enums import Pyrate
 
 
 class MeanTime(Algorithm):
@@ -47,25 +48,25 @@ class MeanTime(Algorithm):
         window = self.store.get(self.config["window"])
 
         # Check for valid values
-        if window == -999 or window is None:
-            MeanTime = -999
-            
-        else:
-            window_range = waveform[window[0]:window[1]].size # Number of indexes to sum over, just in case it goes over the end
-            assert(window_range>=0)
-            if self.range.size < window_range:
-                # Need to resize the range
-                self.range = np.arange(window_range)
-            # Sum(waveform[i] * i)/ Sum()
-            weighted_waveform = np.multiply(waveform[window[0]:window[1]], self.range[:window_range])
-            num = np.sum(weighted_waveform)
-            denom = np.sum(waveform[window[0]:window[1]])
+        if waveform is Pyrate.NONE or window is Pyrate.NONE:
+            self.store.put(self.name, Pyrate.NONE)
+            return
 
-            if denom == 0:
-                # Can't divide by zero
-                MeanTime = float("inf") # FIX ME
-            else:
-                MeanTime = self.sample_period * (num / denom)
+        window_range = waveform[window[0]:window[1]].size # Number of indexes to sum over, just in case it goes over the end
+        assert(window_range>=0)
+        if self.range.size < window_range:
+            # Need to resize the range
+            self.range = np.arange(window_range)
+        # Sum(waveform[i] * i)/ Sum()
+        weighted_waveform = np.multiply(waveform[window[0]:window[1]], self.range[:window_range])
+        num = np.sum(weighted_waveform)
+        denom = np.sum(waveform[window[0]:window[1]])
+
+        if denom == 0:
+            # Can't divide by zero
+            MeanTime = float("inf") # FIX ME
+        else:
+            MeanTime = self.sample_period * (num / denom)
 
         self.store.put(self.name, MeanTime)
 

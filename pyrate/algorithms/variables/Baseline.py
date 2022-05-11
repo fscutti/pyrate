@@ -30,10 +30,12 @@
     Todo: Get baseline automatically for ZLE firmware
 
 """
+import sys
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
 import sys
 from scipy.ndimage.filters import uniform_filter1d
+from pyrate.utils.enums import Pyrate
 
 
 class Baseline(Algorithm):
@@ -60,6 +62,9 @@ class Baseline(Algorithm):
         
         if pulse_idx.shape[0]>0:
             print(waveform[0:40], self.store.get("EVENT:idx"))
+        if waveform is Pyrate.NONE or waveform.size < nsamples:
+            self.store.put(self.name, Pyrate.NONE)
+            return
 
         # Get the baseline.
         Baseline = np.sum(waveform[:nsamples]) / nsamples

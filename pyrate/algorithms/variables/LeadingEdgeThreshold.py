@@ -26,10 +26,9 @@
         waveform: CorrectedWaveform_CHX
 """
 
-from pyrate.core.Algorithm import Algorithm
 import numpy as np
-from code import interact
-
+from pyrate.core.Algorithm import Algorithm
+from pyrate.utils.enums import Pyrate
 
 class LeadingEdgeThreshold(Algorithm):
     __slots__ = ("offset", "threshold", "interpolate")
@@ -50,26 +49,33 @@ class LeadingEdgeThreshold(Algorithm):
         """Caclulates the waveform threshold crossing point"""
         # Get the actual waveform, finally.
         waveform = self.store.get(self.config["waveform"])
+        if waveform is Pyrate.NONE:
+            self.store.put(self.name, Pyrate.NONE)
+            return
 
         cross_index = np.argmax(waveform > self.threshold)
-        if cross_index:
-            if self.interpolate:
-                # We want to interpolate between the points
-                x1, x2 = cross_index - 1, cross_index
-                y1, y2 = waveform[x1], waveform[x2]
-                if y1 == y2:
-                    # We'll get an invalid value, just want the midpoint
-                    LeadingEdgeTime = x1 + 0.5
-                else:
-                    # Interpolation point = x1 + (y-y1)*(x2-x1)/(y2-y1) ##
-                    LeadingEdgeTime = x1 + (self.threshold-y1)/(y2-y1)
-            else:
-                # We just want the index
-                LeadingEdgeTime = cross_index
-        else:
-            LeadingEdgeTime = -999
+        if not cross_index:
+            self.store.put(self.name, Pyrate.NONE)
+            return
 
-        self.store.put(self.name, LeadingEdgeTime-self.offset)
+        if self.interpolate:
+            # We want to interpolate between the points
+            x1, x2 = cross_index - 1, cross_index
+            y1, y2 = waveform[x1], waveform[x2]
+            if y1 == y2:
+                # We'll get an invalid value, just want the midpoint
+                LeadingEdgeTime = x1 + 0.5
+            else:
+                # Interpolation point = x1 + (y-y1)*(x2-x1)/(y2-y1) ##
+                LeadingEdgeTime = x1 + (self.threshold-y1)/(y2-y1)
+        else:
+            # We just want the index
+            LeadingEdgeTime = cross_index
+        
+        # Shift it by the offset if needed
+        LeadingEdgeTime -= self.offset
+
+        self.store.put(self.name, LeadingEdgeTime)
 
 
 # EOF

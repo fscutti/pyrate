@@ -29,7 +29,7 @@
 """
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
-
+from pyrate.utils.enums import Pyrate
 
 class PeakLocation(Algorithm):
     __slots__ = "use_window"
@@ -53,10 +53,11 @@ class PeakLocation(Algorithm):
             window = self.store.get(self.config["window"])
         else:
             window = (None, None)
-        if window == -999 or window is None:
-            PeakLocation = -999
-        else:
-            PeakLocation = np.argmax(waveform[window])
+        if window is Pyrate.NONE or waveform is Pyrate.NONE:
+            self.store.put(self.name, Pyrate.NONE)
+            return
+        
+        PeakLocation = np.argmax(waveform[window])
         self.store.put(self.name, PeakLocation)
 
 
