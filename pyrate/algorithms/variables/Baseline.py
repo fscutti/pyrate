@@ -54,11 +54,12 @@ class Baseline(Algorithm):
         moving_ave = self.moving_average(waveform=waveform[:nsamples], n=4)
         diffs = moving_ave[:1] - moving_ave[:-1]
         diffs_percent = np.divide(diffs, moving_ave[:-1])
-        mask = diffs_percent[diffs_percent>=0.10]
+        #print(diffs)
+        mask = np.abs(diffs)>=10
         pulse_idx = np.where(mask == True)[0]
         
         if pulse_idx.shape[0]>0:
-            print(pulse_idx)
+            print(waveform[0:40], self.store.get("EVENT:idx"))
 
         # Get the baseline.
         Baseline = np.sum(waveform[:nsamples]) / nsamples

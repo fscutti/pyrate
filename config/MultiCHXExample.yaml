@@ -82,8 +82,8 @@ objects:
     PromptWindow_CHX:
         algorithm:
             name: Window
-            left: 10
-            right: 0
+            left: 2
+            right: 10
         initialise:
             output:
         execute:
@@ -93,8 +93,8 @@ objects:
     DelayedWindow_CHX:
         algorithm:
             name: Window
-            left: 20
-            right: 0
+            left: 0
+            right: 20
             window pivot: right
         initialise:
             output:
