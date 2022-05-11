@@ -36,10 +36,7 @@
 """
 
 import numpy as np
-<<<<<<< HEAD
-=======
 from pyrate.core.Algorithm import Algorithm
->>>>>>> 1f3780c098c2d5a2c267e073c41dccd0863b0970
 from pyrate.utils.enums import Pyrate
 
 class AverageWaveform(Algorithm):
