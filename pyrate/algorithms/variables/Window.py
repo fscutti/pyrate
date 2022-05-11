@@ -87,33 +87,22 @@ class Window(Algorithm):
 
     def initialise(self):
         """Prepare for the calculation"""
-        # Check we haven't been given a fixed window
+        # Check the config contains the left and right parameters
         if "window" in self.config["algorithm"]:
+            # Store the fixed window in a way that the rest of the alg can use
+            self.config["algorithm"]["left"], self.config["algorithm"]["right"] = self.str_to_window(self.config["algorithm"]["window"])
+        elif "left" not in self.config["algorithm"]:
+                sys.exit(f"ERROR: in config, window object '{self.name}' missing 'left' parameter")
+        elif "right" not in self.config["algorithm"]:
+                sys.exit(f"ERROR: in config, window object '{self.name}' missing 'right' parameter")
+
+        if "pivot" not in self.config:
             self.mode = "fixed_window"  # Set the mode to fixed window mode
-            window = self.config["algorithm"]["window"]
-            if window.lower() == "full" or window.lower() == "all":
-                # Try to make into numbers
-                # Want the full window, window object will be (None, None)
-                self.fixed_window = (None, None)
-            else:
-                window = get_items(self.config["algorithm"]["window"])
-                try:
-                    self.fixed_window = [int(i) for i in window]
-                except:
-                    # Uh oh we couldn't find the window, but it was passed in...
-                    sys.exit(
-                        f"ERROR: in config, window object '{self.name}' passed in but values couldn't be parsed: {window}"
-                    )
+            self.fixed_window = (self.config["algorithm"]["left"], self.config["algorithm"]["right"])
             return
 
         # Ok, we want to use a dynamic mode
         self.mode = "dynamic"  # Set the mode to use dynamic integer pivots
-        # Check the config contains the left and right parameters
-        if "left" not in self.config["algorithm"]:
-            sys.exit(f"ERROR: in config, window object '{self.name}' missing 'left' parameter")
-        if "right" not in self.config["algorithm"]:
-            sys.exit(f"ERROR: in config, window object '{self.name}' missing 'right' parameter")
-        
         if "window pivot" in self.config["algorithm"]:           
             self.mode = "window_pivot"
             # We want to use a window as a pivot, now we just need to find out which part
@@ -132,7 +121,6 @@ class Window(Algorithm):
         from the config on the store.
         """
         if self.mode == "fixed_window":
-            window = self.fixed_window
             self.store.put(self.name, self.fixed_window)
             return
 
@@ -162,5 +150,24 @@ class Window(Algorithm):
 
         self.store.put(self.name, window)
 
+
+    def str_to_window(self, string):
+        """ Converts a window string to a tuple
+        """
+
+        if string.lower() == "full" or string.lower() == "all":
+            # Try to make into numbers
+            # Want the full window, window object will be (None, None)
+            window = (None, None)
+        else:
+            window = get_items(string)
+            try:
+                window = [int(i) for i in window]
+            except:
+                # Uh oh we couldn't find the window, but it was passed in...
+                sys.exit(
+                    f"ERROR: in window object '{self.name}', window '{window}' couldn't be parsed."
+                )
+        return window
 
 # EOF
