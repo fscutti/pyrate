@@ -125,6 +125,7 @@ class CorrectedWaveform(Algorithm):
         baseline = self.store.get(self.config["baseline"])
         if waveform is Pyrate.NONE or baseline is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
+            return
         
         # Flip the waveform if needed, and subtract baseline
         corrected_waveform = self.conversion * self.polarity * (waveform - baseline)
