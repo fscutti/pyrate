@@ -154,20 +154,18 @@ class Window(Algorithm):
     def str_to_window(self, string):
         """ Converts a window string to a tuple
         """
-
         if string.lower() == "full" or string.lower() == "all":
             # Try to make into numbers
             # Want the full window, window object will be (None, None)
-            window = (None, None)
+            return (None, None)
         else:
             window = get_items(string)
             try:
-                window = [int(i) for i in window]
+                return [int(i) for i in window]
             except:
                 # Uh oh we couldn't find the window, but it was passed in...
                 sys.exit(
                     f"ERROR: in window object '{self.name}', window '{window}' couldn't be parsed."
                 )
-        return window
 
 # EOF
