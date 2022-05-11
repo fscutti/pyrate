@@ -53,18 +53,19 @@ class Baseline(Algorithm):
 
         nsamples = self.config["algorithm"]["samples"]
 
+        if waveform is Pyrate.NONE or waveform.size < nsamples:
+            self.store.put(self.name, Pyrate.NONE)
+            return
+
         moving_ave = self.moving_average(waveform=waveform[:nsamples], n=4)
         diffs = moving_ave[:1] - moving_ave[:-1]
         diffs_percent = np.divide(diffs, moving_ave[:-1])
         #print(diffs)
-        mask = np.abs(diffs)>=10
+        mask = np.abs(diffs)>=20
         pulse_idx = np.where(mask == True)[0]
         
         if pulse_idx.shape[0]>0:
             print(waveform[0:40], self.store.get("EVENT:idx"))
-        if waveform is Pyrate.NONE or waveform.size < nsamples:
-            self.store.put(self.name, Pyrate.NONE)
-            return
 
         # Get the baseline.
         Baseline = np.sum(waveform[:nsamples]) / nsamples

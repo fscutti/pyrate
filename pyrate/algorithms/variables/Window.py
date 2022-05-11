@@ -125,7 +125,7 @@ class Window(Algorithm):
         # Shared common pivot calculation for dynamic and window_pivot modes
         if self.mode == "dynamic" or self.mode == "window_pivot":
             # Check the pivot isn't invalid
-            if pivot == -999 or pivot is None:
+            if pivot is Pyrate.NONE or pivot is None:
                 self.store.put(self.name, Pyrate.NONE)
                 return
             
