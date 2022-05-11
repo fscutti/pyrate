@@ -11,8 +11,20 @@
         Dynamic mode:
             pivot: An object with a single sample or time (will be rounded to 
                    the nearest integer)
-            left: How many samples before the pivot to start the window
-            right: How many samples after the pivot to end the window
+            left: Start of the window relative to the pivot
+            right: End of the window relative to the pivot
+
+            ** The window will be defined as (pivot + left, pivot + right)
+            ** To keep the pivot inside the window range, use a negative value
+            ** for 'left'
+        
+        Window pivot:
+            ** Sub variant of dyanmic mode. Requires all of Dyanmic mode's parameters
+            ** plus the following
+            window pivot: left/start or right/end - The index of the passed in window to 
+                            use as a pivot
+            pivot: A window object / iterable object with a length of 2.
+
 
     Required states:
         initialise:
@@ -32,19 +44,31 @@
         execute:
             output:
     
+    # With a standard dynamic window
+    DynWindow_CHX:
+        algorithm:
+            name: Window
+            left: -20
+            right: 100
+        initialise:
+            output:
+        execute:
+            input: <Pivot object (integer)>
+        pivot: <Pivot object (integer)>
+
     # With a dynamic window, pivoting from a window
 
     PromptWindow_CHX:
         algorithm:
             name: Window
-            left: 20
+            left: -20
             right: 0
             window pivot: left
         initialise:
             output:
         execute:
-            input: <Pivot object>
-        pivot: <Pivot object (variable)>
+            input: <Pivot object (window)>
+        pivot: <Pivot object (window)>
 """
 
 
@@ -52,6 +76,7 @@ import sys
 from pyrate.core.Algorithm import Algorithm
 from pyrate.utils.strings import get_items
 from pyrate.utils.enums import Pyrate
+from pyrate.utils.functions import iterable
 
 
 class Window(Algorithm):
@@ -62,26 +87,23 @@ class Window(Algorithm):
 
     def initialise(self):
         """Prepare for the calculation"""
-        # Check we haven't been given a fixed window
+        # Check the config contains the left and right parameters
         if "window" in self.config["algorithm"]:
+            # Store the fixed window in a way that the rest of the alg can use
+            self.config["algorithm"]["left"], self.config["algorithm"]["right"] = self.str_to_window(self.config["algorithm"]["window"])
+        elif "left" not in self.config["algorithm"]:
+                sys.exit(f"ERROR: in config, window object '{self.name}' missing 'left' parameter")
+        elif "right" not in self.config["algorithm"]:
+                sys.exit(f"ERROR: in config, window object '{self.name}' missing 'right' parameter")
+
+        if "pivot" not in self.config:
             self.mode = "fixed_window"  # Set the mode to fixed window mode
-            window = self.config["algorithm"]["window"]
-            if window.lower() == "full" or window.lower() == "all":
-                # Try to make into numbers
-                # Want the full window, window object will be (None, None)
-                self.fixed_window = (None, None)
-            else:
-                window = get_items(self.config["algorithm"]["window"])
-                try:
-                    self.fixed_window = [int(i) for i in window]
-                except:
-                    # Uh oh we couldn't find the window, but it was passed in...
-                    sys.exit(
-                        f"ERROR: in config, window passed in but values couldn't be parsed: {window}"
-                    )
+            self.fixed_window = (self.config["algorithm"]["left"], self.config["algorithm"]["right"])
+            return
 
-        elif "window pivot" in self.config["algorithm"]:
-
+        # Ok, we want to use a dynamic mode
+        self.mode = "dynamic"  # Set the mode to use dynamic integer pivots
+        if "window pivot" in self.config["algorithm"]:           
             self.mode = "window_pivot"
             # We want to use a window as a pivot, now we just need to find out which part
             self.window_pivot = self.config["algorithm"]["window pivot"]
@@ -89,57 +111,61 @@ class Window(Algorithm):
                 self.window_pivot = 0
             elif self.window_pivot == "right" or self.window_pivot == "stop":
                 self.window_pivot = 1
+            else:
+                # Redundant, I may change this.
+                self.window_pivot = 1 # Take the right most variable as default
 
-            if "left" not in self.config["algorithm"]:
-                sys.exit(f"ERROR: in config, window missing left parameter")
-            if "right" not in self.config["algorithm"]:
-                sys.exit(f"ERROR: in config, window missing right parameter")
-
-        else:
-
-            self.mode = "dynamic"  # Set the mode to use dynamic integer pivots
-            # Better check the left and right parameters have been given
-            if "left" not in self.config["algorithm"]:
-                sys.exit(f"ERROR: in config, window missing left parameter")
-            if "right" not in self.config["algorithm"]:
-                sys.exit(f"ERROR: in config, window missing right parameter")
 
     def execute(self):
-
         """Calcualates the window if it's a variable, otherwise puts the window
         from the config on the store.
         """
         if self.mode == "fixed_window":
-            window = self.fixed_window
+            self.store.put(self.name, self.fixed_window)
+            return
 
-        elif self.mode == "dynamic":
-            # Ok, we're actually calculating it
-            # Get the 'pivot' - e.g. the start of the pulse
-            pivot = self.store.get(self.config["pivot"])
+        # Check the pivot is valid
+        pivot = self.store.get(self.config["pivot"])
+        if pivot is Pyrate.NONE:
+            self.store.put(self.name, Pyrate.NONE)
+            return
+        
+        pivot_is_iterable = iterable(pivot)
+        # Check the pivot variable matches the mode
+        if self.mode == "window_pivot":
+            if not pivot_is_iterable:
+                sys.exit(f"ERROR: Window object '{self.name}' is expecting another"
+                         f" window as a pivot, but the passed in pivot has type '{type(pivot)}'.")
+            pivot = pivot[self.window_pivot] # Extract the pivot point from the window
+        elif pivot_is_iterable:
+            sys.exit(f"ERROR: Window objet '{self.name}' is expecting an integer,"
+                     f" but the passed in object '{pivot}' is iterable.")
 
-        elif self.mode == "window_pivot":
-            # This time we'll define the pivot as the left or right of a passed in window
-            pivot_window = self.store.get(self.config["pivot"])
-            pivot = pivot_window[self.window_pivot]
-
-        # Shared common pivot calculation for dynamic and window_pivot modes
-        if self.mode == "dynamic" or self.mode == "window_pivot":
-            # Check the pivot isn't invalid
-            if pivot == -999 or pivot is None:
-                self.store.put(self.name, Pyrate.NONE)
-                return
-            
-            # The window is defined by a left and right buffer on the start
-            left = self.config["algorithm"]["left"]
-            right = self.config["algorithm"]["right"]
-            window = (int(round(pivot - left)), int(round(pivot + right)))
-            if window[0] < 0:
-                # outside the range of the waveform, I've chosen to make
-                # it give a valid window even thought it failed, in case
-                # it is useful
-                window = (0, window[0])
+        left = self.config["algorithm"]["left"]
+        right = self.config["algorithm"]["right"]
+        # Window defined as the pivot + left to the pivot + right
+        # Typical windows will have a negative left value
+        # Windows can and will underflow on waveforms. The user must be aware of this
+        window = (int(round(pivot + left)), int(round(pivot + right)))
 
         self.store.put(self.name, window)
 
+
+    def str_to_window(self, string):
+        """ Converts a window string to a tuple
+        """
+        if string.lower() == "full" or string.lower() == "all":
+            # Try to make into numbers
+            # Want the full window, window object will be (None, None)
+            return (None, None)
+        else:
+            window = get_items(string)
+            try:
+                return [int(i) for i in window]
+            except:
+                # Uh oh we couldn't find the window, but it was passed in...
+                sys.exit(
+                    f"ERROR: in window object '{self.name}', window '{window}' couldn't be parsed."
+                )
 
 # EOF

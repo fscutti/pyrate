@@ -11,9 +11,9 @@ from pyrate.algorithms.variables.Window import Window
 from pyrate.algorithms.variables.PeakHeight import PeakHeight
 from pyrate.algorithms.variables.PeakLocation import PeakLocation
 from pyrate.algorithms.variables.MeanTime import MeanTime
-from pyrate.algorithms.variables.ChargeRatio import ChargeRatio
+from pyrate.algorithms.variables.Ratio import Ratio
 from pyrate.algorithms.variables.TimeConverter import TimeConverter
-from pyrate.algorithms.variables.TimeDifference import TimeDifference
+from pyrate.algorithms.variables.Difference import Difference
 from pyrate.algorithms.variables.CFD import CFD
 from pyrate.algorithms.variables.TrapezoidFilter import TrapezoidFilter
 from pyrate.algorithms.variables.Moment import Moment
