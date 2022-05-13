@@ -441,9 +441,9 @@ objects:
                 event:
                     vector:
                         int: RawWaveform_CH0
-                        double: CorrectedWaveform_CH0, FFT_CH0, Moments_CH0
+                        double: CorrectedWaveform_CH0, FFT_CH0, Moments_CH0, Baseline_CH0
                     scalar:
-                        float: Baseline_CH0, PeakHeight_CH0, PeakLocation_CH0, PulseCharge_CH0,
+                        float: PeakHeight_CH0, PeakLocation_CH0, PulseCharge_CH0,
                             TotalCharge_CH0, PulseStart_CH0, PulseTime_CH0, PromptDelayChargeRatio_CH0,
                             MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0, Timestamp_CH0, 
                             DAMAX1_CH0, DAMAX2_CH0, LeadingEdge_CH0

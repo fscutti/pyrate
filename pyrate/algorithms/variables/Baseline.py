@@ -57,18 +57,19 @@ class Baseline(Algorithm):
             self.store.put(self.name, Pyrate.NONE)
             return
 
-        moving_ave = self.moving_average(waveform=waveform[:nsamples], n=4)
-        diffs = moving_ave[:1] - moving_ave[:-1]
-        diffs_percent = np.divide(diffs, moving_ave[:-1])
-        #print(diffs)
+        averages = self.moving_average(waveform=waveform[:nsamples], n=4)
+        averages_diffs = moving_ave[1:] - moving_ave[:-1]
         mask = np.abs(diffs)>=20
         pulse_idx = np.where(mask == True)[0]
         
         if pulse_idx.shape[0]>0:
-            print(waveform[0:40], self.store.get("EVENT:idx"))
+            # Ok, now we go to the end of the waveform because a pulse is occuring in the baseline window
+            Baseline = np.sum(waveform[-1*nsamples:]) / nsamples
+        
+        else:
 
-        # Get the baseline.
-        Baseline = np.sum(waveform[:nsamples]) / nsamples
+            # Get the baseline from the front of the waveform.
+            Baseline = np.sum(waveform[:nsamples]) / nsamples
 
         self.store.put(self.name, Baseline)
 
