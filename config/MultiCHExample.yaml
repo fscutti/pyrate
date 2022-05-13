@@ -124,7 +124,6 @@ objects:
             name: Window
             left: -50
             right: 0
-            pivot index: 0
         initialise:
             output:
         execute:
