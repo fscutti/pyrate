@@ -39,7 +39,7 @@ from scipy.ndimage.filters import uniform_filter1d
 from pyrate.utils.enums import Pyrate
 
 
-class Baseline(Algorithm):
+class BaselineNaive(Algorithm):
     __slots__ = ()
 
     def __init__(self, name, config, store, logger):
