@@ -27,6 +27,15 @@ objects:
         algorithm: 
             name: Baseline
             samples: 40
+            threshold: 20
+        execute:
+            input: RawWaveform_CHX
+        waveform: RawWaveform_CHX
+
+    BaselineNaive_CHX:
+        algorithm: 
+            name: Baseline
+            samples: 40
         execute:
             input: RawWaveform_CHX
         waveform: RawWaveform_CHX
@@ -320,7 +329,7 @@ objects:
         initialise:
             output:
         execute:
-            input: RawWaveform_CHX, CorrectedWaveform_CHX, Baseline_CHX, PeakHeight_CHX,
+            input: RawWaveform_CHX, CorrectedWaveform_CHX, Baseline_CHX, BaselineNaive_CHX, PeakHeight_CHX,
                    PeakLocation_CHX, PulseCharge_CHX, TotalCharge_CHX, PulseStart_CHX, 
                    PulseTime_CHX, PromptDelayChargeRatio_CHX, PromptCharge_CHX, DelayedCharge_CHX, 
                    MeanTime_CHX, PromptDelayChargeRatioCalculator_CHX, TimeDifference_CH01, Moments_CHX, 
@@ -335,7 +344,7 @@ objects:
                         int: RawWaveform_CHX
                         double: CorrectedWaveform_CHX, FFT_CHX, Moments_CHX
                     scalar:
-                        float: Baseline_CHX, PeakHeight_CHX, PeakLocation_CHX, PulseCharge_CHX, 
+                        float: Baseline_CHX, BaselineNaive_CHX, PeakHeight_CHX, PeakLocation_CHX, PulseCharge_CHX, 
                                TotalCharge_CHX, PulseStart_CHX, PulseTime_CHX, PromptDelayChargeRatio_CHX, 
                                MeanTime_CHX, PromptDelayChargeRatioCalculator_CHX,
                                Timestamp_CHX, DAMAX1_CHX, DAMAX2_CHX, LeadingEdge_CHX

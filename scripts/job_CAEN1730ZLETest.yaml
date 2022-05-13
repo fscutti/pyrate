@@ -6,11 +6,11 @@ inputs:
         #        groups:
     eslices:
       emin: 0
-      emax: 100000
+      emax: -1
 
     reader: ReaderCAEN1730_ZLE
     path:
-    - /home/lmilligan/data/SABRINACalData/22-03-11_16-29-42_DM-DAQ_SABRINACal_Na22_10mV_2min/SABRINACal_Na22_10mV_2min-Board_0-001.dat
+    - PYRATE/test/data/1730_ZLETest-Board_0-001.dat
 
 configs:
   config2:

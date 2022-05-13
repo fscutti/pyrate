@@ -20,10 +20,25 @@ objects:
         initialise:
             output: null
         waveform: CorrectedWaveform_CH1
+    BaselineNaive_CH0:
+        algorithm:
+            name: Baseline
+            samples: 40
+        execute:
+            input: RawWaveform_CH0
+        waveform: RawWaveform_CH0
+    BaselineNaive_CH1:
+        algorithm:
+            name: Baseline
+            samples: 40
+        execute:
+            input: RawWaveform_CH1
+        waveform: RawWaveform_CH1
     Baseline_CH0:
         algorithm:
             name: Baseline
             samples: 40
+            threshold: 20
         execute:
             input: RawWaveform_CH0
         waveform: RawWaveform_CH0
@@ -31,6 +46,7 @@ objects:
         algorithm:
             name: Baseline
             samples: 40
+            threshold: 20
         execute:
             input: RawWaveform_CH1
         waveform: RawWaveform_CH1
@@ -134,9 +150,9 @@ objects:
         window: DelayedWindow_CH1
     DelayedWindow_CH0:
         algorithm:
-            left: 20
+            left: 0
             name: Window
-            right: 0
+            right: 20
             window pivot: right
         execute:
             input: PromptWindow_CH0
@@ -145,9 +161,9 @@ objects:
         pivot: PromptWindow_CH0
     DelayedWindow_CH1:
         algorithm:
-            left: 20
+            left: 0
             name: Window
-            right: 0
+            right: 20
             window pivot: right
         execute:
             input: PromptWindow_CH1
@@ -342,9 +358,9 @@ objects:
         x2: DelayedCharge_CH1
     PromptWindow_CH0:
         algorithm:
-            left: 10
+            left: 2
             name: Window
-            right: 0
+            right: 10
         execute:
             input: PeakLocation_CH0
         initialise:
@@ -352,9 +368,9 @@ objects:
         pivot: PeakLocation_CH0
     PromptWindow_CH1:
         algorithm:
-            left: 10
+            left: 2
             name: Window
-            right: 0
+            right: 10
         execute:
             input: PeakLocation_CH1
         initialise:
@@ -534,14 +550,14 @@ objects:
             name: TreeMaker
         execute:
             input: TimeDifference_CH01, RawWaveform_CH0, CorrectedWaveform_CH0, Baseline_CH0,
-                PeakHeight_CH0, PeakLocation_CH0, PulseCharge_CH0, TotalCharge_CH0,
-                PulseStart_CH0, PulseTime_CH0, PromptDelayChargeRatio_CH0, PromptCharge_CH0,
-                DelayedCharge_CH0, MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0,
+                BaselineNaive_CH0, PeakHeight_CH0, PeakLocation_CH0, PulseCharge_CH0,
+                TotalCharge_CH0, PulseStart_CH0, PulseTime_CH0, PromptDelayChargeRatio_CH0,
+                PromptCharge_CH0, DelayedCharge_CH0, MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0,
                 Moments_CH0, Timestamp_CH0, AverageWaveform_CH0, DAMAX1_CH0, DAMAX2_CH0,
                 FFT_CH0, LeadingEdge_CH0, RawWaveform_CH1, CorrectedWaveform_CH1,
-                Baseline_CH1, PeakHeight_CH1, PeakLocation_CH1, PulseCharge_CH1, TotalCharge_CH1,
-                PulseStart_CH1, PulseTime_CH1, PromptDelayChargeRatio_CH1, PromptCharge_CH1,
-                DelayedCharge_CH1, MeanTime_CH1, PromptDelayChargeRatioCalculator_CH1,
+                Baseline_CH1, BaselineNaive_CH1, PeakHeight_CH1, PeakLocation_CH1,
+                PulseCharge_CH1, TotalCharge_CH1, PulseStart_CH1, PulseTime_CH1, PromptDelayChargeRatio_CH1,
+                PromptCharge_CH1, DelayedCharge_CH1, MeanTime_CH1, PromptDelayChargeRatioCalculator_CH1,
                 Moments_CH1, Timestamp_CH1, AverageWaveform_CH1, DAMAX1_CH1, DAMAX2_CH1,
                 FFT_CH1, LeadingEdge_CH1
         finalise:
@@ -552,10 +568,10 @@ objects:
         -   Channel_0:
                 event:
                     scalar:
-                        float: Baseline_CH0, PeakHeight_CH0, PeakLocation_CH0, PulseCharge_CH0,
-                            TotalCharge_CH0, PulseStart_CH0, PulseTime_CH0, PromptDelayChargeRatio_CH0,
-                            MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0, Timestamp_CH0,
-                            DAMAX1_CH0, DAMAX2_CH0, LeadingEdge_CH0
+                        float: Baseline_CH0, BaselineNaive_CH0, PeakHeight_CH0, PeakLocation_CH0,
+                            PulseCharge_CH0, TotalCharge_CH0, PulseStart_CH0, PulseTime_CH0,
+                            PromptDelayChargeRatio_CH0, MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0,
+                            Timestamp_CH0, DAMAX1_CH0, DAMAX2_CH0, LeadingEdge_CH0
                     vector:
                         double: CorrectedWaveform_CH0, FFT_CH0, Moments_CH0
                         int: RawWaveform_CH0
@@ -565,10 +581,10 @@ objects:
             Channel_1:
                 event:
                     scalar:
-                        float: Baseline_CH1, PeakHeight_CH1, PeakLocation_CH1, PulseCharge_CH1,
-                            TotalCharge_CH1, PulseStart_CH1, PulseTime_CH1, PromptDelayChargeRatio_CH1,
-                            MeanTime_CH1, PromptDelayChargeRatioCalculator_CH1, Timestamp_CH1,
-                            DAMAX1_CH1, DAMAX2_CH1, LeadingEdge_CH1
+                        float: Baseline_CH1, BaselineNaive_CH1, PeakHeight_CH1, PeakLocation_CH1,
+                            PulseCharge_CH1, TotalCharge_CH1, PulseStart_CH1, PulseTime_CH1,
+                            PromptDelayChargeRatio_CH1, MeanTime_CH1, PromptDelayChargeRatioCalculator_CH1,
+                            Timestamp_CH1, DAMAX1_CH1, DAMAX2_CH1, LeadingEdge_CH1
                     vector:
                         double: CorrectedWaveform_CH1, FFT_CH1, Moments_CH1
                         int: RawWaveform_CH1
