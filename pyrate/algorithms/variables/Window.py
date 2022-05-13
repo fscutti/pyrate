@@ -129,7 +129,7 @@ class Window(Algorithm):
             elif self.pivot_index == "start":
                 self.pivot_index = 0
             elif self.pivot_index == "end":
-                self.pivot_index = 1
+                self.pivot_index = -1
             else:
                 self.pivot_index = 0 # Take the left most variable as default
 
