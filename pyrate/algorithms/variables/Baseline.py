@@ -58,9 +58,9 @@ class Baseline(Algorithm):
             return
 
         averages = self.moving_average(waveform=waveform[:nsamples], n=4)
-        averages_diffs = moving_ave[1:] - moving_ave[:-1]
-        mask = np.abs(diffs)>=20
-        pulse_idx = np.where(mask == True)[0]
+        averages_diffs = averages[1:] - averages[:-1]
+        mask = np.abs(averages_diffs)>=20
+        pulse_idx = np.where(np.abs(averages_diffs)>=20)[0]
         
         if pulse_idx.shape[0]>0:
             # Ok, now we go to the end of the waveform because a pulse is occuring in the baseline window
