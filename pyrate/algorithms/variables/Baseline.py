@@ -1,11 +1,16 @@
-""" Uses physical waveform to calculate the baseline for the event. 
-    Requires input from physical waveform and the number of samples used for the
+""" Uses raw waveform to calculate the baseline for the event. 
+    Requires input from raw waveform and the number of samples used for the
     baseline calculation - this can be varied by the user and is defined in
-    the config file.
-    Takes the average of the first n samples in the waveform. Can be run on any
-    waveform, typically PhysicalWaveform
+    the config file. There is also optional input for the threshold used
+    to check pulses in the sample window, if not specified it is set to 20.
 
-    This can probably be improved to account for events/pulses at the start 
+    Before taking the average of the first n samples in the waveform, checks
+    for a pulse in that window by comparing averages calculated in a rolling average.
+    If a pulse is found, it moves to the end of the window and calculates using a window
+    there. If there is a pulse in that window, the alg will return an incorrect baseline. 
+    Can be run on any waveform, typically RawWaveform
+
+    This is an improvement on BaselineNaive to account for events/pulses at the start 
     of the event window.
 
     Required states:
@@ -23,6 +28,7 @@
         algorithm: 
             name: Baseline
             samples: 40
+            threshold: 20
         execute:
             input: PhysicalWaveform_CHX
         waveform: PhysicalWaveform_CHX
@@ -50,6 +56,11 @@ class Baseline(Algorithm):
 
         if "samples" not in self.config["algorithm"]:
             sys.exit("ERROR in Baseline, 'samples' not found in the config")
+        
+        if "threshold" not in self.config["algorithm"]:
+            check_thres = 20
+        elif "threshold" in self.config["algorithm"]:
+            check_thres = self.config["algorithm"]["threshold"]
 
         nsamples = self.config["algorithm"]["samples"]
 
@@ -59,8 +70,7 @@ class Baseline(Algorithm):
 
         averages = self.moving_average(waveform=waveform[:nsamples], n=4)
         averages_diffs = averages[1:] - averages[:-1]
-        mask = np.abs(averages_diffs)>=20
-        pulse_idx = np.where(np.abs(averages_diffs)>=20)[0]
+        pulse_idx = np.where(np.abs(averages_diffs)>=check_thres)[0]
         
         if pulse_idx.shape[0]>0:
             # Ok, now we go to the end of the waveform because a pulse is occuring in the baseline window
