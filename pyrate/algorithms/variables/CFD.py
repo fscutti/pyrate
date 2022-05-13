@@ -43,8 +43,6 @@
             input: TrapezoidWaveform_CHX
         waveform: TrapezoidWaveform_CHX
 
-    Todo: Decide if we want to subtract the gap and rise time from the CFDTime
-          in trapezoid mode.
 """
 
 import numpy as np
