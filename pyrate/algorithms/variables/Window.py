@@ -21,7 +21,7 @@
         Window pivot:
             ** Sub variant of dyanmic mode. Requires all of Dyanmic mode's parameters
             ** plus the following
-            window pivot: left/start or right/end - The index of the passed in window to 
+            pivot index: integer, start or stop - The index of the passed in window to 
                             use as a pivot
             pivot: A window object / iterable object with a length of 2.
 
@@ -63,7 +63,7 @@
             name: Window
             left: -20
             right: 0
-            window pivot: left
+            pivot index: start
         initialise:
             output:
         execute:
@@ -76,11 +76,11 @@ import sys
 from pyrate.core.Algorithm import Algorithm
 from pyrate.utils.strings import get_items
 from pyrate.utils.enums import Pyrate
-from pyrate.utils.functions import iterable
+from pyrate.utils.functions import iterable, is_float
 
 
 class Window(Algorithm):
-    __slots__ = ("mode", "fixed_window", "window_pivot")
+    __slots__ = ("mode", "left", "right", "pivot_index")
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
@@ -96,58 +96,66 @@ class Window(Algorithm):
         elif "right" not in self.config["algorithm"]:
                 sys.exit(f"ERROR: in config, window object '{self.name}' missing 'right' parameter")
 
+        if not is_float(self.config["algorithm"]["left"]):
+            sys.exit(f"ERROR: in config, window object '{self.name}' 'left' bound not a number")
+        if not is_float(self.config["algorithm"]["right"]):
+            sys.exit(f"ERROR: in config, window object '{self.name}' 'right' bound not a number")
+        
+        self.left = int(self.config["algorithm"]["left"])
+        self.right = int(self.config["algorithm"]["right"])
+        if  self.left >= self.right:
+            sys.exit(f"ERROR: in config, window object '{self.name}' 'right' bound ({self.right}) <= 'left' bound ({self.left}).")
+
         if "pivot" not in self.config:
             self.mode = "fixed_window"  # Set the mode to fixed window mode
-            self.fixed_window = (self.config["algorithm"]["left"], self.config["algorithm"]["right"])
             return
 
         # Ok, we want to use a dynamic mode
         self.mode = "dynamic"  # Set the mode to use dynamic integer pivots
-        if "window pivot" in self.config["algorithm"]:           
+        if "pivot index" in self.config["algorithm"]:           
             self.mode = "window_pivot"
             # We want to use a window as a pivot, now we just need to find out which part
-            self.window_pivot = self.config["algorithm"]["window pivot"]
-            if self.window_pivot == "left" or self.window_pivot == "start":
-                self.window_pivot = 0
-            elif self.window_pivot == "right" or self.window_pivot == "stop":
-                self.window_pivot = 1
+            self.pivot_index = self.config["algorithm"]["pivot index"]
+            if is_float(self.pivot_index):
+                # Can pass in numbers
+                self.pivot_index = int(self.pivot_index)
+            elif self.pivot_index == "start":
+                self.pivot_index = 0
+            elif self.pivot_index == "stop":
+                self.pivot_index = 1
             else:
-                # Redundant, I may change this.
-                self.window_pivot = 1 # Take the right most variable as default
+                self.pivot_index = 0 # Take the left most variable as default
 
 
     def execute(self):
         """Calcualates the window if it's a variable, otherwise puts the window
         from the config on the store.
         """
-        if self.mode == "fixed_window":
-            self.store.put(self.name, self.fixed_window)
-            return
+        pivot = 0
+        if self.mode == "dynamic":
+            pivot = self.store.get(self.config["pivot"])
 
-        # Check the pivot is valid
-        pivot = self.store.get(self.config["pivot"])
-        if pivot is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
-            return
+            if pivot is Pyrate.NONE:
+                self.store.put(self.name, Pyrate.NONE)
+                return
         
-        pivot_is_iterable = iterable(pivot)
-        # Check the pivot variable matches the mode
-        if self.mode == "window_pivot":
-            if not pivot_is_iterable:
-                sys.exit(f"ERROR: Window object '{self.name}' is expecting another"
-                         f" window as a pivot, but the passed in pivot has type '{type(pivot)}'.")
-            pivot = pivot[self.window_pivot] # Extract the pivot point from the window
-        elif pivot_is_iterable:
-            sys.exit(f"ERROR: Window objet '{self.name}' is expecting an integer,"
-                     f" but the passed in object '{pivot}' is iterable.")
+            pivot_is_iterable = iterable(pivot)
+            if pivot_is_iterable:
+                pivot = pivot[self.pivot_index] # Extract the pivot point from the window
+            # Check the pivot variable matches the mode
+            if self.mode == "window_pivot":
+                if not pivot_is_iterable:
+                    sys.exit(f"ERROR: Window object '{self.name}' is expecting another"
+                            f" window as a pivot, but the passed in pivot has type '{type(pivot)}'.")
+            elif pivot_is_iterable:
+                sys.exit(f"ERROR: Window objet '{self.name}' is expecting an integer,"
+                        f" but the passed in object '{pivot}' is iterable.")
 
-        left = self.config["algorithm"]["left"]
-        right = self.config["algorithm"]["right"]
         # Window defined as the pivot + left to the pivot + right
         # Typical windows will have a negative left value
         # Windows can and will underflow on waveforms. The user must be aware of this
-        window = (int(round(pivot + left)), int(round(pivot + right)))
-
+        pivot = round(pivot)
+        window = (int(pivot + self.left), int(pivot + self.right))
         self.store.put(self.name, window)
 
 
