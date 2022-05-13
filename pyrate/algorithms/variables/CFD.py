@@ -1,7 +1,8 @@
 """ Calculates the CFD of a waveform.
     From this it also calculates the CFD zero crossing points - i.e. the cfd time
-    Outputs the crossing point times as an array. Also outputs the CFD as an
-    array on the store, which can be accessed using <OBJNAME>Trace
+    Outputs the first crossing point time. Also outputs the crossing point times
+    as an array. and outputs the CFD as an array, which can be accessed on the
+    store using <OBJNAME>CrossTimes and <OBJNAME>Trace respectively
 
     Required parameters:
         delay: (int)   The amount the CFD algorithm will delay the input trace
@@ -108,7 +109,8 @@ class CFD(Algorithm):
         f = self.cfd[zero_cross]/(self.cfd[zero_cross] - self.cfd[zero_cross+1])
         CFDTimes = zero_cross + f
         
-        self.store.put(self.name, CFDTimes)
+        self.store.put(self.name, CFDTimes[0])
+        self.store.put(f"{self.name}CrossTimes", CFDTimes)
         self.store.put(f"{self.name}Trace", self.cfd)
             # if cross_threshold.size:
             #     # Only look at the zero crosses after the threshold cross
