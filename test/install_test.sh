@@ -2,7 +2,7 @@
 
 # this is not neccessary the smartest test but lets us figure out if the isntall worked
 
-python3.8 -c "from pyrate.core.Job import Job"
+python3 -c "from pyrate.core.Job import Job"
 
 if [ $? -ne 0 ];then
 	echo "Install test failed."

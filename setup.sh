@@ -65,8 +65,8 @@ if [ -z "$VIRTUAL_ENV" ]; then
 	echo -e "To get your old python environment back simply run 'deactivate'.${NC}"
 
 	# get this module as a global user module
-	python3.8 -m pip install --user virtualenv
-	python3.8 -m venv $VENV_NAME
+	python3 -m pip install --user virtualenv
+	python3 -m venv $VENV_NAME
 
     echo -e "Virtual environemnt at'${VENV_NAME}' PATH: '${PATH}'"
 
@@ -85,14 +85,14 @@ fi
 # install all specified packages in that file
 #QUIET="-q" # unset his if you ned to debug the setup
 
-echo -e "$(which pip3.8) $(which python3.8)"
+echo -e "$(which pip3) $(which python3)"
 
-pip3.8 $QUIET install pip --upgrade
-pip3.8 $QUIET install -r $PYRATE/requirements.txt
+pip3 $QUIET install pip --upgrade
+pip3 $QUIET install -r $PYRATE/requirements.txt
 #  install pyrate
 # the -e option is impotant so that pyrate is globall recognised
 # so you can run it independent of were $(pwd) is. 
-pip3.8 $QUIET install -e $PYRATE
+pip3 $QUIET install -e $PYRATE
 
 echo -e "pyrate base dir is ${PYRATE}"
 
