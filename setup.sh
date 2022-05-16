@@ -12,7 +12,7 @@ GREEN='\033[0;32m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-path_of_this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+path_of_this_dir="$( cd "$( dirname "${BASH_SOURCE[0]:-$0}" )" && pwd )"
 export PYRATE=${path_of_this_dir}
 
 add_to_python_path()
