@@ -94,7 +94,7 @@ pip3 $QUIET install pip --upgrade
 if [[ $(uname -m) == 'arm64' ]]; then
 	# special numba install for M1 mac, required temporarily for now
 	pip3 $QUIET install -r $PYRATE/requirements_m1.txt
-    pip3 install -i https://pypi.anaconda.org/numba/label/wheels_experimental_m1/simple numba
+    pip3 $QUIET install -i https://pypi.anaconda.org/numba/label/wheels_experimental_m1/simple numba
 else
 	pip3 $QUIET install -r $PYRATE/requirements.txt
 fi
