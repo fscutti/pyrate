@@ -20,6 +20,7 @@ pipelines:
             - python3.8 -c "import ROOT" || echo "Couldn't setup ROOT something is wrong with the docker container!!!"
             # install pyrate
             - source ./setup.sh
+            - python3 --version
             # run tests (all those ending wih `.robot` ...)
             - robot ./test/
 
