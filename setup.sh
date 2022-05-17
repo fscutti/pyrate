@@ -88,7 +88,15 @@ fi
 echo -e "$(which pip3) $(which python3)"
 
 pip3 $QUIET install pip --upgrade
-pip3 $QUIET install -r $PYRATE/requirements.txt
+
+if [[ $(uname -m) == 'arm64' ]]; then
+	# special numba install for M1 mac, required temporarily for now
+    pip install -i https://pypi.anaconda.org/numba/label/wheels_experimental_m1/simple numba
+	pip3 $QUIET install -r $PYRATE/requirements_m1.txt
+else
+	pip3 $QUIET install -r $PYRATE/requirements.txt
+fi
+
 #  install pyrate
 # the -e option is impotant so that pyrate is globall recognised
 # so you can run it independent of were $(pwd) is. 
