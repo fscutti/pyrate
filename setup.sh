@@ -58,10 +58,14 @@ fi
 
 # virtual environmens are very helpful for development
 # and cause 0 overhead; essentially just add another location
-# for python packages
+# for python packages. Preserves the default python install
 VENV_NAME=pyrate_venv
+# Check if a virtual environment has already been activated
 if [ -z "$VIRTUAL_ENV" ]; then
+	# Check if the default virtual env install exists and try to activate it
 	if ! source $PYRATE/$VENV_NAME/bin/activate &> /dev/null; then
+		# Ok, none already activated and can't find the default
+		# Try making a new one
 		echo -e "${RED}No virtual environment found. I'll set one up at 'pyrate_venv'."
 		echo -e "To get your old python environment back simply run 'deactivate'.${NC}"
 
@@ -87,19 +91,22 @@ fi
 # install all specified packages in that file
 #QUIET="-q" # unset his if you ned to debug the setup
 
-echo -e "$(which pip3) $(which python3)"
+echo -e "Using pip at: $(which pip3)\nUsing python found at: $(which python3)"
 
 pip3 $QUIET install pip --upgrade
 
+# Check if we're running on an arm64 architecture
 if [[ $(uname -m) == 'arm64' ]]; then
 	# special numba install for M1 mac, required temporarily for now
 	currentver="$python3 --version"
 	requiredver="3.9.0"
 	if [ "$(printf '%s\n' "$requiredver" "$currentver" | sort -V | head -n1)" = "$requiredver" ]; then 
+		# Only run this if we have the right python version
 		pip3 $QUIET install -r $PYRATE/requirements_m1.txt
 		pip3 $QUIET install -i https://pypi.anaconda.org/numba/label/wheels_experimental_m1/simple numba
 	else
 		echo "${RED}Python version must be greater than 3.9 for using numba with M1${NC}"
+		read -s -k "?Press any key to quit..."
 		exit 1
 	fi
 else
