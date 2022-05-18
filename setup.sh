@@ -84,7 +84,8 @@ fi
 
 # Check the environment has been activated
 if [ -z "$VIRTUAL_ENV" ]; then
-	echo -e "${RED}ERROR: Python environment failed to activate. Exiting...${NC}"
+	echo -e "${RED}ERROR: Python environment failed to activate.${NC}"
+	read -s -k "?Press any key to quit..."
 	exit 1
 fi
 
