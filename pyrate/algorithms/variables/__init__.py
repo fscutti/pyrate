@@ -1,5 +1,6 @@
 from pyrate.algorithms.variables.RawWaveform import RawWaveform
-from pyrate.algorithms.variables.Baseline import Baseline
+from pyrate.algorithms.variables.BaselineDynamic import BaselineDynamic
+from pyrate.algorithms.variables.BaselineNaive import BaselineNaive
 from pyrate.algorithms.variables.Charge import Charge
 from pyrate.algorithms.variables.Sum import Sum
 from pyrate.algorithms.variables.ChargeConstant import ChargeConstant
