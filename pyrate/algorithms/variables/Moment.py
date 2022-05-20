@@ -75,6 +75,10 @@ class Moment(Algorithm):
         fsum = np.sum(fx)
         if fsum == 0:
             self.store.put(self.name, Pyrate.NONE)
+            self.store.put(f"{self.name}Mean", Pyrate.NONE)
+            self.store.put(f"{self.name}Stddev", Pyrate.NONE)
+            self.store.put(f"{self.name}Skew", Pyrate.NONE)
+            self.store.put(f"{self.name}Kurtosis", Pyrate.NONE)
             return
 
         inner = fx * x
@@ -104,6 +108,10 @@ class Moment(Algorithm):
             moments = [mean, stddev, skew, excess_kurtosis]
 
         self.store.put(self.name, moments)
+        self.store.put(f"{self.name}Mean", moments[0])
+        self.store.put(f"{self.name}Stddev", moments[1])
+        self.store.put(f"{self.name}Skew", moments[2])
+        self.store.put(f"{self.name}Kurtosis", moments[3])
 
         # Old version
         # if self.mode == 0:
