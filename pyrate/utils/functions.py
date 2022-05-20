@@ -226,6 +226,14 @@ def iterable(obj):
     else:
         return True
 
+def is_float(var):
+    """Checks if a string can be converted to a float"""
+    try:
+        float(var)
+        return True
+    except:
+        return False
+
 
 def is_wc_ascii(filepath):
     """Determines if a file is a text wavecatcher file"""

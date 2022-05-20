@@ -122,7 +122,7 @@ objects:
     PulseWindow_CH0:
         algorithm:
             name: Window
-            left: 50
+            left: -50
             right: 0
         initialise:
             output:
@@ -134,7 +134,7 @@ objects:
     PromptWindow_CH0:
         algorithm:
             name: Window
-            left: 10
+            left: -10
             right: 0
         initialise:
             output:
@@ -146,9 +146,9 @@ objects:
     DelayedWindow_CH0:
         algorithm:
             name: Window
-            left: 20
-            right: 0
-            window pivot: right
+            left: 0
+            right: 20
+            pivot index: end
         initialise:
             output:
         execute:
