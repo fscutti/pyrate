@@ -12,7 +12,7 @@ GREEN='\033[0;32m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-path_of_this_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+path_of_this_dir="$( cd "$( dirname "${BASH_SOURCE[0]:-$0}" )" && pwd )"
 export PYRATE=${path_of_this_dir}
 
 add_to_python_path()
@@ -58,41 +58,66 @@ fi
 
 # virtual environmens are very helpful for development
 # and cause 0 overhead; essentially just add another location
-# for python packages
+# for python packages. Preserves the default python install
 VENV_NAME=pyrate_venv
+# Check if a virtual environment has already been activated
 if [ -z "$VIRTUAL_ENV" ]; then
-	echo -e "${RED}No virtual environment found. Ill set one up at 'pyrate_venv'."
-	echo -e "To get your old python environment back simply run 'deactivate'.${NC}"
+	# Check if the default virtual env install exists and try to activate it
+	if ! source $PYRATE/$VENV_NAME/bin/activate &> /dev/null; then
+		# Ok, none already activated and can't find the default
+		# Try making a new one
+		echo -e "${RED}No virtual environment found. I'll set one up at 'pyrate_venv'."
+		echo -e "To get your old python environment back simply run 'deactivate'.${NC}"
 
-	# get this module as a global user module
-	python3.8 -m pip install --user virtualenv
-	python3.8 -m venv $VENV_NAME
+		# get this module as a global user module
+		python3 -m pip install --user virtualenv
+		python3 -m venv $VENV_NAME
 
-    echo -e "Virtual environemnt at'${VENV_NAME}' PATH: '${PATH}'"
+		echo -e "Virtual environemnt at'${VENV_NAME}' PATH: '${PATH}'"
 
-	source $VENV_NAME/bin/activate
-    echo -e "Virtuel environment activated."
+		source $VENV_NAME/bin/activate
+		echo -e "Virtual environment activated."
+	fi
 else
 	echo -e "${GREEN}Virtual environment found at:\n${NC}${CYAN}${VIRTUAL_ENV}${NC}\n${GREEN}Using it to install our dependencies.${NC}"
 fi
 
 # Check the environment has been activated
 if [ -z "$VIRTUAL_ENV" ]; then
-	echo -e "${RED}ERROR: Python environment failed to activate. Exiting...${NC}"
+	echo -e "${RED}ERROR: Python environment failed to activate.${NC}"
+	read -s -k "?Press any key to quit..."
 	exit 1
 fi
 
 # install all specified packages in that file
 #QUIET="-q" # unset his if you ned to debug the setup
 
-echo -e "$(which pip3.8) $(which python3.8)"
+echo -e "Using pip at: $(which pip3)\nUsing python found at: $(which python3)"
 
-pip3.8 $QUIET install pip --upgrade
-pip3.8 $QUIET install -r $PYRATE/requirements.txt
+pip3 $QUIET install pip --upgrade
+
+# Check if we're running on an arm64 architecture
+if [[ $(uname -m) == 'arm64' ]]; then
+	# special numba install for M1 mac, required temporarily for now
+	currentver="$python3 --version"
+	requiredver="3.9.0"
+	if [ "$(printf '%s\n' "$requiredver" "$currentver" | sort -V | head -n1)" = "$requiredver" ]; then 
+		# Only run this if we have the right python version
+		pip3 $QUIET install -r $PYRATE/requirements_m1.txt
+		pip3 $QUIET install -i https://pypi.anaconda.org/numba/label/wheels_experimental_m1/simple numba
+	else
+		echo "${RED}Python version must be greater than 3.9 for using numba with M1${NC}"
+		read -s -k "?Press any key to quit..."
+		exit 1
+	fi
+else
+	pip3 $QUIET install -r $PYRATE/requirements.txt
+fi
+
 #  install pyrate
 # the -e option is impotant so that pyrate is globall recognised
 # so you can run it independent of were $(pwd) is. 
-pip3.8 $QUIET install -e $PYRATE
+pip3 $QUIET install -e $PYRATE
 
 echo -e "pyrate base dir is ${PYRATE}"
 

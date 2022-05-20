@@ -93,9 +93,9 @@ objects:
     DelayedWindow_CHX:
         algorithm:
             name: Window
-            left: 20
-            right: 0
-            window pivot: right
+            left: 0
+            right: 20
+            pivot index: end
         initialise:
             output:
         execute:
