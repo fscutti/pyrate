@@ -72,7 +72,7 @@ class Calculator(Algorithm):
         try:
             float(var)
             return True
-        except ValueError:
+        except:
             return False
 
     # -------------------------------------------------------------------

@@ -21,10 +21,19 @@ objects:
         waveform_md: EVENT:board_0:ch_3:waveform
         waveform_wd: EVENT:RawWaveform
 
-    Baseline:
+    BaselineNaive:
         algorithm:
-            name: Baseline
+            name: BaselineNaive
             samples: 40
+        execute:
+            input: RawWaveform
+        waveform: RawWaveform
+
+    BaselineDynamic:
+        algorithm:
+            name: BaselineDynamic
+            samples: 40
+            threshold: 20
         execute:
             input: RawWaveform
         waveform: RawWaveform
@@ -39,9 +48,9 @@ objects:
         initialise:
             output:
         execute:
-            input: RawWaveform, Baseline
+            input: RawWaveform, BaselineNaive
         waveform: RawWaveform
-        baseline: Baseline
+        baseline: BaselineNaive
         wc_waveform: EVENT:GROUP:CH0:RawWaveform
 
     AverageWaveform:
@@ -83,7 +92,7 @@ objects:
     PulseWindow:
         algorithm:
             name: Window
-            left: 50
+            left: -50
             right: 0
         initialise:
             output:
@@ -94,7 +103,7 @@ objects:
     PromptWindow:
         algorithm:
             name: Window
-            left: 10
+            left: -10
             right: 0
         initialise:
             output:
@@ -107,7 +116,7 @@ objects:
             name: Window
             left: 0
             right: 20
-            window pivot: right
+            pivot index: end
         initialise:
             output:
         execute:
@@ -358,7 +367,7 @@ objects:
         initialise:
             output:
         execute:
-            input: RawWaveform, CorrectedWaveform, Baseline, PeakHeight, PeakLocation, PulseCharge,
+            input: RawWaveform, CorrectedWaveform, BaselineDynamic, BaselineNaive, PeakHeight, PeakLocation, PulseCharge,
                 TotalCharge, PulseStart, PromptDelayChargeRatio, PromptCharge, DelayedCharge,
                 MeanTime, PromptDelayChargeRatioCalculator, TotalSum, PulseSum, ChargeConstant,
                 TrapezoidFilter, CFD_Trap, Moments, Timestamp, AverageWaveform, DAMAX1, DAMAX2, FFT, LeadingEdge
@@ -371,7 +380,7 @@ objects:
                         int: RawWaveform
                         double: CorrectedWaveform, TrapezoidFilter, FFT, Moments
                     scalar:
-                        float: Baseline, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart,
+                        float: BaselineDynamic, BaselineNaive, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart,
                             PromptDelayChargeRatio, MeanTime, PromptDelayChargeRatioCalculator,
                             TotalSum, PulseSum, CFD_Trap, Timestamp, DAMAX1, DAMAX2, LeadingEdge
                 single:

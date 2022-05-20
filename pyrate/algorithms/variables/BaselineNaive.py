@@ -2,11 +2,12 @@
     Requires input from physical waveform and the number of samples used for the
     baseline calculation - this can be varied by the user and is defined in
     the config file.
-    Takes the average of the first n samples in the waveform. Can be run on any
-    waveform, typically PhysicalWaveform
 
-    This can probably be improved to account for events/pulses at the start 
-    of the event window.
+    Takes the average of the first n samples in the waveform. Can be run on any
+    waveform, typically PhysicalWaveform. Does not check for any pulses in said window.
+
+    Baseline is an improvement to account for events/pulses at the start 
+    of the event window, but is slower and so using this alg may still be preferable.
 
     Required states:
         execute:
@@ -21,7 +22,7 @@
 
     Baseline_CHX:
         algorithm: 
-            name: Baseline
+            name: BaselineNaive
             samples: 40
         execute:
             input: PhysicalWaveform_CHX
@@ -33,10 +34,12 @@
 import sys
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
+import sys
+from scipy.ndimage.filters import uniform_filter1d
 from pyrate.utils.enums import Pyrate
 
 
-class Baseline(Algorithm):
+class BaselineNaive(Algorithm):
     __slots__ = ()
 
     def __init__(self, name, config, store, logger):
@@ -55,7 +58,7 @@ class Baseline(Algorithm):
             self.store.put(self.name, Pyrate.NONE)
             return
 
-        # Get the baseline.
+        # Get the baseline from the front of the waveform.
         Baseline = np.sum(waveform[:nsamples]) / nsamples
 
         self.store.put(self.name, Baseline)
