@@ -1,4 +1,4 @@
-python3.8 -c "import ROOT"
+python3 -c "import ROOT"
 if [ $? -ne 0 ];then
 	echo "CHECK for ROOT failed."
 	exit 1
