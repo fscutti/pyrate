@@ -1,6 +1,8 @@
 """ This class controls the execution of algorithms
     as a single local instance. 
 """
+from cmath import log
+import os
 import sys
 import importlib
 import timeit
@@ -39,8 +41,17 @@ class Run:
 
         self._history = {"CURRENT TARGET": None}
 
+        log_file_name = f"{self.name}.{time.strftime('%Y-%m-%d-%Hh%M')}.log"
+        # Handles the case where log files have the same name
+        while os.path.exists(log_file_name):
+            base_name = log_file_name.split(".log")[0]
+            if base_name[-2] == '_':
+                log_file_name = base_name[:-1] + str(int(base_name[-1])+1) + ".log"
+            else:
+                log_file_name = base_name + "_1.log"
+
         fileHandler = logging.FileHandler(
-            f"{self.name}.{time.strftime('%Y-%m-%d-%Hh%M')}.log", mode="w", 
+            log_file_name, 
             delay=True
         )
         fileHandler.setFormatter(
@@ -227,8 +238,12 @@ class Run:
                 
                 # Printing average time taken to execute an alg for a single event
                 if self.alg_timing:
-                    for alg in self.algorithms:
-                        self.logger.info(f"{self.algorithms[alg].name:<40}{self.alg_times[alg]/erange:>20.2f} ns")
+                    for alg in sorted(self.algorithms):
+                        if self.alg_timing == True:
+                            self.logger.info(f"{self.algorithms[alg].name:<40}{self.alg_times[alg]/erange:>20.2f} ns")
+                        elif self.alg_timing == "print" or self.alg_timing == "p":
+                            print(f"{self.algorithms[alg].name:<40}{self.alg_times[alg]/erange:>20.2f} ns")
+
 
                 self._in.offload()
 

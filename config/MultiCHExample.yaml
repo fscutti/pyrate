@@ -33,9 +33,9 @@ objects:
         waveform_wd: EVENT:RawWaveform
 
 
-    Baseline_CH0:
+    BaselineDynamic_CH0:
         algorithm:
-            name: Baseline
+            name: BaselineDynamic
             samples: 40
             threshold: 20
         execute:
@@ -43,9 +43,9 @@ objects:
         waveform: RawWaveform_CH0
 
 
-    Baseline_CH1:
+    BaselineDynamic_CH1:
         algorithm:
-            name: Baseline
+            name: BaselineDynamic
             samples: 40
             threshold: 20
         execute:
@@ -80,9 +80,9 @@ objects:
         initialise:
             output:
         execute:
-            input: RawWaveform_CH0, Baseline_CH0
+            input: RawWaveform_CH0, BaselineNaive_CH0
         waveform: RawWaveform_CH0
-        baseline: Baseline_CH0
+        baseline: BaselineNaive_CH0
         wc_waveform: EVENT:GROUP:CH0:RawWaveform
 
 
@@ -96,9 +96,9 @@ objects:
         initialise:
             output:
         execute:
-            input: RawWaveform_CH1, Baseline_CH1
+            input: RawWaveform_CH1, BaselineNaive_CH1
         waveform: RawWaveform_CH1
-        baseline: Baseline_CH1
+        baseline: BaselineNaive_CH1
         wc_waveform: EVENT:GROUP:CH1:RawWaveform
 
     AverageWaveform_CH0:
@@ -141,7 +141,7 @@ objects:
     PulseWindow_CH0:
         algorithm:
             name: Window
-            left: 50
+            left: -50
             right: 0
         initialise:
             output:
@@ -153,7 +153,7 @@ objects:
     PromptWindow_CH0:
         algorithm:
             name: Window
-            left: 10
+            left: -10
             right: 0
         initialise:
             output:
@@ -165,9 +165,9 @@ objects:
     DelayedWindow_CH0:
         algorithm:
             name: Window
-            left: 20
-            right: 0
-            window pivot: right
+            left: 0
+            right: 20
+            pivot index: end
         initialise:
             output:
         execute:
@@ -447,7 +447,7 @@ objects:
         initialise:
             output:
         execute:
-            input: RawWaveform_CH0, CorrectedWaveform_CH0, Baseline_CH0, BaselineNaive_CH0, PeakHeight_CH0,
+            input: RawWaveform_CH0, CorrectedWaveform_CH0, BaselineDynamic_CH0, BaselineNaive_CH0, PeakHeight_CH0,
                 PeakLocation_CH0, PulseCharge_CH0, TotalCharge_CH0, PulseStart_CH0, PulseStart_CH1,
                 PulseTime_CH0, PulseTime_CH1, PromptDelayChargeRatio_CH0, PromptCharge_CH0,
                 DelayedCharge_CH0, MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0, TimeDifference_CH01,
@@ -465,7 +465,7 @@ objects:
                         float: PeakHeight_CH0, PeakLocation_CH0, PulseCharge_CH0,
                             TotalCharge_CH0, PulseStart_CH0, PulseTime_CH0, PromptDelayChargeRatio_CH0,
                             MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0, Timestamp_CH0, 
-                            DAMAX1_CH0, DAMAX2_CH0, LeadingEdge_CH0, Baseline_CH0, BaselineNaive_CH0
+                            DAMAX1_CH0, DAMAX2_CH0, LeadingEdge_CH0, BaselineDynamic_CH0, BaselineNaive_CH0
                 single:
                     vector:
                         double: AverageWaveform_CH0
