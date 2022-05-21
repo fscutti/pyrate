@@ -34,6 +34,7 @@ py-spy==0.3.3
 pyaml==20.4.0
 pycodestyle==2.6.0
 pyflakes==2.2.0
+pyinstrument>=4.1.1
 PyJWT==1.7.1
 pyparsing==2.4.7
 pyrsistent==0.16.0
@@ -50,6 +51,7 @@ robotframework==3.2.2
 scipy==1.4.1
 semantic-version==2.8.5
 six==1.15.0
+snakeviz>=2.1.1
 strictyaml==1.0.6
 tinyprog==1.0.21
 toml==0.10.1

@@ -5,6 +5,7 @@ import yaml
 import cProfile
 import pstats
 from datetime import datetime
+from pyinstrument import Profiler
 
 from pyrate.core.Job import Job
 
@@ -87,11 +88,19 @@ if __name__ == "__main__":
                 job.launch()
             time_stats = pstats.Stats(pr)
             time_stats.sort_stats(pstats.SortKey.TIME)
-            if type(args.timing) == str and (args.timing.lower() == "print" or args.timing.lower() == "p"):
+            # printing would be insane don't do that 
+            if type(args.timing) == str and (args.timing.lower() == "print"):
                 time_stats.print_stats()
 
             # Save the profiling to file
             time_stats.dump_stats(filename=f"{j_name}{datetime.now():.%Y-%m-%d-%Hh%M}.prof")
+
+            # profiler = Profiler()
+            # profiler.start()
+            # job.setup()
+            # job.launch()
+            # profiler.stop()
+            # profiler.print()
 
         else:
             job.setup()
