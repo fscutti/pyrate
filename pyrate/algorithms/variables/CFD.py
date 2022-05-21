@@ -80,8 +80,11 @@ class CFD(Algorithm):
         if (waveform_len + self.delay) > self.waveform.size:
             # Our waveform is larger than the storage
             # we need to grow our arrays
-            self.waveform.resize(waveform_len + self.delay)
-            self.waveform_delay_scaled.resize(waveform_len + self.delay)
+            # Using new arrays to avoid refcheck error
+            self.waveform = np.resize(self.waveform, waveform_len + self.delay)
+            self.waveform_delay_scaled = np.resize(self.waveform_delay_scaled, waveform_len + self.delay)
+            # self.waveform.resize(waveform_len + self.delay)
+            # self.waveform_delay_scaled.resize(waveform_len + self.delay)
 
         # Parameters and formula from Digital techniques for real-time pulse shaping in radiation measurements
         # https://doi.org/10.1016/0168-9002(94)91652-7
