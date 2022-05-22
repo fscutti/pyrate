@@ -65,10 +65,7 @@ class Input(Reader):
                     g_files = [g_files]
 
                 self.groups[g_names[g_idx]] = g_files
-                if hasattr(self, "reader"):
-                    self._set_group_reader(g_names[g_idx], self._f_idx, self.reader)
-                else:
-                    self._set_group_reader(g_names[g_idx], self._f_idx)
+                self._set_group_reader(g_names[g_idx], self._f_idx)
 
         else:
             self._set_db_reader(self.database)
@@ -327,7 +324,7 @@ class Input(Reader):
 
         self.db.load()
 
-    def _set_group_reader(self, g_name, f_idx, reader=None):
+    def _set_group_reader(self, g_name, f_idx):
         """Instantiate different readers here. If the instance exists nothing
         is done. This function transforms a string into a reader.
         """
@@ -337,20 +334,20 @@ class Input(Reader):
 
             f_name = self.groups[g_name][f_idx]
 
-            if reader:
+            if hasattr(self, "reader"):
                 # The user has specified the reader they want to use
                 # Try to import the reader class
-                reader_module = "pyrate.readers." + reader
+                reader_module = "pyrate.readers." + self.reader
                 try:
                     ReaderModule = import_module(reader_module)
-                    ReaderClass = ReaderModule.__getattribute__(reader)
+                    ReaderClass = ReaderModule.__getattribute__(self.reader)
                 except ImportError as err:
                     sys.exit(
-                        f"ERROR: {err}\n Unable to import reader '{reader}' from module '{reader_module}'\n"
+                        f"ERROR: {err}\n Unable to import reader '{self.reader}' from module '{reader_module}'\n"
                         "Check that the reader is in pyrate/readers, that the class and module have the same name, and is added the nearest __init__.py"
                     )
 
-                self.logger.info(f"User-set reader for {f_name} to {reader}")
+                self.logger.info(f"User-set reader for {f_name} to {self.reader}")
                 reader = ReaderClass(
                     r_name, self.store, self.logger, f_name, self.structure
                 )
