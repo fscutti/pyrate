@@ -376,15 +376,11 @@ objects:
         trees:
         - Channel_0:
                 event:
-                    vector:
-                        int: RawWaveform
-                        double: CorrectedWaveform, TrapezoidFilter, FFT, Moments
-                    scalar:
-                        float: BaselineDynamic, BaselineNaive, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart,
-                            PromptDelayChargeRatio, MeanTime, PromptDelayChargeRatioCalculator,
-                            TotalSum, PulseSum, CFD_Trap, Timestamp, DAMAX1, DAMAX2, LeadingEdge
+                    vector<int>: RawWaveform
+                    vector<double>: CorrectedWaveform, TrapezoidFilter, FFT, Moments
+                    float: BaselineDynamic, BaselineNaive, PeakHeight, PeakLocation, PulseCharge, TotalCharge, PulseStart,
+                        PromptDelayChargeRatio, MeanTime, PromptDelayChargeRatioCalculator,
+                        TotalSum, PulseSum, CFD_Trap, Timestamp, DAMAX1, DAMAX2, LeadingEdge
                 single:
-                    vector:
-                        double: AverageWaveform
-                    scalar:
-                        double: ChargeConstant
+                    vector<double>: AverageWaveform
+                    double: ChargeConstant

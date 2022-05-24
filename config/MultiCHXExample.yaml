@@ -340,19 +340,15 @@ objects:
             - Channel_X:
                 channels: global
                 event:
-                    vector: 
-                        int: RawWaveform_CHX
-                        double: CorrectedWaveform_CHX, FFT_CHX, Moments_CHX
-                    scalar:
-                        float: BaselineDynamic_CHX, BaselineNaive_CHX, PeakHeight_CHX, PeakLocation_CHX, PulseCharge_CHX, 
-                               TotalCharge_CHX, PulseStart_CHX, PulseTime_CHX, PromptDelayChargeRatio_CHX, 
-                               MeanTime_CHX, PromptDelayChargeRatioCalculator_CHX,
-                               Timestamp_CHX, DAMAX1_CHX, DAMAX2_CHX, LeadingEdge_CHX
+                    vector<int>: RawWaveform_CHX
+                    vector<double>: CorrectedWaveform_CHX, FFT_CHX, Moments_CHX
+                    float: BaselineDynamic_CHX, BaselineNaive_CHX, PeakHeight_CHX, PeakLocation_CHX, PulseCharge_CHX, 
+                            TotalCharge_CHX, PulseStart_CHX, PulseTime_CHX, PromptDelayChargeRatio_CHX, 
+                            MeanTime_CHX, PromptDelayChargeRatioCalculator_CHX,
+                            Timestamp_CHX, DAMAX1_CHX, DAMAX2_CHX, LeadingEdge_CHX
                 single:
-                    vector:
-                        double: AverageWaveform_CHX
+                    vector<double>: AverageWaveform_CHX
         
             - Channel_01:
                 event:
-                    scalar:
-                        float: TimeDifference_CH01
+                    float: TimeDifference_CH01

@@ -86,7 +86,6 @@ import ROOT as R
 from array import array
 import ctypes
 
-from code import interact
 from pyrate.core.Algorithm import Algorithm
 
 from pyrate.utils import strings as ST

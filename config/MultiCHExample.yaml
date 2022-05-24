@@ -458,32 +458,26 @@ objects:
         trees:
         - Channel_0:
                 event:
-                    vector:
-                        int: RawWaveform_CH0
-                        double: 
-                            - FFT_CH0, Moments_CH0
-                            - CorrectedWaveform: CorrectedWaveform_CH0
-                    scalar:
-                        float: 
-                            - PeakHeight_CH0, PeakLocation_CH0, PulseCharge_CH0,
-                                TotalCharge_CH0, PulseStart_CH0, PulseTime_CH0, PromptDelayChargeRatio_CH0,
-                                MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0,
-                                LeadingEdge_CH0, BaselineDynamic_CH0, BaselineNaive_CH0
-                            - Timestamp: Timestamp_CH0
-                            - {DAMAX1: DAMAX1_CH0, DAMAX2_CH0: DAMAX2_CH0}
+                    vector<int>: RawWaveform_CH0
+                    vector<double>: 
+                                - FFT_CH0, Moments_CH0
+                                - CorrectedWaveform: CorrectedWaveform_CH0
+                    float: 
+                        -   PeakHeight_CH0, PeakLocation_CH0, PulseCharge_CH0,
+                            TotalCharge_CH0, PulseStart_CH0, PulseTime_CH0, PromptDelayChargeRatio_CH0,
+                            MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0,
+                            LeadingEdge_CH0, BaselineDynamic_CH0, BaselineNaive_CH0
+                        - Timestamp: Timestamp_CH0
+                        - {DAMAX1: DAMAX1_CH0, DAMAX2_CH0: DAMAX2_CH0}
                 single:
-                    vector:
-                        double: AverageWaveform_CH0
+                    vector<double>: AverageWaveform_CH0
 
         - Channel_1:
                 event:
-                    scalar:
-                        float: PulseStart_CH1, PulseTime_CH1
+                    float: PulseStart_CH1, PulseTime_CH1
                 single:
-                    vector:
-                        double: AverageWaveform_CH1
+                    vector<double>: AverageWaveform_CH1
 
         - MultiChannel:
                 event:
-                    scalar:
-                        float: TimeDifference_CH01
+                    float: TimeDifference_CH01
