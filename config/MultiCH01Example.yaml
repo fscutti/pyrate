@@ -38,14 +38,14 @@ objects:
         waveform: RawWaveform_CH1
     BaselineNaive_CH0:
         algorithm:
-            name: Baseline
+            name: BaselineNaive
             samples: 40
         execute:
             input: RawWaveform_CH0
         waveform: RawWaveform_CH0
     BaselineNaive_CH1:
         algorithm:
-            name: Baseline
+            name: BaselineNaive
             samples: 40
         execute:
             input: RawWaveform_CH1
@@ -567,33 +567,24 @@ objects:
         trees:
         -   Channel_0:
                 event:
-                    scalar:
-                        float: BaselineDynamic_CH0, BaselineNaive_CH0, PeakHeight_CH0,
-                            PeakLocation_CH0, PulseCharge_CH0, TotalCharge_CH0, PulseStart_CH0,
-                            PulseTime_CH0, PromptDelayChargeRatio_CH0, MeanTime_CH0,
-                            PromptDelayChargeRatioCalculator_CH0, Timestamp_CH0, DAMAX1_CH0,
-                            DAMAX2_CH0, LeadingEdge_CH0
-                    vector:
-                        double: CorrectedWaveform_CH0, FFT_CH0, Moments_CH0
-                        int: RawWaveform_CH0
+                    float: BaselineDynamic_CH0, BaselineNaive_CH0, PeakHeight_CH0,
+                        PeakLocation_CH0, PulseCharge_CH0, TotalCharge_CH0, PulseStart_CH0,
+                        PulseTime_CH0, PromptDelayChargeRatio_CH0, MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0,
+                        Timestamp_CH0, DAMAX1_CH0, DAMAX2_CH0, LeadingEdge_CH0
+                    vector<double>: CorrectedWaveform_CH0, FFT_CH0, Moments_CH0
+                    vector<int>: RawWaveform_CH0
                 single:
-                    vector:
-                        double: AverageWaveform_CH0
+                    vector<double>: AverageWaveform_CH0
             Channel_1:
                 event:
-                    scalar:
-                        float: BaselineDynamic_CH1, BaselineNaive_CH1, PeakHeight_CH1,
-                            PeakLocation_CH1, PulseCharge_CH1, TotalCharge_CH1, PulseStart_CH1,
-                            PulseTime_CH1, PromptDelayChargeRatio_CH1, MeanTime_CH1,
-                            PromptDelayChargeRatioCalculator_CH1, Timestamp_CH1, DAMAX1_CH1,
-                            DAMAX2_CH1, LeadingEdge_CH1
-                    vector:
-                        double: CorrectedWaveform_CH1, FFT_CH1, Moments_CH1
-                        int: RawWaveform_CH1
+                    float: BaselineDynamic_CH1, BaselineNaive_CH1, PeakHeight_CH1,
+                        PeakLocation_CH1, PulseCharge_CH1, TotalCharge_CH1, PulseStart_CH1,
+                        PulseTime_CH1, PromptDelayChargeRatio_CH1, MeanTime_CH1, PromptDelayChargeRatioCalculator_CH1,
+                        Timestamp_CH1, DAMAX1_CH1, DAMAX2_CH1, LeadingEdge_CH1
+                    vector<double>: CorrectedWaveform_CH1, FFT_CH1, Moments_CH1
+                    vector<int>: RawWaveform_CH1
                 single:
-                    vector:
-                        double: AverageWaveform_CH1
+                    vector<double>: AverageWaveform_CH1
         -   Channel_01:
                 event:
-                    scalar:
-                        float: TimeDifference_CH01
+                    float: TimeDifference_CH01
