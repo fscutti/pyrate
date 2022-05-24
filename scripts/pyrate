@@ -65,8 +65,6 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-from code import interact
-
 if __name__ == "__main__":
     for j_file in args.job_config:
 
