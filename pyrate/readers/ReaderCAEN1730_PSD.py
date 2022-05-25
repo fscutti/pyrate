@@ -64,6 +64,8 @@ class ReaderCAEN1730_PSD(Reader):
             #Get the event value
             if path["variable"]=="timestamp":
                 value = self._evtTime
+            elif path["variable"]=="ch_timestamps":
+                value = self._subChTimes
             elif path["variable"]=="waveform":
                 value = self._get_waveform(path["ch"])
                 

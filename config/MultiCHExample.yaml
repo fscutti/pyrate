@@ -436,6 +436,14 @@ objects:
             input: CorrectedWaveform_CH0
         waveform: CorrectedWaveform_CH0
 
+    # Only relevant for PSD reader
+    SubEventTimestamp_CH0:
+        algorithm:
+            name: ChannelTimestamps
+            channel: 0
+        execute:
+            output:
+
 
         # -----------------------------------------------------------
         # Trees
@@ -451,7 +459,8 @@ objects:
                 PeakLocation_CH0, PulseCharge_CH0, TotalCharge_CH0, PulseStart_CH0, PulseStart_CH1,
                 PulseTime_CH0, PulseTime_CH1, PromptDelayChargeRatio_CH0, PromptCharge_CH0,
                 DelayedCharge_CH0, MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0, TimeDifference_CH01,
-                Moments_CH0, Timestamp_CH0, AverageWaveform_CH0, AverageWaveform_CH1, DAMAX1_CH0, DAMAX2_CH0, FFT_CH0, LeadingEdge_CH0
+                Moments_CH0, Timestamp_CH0, AverageWaveform_CH0, AverageWaveform_CH1, DAMAX1_CH0, DAMAX2_CH0, FFT_CH0, LeadingEdge_CH0,
+                SubEventTimestamp_CH0
         finalise:
             output:
 
@@ -466,7 +475,7 @@ objects:
                         -   PeakHeight_CH0, PeakLocation_CH0, PulseCharge_CH0,
                             TotalCharge_CH0, PulseStart_CH0, PulseTime_CH0, PromptDelayChargeRatio_CH0,
                             MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0,
-                            LeadingEdge_CH0, BaselineDynamic_CH0, BaselineNaive_CH0
+                            LeadingEdge_CH0, BaselineDynamic_CH0, BaselineNaive_CH0, SubEventTimestamp_CH0
                         - Timestamp: Timestamp_CH0
                         - {DAMAX1: DAMAX1_CH0, DAMAX2_CH0: DAMAX2_CH0}
                 single:

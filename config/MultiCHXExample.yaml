@@ -318,6 +318,14 @@ objects:
         execute:
             input: CorrectedWaveform_CHX
         waveform: CorrectedWaveform_CHX
+    
+    # Only relevant for PSD reader
+    SubEventTimestamp_CHX:
+        algorithm:
+            name: ChannelTimestamps
+            channel: X
+        execute:
+            output:
 
     # -----------------------------------------------------------
     # Trees
@@ -333,7 +341,7 @@ objects:
                    PeakLocation_CHX, PulseCharge_CHX, TotalCharge_CHX, PulseStart_CHX, 
                    PulseTime_CHX, PromptDelayChargeRatio_CHX, PromptCharge_CHX, DelayedCharge_CHX, 
                    MeanTime_CHX, PromptDelayChargeRatioCalculator_CHX, TimeDifference_CH01, Moments_CHX, 
-                   Timestamp_CHX, AverageWaveform_CHX, DAMAX1_CHX, DAMAX2_CHX, FFT_CHX, LeadingEdge_CHX
+                   Timestamp_CHX, AverageWaveform_CHX, DAMAX1_CHX, DAMAX2_CHX, FFT_CHX, LeadingEdge_CHX, SubEventTimestamp_CHX
         finalise:
             output:
         trees:
@@ -345,7 +353,7 @@ objects:
                     float: BaselineDynamic_CHX, BaselineNaive_CHX, PeakHeight_CHX, PeakLocation_CHX, PulseCharge_CHX, 
                             TotalCharge_CHX, PulseStart_CHX, PulseTime_CHX, PromptDelayChargeRatio_CHX, 
                             MeanTime_CHX, PromptDelayChargeRatioCalculator_CHX,
-                            Timestamp_CHX, DAMAX1_CHX, DAMAX2_CHX, LeadingEdge_CHX
+                            Timestamp_CHX, DAMAX1_CHX, DAMAX2_CHX, LeadingEdge_CHX, SubEventTimestamp_CHX
                 single:
                     vector<double>: AverageWaveform_CHX
         
