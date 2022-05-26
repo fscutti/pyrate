@@ -318,14 +318,6 @@ objects:
         execute:
             input: CorrectedWaveform_CHX
         waveform: CorrectedWaveform_CHX
-    
-    # Only relevant for PSD reader
-    SubEventTimestamp_CHX:
-        algorithm:
-            name: ChannelTimestamps
-            channel: X
-        execute:
-            output:
 
     # -----------------------------------------------------------
     # Trees

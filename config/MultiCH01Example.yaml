@@ -486,18 +486,6 @@ objects:
         waveform_bt: EVENT:board_0:raw_waveform_ch_1
         waveform_md: EVENT:board_0:ch_1:waveform
         waveform_wd: EVENT:RawWaveform
-    SubEventTimestamp_CH0:
-        algorithm:
-            channel: X
-            name: ChannelTimestamps
-        execute:
-            output: null
-    SubEventTimestamp_CH1:
-        algorithm:
-            channel: X
-            name: ChannelTimestamps
-        execute:
-            output: null
     TimeDifference_CH01:
         algorithm:
             name: Difference

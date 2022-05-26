@@ -7,6 +7,7 @@ Binary data is written according to the scheme given in the PSD manual
 import os
 import mmap
 import struct
+from pyrate.utils.enums import Pyrate
 
 from pyrate.core.Reader import Reader
 
@@ -64,8 +65,8 @@ class ReaderCAEN1730_PSD(Reader):
             #Get the event value
             if path["variable"]=="timestamp":
                 value = self._evtTime
-            elif path["variable"]=="ch_timestamps":
-                value = self._subChTimes
+            elif path["variable"]=="ch_timestamp":
+                value = self._get_timestamps(path["ch"])
             elif path["variable"]=="waveform":
                 value = self._get_waveform(path["ch"])
                 
@@ -132,10 +133,19 @@ class ReaderCAEN1730_PSD(Reader):
         #If the channel is not in the event return an empty list
         #ToDo: Confirm this behaviour in pyrate
         if(ch not in self._inEvt.keys()):
-            return [0]
+            return Pyrate.NONE
 
         #Return the waveform and mark that this channel has been read
         return self._evtWaveforms[ch]
+
+    def _get_timestamps(self, ch):
+        #If the channel is not in the event return an empty list
+        #ToDo: Confirm this behaviour in pyrate
+        if(ch not in self._inEvt.keys()):
+            return Pyrate.NONE
+
+        #Return the waveform and mark that this channel has been read
+        return self._evtChTimes[ch]
 
     def _read_event(self):
         #Reset event

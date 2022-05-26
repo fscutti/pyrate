@@ -31,6 +31,7 @@
 import sys
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
+from pyrate.utils.enums import Pyrate
 
 
 class RawWaveform(Algorithm):
@@ -68,6 +69,9 @@ class RawWaveform(Algorithm):
             sys.exit("Uh oh, WaveCatcher doesn't have a RawWaveform...")
 
         # convert to numpy array
+        if RawWaveform is Pyrate.NONE:
+            self.store.put(self.name, Pyrate.NONE)
+            return
         RawWaveform = np.array(RawWaveform, dtype='int32')
         self.store.put(self.name, RawWaveform)
 
