@@ -7,6 +7,7 @@ Binary data is written according to the scheme given in the CAEN1730 manual
 import os
 import mmap
 import struct
+from pyrate.utils.enums import Pyrate
 
 from pyrate.core.Reader import Reader
 
@@ -109,7 +110,7 @@ class ReaderCAEN1730_RAW(Reader):
         #If the channel is not in the event return an empty list
         #ToDo: Confirm this behaviour in pyrate
         if(ch not in self._inEvt.keys()):
-            return [0]
+            return Pyrate.NONE
 
         return self._evtWaveforms[ch]
 
