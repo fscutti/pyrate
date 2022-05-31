@@ -56,6 +56,8 @@ class ReaderCAEN1730_RAW(Reader):
                 value = self._evtTime
             elif path["variable"] == "waveform":
                 value = self._get_waveform(path["ch"])
+            elif path["variable"] == "ch_timestamp":
+                value = self._get_timestamps(path["ch"])
 
             # Add the value to the transient store
             self.store.put(name, value, "TRAN")
@@ -113,6 +115,15 @@ class ReaderCAEN1730_RAW(Reader):
             return Pyrate.NONE
 
         return self._evtWaveforms[ch]
+
+    def _get_timestamps(self, ch):
+        #If the channel is not in the event return an empty list
+        #ToDo: Confirm this behaviour in pyrate
+        if(ch not in self._inEvt.keys()):
+            return Pyrate.NONE
+
+        #Return the waveform and mark that this channel has been read
+        return self._evtTime[ch]
 
     def _read_event(self):
         #Reset event
