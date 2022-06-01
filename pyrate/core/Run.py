@@ -9,6 +9,7 @@ import timeit
 import time
 import logging
 from collections import defaultdict
+from anytree import Node, RenderTree
 
 from colorama import Fore
 from tqdm import tqdm
@@ -26,7 +27,9 @@ class Run:
     def __init__(self, name, iterable=(), **kwargs):
         self.__dict__.update(iterable, **kwargs)
         self.name = name
-        self.alg_times = defaultdict(float) # Initialising the alg_times dictionary which stores the average run times of each alg
+        self.alg_times = defaultdict(
+            float
+        )  # Initialising the alg_times dictionary which stores the average run times of each alg
 
     def setup(self):
         """First instance of 'private' members."""
@@ -45,15 +48,15 @@ class Run:
         # Handles the case where log files have the same name
         while os.path.exists(log_file_name):
             base_name = log_file_name.split(".log")[0]
-            if base_name[-2] == '_':
-                log_file_name = base_name[:-1] + str(int(base_name[-1])+1) + ".log"
+
+            if base_name[-2] == "_":
+                log_file_name = base_name[:-1] + str(int(base_name[-1]) + 1) + ".log"
+
             else:
                 log_file_name = base_name + "_1.log"
 
-        fileHandler = logging.FileHandler(
-            log_file_name, 
-            delay=True
-        )
+        fileHandler = logging.FileHandler(log_file_name, delay=True)
+
         fileHandler.setFormatter(
             logging.Formatter("[%(asctime)s %(name)-16s %(levelname)-7s]  %(message)s")
         )
@@ -78,6 +81,114 @@ class Run:
             Fore.WHITE,
             Fore.RESET,
         )
+
+        # for now this is just a temporary initialisation.
+        self.store = Store(None)
+
+        self.targets = []
+        self.trees = {}
+
+        # This is a list where each item is a dependency tree.
+        self.algorithms = {}
+
+        for out_name, out_config in self.outputs.items():
+            for t_dict in out_config["targets"]:
+                for t_name, t_samples in t_dict.items():
+
+                    obj_name = t_name.split(":")[0]
+
+                    alg = self.alg(obj_name)
+
+                    if alg is not None:
+                        self.targets[t_name] = self.dependency(obj_name)
+
+                    else:
+                        # Error message here.
+                        pass
+
+        sys.exit()
+
+        self._objects = {}
+
+        print(self.targets)
+
+        # Build dependency tree here.
+
+        sys.exit()
+
+    def target(self, obj_name, samples):
+        """
+        try:
+            return self.targets[obj_name]
+
+        except KeyError:
+            pass
+
+        self.targets
+        """
+        pass
+
+    def dependency(self, obj_name, samples=None):
+        """Gets dependency tree of an object.
+        This is a recursive function.
+        Todo(?) Transform this into a getter method."""
+
+        try:
+            return self.trees[obj_name]
+
+        except KeyError:
+            pass
+
+        self.trees[obj_name] = Node(
+            obj_name, algorithm=self.alg(obj_name), samples=samples
+        )
+
+        if self.trees[obj_name].algorithm is not None:
+
+            for i in self.trees[obj_name].algorithm.inputs:
+                self.dependency(i).parent = self.trees[obj_name]
+
+        return self.trees[obj_name]
+
+    def alg(self, obj_name):
+        """Gets instance of algorithm from the configuration.
+        Todo(?) Transform this into a getter method."""
+
+        try:
+            return self.algorithms[obj_name]
+
+        except KeyError:
+            pass
+
+        try:
+            # obj_name might be a target
+            # containining the sample names. There are other
+            # manipulations of the obj_name too for example
+            # "multiplying" channels.
+            obj_config = self._config[obj_name.split(":")[0]]
+
+            for m in sys.modules:
+                if obj_config["algorithm"] == m.split(".")[-1]:
+
+                    # dependencies will be build internally at
+                    # initialisation. The Algorithm will have
+                    # an input attribute consisting of a list
+                    # of strings.
+                    self.algorithms[obj_name] = getattr(
+                        importlib.import_module(m), m.split(".")[-1]
+                    )(obj_name, obj_config, self.store, self.logger)
+
+                    # initialise dependencies.
+                    # for i in FN.get_nested_values(obj_config["input"]):
+                    #
+                    #    # input will be a decorated method of the Algorithm class.
+                    #    self.algorithms[obj_name].input += i
+
+                    return self.algorithms[obj_name]
+
+        except KeyError:
+            """Error message here. Let EVENT or INPUT pass."""
+            pass
 
     def launch(self):
         """Implement input/output loop."""
@@ -235,15 +346,18 @@ class Run:
                         store.clear("TRAN")
 
                         self._in.set_next_event()
-                
+
                 # Printing average time taken to execute an alg for a single event
                 if self.alg_timing:
                     for alg in sorted(self.algorithms):
                         if self.alg_timing == True:
-                            self.logger.info(f"{self.algorithms[alg].name:<40}{self.alg_times[alg]/erange:>20.2f} ns")
+                            self.logger.info(
+                                f"{self.algorithms[alg].name:<40}{self.alg_times[alg]/erange:>20.2f} ns"
+                            )
                         elif self.alg_timing == "print" or self.alg_timing == "p":
-                            print(f"{self.algorithms[alg].name:<40}{self.alg_times[alg]/erange:>20.2f} ns")
-
+                            print(
+                                f"{self.algorithms[alg].name:<40}{self.alg_times[alg]/erange:>20.2f} ns"
+                            )
 
                 self._in.offload()
 
@@ -315,27 +429,10 @@ class Run:
                 # executing main algorithm state
                 getattr(alg, self.state)()
                 t2 = time.time_ns()
-                self.alg_times[alg.name] += t2-t1
+                self.alg_times[alg.name] += t2 - t1
             else:
                 # executing main algorithm state
                 getattr(alg, self.state)()
-
-    def add(self, obj_name, alg_name, store):
-        """Adds instances of algorithms dynamically.
-        obj_name can be the name of a target."""
-
-        obj_config = self._config[obj_name.split(":", 1)[0]]
-
-        if not obj_name in self.algorithms:
-            self.algorithms.update(
-                {
-                    obj_name: getattr(importlib.import_module(m), m.split(".")[-1])(
-                        obj_name, obj_config, store, self.logger
-                    )
-                    for m in sys.modules
-                    if alg_name == m.split(".")[-1]
-                }
-            )
 
     def update_inputs_vs_targets(self, state, store, inputs_vs_targets):
         """Updates the dictionary containing all the targets relative to an input."""
