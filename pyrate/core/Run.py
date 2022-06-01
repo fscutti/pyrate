@@ -85,7 +85,7 @@ class Run:
         # for now this is just a temporary initialisation.
         self.store = Store(None)
 
-        self.targets = []
+        self.targets = {}
         self.trees = {}
 
         # This is a list where each item is a dependency tree.
@@ -96,19 +96,11 @@ class Run:
                 for t_name, t_samples in t_dict.items():
 
                     obj_name = t_name.split(":")[0]
+                    
+                    self.targets[t_name] = self.dependency(t_name, samples=t_samples)
 
-                    alg = self.alg(obj_name)
 
-                    if alg is not None:
-                        self.targets[t_name] = self.dependency(obj_name)
-
-                    else:
-                        # Error message here.
-                        pass
-
-        sys.exit()
-
-        self._objects = {}
+        #self._objects = {}
 
         print(self.targets)
 
@@ -145,7 +137,9 @@ class Run:
 
         if self.trees[obj_name].algorithm is not None:
 
-            for i in self.trees[obj_name].algorithm.inputs:
+            for i in self.trees[obj_name].algorithm.input:
+                # To do: handle multiple parents for many targets 
+                # with same object. Shallow copy of dependency.
                 self.dependency(i).parent = self.trees[obj_name]
 
         return self.trees[obj_name]
@@ -170,19 +164,11 @@ class Run:
             for m in sys.modules:
                 if obj_config["algorithm"] == m.split(".")[-1]:
 
-                    # dependencies will be build internally at
-                    # initialisation. The Algorithm will have
-                    # an input attribute consisting of a list
-                    # of strings.
                     self.algorithms[obj_name] = getattr(
                         importlib.import_module(m), m.split(".")[-1]
                     )(obj_name, obj_config, self.store, self.logger)
-
-                    # initialise dependencies.
-                    # for i in FN.get_nested_values(obj_config["input"]):
-                    #
-                    #    # input will be a decorated method of the Algorithm class.
-                    #    self.algorithms[obj_name].input += i
+                    
+                    self.algorithms[obj_name].input = obj_config["input"] 
 
                     return self.algorithms[obj_name]
 

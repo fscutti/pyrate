@@ -25,7 +25,7 @@ from pyrate.utils import enums
 
 
 class Algorithm:
-    __slots__ = ["name", "config", "store", "logger"]
+    __slots__ = ["name", "config", "store", "logger", "_input", "_output"]
 
     def __init__(self, name, config, store, logger):
         self.name = name
@@ -33,40 +33,42 @@ class Algorithm:
         self.store = store
         self.logger = logger
 
-    def initialise(self):
+        self._input = {}
+        self._output = {}
+
+    def initialise(self, condition=None):
         """At this stage the method knows the current input."""
         self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
 
-    def execute(self):
+    def execute(self, condition=None):
         """At this stage the method knows the current input and current event."""
         self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
 
-    def finalise(self):
+    def finalise(self, condition=None):
         """At this stage the method knows the current input."""
         self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
 
-    def _prepare_input(self, state):
-        """Prepares objects on the store before the execution of the state methods."""
-        for o in self.config["dependency"][state]:
-            self.store.get(o)
+    @property
+    def input(self):
+        return self._input
 
-    def _initialise(self):
-        """Do not override this method!"""
-        self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
+    @input.setter
+    def input(self, config):
 
-        self._prepare_input("initialise")
+        for i in FN.get_nested_values(config):
 
-    def _execute(self):
-        """Do not override this method!"""
-        self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
+            if isinstance(i, str):
+                for s in ST.get_items(i):
+                    self._input[s] = None
 
-        self._prepare_input("execute")
+            elif isinstance(i, list):
+                for s, c in self.parse_input_string(i).items():
+                    self._input[s] = c
 
-    def _finalise(self):
-        """Do not override this method!"""
-        self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
-
-        self._prepare_input("finalise")
+    def parse_input_string(self, s):
+        """Returns a dictionary.
+        This function is reimplemented by derived algorithms."""
+        return {}
 
 
 # EOF
