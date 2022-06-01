@@ -4,104 +4,84 @@
 # -----------------------------------------------------------
 objects: 
     #muonSmallSelection:
-    #    algorithm: 
-    #        name: Region
-    #    execute: 
-    #        input: chargeSmallMuonCh0, chargeSmallMuonCh1, weightSmallMuonCh0, weightSmallMuonCh1, muonSmallTrigger
-    #    selection: 
-    #        - chargeSmallMuonCh0 >= 8800000.0
-    #        - chargeSmallMuonCh1 < 8704000.0 || chargeSmallMuonCh1 >= 8705000.0
-    #    weights: 
-    #        - weightSmallMuonCh0
-    #        - weightSmallMuonCh1
-    #    is_subregion_of: 
-    #        - muonSmallTrigger
+    #    algorithm: Region
+    #    input:
+    #        selection: 
+    #            - chargeSmallMuonCh0 >= 8800000.0
+    #            - chargeSmallMuonCh1 < 8704000.0 || chargeSmallMuonCh1 >= 8705000.0
+    #        weights: 
+    #            - weightSmallMuonCh0
+    #            - weightSmallMuonCh1
+    #        is_subregion_of: 
+    #            - muonSmallTrigger
 
 
     # -------------
     # Hit positions
     # -------------
     muonDetParticlePos1:
-      algorithm:
-        name: Region
-      execute:
-        input: xParticleHitPos, yParticleHitPos
-      selection:
-        - xParticleHitPos == -1000.
-        - yParticleHitPos == 100.
+      algorithm: Region
+      input:
+        selection:
+            - xParticleHitPos == -1000.
+            - yParticleHitPos == 100.
 
     muonDetParticlePos2:
-      algorithm:
-        name: Region
-      execute:
-        input: xParticleHitPos, yParticleHitPos
-      selection:
-        - xParticleHitPos == -1000.
-        - yParticleHitPos == 0.0
+      algorithm: Region
+      input:
+        selection:
+            - xParticleHitPos == -1000.
+            - yParticleHitPos == 0.0
 
     muonDetParticlePos3:
-      algorithm:
-        name: Region
-      execute:
-        input: xParticleHitPos, yParticleHitPos
-      selection:
-        - xParticleHitPos == -1000.
-        - yParticleHitPos == -100.
+      algorithm: Region
+      input:
+          selection:
+            - xParticleHitPos == -1000.
+            - yParticleHitPos == -100.
 
     muonDetParticlePos4:
-      algorithm:
-        name: Region
-      execute:
-        input: xParticleHitPos, yParticleHitPos
-      selection:
-        - xParticleHitPos == 0.0
-        - yParticleHitPos == 100.
+      algorithm: Region
+      input:
+          selection:
+            - xParticleHitPos == 0.0
+            - yParticleHitPos == 100.
 
     muonDetParticlePos5:
-      algorithm:
-        name: Region
-      execute:
-        input: xParticleHitPos, yParticleHitPos
-      selection:
-        - xParticleHitPos == 0.0
-        - yParticleHitPos == 0.0
+      algorithm: Region
+      input:
+          selection:
+            - xParticleHitPos == 0.0
+            - yParticleHitPos == 0.0
       #weights:
       #  - myWeight = 2.
 
     muonDetParticlePos6:
-      algorithm:
-        name: Region
-      execute:
-        input: xParticleHitPos, yParticleHitPos
-      selection:
-        - xParticleHitPos == 0.0
-        - yParticleHitPos == -100.
+      algorithm: Region
+      input:
+          selection:
+            - xParticleHitPos == 0.0
+            - yParticleHitPos == -100.
 
     muonDetParticlePos7:
-      algorithm:
-        name: Region
-      execute:
-        input: xParticleHitPos, yParticleHitPos
-      selection:
-        - xParticleHitPos == 1000.
-        - yParticleHitPos == 100.
+      algorithm: Region
+      input:
+          selection:
+            - xParticleHitPos == 1000.
+            - yParticleHitPos == 100.
 
     muonDetParticlePos8:
-      algorithm:
-        name: Region
-      execute:
-        input: xParticleHitPos, yParticleHitPos
-      selection:
-        - xParticleHitPos == 1000.
-        - yParticleHitPos == 0.0
+      algorithm: Region
+      input:
+          selection:
+            - xParticleHitPos == 1000.
+            - yParticleHitPos == 0.0
 
     muonDetParticlePos9:
-      algorithm:
-        name: Region
-      execute:
-        input: xParticleHitPos, yParticleHitPos
-      selection:
-        - xParticleHitPos == 1000.
-        - yParticleHitPos == -100.
+      algorithm: Region
+      input:
+          selection:
+            - xParticleHitPos == 1000.
+            - yParticleHitPos == -100.
 
 # EOF

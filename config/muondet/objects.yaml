@@ -9,153 +9,115 @@ objects:
      # -----------------------------------------------------------
      
      simWaveforms:
-       algorithm:
-         name: SimulatedWaveformsBuilder
-       execute:
-         input: EVENT:nT:timePMT_hits, EVENT:nT:photonEnPMT_hits, EVENT:nT:xPMT_hits, EVENT:nT:yPMT_hits, EVENT:nT:zPMT_hits
-       time: EVENT:nT:timePMT_hits
-       energy: EVENT:nT:photonEnPMT_hits
-       hits_x_positions: EVENT:nT:xPMT_hits
-       hits_y_positions: EVENT:nT:yPMT_hits
-       hits_z_positions: EVENT:nT:zPMT_hits
-
-
+       algorithm: SimulatedWaveformsBuilder
+       input:
+         time: EVENT:nT:timePMT_hits
+         energy: EVENT:nT:photonEnPMT_hits
+         hits_x_positions: EVENT:nT:xPMT_hits
+         hits_y_positions: EVENT:nT:yPMT_hits
+         hits_z_positions: EVENT:nT:zPMT_hits
     
 
      # Waveforms
      # -----------------------------------------------------------
      wfPMT8:
-       algorithm:
-         name: SimulatedWaveformsGetter
-       execute:
-         input: simWaveforms
+       algorithm: SimulatedWaveformsGetter
        pmt_name: PMT8
-       waveform_map: simWaveforms
+       input:
+           waveform_map: simWaveforms
 
      wfPMT9:
-       algorithm:
-         name: SimulatedWaveformsGetter
-       execute:
-         input: simWaveforms
+       algorithm: SimulatedWaveformsGetter
        pmt_name: PMT9
-       waveform_map: simWaveforms
+       input:
+           waveform_map: simWaveforms
 
      wfPMT12:
-       algorithm:
-         name: SimulatedWaveformsGetter
-       execute:
-         input: simWaveforms
+       algorithm: SimulatedWaveformsGetter
        pmt_name: PMT12
-       waveform_map: simWaveforms
+       input:
+           waveform_map: simWaveforms
 
      wfPMT13:
-       algorithm:
-         name: SimulatedWaveformsGetter
-       execute:
-         input: simWaveforms
+       algorithm: SimulatedWaveformsGetter
        pmt_name: PMT13
-       waveform_map: simWaveforms
+       input:
+           waveform_map: simWaveforms
 
 
      # Energies
      # -----------------------------------------------------------
      numPhotonsPMT8:
-         algorithm:
-           name: TimeWeightedPulse
-         execute:
-           input: wfPMT8
-         waveform: wfPMT8
+         algorithm: TimeWeightedPulse
          only_photons: True
+         input:
+             waveform: wfPMT8
 
      numPhotonsPMT9:
-         algorithm:
-           name: TimeWeightedPulse
-         execute:
-           input: wfPMT9
-         waveform: wfPMT9
+         algorithm: TimeWeightedPulse
          only_photons: True
+         input:
+             waveform: wfPMT9
 
      numPhotonsPMT12:
-         algorithm:
-           name: TimeWeightedPulse
-         execute:
-           input: wfPMT12
-         waveform: wfPMT12
+         algorithm: TimeWeightedPulse
          only_photons: True
-
+         input:
+             waveform: wfPMT12
+     
      numPhotonsPMT13:
-         algorithm:
-           name: TimeWeightedPulse
-         execute:
-           input: wfPMT13
-         waveform: wfPMT13
+         algorithm: TimeWeightedPulse
          only_photons: True
-
+         input:
+             waveform: wfPMT13
 
      measEnergyPMT8:
-         algorithm:
-           name: TimeWeightedPulse
-         execute:
-           input: wfPMT8
-         waveform: wfPMT8
+         algorithm: TimeWeightedPulse
+         input: 
+             waveform: wfPMT8
 
      measEnergyPMT9:
-         algorithm:
-           name: TimeWeightedPulse
-         execute:
-           input: wfPMT9
-         waveform: wfPMT9
-
+         algorithm: TimeWeightedPulse
+         input: 
+             waveform: wfPMT9
+     
      measEnergyPMT12:
-         algorithm:
-           name: TimeWeightedPulse
-         execute:
-           input: wfPMT12
-         waveform: wfPMT12
+         algorithm: TimeWeightedPulse
+         input: 
+             waveform: wfPMT12
 
      measEnergyPMT13:
-         algorithm:
-           name: TimeWeightedPulse
-         execute:
-           input: wfPMT13
-         waveform: wfPMT13
-
+         algorithm: TimeWeightedPulse
+         input: 
+             waveform: wfPMT13
 
      muonDetEnergy:
-         algorithm: 
-           name: MuonDetCharge
-         execute:
-           input: EVENT:nT:edepScint
-         edep: EVENT:nT:edepScint
+         algorithm: MuonDetCharge
          format: ROOT
+         input:
+             edep: EVENT:nT:edepScint
 
 
      trueParticleEnergy:
-         algorithm:
-           name: TrueEnergy
-         execute:
-           input: EVENT:nT:ekin_particle
-         etrue: EVENT:nT:ekin_particle
+         algorithm: TrueEnergy
+         input:
+             etrue: EVENT:nT:ekin_particle
          
      xParticleHitPos:
-       algorithm:
-         name: ParticleHitPosition
-       execute:
-         input: EVENT:TotT:XPosTot, EVENT:TotT:YPosTot, EVENT:TotT:ZPosTot
-       xpos: EVENT:TotT:XPosTot
-       ypos: EVENT:TotT:YPosTot
-       zpos: EVENT:TotT:ZPosTot
+       algorithm: ParticleHitPosition
        coordinate: x
+       input:
+           xpos: EVENT:TotT:XPosTot
+           ypos: EVENT:TotT:YPosTot
+           zpos: EVENT:TotT:ZPosTot
 
      yParticleHitPos:
-       algorithm:
-         name: ParticleHitPosition
-       execute:
-         input: EVENT:TotT:XPosTot, EVENT:TotT:YPosTot, EVENT:TotT:ZPosTot
-       xpos: EVENT:TotT:XPosTot
-       ypos: EVENT:TotT:YPosTot
-       zpos: EVENT:TotT:ZPosTot
+       algorithm: ParticleHitPosition
        coordinate: y
+       input:
+           xpos: EVENT:TotT:XPosTot
+           ypos: EVENT:TotT:YPosTot
+           zpos: EVENT:TotT:ZPosTot
 
      # -----------------------------------------------------------
      # Histograms
@@ -163,164 +125,113 @@ objects:
      #
 
 
-
-
-
      # -----------------------------------------------------------
      # Plots
      # -----------------------------------------------------------
      muonDetPlot1D:
-         algorithm: 
-           name: Make1DHistPlot
 
-         initialise:
-           output: SELF
-         execute:
-           input: measEnergyPMT8, measEnergyPMT12, measEnergyPMT9, measEnergyPMT13, muonDetParticlePos5, muonDetParticlePos1
-         finalise:
-           output: SELF
-         
-         folders:
-             testFolder1:
-                 path: pmt_variables
-                 regions: muonDetParticlePos5, muonDetParticlePos1
-                 variables:
-                      measEnergyPMT8: 30, 0., 4e-6, "# of photons", "Entries", "R:0.|G:1.0| B:0."
-                      measEnergyPMT12: 30, 0., 4e-6, "# of photons", "Entries", "R:1.0| G:1.| B:0."
-                 overlay: regions
-             
-             testFolder2:
-                 path: pmt_variables
-                 regions: muonDetParticlePos5
-                 variables:
-                      measEnergyPMT9: 30, 0., 4e-6, "# of photons", "Entries", "R:0.6| G:0.6| B:0.2"
-                      measEnergyPMT13: 30, 0., 4e-6, "# of photons", "Entries", "R:1.0| G:0.8| B:0.2"
-                 overlay: Gamma
-             
-             testFolder3:
-                 regions: muonDetParticlePos5
-                 variables:
-                      measEnergyPMT12: 30, 0., 4e-6, "# of photons", "Entries", "R:0.7|G:0.0|B:0.1"
-                      measEnergyPMT13: 30, 0., 4e-6, "# of photons", "Entries", "R:.2|G:.2|B:0.6"
-                 overlay: variables
-             
-             testFolder4:
-                 regions: muonDetParticlePos5
-                 variables:
-                      measEnergyPMT8: 30, 0., 4e-6, "# of photons", "Entries", "R:.2|G:.6|B:.6"
-                      measEnergyPMT13: 30, 0., 4e-6, "# of photons", "Entries", "R:.1|G:1.0|B:.0"
-                 overlay: inputs
-             
-             testFolder5:
-                 regions: muonDetParticlePos5
-                 variables:
-                      measEnergyPMT8: 30, 0., 4e-6, "# of photons", "Entries","R:0.6| G:0.6| B:0.2" 
-                      measEnergyPMT13: 30, 0., 4e-6, "# of photons", "Entries","R:0.1| G:1.0| B:0.1" 
+         algorithm: Make1DHistPlot
+
+         input:
+             folders:
+                 main/pmt_variables1:
+                     regions: muonDetParticlePos5, muonDetParticlePos1
+                     variables:
+                       - measEnergyPMT8, 30, 0., 4e-6, "# of photons", "Entries", "R:0.|G:1.0| B:0.", regions
+                       - measEnergyPMT12, 30, 0., 4e-6, "# of photons", "Entries", "R:1.0| G:1.| B:0.", regions
+                 
+                 main/pmt_variables2:
+                     regions: muonDetParticlePos5
+                     variables:
+                       - measEnergyPMT9, 30, 0., 4e-6, "# of photons", "Entries", "R:0.6| G:0.6| B:0.2", Gamma
+                       - measEnergyPMT13, 30, 0., 4e-6, "# of photons", "Entries", "R:1.0| G:0.8| B:0.2", Gamma
+                 
+                 main:
+                     regions: muonDetParticlePos5
+                     variables:
+                       - measEnergyPMT12, 30, 0., 4e-6, "# of photons", "Entries", "R:0.7|G:0.0|B:0.1", variables
+                       - measEnergyPMT13, 30, 0., 4e-6, "# of photons", "Entries", "R:.2|G:.2|B:0.6", variables
+                 
+                 main:
+                     regions: muonDetParticlePos5
+                     variables:
+                       - measEnergyPMT8, 30, 0., 4e-6, "# of photons", "Entries", "R:.2|G:.6|B:.6", inputs
+                       - measEnergyPMT13, 30, 0., 4e-6, "# of photons", "Entries", "R:.1|G:1.0|B:.0", inputs
+                 
+                 main:
+                     regions: muonDetParticlePos5
+                     variables:
+                       - measEnergyPMT8, 30, 0., 4e-6, "# of photons", "Entries","R:0.6| G:0.6| B:0.2" 
+                       - measEnergyPMT13, 30, 0., 4e-6, "# of photons", "Entries","R:0.1| G:1.0| B:0.1" 
 
 
-
-     
      
      muonDetPlot2D:
-         algorithm: 
-             name: Make2DHistPlot
+         algorithm: Make2DHistPlot
 
-         initialise:
-           output: SELF
-         execute:
-           input: measEnergyPMT8, measEnergyPMT12, measEnergyPMT9, measEnergyPMT13, muonDetParticlePos5, muonDetParticlePos1
-         finalise:
-           output: SELF
-
-         folders:
-         
-           testFolder1:
-               path: pmt_variables
-               regions: muonDetParticlePos5, muonDetParticlePos1
-               variables:
-                    measEnergyPMT8, measEnergyPMT12: 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.|G:1.0| B:0."
-                    measEnergyPMT12, measEnergyPMT13: 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:1.0| G:1.| B:0." 
-               overlay: regions
-           
-           testFolder2:
-               path: pmt_variables
-               regions: muonDetParticlePos5
-               variables:
-                    measEnergyPMT8, measEnergyPMT12: 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.6| G:0.6| B:0.2" 
-                    measEnergyPMT9, measEnergyPMT13: 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:1.0| G:0.8| B:0.2" 
-               overlay: Gamma
-           
-           testFolder3:
-               regions: muonDetParticlePos5
-               variables:
-                    measEnergyPMT9, measEnergyPMT13: 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.7|G:0.0|B:0.1" 
-               overlay: variables
-           
-           testFolder4:
-               regions: muonDetParticlePos5
-               variables:
-                    measEnergyPMT8, measEnergyPMT9: 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:.2|G:.2|B:0.6" 
-               overlay: inputs
-           
-           testFolder5:
-               regions: muonDetParticlePos5
-               variables:
-                    measEnergyPMT9, measEnergyPMT12: 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:.2|G:.6|B:.6" 
+         input:
+             folders:
+               main/pmt_variables1:
+                   regions: muonDetParticlePos5, muonDetParticlePos1
+                   variables:
+                     - measEnergyPMT8, measEnergyPMT12, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.|G:1.0| B:0.", regions
+                     - measEnergyPMT12, measEnergyPMT13, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:1.0| G:1.| B:0.", regions
+               
+               main/pmt_variables2:
+                   regions: muonDetParticlePos5
+                   variables:
+                     - measEnergyPMT8, measEnergyPMT12, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.6| G:0.6| B:0.2", Gamma
+                     - measEnergyPMT9, measEnergyPMT13, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:1.0| G:0.8| B:0.2", Gamma
+               
+               main:
+                   regions: muonDetParticlePos5
+                   variables:
+                     - measEnergyPMT9, measEnergyPMT13, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.7|G:0.0|B:0.1", variables
+               
+               main:
+                   regions: muonDetParticlePos5
+                   variables:
+                     - measEnergyPMT8, measEnergyPMT9, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:.2|G:.2|B:0.6", inputs
+               
+               main:
+                   regions: muonDetParticlePos5
+                   variables:
+                     - measEnergyPMT9, measEnergyPMT12, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:.2|G:.6|B:.6" 
      
      
      
      muonDetPlotProfile1D:
-         algorithm: 
-             name: Make1DProfilePlot
-         initialise:
-           output: SELF
-         execute:
-           input: measEnergyPMT8, measEnergyPMT12, measEnergyPMT9, numPhotonsPMT8, numPhotonsPMT12, numPhotonsPMT9, measEnergyPMT13, muonDetParticlePos5, muonDetParticlePos1 
-         finalise:
-           output: SELF
+         algorithm: Make1DProfilePlot
 
-         folders:
+         input:
+             folders:
+             
+               main/pmt_variables1:
+                   regions: muonDetParticlePos5, muonDetParticlePos1
+                   variables:
+                     - measEnergyPMT8, numPhotonsPMT8, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.|G:1.0| B:0.", regions
+                     - measEnergyPMT12, numPhotonsPMT12, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:1.0| G:1.| B:0.", regions
+               
+               main/pmt_variables2:
+                   regions: muonDetParticlePos5
+                   variables:
+                     - measEnergyPMT8, numPhotonsPMT8, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.6| G:0.6| B:0.2", Gamma
+                     - measEnergyPMT9, numPhotonsPMT9, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:1.0| G:0.8| B:0.2", Gamma
+               
+               main:
+                   regions: muonDetParticlePos5
+                   variables:
+                     - measEnergyPMT9, numPhotonsPMT9, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.7|G:0.0|B:0.1", variables
+               
+               main:
+                   regions: muonDetParticlePos5
+                   variables:
+                     - measEnergyPMT8, numPhotonsPMT8, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:.2|G:.2|B:0.6", input
+               
+               main:
+                   regions: muonDetParticlePos5
+                   variables:
+                     - measEnergyPMT9, numPhotonsPMT9, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:.2|G:.6|B:.6" 
      
-           testFolder1:
-               path: pmt_variables
-               regions: muonDetParticlePos5, muonDetParticlePos1
-               variables:
-                    measEnergyPMT8, numPhotonsPMT8: 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.|G:1.0| B:0."
-                    measEnergyPMT12, numPhotonsPMT12: 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:1.0| G:1.| B:0." 
-               overlay: regions
-           
-           testFolder2:
-               path: pmt_variables
-               regions: muonDetParticlePos5
-               variables:
-                    measEnergyPMT8, numPhotonsPMT8: 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.6| G:0.6| B:0.2" 
-                    measEnergyPMT9, numPhotonsPMT9: 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:1.0| G:0.8| B:0.2" 
-               overlay: Gamma
-           
-           testFolder3:
-               regions: muonDetParticlePos5
-               variables:
-                    measEnergyPMT9, numPhotonsPMT9: 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.7|G:0.0|B:0.1" 
-               overlay: variables
-           
-           testFolder4:
-               regions: muonDetParticlePos5
-               variables:
-                    measEnergyPMT8, numPhotonsPMT8: 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:.2|G:.2|B:0.6" 
-               overlay: inputs
-           
-           testFolder5:
-               regions: muonDetParticlePos5
-               variables:
-                    measEnergyPMT9, numPhotonsPMT9: 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:.2|G:.6|B:.6" 
-     
-     
-     #
-     #
-     #
-     #
-     ## -----------------------------------------------------------
-     # Trees
-     # -----------------------------------------------------------
      
 # EOF
