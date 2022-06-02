@@ -46,6 +46,15 @@ def find_files(paths, env=None):
     return files
 
 
+def get_nested_values(d):
+    """Returns a generator over all values of a nested dictionary."""
+    for v in d.values():
+        if isinstance(v, dict):
+            yield from get_nested_values(v)
+        else:
+            yield v
+
+
 def flatten(l):
     """Flattens a list of lists."""
     return [item for sublist in l for item in sublist]
@@ -225,6 +234,7 @@ def iterable(obj):
         return False
     else:
         return True
+
 
 def is_float(var):
     """Checks if a string can be converted to a float"""

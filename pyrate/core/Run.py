@@ -29,9 +29,11 @@ class Run:
     def __init__(self, name, iterable=(), **kwargs):
         self.__dict__.update(iterable, **kwargs)
         self.name = name
-        self.alg_times = defaultdict(
-            float
-        )  # Initialising the alg_times dictionary which stores the average run times of each alg
+
+        # will handle this within the algorithm.
+        # self.alg_times = defaultdict(
+        #    float
+        # )  # Initialising the alg_times dictionary which stores the average run times of each alg
 
     def setup(self):
         """First instance of 'private' members."""
@@ -47,7 +49,10 @@ class Run:
         self._history = {"CURRENT TARGET": None}
 
         log_file_name = f"{self.name}.{time.strftime('%Y-%m-%d-%Hh%M')}.log"
-        # Handles the case where log files have the same name
+
+        # Will need to change handling of log files.
+
+        """
         while os.path.exists(log_file_name):
             base_name = log_file_name.split(".log")[0]
 
@@ -56,6 +61,7 @@ class Run:
 
             else:
                 log_file_name = base_name + "_1.log"
+        """
 
         fileHandler = logging.FileHandler(log_file_name, delay=True)
 
@@ -88,9 +94,7 @@ class Run:
         self.store = Store(None)
 
         self.targets = {}
-        self.trees = {}
-
-        # This is a list where each item is a dependency tree.
+        self.dependencies = {}
         self.algorithms = {}
 
         for out_name, out_config in self.outputs.items():
@@ -101,22 +105,9 @@ class Run:
 
                     self.targets[t_name] = self.dependency(t_name, samples=t_samples)
 
-                    # print(RenderTree(self.targets[t_name], style=AsciiStyle()))
-                    print(RenderTree(self.targets[t_name]))
+                    # print(RenderTree(self.targets[t_name]))
 
         sys.exit()
-
-    def target(self, obj_name, samples):
-        """
-        try:
-            return self.targets[obj_name]
-
-        except KeyError:
-            pass
-
-        self.targets
-        """
-        pass
 
     def dependency(self, obj_name, samples=None):
         """Gets dependency tree of an object.
@@ -124,28 +115,28 @@ class Run:
         Todo(?) Transform this into a getter method."""
 
         try:
-            return self.trees[obj_name]
+            return self.dependencies[obj_name]
 
         except KeyError:
             pass
 
-        self.trees[obj_name] = Node(
+        self.dependencies[obj_name] = Node(
             obj_name, algorithm=self.alg(obj_name), samples=samples
         )
 
-        if self.trees[obj_name].algorithm is not None:
+        if self.dependencies[obj_name].algorithm is not None:
 
-            for i in self.trees[obj_name].algorithm.input:
+            for i in self.dependencies[obj_name].algorithm.input:
 
                 try:
-                    self.dependency(i).parent = self.trees[obj_name]
+                    self.dependency(i).parent = self.dependencies[obj_name]
 
-                except anyExceptions.LoopError:
+                except anytreeExceptions.LoopError:
                     sys.exit(
                         f"ERROR: circular dependency detected between {i} and {obj_name}"
                     )
 
-        return self.trees[obj_name]
+        return self.dependencies[obj_name]
 
     def alg(self, obj_name):
         """Gets instance of algorithm from the configuration.
@@ -176,8 +167,12 @@ class Run:
                     return self.algorithms[obj_name]
 
         except KeyError:
-            """Error message here. Let EVENT or INPUT pass."""
-            pass
+
+            if "EVENT:" in obj_name or "INPUT:" in obj_name:
+                pass
+
+            else:
+                sys.exit(f"ERROR: object {obj_name} not defined in the configuration.")
 
     def launch(self):
         """Implement input/output loop."""

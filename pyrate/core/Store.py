@@ -10,8 +10,8 @@ from pyrate.utils import enums
 
 class Store:
     def __init__(self, run):
-        self._run = run
-        self.name = self._run.name
+        self._run = None
+        self.name = None
         self._objects = {"PERM": {}, "TRAN": {}}
         self._default = {
             None: "TRAN",
