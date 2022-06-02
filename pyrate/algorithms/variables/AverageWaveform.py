@@ -78,7 +78,7 @@ class AverageWaveform(Algorithm):
     def execute(self):
         """ Calculates the baseline corrected waveform
         """
-        waveform = self.store.get(self.config["waveform"])
+        waveform = self.store.get(self.config["input"]["waveform"])
 
         if waveform is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)

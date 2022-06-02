@@ -40,12 +40,12 @@ class MeanTime(Algorithm):
 
     def initialise(self):
         """Gets the sample rate for later use in execute"""
-        self.sample_period = 1 / float(self.config["algorithm"]["rate"])*1e9
+        self.sample_period = 1 / float(self.config["rate"])*1e9
         self.range = np.arange(0)
 
     def execute(self):
-        waveform = self.store.get(self.config["waveform"])
-        window = self.store.get(self.config["window"])
+        waveform = self.store.get(self.config["input"]["waveform"])
+        window = self.store.get(self.config["input"]["window"])
 
         # Check for valid values
         if waveform is Pyrate.NONE or window is Pyrate.NONE:

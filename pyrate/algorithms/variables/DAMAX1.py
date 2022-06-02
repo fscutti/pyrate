@@ -51,18 +51,18 @@ class DAMAX1(Algorithm):
     def initialise(self):
         """Prepare Initialised variables - CFD delay and digitiser sample rate"""
         # Deal with CFD delay if CFD is being used as the timing
-        self.sample_rate = float(self.config["algorithm"]["rate"])
+        self.sample_rate = float(self.config["rate"])
         self.delay = 0
 
-        if "cfd_delay" in self.config["algorithm"]:
-            self.delay = self.config["algorithm"]["cfd_delay"]
+        if "cfd_delay" in self.config:
+            self.delay = self.config["cfd_delay"]
 
     def execute(self):
         """Charge ratio X1 defined according to:
         Characterization of SABRE crystal NaI-33 with direct underground counting (arXiv:2012.02610)"""
 
-        pulse_start = self.store.get(self.config["pulse_start"])
-        waveform = self.store.get(self.config["waveform"])
+        pulse_start = self.store.get(self.config["input"]["pulse_start"])
+        waveform = self.store.get(self.config["input"]["waveform"])
         if pulse_start is Pyrate.NONE or waveform is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             return

@@ -34,8 +34,8 @@ class Sum(Algorithm):
 
     def execute(self):
         """Sum over the waveform"""
-        window = self.store.get(self.config["window"])
-        waveform = self.store.get(self.config["waveform"])
+        window = self.store.get(self.config["input"]["window"])
+        waveform = self.store.get(self.config["input"]["waveform"])
 
         # check for invalid windows
         if window is Pyrate.NONE or waveform is Pyrate.NONE:

@@ -279,8 +279,8 @@ objects:
             B: 11.5
             C: PromptCharge_CH0
             D: 3e-1
-            input:
-                C: PromptCharge_CH0
+        input:
+            C: PromptCharge_CH0
 
 
     PulseTime_CH0:

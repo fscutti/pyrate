@@ -45,12 +45,12 @@ class PeakLocation(Algorithm):
 
     def execute(self):
         """Caclulates the pulse time based on the mode chosen"""
-        waveform = self.store.get(self.config["waveform"])
+        waveform = self.store.get(self.config["input"]["waveform"])
         # PeakHeight = self.store.get(self.config["peakheight"])
         # Peak location is the highest point on the waveform
         # PeakLocation = np.argmax(waveform)
         if self.use_window:
-            window = self.store.get(self.config["window"])
+            window = self.store.get(self.config["input"]["window"])
         else:
             window = (None, None)
         if window is Pyrate.NONE or waveform is Pyrate.NONE:
