@@ -114,27 +114,25 @@ class Run:
         This is a recursive function.
         Todo(?) Transform this into a getter method."""
 
-        try:
+        if obj_name in self.dependencies:
             return self.dependencies[obj_name]
 
-        except KeyError:
-            pass
-
-        self.dependencies[obj_name] = Node(
-            obj_name, algorithm=self.alg(obj_name), samples=samples
-        )
-
-        if self.dependencies[obj_name].algorithm is not None:
-
-            for i in self.dependencies[obj_name].algorithm.input:
-
-                try:
-                    self.dependency(i).parent = self.dependencies[obj_name]
-
-                except anytreeExceptions.LoopError:
-                    sys.exit(
-                        f"ERROR: circular dependency detected between {i} and {obj_name}"
-                    )
+        else:
+            self.dependencies[obj_name] = Node(
+                obj_name, algorithm=self.alg(obj_name), samples=samples
+            )
+            
+            if self.dependencies[obj_name].algorithm is not None:
+            
+                for i in self.dependencies[obj_name].algorithm.input:
+            
+                    try:
+                        self.dependency(i).parent = self.dependencies[obj_name]
+            
+                    except anytreeExceptions.LoopError:
+                        sys.exit(
+                            f"ERROR: circular dependency detected between {i} and {obj_name}"
+                        )
 
         return self.dependencies[obj_name]
 
@@ -142,37 +140,42 @@ class Run:
         """Gets instance of algorithm from the configuration.
         Todo(?) Transform this into a getter method."""
 
-        try:
+        if obj_name in self.algorithms:
             return self.algorithms[obj_name]
 
-        except KeyError:
-            pass
-
-        try:
+        else:
             # obj_name might be a target
             # containining the sample names. There are other
             # manipulations of the obj_name too for example
             # "multiplying" channels.
-            obj_config = self._config[obj_name.split(":")[0]]
 
-            for m in sys.modules:
-                if obj_config["algorithm"] == m.split(".")[-1]:
+            obj = obj_name.split(":")[0]
 
-                    self.algorithms[obj_name] = getattr(
-                        importlib.import_module(m), m.split(".")[-1]
-                    )(obj_name, obj_config, self.store, self.logger)
+            if obj in self._config:
 
-                    self.algorithms[obj_name].input = obj_config["input"]
+                obj_config = self._config[obj]
 
-                    return self.algorithms[obj_name]
+                for m in sys.modules:
+                    if obj_config["algorithm"] == m.split(".")[-1]:
 
-        except KeyError:
+                        self.algorithms[obj_name] = getattr(
+                            importlib.import_module(m), m.split(".")[-1]
+                        )(obj_name, obj_config, self.store, self.logger)
 
-            if "EVENT:" in obj_name or "INPUT:" in obj_name:
+                        self.algorithms[obj_name].input = obj_config["input"]
+
+                        if "output" in obj_config:
+                            self.algorithms[obj_name].output = obj_config["output"]
+                        else:
+                            self.algorithms[obj_name].output = ""
+
+                        return self.algorithms[obj_name]
+
+            elif obj == "EVENT" or obj == "INPUT":
                 pass
 
             else:
-                sys.exit(f"ERROR: object {obj_name} not defined in the configuration.")
+                sys.exit(f"ERROR: object {obj} not defined in the configuration.")
 
     def launch(self):
         """Implement input/output loop."""
