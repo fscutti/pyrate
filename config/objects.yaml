@@ -7,185 +7,158 @@ objects:
      # -----------------------------------------------------------
      # Variables
      # -----------------------------------------------------------
-     baseSmallMuonCh0:
-         algorithm: 
-             name: Baseline
-         baseline: EVENT:GROUP:ch0:SmallMuon:Channel_0:Baseline
+    baseSmallMuonCh0:
+        algorithm: Baseline
+        input:
+            baseline: EVENT:GROUP:ch0:SmallMuon:Channel_0:Baseline
 
-     baseSmallMuonCh1:
-         algorithm: 
-             name: Baseline
-         baseline: EVENT:GROUP:ch1:SmallMuon:Channel_1:Baseline
+    baseSmallMuonCh1:
+        algorithm: Baseline
+        input:
+            baseline: EVENT:GROUP:ch1:SmallMuon:Channel_1:Baseline
 
-     waveformSmallMuonCh0:
-         algorithm: 
-             name: Waveform
-             basesub: true
-         waveform: EVENT:GROUP:ch0:SmallMuon:Channel_0:RawWaveform
+    waveformSmallMuonCh0:
+        algorithm: Waveform
+        basesub: true
+        input:
+            waveform: EVENT:GROUP:ch0:SmallMuon:Channel_0:RawWaveform
 
-     waveformSmallMuonCh1:
-         algorithm: 
-             name: Waveform
-             basesub: false
-         waveform: EVENT:GROUP:ch1:SmallMuon:Channel_1:RawWaveform
+    waveformSmallMuonCh1:
+        algorithm: Waveform
+        basesub: false
+        input:
+            waveform: EVENT:GROUP:ch1:SmallMuon:Channel_1:RawWaveform
 
-     chargeSmallMuonCh0:
-         algorithm: 
-             name: Charge
-         waveform: waveformSmallMuonCh0
+    chargeSmallMuonCh0:
+        algorithm: Charge
+        input:
+            waveform: waveformSmallMuonCh0
 
-     chargeSmallMuonCh1:
-         algorithm: 
-             name: Charge
-         waveform: waveformSmallMuonCh1
+    chargeSmallMuonCh1:
+        algorithm: Charge
+        input:
+            waveform: waveformSmallMuonCh1
 
-     muonSmallTriggerTime:
-         algorithm: 
-             name: Trigger
-         triggeredch: EVENT:SmallMuon:EventData:TriggerTime
-     
-     sabreTriggerTime:
-         algorithm: 
-             name: Trigger
-         triggeredch: EVENT:SABRE:EventData:TriggerTime
-
-     sabreTriggerTimeDiff:
-         algorithm: 
-             name: Trigger
-             get_diff: true
-         triggeredch: EVENT:SABRE:EventData:TriggerTime
-
-     weightSmallMuonCh1:
-         algorithm: 
-             name: Weight
-         value: 2
-     
-     # WARNING: change the path of the file below!!!
-     weightSmallMuonCh0:
-         algorithm: 
-             name: Weight
-         applycalib: 
-             filepath: /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/calibrations
-             filename: detectorCalibration.root
-             histname: hist_calib
-             variable: chargeSmallMuonCh0
-     
-
-
-
-     # -----------------------------------------------------------
-     # Plots
-     # -----------------------------------------------------------
-     smallMuonPlot1D:
-         algorithm: 
-             name: Make1DPlot
-             makeratio: False
-             makeoverlay: True
-             gather: variables
-             save_histograms: True
-             regions:
-                 muonSmallSelection:
-                     channels: 
-                         chargeSmallMuonCh0: 100, 8600000, 9000000, black
-                         chargeSmallMuonCh1: 100, 8600000, 9000000, red
+    muonSmallTriggerTime:
+        algorithm: Trigger
+        input:
+            triggeredch: EVENT:SmallMuon:EventData:TriggerTime
     
-     sabreDataPlot1D:
-         algorithm: 
-             name: Make1DPlot
-             makeratio: False
-             #makeoverlay: True
-             save_histograms: False
-             regions:
-                 sabreTrigger:
-                     event: 
-                         sabreTriggerTimeDiff: 100, -52000000, 52000000, blue
+    sabreTriggerTime:
+        algorithm: Trigger
+        input:
+            triggeredch: EVENT:SABRE:EventData:TriggerTime
+
+    sabreTriggerTimeDiff:
+        algorithm: Trigger
+        get_diff: true
+        input:
+            triggeredch: EVENT:SABRE:EventData:TriggerTime
+
+    weightSmallMuonCh1:
+        algorithm: Weight
+        value: 2
+    
+    # WARNING: change the path of the file below!!!
+    weightSmallMuonCh0:
+        algorithm: Weight
+        applycalib: 
+            filepath: /Users/fscutti/pyrate/myNotebooks/myData/MuonDetData/calibrations
+            filename: detectorCalibration.root
+            histname: hist_calib
+            variable: chargeSmallMuonCh0
+    
+
+
+
+    # -----------------------------------------------------------
+    # Plots
+    # -----------------------------------------------------------
+    smallMuonPlot1D:
+        algorithm: Make1DPlot
+        makeratio: False
+        makeoverlay: True
+        gather: variables
+        save_histograms: True
+        regions:
+            muonSmallSelection:
+                channels: 
+                    chargeSmallMuonCh0: 100, 8600000, 9000000, black
+                    chargeSmallMuonCh1: 100, 8600000, 9000000, red
+
+    sabreDataPlot1D:
+        algorithm: Make1DPlot
+        makeratio: False
+        #makeoverlay: True
+        save_histograms: False
+        regions:
+            sabreTrigger:
+                event: 
+                    sabreTriggerTimeDiff: 100, -52000000, 52000000, blue
 
 
 
 
 
-     commonPlot1D:
-         algorithm: 
-             name: Make1DPlot
-             makeratio: False
-             #makeoverlay: True
-             gather: inputs
-             save_histograms: False
-             regions:
-                 muonSmallTrigger:
-                     event: 
-                         muonSmallTriggerTime: 100, -2000000000, 0, green
+    commonPlot1D:
+        algorithm: Make1DPlot
+        makeratio: False
+        #makeoverlay: True
+        gather: inputs
+        save_histograms: False
+        regions:
+            muonSmallTrigger:
+                event: 
+                    muonSmallTriggerTime: 100, -2000000000, 0, green
 
-     muonDetPlot1D:
-         algorithm: 
-             name: Make1DPlot
-             makeratio: False
-             makeoverlay: False
-             gather: inputs
-             save_histograms: True
-             regions:
-                 muonDetSel:
-                     event: 
-                         muonDetEnergy: 100, 0, 10, blue
+    muonDetPlot1D:
+        algorithm: Make1DPlot
+        makeratio: False
+        makeoverlay: False
+        gather: inputs
+        save_histograms: True
+        regions:
+            muonDetSel:
+                event: 
+                    muonDetEnergy: 100, 0, 10, blue
 
-     muonDetEnergy:
-         algorithm: 
-             name: MuonDetCharge
-             format: ROOT
+    muonDetEnergy:
+        algorithm: MuonDetCharge
+        format: ROOT
 
 
 
-     # -----------------------------------------------------------
-     # Histograms
-     # -----------------------------------------------------------
-     
-     
-     # -----------------------------------------------------------
-     # Trees
-     # -----------------------------------------------------------
-     #
-     treeMaker:
-       algorithm:
-           name: TreeMaker
-       trees:
-         - MuonDetector/MetaData:
-               #numbers: 
-               #     int: EventCount
-               vectors: 
-                   float: Waveform
-         #          int: X
-         #- MuonDetector/Event:
-         #      numbers: 
-         #          int: x
-         #          float: x
-         #      vectors: 
-         #          int: x 
-         #          float: x
-         #- MuonDetector/Channel_8:
-         #      numbers: 
-         #          int: x
-         #          float: x
-         #      vectors: 
-         #          int: x
-         #          float: x
+    # -----------------------------------------------------------
+    # Histograms
+    # -----------------------------------------------------------
+    
+    
+    # -----------------------------------------------------------
+    # Trees
+    # -----------------------------------------------------------
+    #
+    treeMaker:
+    algorithm: TreeMaker
+    trees:
+        - MuonDetector/MetaData:
+            # int: EventCount
+            vector<float>: Waveform
 
 
 
-     # -----------------------------------------------------------
-     # Testing
-     # -----------------------------------------------------------
-     #EventCount:
-     #  algorithm:
-     #    name: TestingReader
-     #    format: BlueTongue
-     #    #var: EVENT:board_1:time_count_ch_8
-     #    var: INPUT:n_boards
-     #
-     #Waveform:
-     #  algorithm:
-     #    name: TestingReader
-     #    format: BlueTongue
-     #    var: EVENT:board_1:raw_waveform_ch_10
+    # -----------------------------------------------------------
+    # Testing
+    # -----------------------------------------------------------
+    # EventCount:
+    #     algorithm: TestingReader
+    #     format: BlueTongue
+    #     #var: EVENT:board_1:time_count_ch_8
+    #     var: INPUT:n_boards
+    
+    # Waveform:
+    #     algorithm: TestingReader
+    #     format: BlueTongue
+    #     var: EVENT:board_1:raw_waveform_ch_10
 
 
 
