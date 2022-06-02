@@ -63,12 +63,15 @@ class Algorithm:
                     self._input[s] = None
 
             elif isinstance(i, list):
-                for s, c in self.parse_input_string(i).items():
+                for s, c in self.parse_input(i).items():
                     self._input[s] = c
 
-    def parse_input_string(self, s):
-        """Returns a dictionary.
-        This function is reimplemented by derived algorithms."""
+    def parse_input(self, s):
+        """Returns a dictionary where keys are dependencies
+        and values are conditions for their evaluation. If 
+        dependencies should be evaluated no matter what, then
+        values should be None.This function is reimplemented 
+        by derived algorithms."""
         return {}
 
     @property
