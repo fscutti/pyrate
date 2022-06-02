@@ -1,5 +1,10 @@
 """ Store class.
+PERM:
+    objects which are persistent throughout the run.
+TRAN:
+    objects which are volatile and removed after each input/event loop.
 """
+
 import sys
 from copy import copy
 import traceback
@@ -9,125 +14,64 @@ from pyrate.utils import enums
 
 
 class Store:
-    def __init__(self, run):
-        self._run = None
-        self.name = None
+    def __init__(self, name):
+        self.name = name
+        self.state = None
         self._objects = {"PERM": {}, "TRAN": {}}
-        self._default = {
-            None: "TRAN",
-            "initialise": "PERM",
-            "execute": "TRAN",
-            "finalise": "PERM",
-        }
+        self._default = {"initialise": "PERM", "execute": "TRAN", "finalise": "PERM"}
 
-        # ----------------------------------------------------------------------------------------
-        # PERM:
-        #     objects which are persistent throughout the run.
-        # TRAN:
-        #     objects which are volatile and removed after each input/event loop.
-        # ----------------------------------------------------------------------------------------
-
-    def put(self, name, obj, opt=None, replace=False):
+    def put(self, name, obj, location=None, replace=False):
         """Objects should be put on the store only once!"""
 
-        if not opt:
-            opt = self._default[self._run.state]
+        if location is None:
 
-        if self.check(name, opt) and not replace:
-            self._run.logger.warning(f"object {name} is already on the {opt} store.")
-            return
-
-        self._objects[opt][name] = obj
-
-    def get(self, name, opt=None):
-        """try/except among objects."""
-
-        opts1, opts2 = [], []
-
-        if opt:
-            opts1, opts2 = [opt], [opt]
-        else:
-            opts1 = ["TRAN", "PERM"]
-            opts2 = ["TRAN", "PERM"]
-
-        # first try to retrieve the object from the store.
-        while opts1:
-            try:
-                return self._objects[opts1.pop(0)][name]
-
-            except KeyError:
-                pass
-
-        # the object is not there so we'll update the store.
-        self._run.update_store(name, self)
-
-        # try to retrieve the object a second time.
-        while opts2:
-            try:
-                return self._objects[opts2.pop(0)][name]
-
-            except KeyError:
-                pass
-
-        # if none of the previous instructions has returned the object
-        # we will output an error message and exit.
-        msg = f"object {name} has not been found on the store after updating."
-
-        stack_trace = "".join(traceback.format_list(traceback.extract_stack()[:-1]))
-
-        msg2 = "\n".join(
-            [
-                "******* Stack trace below *******",
-                stack_trace,
-                "******* Stack trace above *******",
-            ]
-        )
-
-        sys.stdout.write(stack_trace)
-
-        self._run.logger.error(msg)
-        self._run.logger.error(msg2)
-
-        sys.exit(f"ERROR: {msg}\n{msg2}")
-
-    def copy(self, name, opt=None):
-        """Returns a copy of the object."""
-        return copy(self.get(name, opt))
-
-    def check(self, name, opt=None):
-        """Checks if object is in the store."""
-        if name != "any":
-
-            if opt:
-
-                try:
-                    return not (self._objects[opt][name] is enums.Pyrate.NONE)
-
-                except KeyError:
-                    return False
+            if self.state is None:
+                location = "TRAN"
 
             else:
+                location = self._default[self.state]
 
-                for opt in ["TRAN", "PERM"]:
+        if self.check(name, location) and not replace:
+            """To do: handle warning at this stage."""
+            return
 
-                    if name in self._objects[opt]:
-                        return not (self._objects[opt][name] is enums.Pyrate.NONE)
+        self._objects[location][name] = obj
 
-                return False
+    def get(self, name, location=["TRAN", "PERM"]):
+        """try/except among objects."""
+
+        if isinstance(location, list):
+            for l in location:
+                if name in self._objects[l]:
+                    return self._objects[l][name]
 
         else:
-            assert (
-                opt
-            ), "ERROR: specify option for the store if the check function uses name = any!"
-            return self._objects[opt]
+            return self._objects[location][name]
 
-    def clear(self, opt):
+        return enums.Pyrate.NONE
+
+    def copy(self, name, location=["TRAN", "PERM"]):
+        """Returns a copy of the object."""
+        return copy(self.get(name, location))
+
+    def check(self, name, location=["TRAN" "PERM"]):
+        """Checks if object is in the store."""
+
+        if isinstance(location, str):
+            return name in self._objects[location]
+
+        else:
+            return any([name in self._objects[l] for l in location])
+
+    def clear(self, location=["TRAN", "PERM"]):
         """Clears the store or portions of it."""
-        if opt != "all":
-            self._objects[opt].clear()
+
+        if isinstance(location, str):
+            self._objects[location].clear()
+
         else:
-            for opt in self._objects:
-                self._objects[opt].clear()
+            for l in location:
+                self._objects[l].clear()
 
 
 # EOF
