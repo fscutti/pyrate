@@ -1,20 +1,83 @@
-""" Creates and fills a ROOT TTree.
+""" Creates and fills a ROOT TTree based on the config
 https://root.cern.ch/doc/master/classTTree.html
 
+    Required parameters:
+        trees: Valid config of trees containing all the variables and their branch
+                names sorted by the appropriate datatypes and fill-type
+        
+        Config requirememnts: TreeMaker uses a specialised config that maps out
+            the shape and variables in the TTree, listed in the "trees"
+            parameter. "trees" contains a list (using the yaml list 
+            character '-'). Each tree must then separate its variables 
+            (branches) into 'event' or 'single' fill-types, then 'vector' or
+            'scalar' types, and finally the variable's data type. Objects can
+            be listed as a comma separated string, and will be filled into
+            the tree with the branch name the same as the object name.
+                e.g. 
+                Tree1:
+                    event:
+                        float: Baseline_CH0, Charge_CH0, Skew_CH0
+                        vector<int>: RawWaveform_CH0
+            
+            TreeMaker also supports custom branch names - branch names distinct
+            from the object name they point to and store. To do this, instead of
+            and object name, the TreeMaker must be passed a branch name and an
+            object name pairing as follows: Branch_name: Object_name. 
+            To use this functionality, objects must be listed in the tree with 
+            yaml's list syntax (-). It also supports direct use of in-line
+            dictionaries as per yaml parsing.
+            The following example shows a range of possible syntaxes. Note that 
+            within the list, regular comma separated string passing is still 
+            possible.
+                e.g.
+                Tree1:
+                    event:
+                        float: 
+                            - Baseline: Baseline_CH0                # Single custom branch
+                            - {Charge: Charge_CH0, Skew: Skew_CH0}  # Multiple custom branches 
+                            - CFDTime_CH0, Timestamp_CH0,           # Older comma separated strings still compatible
+                                LeadingEdge_CH0
+                        vector<float>: CorrectedWaveform: CorrectedWaveform_CH0
+      
+    
+    Required states:
+        initialise:
+            input:
+        execute:
+            input: <Execute objects to be stored>
+        finalise:
+            input: <Finalise objects>
+    
+    Example config:
+    
+    TreeObject:
+        algorithm:
+            name: TreeMaker
+        initialise:
+            input: RawWaveform_CH0, CorrectedWaveform_CH0, Baseline_CH0, Charge_CH0
+                   Skew_CH0, CFDTime_CH0, Timestamp_CH0, LeadingEdge_CH0,
+                   CorrectedWaveform_CH1, AverageWaveform_CH1
+        execute:
+            input: 
+        finalise:
+            input: AverageWaveform_CH0
+        trees:
+            - TreeName1:
+                event:
+                    vector<int>: RawWaveform_CH0
+                    vector<float>: CorrectedWaveform_CH0
+                    float: 
+                        - Baseline: Baseline_CH0
+                        - {Charge: Charge_CH0, Skew: Skew_CH0}
+                        - CFDTime_CH0, Timestamp_CH0,
+                            LeadingEdge_CH0
 
-myTreeObject:
-       algorithm:
-           name: TreeMaker
-       trees:
-         - my/folder/path/myTreeName:
-               numbers:
-                   int: myIntBranch1, myIntBranch2, ...
-                   float: myFloatBranch1, myFloatBranch2, ...
-               vectors:
-                   int: myIntVectorBranch1, myIntVectorBranch2, ...
-                   float: myFloatVectorBranch1, myFloatVectorBranch2, ...
-         - my/folder/path/myOtherTreeName:
-               etc ...
+            - TreeName2:
+                event:
+                    vector<float>: CorrectedWaveform: CorrectedWaveform_CH1
+                single:
+                    vector<float>: AverageWaveform: AverageWaveform_CH0
+
 """
 
 import os
@@ -65,10 +128,15 @@ _Type = {
 
 
 class Branch:
-    """Class to store branch information"""
+    """Class to store branch information
+        Name will be the name of the branch in the TTree
+        var_name is an optional string to store the name of the variable on the
+        store. If it exists, it will be used instead of 'name' to get the
+        variable from the store.
+    """
 
     def __init__(
-        self, name, datatype=None, vector=False, event_based=True, create_now=False
+        self, name, var_name=None, datatype=None, event_based=True, create_now=False
     ):
         self.name = name
         if not self.name.replace("_", "").isalnum():
@@ -76,10 +144,13 @@ class Branch:
                 f"Warning: Branch name contains non-alphanumeric characters '{self.name}'"
             )
 
+        # self.var_name will be name unless var_name passed in
+        self.var_name = self.name if var_name is None else var_name
+
         if datatype == None:
             sys.exit(f"ERROR: in branch {self.name} - datatype not provided.")
-        self.datatype = datatype
-        self.vector = vector
+        
+        self._set_datatype(datatype) # set the datatype and vector type
         self.event_based = event_based
         self.created = False
         self.linked = False
@@ -149,6 +220,22 @@ class Branch:
         if not self.vector:
             return
         self.data.clear()
+    
+    def _set_datatype(self, datatype):
+        """ Parses the datatype, breaks up into type and 
+            vector mode
+        """
+        if datatype.startswith("vector"):
+            # extract the datatype
+            if datatype[-1].isalnum():
+                self.datatype = datatype[7:]
+            else:
+                self.datatype = datatype[7:-1]
+            self.vector = True
+        else:
+            self.datatype = datatype
+            self.vector = False
+
 
 
 class Tree:
@@ -175,10 +262,11 @@ class Tree:
 
     def add_branch(self, branch):
         """Adds branch to the tree storage"""
-        if branch in self.branches:
+        if branch.name in self.branches:
             # Uh oh, branch already in branch list
             sys.exit(
-                f"Error: branch ({branch.name}) already stored in branch list of this Tree.\nPlease remove it first (or don't add it twice?)"
+                f"Error: A branch with the name '{branch.name}' already exists in this Tree ({self.name}).\n"
+                "Please rename the new incoming branch (or don't add the same branch twice?)"
             )
         self.branches[branch.name] = branch
         if self.created:
@@ -307,31 +395,43 @@ class TreeMaker(Algorithm):
                         event_based = True
                     elif "single" in fill_type.lower() or "run" in fill_type.lower():
                         event_based = False
-                    # Loop through vector and scalar type branches
-                    for vec_scalar in t_variables[fill_type]:
-                        # loop over datatypes
-                        for datatype, vars in t_variables[fill_type][
-                            vec_scalar].items():
-                            for var in ST.get_items(vars):
+                    # # Loop through vector and scalar type branches
+                    # for vec_scalar in t_variables[fill_type]:
+                    # loop over datatypes
+                    for datatype, variables in t_variables[fill_type].items():
+                        # LEGACY SUPPORT TO BE REMOVED
+                        ########################################################
+                        if datatype == "vector" or datatype == "scalar":
+                            # ok, we're in legacy mode
+                            if datatype == "vector":
+                                new_syntax = {datatype + f"<{t}>":v for t, v in variables.items()}
+                            else:
+                                new_syntax = {t:v for t, v in variables.items()}
+                            for dtype, vars in new_syntax.items():
+                                variables_list = self._parse_tree_vars(vars)
+                                for b_name, var_name in variables_list:
+                                    # loop over individual variables
+                                    new_branch = Branch(
+                                        b_name,
+                                        var_name=var_name,
+                                        datatype=dtype,
+                                        event_based=event_based,
+                                        create_now=True,
+                                    )
+                                    trees[t_name].add_branch(new_branch)
+                        ########################################################
+                        # New check to handle lists of vars
+                        else:
+                            variables_list = self._parse_tree_vars(variables)
+                            for b_name, var_name in variables_list:
                                 # loop over individual variables
-                                if "vector" in vec_scalar:
-                                    # Storing vectors
-                                    new_branch = Branch(
-                                        var,
-                                        datatype=datatype,
-                                        vector=True,
-                                        event_based=event_based,
-                                        create_now=True,
-                                    )
-                                if "scalar" in vec_scalar or "number" in vec_scalar:
-                                    # Storing scalars
-                                    new_branch = Branch(
-                                        var,
-                                        datatype=datatype,
-                                        vector=False,
-                                        event_based=event_based,
-                                        create_now=True,
-                                    )
+                                new_branch = Branch(
+                                    b_name,
+                                    var_name=var_name,
+                                    datatype=datatype,
+                                    event_based=event_based,
+                                    create_now=True,
+                                )
                                 # Add the new branch to the TTree
                                 trees[t_name].add_branch(new_branch)
 
@@ -350,7 +450,7 @@ class TreeMaker(Algorithm):
             for branch_name in self.trees[tree].branches:
                 # Only want to fill the branches that are event-based
                 if self.trees[tree].branches[branch_name].event_based:
-                    value = self.store.get(branch_name, "TRAN")
+                    value = self.store.get(self.trees[tree].branches[branch_name].var_name, "TRAN")
                     
                     # Handle invalid values using internal Pyrate.NONE
                     if value is enums.Pyrate.NONE:
@@ -378,7 +478,7 @@ class TreeMaker(Algorithm):
             for branch_name in self.trees[tree].branches:
                 # Only want to fill the branches that are run-based
                 if not self.trees[tree].branches[branch_name].event_based:
-                    value = self.store.get(branch_name, "PERM")
+                    value = self.store.get(self.trees[tree].branches[branch_name].var_name, "PERM")
                     
                     # Handle invalid values using internal Pyrate.NONE
                     if value is enums.Pyrate.NONE:
@@ -401,5 +501,24 @@ class TreeMaker(Algorithm):
         # to return.
         self.store.put(self.name, enums.Pyrate.SKIP_WRITE)
 
+    def _parse_tree_vars(self, variables):
+        """ Dedicated function to just parse the tree lists/dicts/strings
+        """
+        if type(variables) == list:
+            # Dealing with a list
+            retlist = []
+            for entry in variables:
+                if type(entry) == str:
+                    var_names = list(filter(None, ST.get_items(entry)))
+                    retlist += list(zip(var_names, var_names))
+                elif type(entry) == dict:
+                    retlist += list(entry.items())
+                else:
+                    retlist += [entry]
+            return retlist
+        else:
+            # old style
+            var_names = list(filter(None, ST.get_items(variables)))
+            return list(zip(var_names, var_names))
 
 # EOF

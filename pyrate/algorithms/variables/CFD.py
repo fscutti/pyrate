@@ -1,7 +1,8 @@
 """ Calculates the CFD of a waveform.
     From this it also calculates the CFD zero crossing points - i.e. the cfd time
-    Outputs the first crossing point time. Also outputs the crossing point times
-    as an array. and outputs the CFD as an array, which can be accessed on the
+    Outputs the first crossing point time. 
+    Also outputs the crossing point timesas an array. 
+    Also outputs the CFD as an array, which can be accessed on the
     store using <OBJNAME>CrossTimes and <OBJNAME>Trace respectively
 
     Required parameters:
