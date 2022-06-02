@@ -11,6 +11,8 @@ import logging
 from collections import defaultdict
 from anytree import Node, RenderTree
 
+import anytree.node.exceptions as anytreeExceptions
+
 from colorama import Fore
 from tqdm import tqdm
 
@@ -96,15 +98,11 @@ class Run:
                 for t_name, t_samples in t_dict.items():
 
                     obj_name = t_name.split(":")[0]
-                    
+
                     self.targets[t_name] = self.dependency(t_name, samples=t_samples)
 
-
-        #self._objects = {}
-
-        print(self.targets)
-
-        # Build dependency tree here.
+                    # print(RenderTree(self.targets[t_name], style=AsciiStyle()))
+                    print(RenderTree(self.targets[t_name]))
 
         sys.exit()
 
@@ -138,9 +136,14 @@ class Run:
         if self.trees[obj_name].algorithm is not None:
 
             for i in self.trees[obj_name].algorithm.input:
-                # To do: handle multiple parents for many targets 
-                # with same object. Shallow copy of dependency.
-                self.dependency(i).parent = self.trees[obj_name]
+
+                try:
+                    self.dependency(i).parent = self.trees[obj_name]
+
+                except anyExceptions.LoopError:
+                    sys.exit(
+                        f"ERROR: circular dependency detected between {i} and {obj_name}"
+                    )
 
         return self.trees[obj_name]
 
@@ -167,8 +170,8 @@ class Run:
                     self.algorithms[obj_name] = getattr(
                         importlib.import_module(m), m.split(".")[-1]
                     )(obj_name, obj_config, self.store, self.logger)
-                    
-                    self.algorithms[obj_name].input = obj_config["input"] 
+
+                    self.algorithms[obj_name].input = obj_config["input"]
 
                     return self.algorithms[obj_name]
 
