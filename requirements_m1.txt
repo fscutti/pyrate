@@ -1,4 +1,5 @@
 #apio==0.4.0b5
+anytree
 apio
 appdirs==1.4.4
 attrs==20.2.0
