@@ -50,11 +50,12 @@ class Algorithm:
 
     @property
     def input(self):
+        """Getter method for input objects."""
         return self._input
 
     @input.setter
     def input(self, config):
-
+        """Setter method for input objects."""
         for i in FN.get_nested_values(config):
 
             if isinstance(i, str):
@@ -69,6 +70,16 @@ class Algorithm:
         """Returns a dictionary.
         This function is reimplemented by derived algorithms."""
         return {}
+
+    @property
+    def output(self):
+        """Getter method for output objects."""
+        return self._output
+
+    @output.setter
+    def output(self, config):
+        """Setter method for output objects."""
+        self._output[self.name] = ST.get_items(config)
 
 
 # EOF
