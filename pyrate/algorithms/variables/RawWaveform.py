@@ -59,11 +59,11 @@ class RawWaveform(Algorithm):
         """ Gets the raw trace from the reader and puts it on the store
         """
         if self.reader == "ReaderWaveDumpMMAP":
-            RawWaveform = self.store.get(self.config["waveform_wd"])
+            RawWaveform = self.store.get(self.config["input"]["waveform_wd"])
         elif self.reader == "ReaderCAEN1730_ZLE" or self.reader == "ReaderCAEN1730_RAW" or self.reader == "ReaderCAEN1730_PSD":
-            RawWaveform = self.store.get(self.config["waveform_md"])
+            RawWaveform = self.store.get(self.config["input"]["waveform_md"])
         elif self.reader == "ReaderBlueTongueMMAP":
-            RawWaveform = self.store.get(self.config["waveform_bt"])
+            RawWaveform = self.store.get(self.config["input"]["waveform_bt"])
         elif self.reader == "ReaderWaveCatcherMMAP":
             sys.exit("Uh oh, WaveCatcher doesn't have a RawWaveform...")
 

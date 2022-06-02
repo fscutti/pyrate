@@ -72,8 +72,8 @@ class CorrectedWaveform(Algorithm):
             reader = self.store.get(f"INPUT:READER:GROUP:name")
 
         # Convert to physical units
-        if "units" in self.config["algorithm"]:
-            units = self.config["algorithm"]["units"]
+        if "units" in self.config:
+            units = self.config["units"]
         else:
             units = "mV"
         if units in wf_units:
@@ -86,8 +86,8 @@ class CorrectedWaveform(Algorithm):
 
         # Handle the converison from ADC is appropriate
         if reader != "ReaderWaveCatcherMMAP":
-            Vpp = float(self.config["algorithm"]["vpp"])
-            BitRange = int(self.config["algorithm"]["adcrange"])
+            Vpp = float(self.config["vpp"])
+            BitRange = int(self.config["adcrange"])
 
             # Conversion factor between ADC and mV
             conversion = (Vpp / BitRange) * units
@@ -97,8 +97,8 @@ class CorrectedWaveform(Algorithm):
             conversion = units  # just convert to mV
 
         # Sets polarity constant based on user input.
-        if "polarity" in self.config["algorithm"]:
-            polarity = self.config["algorithm"]["polarity"]
+        if "polarity" in self.config:
+            polarity = self.config["polarity"]
         else:
             sys.exit("ERROR in CorrectedWaveform config, please provide a polarity")
         if "neg" in polarity.lower():
@@ -118,11 +118,11 @@ class CorrectedWaveform(Algorithm):
     def execute(self):
         """Calculates the baseline corrected waveform"""
         if self.reader == "ReaderWaveCatcherMMAP":
-            waveform = self.store.get(self.config["wc_waveform"])
+            waveform = self.store.get(self.config["input"]["wc_waveform"])
         else:
-            waveform = self.store.get(self.config["waveform"])
+            waveform = self.store.get(self.config["input"]["waveform"])
         
-        baseline = self.store.get(self.config["baseline"])
+        baseline = self.store.get(self.config["input"]["baseline"])
         if waveform is Pyrate.NONE or baseline is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             return

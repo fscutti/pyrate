@@ -33,8 +33,8 @@ class Difference(Algorithm):
 
     def execute(self):
         """Caclulates the difference x2 - x1"""
-        x1 = self.store.get(self.config["x1"])
-        x2 = self.store.get(self.config["x2"])
+        x1 = self.store.get(self.config["input"]["x1"])
+        x2 = self.store.get(self.config["input"]["x2"])
         if x1 is Pyrate.NONE or x2 is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             return

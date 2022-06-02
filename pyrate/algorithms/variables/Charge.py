@@ -58,9 +58,9 @@ class Charge(Algorithm):
     def initialise(self):
         """Prepare the constant for calculating charge"""
         # Deal with charge constants
-        impedance = self.config["algorithm"]["impedance"]
-        sample_rate = float(self.config["algorithm"]["rate"])
-        charge_units = self.config["algorithm"]["unit"]
+        impedance = self.config["impedance"]
+        sample_rate = float(self.config["rate"])
+        charge_units = self.config["unit"]
 
         if charge_units in q_units:
             charge_units = q_units[charge_units]
@@ -74,7 +74,7 @@ class Charge(Algorithm):
                     "ERROR: In algorithm Charge, unit parameter could not be converted to a float."
                 )
 
-        waveform_units = self.config["algorithm"]["waveform_unit"]
+        waveform_units = self.config["waveform_unit"]
 
         if waveform_units in wf_units:
             waveform_units = wf_units[waveform_units]
@@ -92,8 +92,8 @@ class Charge(Algorithm):
 
     def execute(self):
         """Calculates the charge by summing over the waveform"""
-        window = self.store.get(self.config["window"])
-        waveform = self.store.get(self.config["waveform"])
+        window = self.store.get(self.config["input"]["window"])
+        waveform = self.store.get(self.config["input"]["waveform"])
 
         # check for invalid windows
         if waveform is Pyrate.NONE or window is Pyrate.NONE:

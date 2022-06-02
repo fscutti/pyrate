@@ -39,16 +39,16 @@ class LeadingEdgeThreshold(Algorithm):
     def initialise(self):
         """Set up the CFD and trapezoid parameters"""
         # offset parameter decides offset from threshold crossing point
-        self.offset = int(self.config["algorithm"]["offset"])
-        self.threshold = self.config["algorithm"]["threshold"]
+        self.offset = int(self.config["offset"])
+        self.threshold = self.config["threshold"]
         self.interpolate = False
-        if "interpolate" in self.config["algorithm"]:
+        if "interpolate" in self.config:
             self.interpolate = True
 
     def execute(self):
         """Caclulates the waveform threshold crossing point"""
         # Get the actual waveform, finally.
-        waveform = self.store.get(self.config["waveform"])
+        waveform = self.store.get(self.config["input"]["waveform"])
         if waveform is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             return

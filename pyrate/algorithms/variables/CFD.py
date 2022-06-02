@@ -59,9 +59,9 @@ class CFD(Algorithm):
     def initialise(self):
         """Set up the CFD and trapezoid parameters"""
         # CFD parameters
-        self.delay = int(self.config["algorithm"]["delay"])
-        self.scale = int(self.config["algorithm"]["scale"])
-        self.cfd_threshold = float(self.config["algorithm"]["cfd_threshold"])
+        self.delay = int(self.config["delay"])
+        self.scale = int(self.config["scale"])
+        self.cfd_threshold = float(self.config["cfd_threshold"])
 
         self.cfd = np.zeros(0)
         self.waveform = np.zeros(0)
@@ -72,7 +72,7 @@ class CFD(Algorithm):
         # Reset all the waveforms, safer to do at the start
         self.clear_arrays()
 
-        waveform = self.store.get(self.config["waveform"])
+        waveform = self.store.get(self.config["input"]["waveform"])
         if waveform is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             return
