@@ -38,7 +38,7 @@ class Store:
         self._objects[location][name] = obj
 
     def get(self, name, location=["TRAN", "PERM"]):
-        """try/except among objects."""
+        """Get an object."""
 
         if isinstance(location, list):
             for l in location:
