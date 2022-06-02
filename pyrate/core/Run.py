@@ -105,7 +105,7 @@ class Run:
 
                     self.targets[t_name] = self.dependency(t_name, samples=t_samples)
 
-                    # print(RenderTree(self.targets[t_name]))
+                    print(RenderTree(self.targets[t_name]))
 
         sys.exit()
 
