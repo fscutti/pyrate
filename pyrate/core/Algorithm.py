@@ -38,15 +38,18 @@ class Algorithm:
 
     def initialise(self, condition=None):
         """At this stage the method knows the current input."""
-        self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
+        #self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
+        return condition
 
     def execute(self, condition=None):
         """At this stage the method knows the current input and current event."""
-        self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
+        #self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
+        return condition
 
     def finalise(self, condition=None):
         """At this stage the method knows the current input."""
-        self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
+        #self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
+        return condition
 
     @property
     def input(self):
@@ -68,9 +71,9 @@ class Algorithm:
 
     def parse_input(self, s):
         """Returns a dictionary where keys are dependencies
-        and values are conditions for their evaluation. If 
+        and values are conditions for their evaluation. If
         dependencies should be evaluated no matter what, then
-        values should be None.This function is reimplemented 
+        values should be None.This function is reimplemented
         by derived algorithms."""
         return {}
 
@@ -82,7 +85,7 @@ class Algorithm:
     @output.setter
     def output(self, config):
         """Setter method for output objects."""
-        self._output[self.name] = ST.get_items(config)
+        self._output[self.name] = [f"{self.name}:{o}" for o in ST.get_items(config)]
 
 
 # EOF

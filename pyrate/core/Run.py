@@ -90,11 +90,10 @@ class Run:
             Fore.RESET,
         )
 
-        # for now this is just a temporary initialisation.
-        self.store = Store(None)
+        self.store = Store(self.name)
 
         self.targets = {}
-        self.dependencies = {}
+        self.nodes = {}
         self.algorithms = {}
 
         for out_name, out_config in self.outputs.items():
@@ -103,42 +102,38 @@ class Run:
 
                     obj_name = t_name.split(":")[0]
 
-                    self.targets[t_name] = self.dependency(t_name, samples=t_samples)
+                    self.targets[t_name] = self.node(t_name, samples=t_samples)
 
-                    print(RenderTree(self.targets[t_name]))
+                    # print(RenderTree(self.targets[t_name]))
 
-        sys.exit()
+    def node(self, obj_name, samples=None):
+        """Gets node tree of an object.
+        This is a recursive function."""
 
-    def dependency(self, obj_name, samples=None):
-        """Gets dependency tree of an object.
-        This is a recursive function.
-        Todo(?) Transform this into a getter method."""
-
-        if obj_name in self.dependencies:
-            return self.dependencies[obj_name]
+        if obj_name in self.nodes:
+            return self.nodes[obj_name]
 
         else:
-            self.dependencies[obj_name] = Node(
+            self.nodes[obj_name] = Node(
                 obj_name, algorithm=self.alg(obj_name), samples=samples
             )
-            
-            if self.dependencies[obj_name].algorithm is not None:
-            
-                for i in self.dependencies[obj_name].algorithm.input:
-            
+
+            if self.nodes[obj_name].algorithm is not None:
+
+                for i in self.nodes[obj_name].algorithm.input:
+
                     try:
-                        self.dependency(i).parent = self.dependencies[obj_name]
-            
+                        self.node(i).parent = self.nodes[obj_name]
+
                     except anytreeExceptions.LoopError:
                         sys.exit(
-                            f"ERROR: circular dependency detected between {i} and {obj_name}"
+                            f"ERROR: circular node detected between {i} and {obj_name}"
                         )
 
-        return self.dependencies[obj_name]
+        return self.nodes[obj_name]
 
     def alg(self, obj_name):
-        """Gets instance of algorithm from the configuration.
-        Todo(?) Transform this into a getter method."""
+        """Gets instance of algorithm from the configuration."""
 
         if obj_name in self.algorithms:
             return self.algorithms[obj_name]
@@ -185,33 +180,33 @@ class Run:
 
         start = timeit.default_timer()
 
-        store = Store(self)
-
-        store.put("history", self._history, "PERM")
+        # self.store.put("history", self._history, "PERM")
 
         # -----------------------------------------------------------------------
         # Instanciate/load the output. Files are opened and ready to be written.
         # -----------------------------------------------------------------------
 
-        self._out = Output(self.name, store, self.logger, outputs=self.outputs)
+        self._out = Output(self.name, self.store, self.logger, outputs=self.outputs)
 
         if not self._out.is_loaded:
             self._out.load()
 
+        # maybe change the way this is retrieved. Use nodes directly.
         all_inputs_vs_targets = self._out.get_inputs_vs_targets()
 
         # -----------------------------------------------------------------------
         # Instanciate algorithms for all targets specified in the job options.
         # -----------------------------------------------------------------------
+        # print(all_inputs_vs_targets)
 
-        self.algorithms = {}
-        for i_name, targets in all_inputs_vs_targets.items():
-            for t in targets:
+        # self.algorithms = {}
+        # for i_name, targets in all_inputs_vs_targets.items():
+        #    for t in targets:
 
-                alg_name = self._config[t["object"]]["algorithm"]["name"]
-                obj_name = t["name"]
+        #        alg_name = self._config[t["object"]]["algorithm"]["name"]
+        #        obj_name = t["name"]
 
-                self.add(obj_name, alg_name, store)
+        #        self.add(obj_name, alg_name, store)
 
         # -----------------------------------------------------------------------
         # Inputs will be initialised dynamically in the run function.
@@ -228,9 +223,9 @@ class Run:
         for state in ["initialise", "execute", "finalise"]:
 
             # updating list of targets to be considered for the next loop.
-            current_inputs_vs_targets = self.update_inputs_vs_targets(
-                state, store, all_inputs_vs_targets
-            )
+            # current_inputs_vs_targets = self.update_inputs_vs_targets(
+            #    state, store, all_inputs_vs_targets
+            # )
 
             # update the store.
             store = self.run(state, store, current_inputs_vs_targets)
@@ -325,7 +320,9 @@ class Run:
                         bar_format=self.colors[self.state]["event"],
                     ):
                         store.put("INPUT:name", i_name, "TRAN")
+
                         store.put("INPUT:config", self.inputs[i_name], "TRAN")
+
                         store.put("EVENT:idx", self._in.get_idx())
 
                         self.loop(store, targets)
@@ -335,16 +332,16 @@ class Run:
                         self._in.set_next_event()
 
                 # Printing average time taken to execute an alg for a single event
-                if self.alg_timing:
-                    for alg in sorted(self.algorithms):
-                        if self.alg_timing == True:
-                            self.logger.info(
-                                f"{self.algorithms[alg].name:<40}{self.alg_times[alg]/erange:>20.2f} ns"
-                            )
-                        elif self.alg_timing == "print" or self.alg_timing == "p":
-                            print(
-                                f"{self.algorithms[alg].name:<40}{self.alg_times[alg]/erange:>20.2f} ns"
-                            )
+                #if self.alg_timing:
+                #    for alg in sorted(self.algorithms):
+                #        if self.alg_timing == True:
+                #            self.logger.info(
+                #                f"{self.algorithms[alg].name:<40}{self.alg_times[alg]/erange:>20.2f} ns"
+                #            )
+                #        elif self.alg_timing == "print" or self.alg_timing == "p":
+                #            print(
+                #                f"{self.algorithms[alg].name:<40}{self.alg_times[alg]/erange:>20.2f} ns"
+                #            )
 
                 self._in.offload()
 
@@ -367,23 +364,21 @@ class Run:
 
         return store
 
-    def loop(self, store, targets):
+    def loop(self):
         """Loop over required targets to resolve them. Skips completed ones."""
-        for t in targets:
+        for t in self.targets:
 
-            self._history[t["name"]] = []
+            # self._history[t["name"]] = []
+            # self._target_history = self._history[t["name"]]
+            # self._history["CURRENT TARGET"] = t["name"]
 
-            self._target_history = self._history[t["name"]]
+            self.call(t)
 
-            self._history["CURRENT TARGET"] = t["name"]
-
-            self.call(t["object"], target_name=t["name"])
-
-    def call(self, obj_name, target_name=""):
+    def call(self, obj_name, condition=None):
         """Calls an algorithm."""
 
         # print(f"calling {obj_name} is target: ({is_target})")
-
+        """
         alg = None
 
         # Assign the name attribute in the config dictionary here.
@@ -420,9 +415,44 @@ class Run:
             else:
                 # executing main algorithm state
                 getattr(alg, self.state)()
+        """
+        passed = None
 
+        if not self.store.check(obj_name):
+
+            alg = self.nodes[obj_name].algorithm
+
+            if alg is not None:
+
+                # preparing input
+                for dep_name, dep_cond in alg.input.items():
+                    dep_passed = self.call(dep_name, dep_cond)
+                    if dep_passed is not None:
+                        if not dep_passed:
+                            break
+
+                passed = getattr(alg, self.state)(condition)
+
+                # checking ouput.
+                if self.store.check(obj_name):
+
+                    for out_name, out_list in alg.output.items():
+                        if not all([self.store.check(o) for o in out_list]):
+                            # Error message.
+                            pass
+
+                else:
+                    # Error message?
+                    pass
+
+            else:
+                self._in.read(obj_name)
+
+        return passed
+
+    """
     def update_inputs_vs_targets(self, state, store, inputs_vs_targets):
-        """Updates the dictionary containing all the targets relative to an input."""
+        #Updates the dictionary containing all the targets relative to an input.
 
         new_inputs_vs_targets = dict.fromkeys(inputs_vs_targets.keys(), [])
 
@@ -443,11 +473,10 @@ class Run:
                     new_inputs_vs_targets[i_name].append(t)
 
         return new_inputs_vs_targets
-
+    """
+    
+    """
     def update_store(self, obj_name, store):
-        """Updates value of object on the store.
-        N.B. obj_name here is never the name of a target.
-        This method is never called for targets as they are called explicitly in the loop."""
 
         if not obj_name in self._config:
             self._in.read(obj_name)
@@ -464,12 +493,13 @@ class Run:
 
             self.call(obj_name)
             return
+    """
 
-    def get_history(self, show=False):
-        """Returns the algorithm history."""
-        if show:
-            FN.pretty(self._history)
-        return self._history
+    #def get_history(self, show=False):
+    #    """Returns the algorithm history."""
+    #    if show:
+    #        FN.pretty(self._history)
+    #    return self._history
 
     def get_events_slices(self, tot):
         """Updates emin and emax attributes for running on valid slice."""

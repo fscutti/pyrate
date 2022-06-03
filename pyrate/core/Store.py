@@ -31,9 +31,9 @@ class Store:
             else:
                 location = self._default[self.state]
 
-        if self.check(name, location) and not replace:
-            """To do: handle warning at this stage."""
-            return
+        #if self.check(name, location) and not replace:
+        #    """To do: handle warning at this stage."""
+        #    return
 
         self._objects[location][name] = obj
 
