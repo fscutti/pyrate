@@ -379,11 +379,12 @@ class Run:
             if alg is not None:
 
                 # preparing input
-                if self.prepare_input(obj_name, alg):
+                if not self.is_done(obj_name, alg):
+
                     getattr(alg, self.state)()
 
                 # checking ouput.
-                if not self.check_output(obj_name, alg):
+                if not self.is_complete(obj_name, alg):
                     sys.exit(
                         f"ERROR: object {obj_name} is on the store but additional output is missing !!!"
                     )
@@ -393,7 +394,7 @@ class Run:
 
         return
 
-    def prepare_input(self, obj_name, alg):
+    def is_done(self, obj_name, alg):
         """In order to get out of the dependency loop
         the algorithm has to put False on the store."""
 
@@ -406,11 +407,11 @@ class Run:
                 getattr(alg, self.state)(dep_cond)
 
                 if not self.store.get(obj_name):
-                    return False
+                    return True
 
-        return True
+        return False
 
-    def check_output(self, obj_name, alg):
+    def is_complete(self, obj_name, alg):
         """If the main object is on the store with a valid value,
         additional output is checked to be on the store."""
 
@@ -422,6 +423,9 @@ class Run:
                     for o in alg.output[obj_name]
                 ]
             )
+
+        else:
+            return True
 
     def get_events_slices(self, tot):
         """Updates emin and emax attributes for running on valid slice."""
