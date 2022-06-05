@@ -332,7 +332,7 @@ class Run:
                         self._in.set_next_event()
 
                 # Printing average time taken to execute an alg for a single event
-                #if self.alg_timing:
+                # if self.alg_timing:
                 #    for alg in sorted(self.algorithms):
                 #        if self.alg_timing == True:
                 #            self.logger.info(
@@ -367,139 +367,61 @@ class Run:
     def loop(self):
         """Loop over required targets to resolve them. Skips completed ones."""
         for t in self.targets:
-
-            # self._history[t["name"]] = []
-            # self._target_history = self._history[t["name"]]
-            # self._history["CURRENT TARGET"] = t["name"]
-
             self.call(t)
 
-    def call(self, obj_name, condition=None):
+    def call(self, obj_name):
         """Calls an algorithm."""
 
-        # print(f"calling {obj_name} is target: ({is_target})")
-        """
-        alg = None
-
-        # Assign the name attribute in the config dictionary here.
-        # This might be done best in the Job class though...
-        if target_name:
-            alg = self.algorithms[target_name]
-
-        else:
-            alg = self.algorithms[obj_name]
-
-        entry = f"{obj_name}:{alg.name}:TARGET({target_name})"
-
-        if entry in self._target_history:
-
-            self.get_history(show=True)
-
-            FN.pretty(self._config[obj_name])
-
-            sys.exit(f"ERROR:{entry} already executed")
-
-        else:
-
-            self._target_history.append(entry)
-
-            # preparing input variables
-            getattr(alg, f"_{self.state}")()
-            # Timing the algorithm if timing is flagged
-            if self.alg_timing:
-                t1 = time.time_ns()
-                # executing main algorithm state
-                getattr(alg, self.state)()
-                t2 = time.time_ns()
-                self.alg_times[alg.name] += t2 - t1
-            else:
-                # executing main algorithm state
-                getattr(alg, self.state)()
-        """
-        passed = None
-
-        if not self.store.check(obj_name):
+        if self.store.get(obj_name) is enums.Pyrate.NONE:
 
             alg = self.nodes[obj_name].algorithm
 
             if alg is not None:
 
                 # preparing input
-                for dep_name, dep_cond in alg.input.items():
-                    dep_passed = self.call(dep_name, dep_cond)
-                    if dep_passed is not None:
-                        if not dep_passed:
-                            break
-
-                passed = getattr(alg, self.state)(condition)
+                if self.prepare_input(obj_name, alg):
+                    getattr(alg, self.state)()
 
                 # checking ouput.
-                if self.store.check(obj_name):
-
-                    for out_name, out_list in alg.output.items():
-                        if not all([self.store.check(o) for o in out_list]):
-                            # Error message.
-                            pass
-
-                else:
-                    # Error message?
-                    pass
+                if not self.check_output(obj_name, alg):
+                    sys.exit(
+                        f"ERROR: object {obj_name} is on the store but additional output is missing !!!"
+                    )
 
             else:
                 self._in.read(obj_name)
 
-        return passed
+        return
 
-    """
-    def update_inputs_vs_targets(self, state, store, inputs_vs_targets):
-        #Updates the dictionary containing all the targets relative to an input.
+    def prepare_input(self, obj_name, alg):
+        """In order to get out of the dependency loop
+        the algorithm has to put False on the store."""
 
-        new_inputs_vs_targets = dict.fromkeys(inputs_vs_targets.keys(), [])
+        for dep_name, dep_cond in alg.input.items():
 
-        for i_name, targets in inputs_vs_targets.items():
-            for t in targets:
+            self.call(dep_name)
 
-                if not ":" + i_name in t["name"] or "," + i_name in t["name"]:
-                    continue
+            if dep_cond is not None:
 
-                # we cannot immediately "get" the target value, as this might trigger
-                # the update_store function and we don't want to do that at this stage.
-                if store.check(t["name"], "PERM"):
+                getattr(alg, self.state)(dep_cond)
 
-                    if store.get(t["name"], "PERM") is enums.Pyrate.SKIP_NEXT_STATE:
-                        continue
+                if not self.store.get(obj_name):
+                    return False
 
-                if not FN.check_dict_in_list(new_inputs_vs_targets[i_name], t):
-                    new_inputs_vs_targets[i_name].append(t)
+        return True
 
-        return new_inputs_vs_targets
-    """
-    
-    """
-    def update_store(self, obj_name, store):
+    def check_output(self, obj_name, alg):
+        """If the main object is on the store with a valid value,
+        additional output is checked to be on the store."""
 
-        if not obj_name in self._config:
-            self._in.read(obj_name)
-            return
+        if self.store.get(obj_name) is not enums.Pyrate.NONE:
 
-        else:
-            alg_name = self._config[obj_name]["algorithm"]["name"]
-
-            try:
-                alg_instance = self.algorithms[obj_name]
-
-            except KeyError:
-                self.add(obj_name, alg_name, store)
-
-            self.call(obj_name)
-            return
-    """
-
-    #def get_history(self, show=False):
-    #    """Returns the algorithm history."""
-    #    if show:
-    #        FN.pretty(self._history)
-    #    return self._history
+            return all(
+                [
+                    self.store.get(o) is not enums.Pyrate.NONE
+                    for o in alg.output[obj_name]
+                ]
+            )
 
     def get_events_slices(self, tot):
         """Updates emin and emax attributes for running on valid slice."""

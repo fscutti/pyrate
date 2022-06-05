@@ -1,8 +1,5 @@
 """ Store class.
-PERM:
-    objects which are persistent throughout the run.
-TRAN:
-    objects which are volatile and removed after each input/event loop.
+The store is cleaned after every event/input iteration.
 """
 
 import sys
@@ -16,62 +13,27 @@ from pyrate.utils import enums
 class Store:
     def __init__(self, name):
         self.name = name
-        self.state = None
-        self._objects = {"PERM": {}, "TRAN": {}}
-        self._default = {"initialise": "PERM", "execute": "TRAN", "finalise": "PERM"}
+        self._store = {}
 
-    def put(self, name, obj, location=None, replace=False):
+    def put(self, name, obj, replace=True):
         """Objects should be put on the store only once!"""
+        if replace:
+            self._store[name] = obj
 
-        if location is None:
-
-            if self.state is None:
-                location = "TRAN"
-
-            else:
-                location = self._default[self.state]
-
-        #if self.check(name, location) and not replace:
-        #    """To do: handle warning at this stage."""
-        #    return
-
-        self._objects[location][name] = obj
-
-    def get(self, name, location=["TRAN", "PERM"]):
+    def get(self, name):
         """Get an object."""
+        try:
+            return self._store[name]
 
-        if isinstance(location, list):
-            for l in location:
-                if name in self._objects[l]:
-                    return self._objects[l][name]
+        except KeyError:
+            return enums.Pyrate.NONE
 
-        else:
-            return self._objects[location][name]
-
-        return enums.Pyrate.NONE
-
-    def copy(self, name, location=["TRAN", "PERM"]):
+    def copy(self, name):
         """Returns a copy of the object."""
-        return copy(self.get(name, location))
+        return copy(self.get(name))
 
-    def check(self, name, location=["TRAN" "PERM"]):
-        """Checks if object is in the store."""
-
-        if isinstance(location, str):
-            return name in self._objects[location]
-
-        else:
-            return any([name in self._objects[l] for l in location])
-
-    def clear(self, location=["TRAN", "PERM"]):
+    def clear(self):
         """Clears the store or portions of it."""
-
-        if isinstance(location, str):
-            self._objects[location].clear()
-
-        else:
-            for l in location:
-                self._objects[l].clear()
-
+        self._store[l].clear()
 
 # EOF

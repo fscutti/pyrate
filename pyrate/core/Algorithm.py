@@ -38,18 +38,15 @@ class Algorithm:
 
     def initialise(self, condition=None):
         """At this stage the method knows the current input."""
-        #self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
-        return condition
+        pass
 
     def execute(self, condition=None):
         """At this stage the method knows the current input and current event."""
-        #self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
-        return condition
+        pass
 
     def finalise(self, condition=None):
         """At this stage the method knows the current input."""
-        #self.store.put(self.name, enums.Pyrate.NONE, "TRAN")
-        return condition
+        pass
 
     @property
     def input(self):
