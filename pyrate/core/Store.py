@@ -4,9 +4,7 @@ The store is cleaned after every event/input iteration.
 
 import sys
 from copy import copy
-import traceback
 
-from pyrate.utils import functions as FN
 from pyrate.utils import enums
 
 
