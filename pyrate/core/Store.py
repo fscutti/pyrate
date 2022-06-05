@@ -14,10 +14,12 @@ class Store:
         self._store = {}
         self._saved = {}
 
-    def put(self, name, obj, replace=True):
+    def put(self, name, obj, copy=False):
         """Objects should be put on the store only once!"""
-        if replace:
+        if not copy:
             self._store[name] = obj
+        else:
+            self._store[name] = copy(obj)
 
     def get(self, name):
         """Get an object."""
