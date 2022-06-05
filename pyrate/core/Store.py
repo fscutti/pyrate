@@ -12,6 +12,7 @@ class Store:
     def __init__(self, name):
         self.name = name
         self._store = {}
+        self._saved = {}
 
     def put(self, name, obj, replace=True):
         """Objects should be put on the store only once!"""
@@ -33,5 +34,23 @@ class Store:
     def clear(self):
         """Clears the store or portions of it."""
         self._store[l].clear()
+
+    def save(self, name):
+        try:
+            self._saved[name] = copy(self._store[name])
+
+        except KeyError:
+            sys.exit(
+                f"ERROR: trying to save {name} but the object is not on the store."
+            )
+
+    def collect(self, name):
+        """Get a saved object."""
+        try:
+            return self._saved[name]
+
+        except KeyError:
+            return enums.Pyrate.NONE
+
 
 # EOF
