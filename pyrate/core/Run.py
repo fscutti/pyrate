@@ -1,17 +1,18 @@
 """ This class controls the execution of algorithms
     as a single local instance. 
 """
-from cmath import log
 import os
 import sys
 import importlib
 import timeit
 import time
 import logging
-from collections import defaultdict
-from anytree import Node, RenderTree
 
 import anytree.node.exceptions as anytreeExceptions
+
+from cmath import log
+from collections import defaultdict
+from anytree import Node, RenderTree
 
 from colorama import Fore
 from tqdm import tqdm
@@ -139,11 +140,6 @@ class Run:
             return self.algorithms[obj_name]
 
         else:
-            # obj_name might be a target
-            # containining the sample names. There are other
-            # manipulations of the obj_name too for example
-            # "multiplying" channels.
-
             obj = obj_name.split(":")[0]
 
             if obj in self._config:
@@ -151,12 +147,19 @@ class Run:
                 obj_config = self._config[obj]
 
                 for m in sys.modules:
-                    if obj_config["algorithm"] == m.split(".")[-1]:
 
-                        self.algorithms[obj_name] = getattr(
-                            importlib.import_module(m), m.split(".")[-1]
-                        )(obj_name, obj_config, self.store, self.logger)
+                    alg_name = m.split(".")[-1]
 
+                    if obj_config["algorithm"] == alg_name:
+
+                        module = importlib.import_module(m)
+
+                        # algorithm instance.
+                        self.algorithms[obj_name] = getattr(module, alg_name)(
+                            obj_name, obj_config, self.store, self.logger
+                        )
+
+                        # initialisation of inputs and outputs.
                         self.algorithms[obj_name].input = obj_config["input"]
 
                         if "output" in obj_config:
@@ -166,8 +169,8 @@ class Run:
 
                         return self.algorithms[obj_name]
 
-            elif obj == "EVENT" or obj == "INPUT":
-                pass
+            elif obj in ["EVENT", "INPUT"]:
+                return None
 
             else:
                 sys.exit(f"ERROR: object {obj} not defined in the configuration.")
@@ -193,20 +196,6 @@ class Run:
 
         # maybe change the way this is retrieved. Use nodes directly.
         all_inputs_vs_targets = self._out.get_inputs_vs_targets()
-
-        # -----------------------------------------------------------------------
-        # Instanciate algorithms for all targets specified in the job options.
-        # -----------------------------------------------------------------------
-        # print(all_inputs_vs_targets)
-
-        # self.algorithms = {}
-        # for i_name, targets in all_inputs_vs_targets.items():
-        #    for t in targets:
-
-        #        alg_name = self._config[t["object"]]["algorithm"]["name"]
-        #        obj_name = t["name"]
-
-        #        self.add(obj_name, alg_name, store)
 
         # -----------------------------------------------------------------------
         # Inputs will be initialised dynamically in the run function.
@@ -241,7 +230,7 @@ class Run:
 
         return store
 
-    def run(self, state, store, inputs_vs_targets):
+    def run(self, state, inputs_vs_targets):
         """Run the loop function."""
 
         prefix_types = {
@@ -269,7 +258,7 @@ class Run:
 
             if not i_name in self.instanciated_inputs:
                 self.instanciated_inputs[i_name] = Input(
-                    i_name, store, self.logger, self.inputs[i_name]
+                    i_name, self.store, self.logger, self.inputs[i_name]
                 )
 
             self._in = self.instanciated_inputs[i_name]
@@ -281,12 +270,13 @@ class Run:
                 # ---------------------------------------------------------------
                 # Initialise and finalise loops
                 # ---------------------------------------------------------------
-                store.put("INPUT:name", i_name, "TRAN")
-                store.put("INPUT:config", self.inputs[i_name], "TRAN")
+                store.put("INPUT:name", i_name)
 
-                self.loop(store, targets)
+                store.put("INPUT:config", self.inputs[i_name])
 
-                store.clear("TRAN")
+                self.loop()
+
+                store.clear()
 
             elif self.state == "execute":
                 # ---------------------------------------------------------------
@@ -319,15 +309,15 @@ class Run:
                         disable=self.no_progress_bar,
                         bar_format=self.colors[self.state]["event"],
                     ):
-                        store.put("INPUT:name", i_name, "TRAN")
+                        store.put("INPUT:name", i_name)
 
-                        store.put("INPUT:config", self.inputs[i_name], "TRAN")
+                        store.put("INPUT:config", self.inputs[i_name])
 
                         store.put("EVENT:idx", self._in.get_idx())
 
-                        self.loop(store, targets)
+                        self.loop()
 
-                        store.clear("TRAN")
+                        store.clear()
 
                         self._in.set_next_event()
 
@@ -396,7 +386,7 @@ class Run:
 
     def is_done(self, obj_name, alg):
         """In order to get out of the dependency loop
-        the algorithm has to put False on the store."""
+        the algorithm has to put False/0 on the store."""
 
         for dep_name, dep_cond in alg.input.items():
 
