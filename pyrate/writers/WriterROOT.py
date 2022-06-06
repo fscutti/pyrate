@@ -5,25 +5,25 @@ from pyrate.core.Writer import Writer
 
 
 class WriterROOT(Writer):
-    __slots__ = ["f", "w_targets"]
+    __slots__ = ["f"]
 
-    def __init__(self, name, store, logger, f, w_targets):
+    def __init__(self, name, config, store, logger):
         super().__init__(name, store, logger)
-        self.f = f
-        self.w_targets = w_targets
 
     def load(self):
         """Creates the file and set targets."""
+
+        self.targets = self.config["targets"]
+        self.file = self.config["path"]
+
         self.is_loaded = True
 
-        self.set_inputs_vs_targets(self.w_targets)
-
-        self.f = R.TFile(self.f, "RECREATE")
+        self.f = R.TFile(self.file, "RECREATE")
 
         # WARNING: if the file pointer needs to be retrieved from the store
         # by accessing the OUTPUT keys like follows, then is better for the
         # target to belong to just one output file.
-        for t in self.get_targets():
+        for t in self.targets:
             self.store.put(f"OUTPUT:{t}", self.f, "PERM")
 
     def write(self, name):

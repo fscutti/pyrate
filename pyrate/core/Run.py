@@ -7,7 +7,6 @@ import importlib
 import timeit
 import time
 import logging
-
 import anytree.node.exceptions as anytreeExceptions
 
 from cmath import log
@@ -23,7 +22,7 @@ from pyrate.core.Output import Output
 
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
-from pyrate.utils import enums
+from pyrate.utils import enums as EN
 
 
 class Run:
@@ -93,6 +92,14 @@ class Run:
 
         self.store = Store(self.name)
 
+        for out_name, out_config in self.outputs.items():
+            out = self.output(out_name)
+
+        sys.exit()
+
+        # maybe change the way this is retrieved. Use nodes directly.
+        all_inputs_vs_targets = self._out.get_inputs_vs_targets()
+
         self.targets = {}
         self.nodes = {}
         self.algorithms = {}
@@ -106,6 +113,34 @@ class Run:
                     self.targets[t_name] = self.node(t_name, samples=t_samples)
 
                     # print(RenderTree(self.targets[t_name]))
+
+    def output(self, output_name):
+        """Returns a specific output instance."""
+
+        if output_name in self.outputs:
+            return self.outputs[output_name]
+
+        else:
+
+            if output_name in self.outputs:
+
+                output_config = self.outputs[output_name]
+
+                self.outputs[output_name] = Output(
+                    output_name, output_config, self.store, self.logger
+                )
+
+                self.outputs[output_name].load()
+
+                return self.outputs[output_name]
+
+            else:
+                sys.exit(f"ERROR: output {output_name} not defined in the configuration.")
+                return None
+
+
+
+
 
     def node(self, obj_name, samples=None):
         """Gets node tree of an object.
@@ -217,7 +252,7 @@ class Run:
             # )
 
             # update the store.
-            store = self.run(state, store, current_inputs_vs_targets)
+            store = self.run(state, current_inputs_vs_targets)
 
         print("\n")
 
@@ -349,7 +384,7 @@ class Run:
                     self.logger.error(msg)
 
                 else:
-                    if store.get(t["name"], "PERM") is not enums.Pyrate.SKIP_WRITE:
+                    if store.get(t["name"], "PERM") is not EN.Pyrate.SKIP_WRITE:
                         self._out.write(t["name"])
 
         return store
@@ -362,13 +397,13 @@ class Run:
     def call(self, obj_name):
         """Calls an algorithm."""
 
-        if self.store.get(obj_name) is enums.Pyrate.NONE:
+        if self.store.get(obj_name) is EN.Pyrate.NONE:
 
             alg = self.nodes[obj_name].algorithm
 
             if alg is not None:
 
-                # preparing input
+                # preparing input and checking conditions.
                 if not self.is_done(obj_name, alg):
 
                     getattr(alg, self.state)()
@@ -405,13 +440,10 @@ class Run:
         """If the main object is on the store with a valid value,
         additional output is checked to be on the store."""
 
-        if self.store.get(obj_name) is not enums.Pyrate.NONE:
+        if self.store.get(obj_name) is not EN.Pyrate.NONE:
 
             return all(
-                [
-                    self.store.get(o) is not enums.Pyrate.NONE
-                    for o in alg.output[obj_name]
-                ]
+                [self.store.get(o) is not EN.Pyrate.NONE for o in alg.output[obj_name]]
             )
 
         else:
