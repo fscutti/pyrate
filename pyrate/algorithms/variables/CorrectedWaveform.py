@@ -47,6 +47,7 @@
 import sys
 from pyrate.core.Algorithm import Algorithm
 from pyrate.utils.enums import Pyrate
+import numpy as np
 
 wf_units = {"V": 1.0, "mV": 1e3, "uV": 1e6}
 
@@ -118,9 +119,9 @@ class CorrectedWaveform(Algorithm):
     def execute(self):
         """Calculates the baseline corrected waveform"""
         if self.reader == "ReaderWaveCatcherMMAP":
-            waveform = self.store.get(self.config["wc_waveform"])
+            waveform = np.array(self.store.get(self.config["wc_waveform"]))
         else:
-            waveform = self.store.get(self.config["waveform"])
+            waveform = np.array(self.store.get(self.config["waveform"]))
         
         baseline = self.store.get(self.config["baseline"])
         if waveform is Pyrate.NONE or baseline is Pyrate.NONE:

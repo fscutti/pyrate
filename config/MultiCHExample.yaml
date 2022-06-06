@@ -7,30 +7,30 @@ objects:
         # Waveform and Baseline algorithms
         # -----------------------------------------------------------
 
-    RawWaveform_CH0:
-        algorithm:
-            name: RawWaveform
-        initialise:
-            output:
-        execute:
-            input: EVENT:board_0:ch_0:waveform, EVENT:board_0:raw_waveform_ch_0, EVENT:RawWaveform
-            output:
-        waveform_bt: EVENT:board_0:raw_waveform_ch_0         # Channels need to be specified here
-        waveform_md: EVENT:board_0:ch_0:waveform
-        waveform_wd: EVENT:RawWaveform
+    # RawWaveform_CH0:
+    #     algorithm:
+    #         name: RawWaveform
+    #     initialise:
+    #         output:
+    #     execute:
+    #         input: EVENT:board_0:ch_0:waveform, EVENT:board_0:raw_waveform_ch_0, EVENT:RawWaveform
+    #         output:
+    #     waveform_bt: EVENT:board_0:raw_waveform_ch_0         # Channels need to be specified here
+    #     waveform_md: EVENT:board_0:ch_0:waveform
+    #     waveform_wd: EVENT:RawWaveform
 
 
-    RawWaveform_CH1:
-        algorithm:
-            name: RawWaveform
-        initialise:
-            output:
-        execute:
-            input: EVENT:board_0:ch_1:waveform, EVENT:board_0:raw_waveform_ch_1, EVENT:RawWaveform
-            output:
-        waveform_bt: EVENT:board_0:raw_waveform_ch_1         # Channels need to be specified here
-        waveform_md: EVENT:board_0:ch_1:waveform
-        waveform_wd: EVENT:RawWaveform
+    # RawWaveform_CH1:
+    #     algorithm:
+    #         name: RawWaveform
+    #     initialise:
+    #         output:
+    #     execute:
+    #         input: EVENT:board_0:ch_1:waveform, EVENT:board_0:raw_waveform_ch_1, EVENT:RawWaveform
+    #         output:
+    #     waveform_bt: EVENT:board_0:raw_waveform_ch_1         # Channels need to be specified here
+    #     waveform_md: EVENT:board_0:ch_1:waveform
+    #     waveform_wd: EVENT:RawWaveform
 
 
     BaselineDynamic_CH0:
@@ -40,7 +40,7 @@ objects:
             threshold: 20
         execute:
             input: RawWaveform_CH0
-        waveform: RawWaveform_CH0
+        waveform: EVENT:board_0:ch_0:waveform
 
 
     BaselineDynamic_CH1:
@@ -50,7 +50,7 @@ objects:
             threshold: 20
         execute:
             input: RawWaveform_CH1
-        waveform: RawWaveform_CH1
+        waveform: EVENT:board_0:ch_1:waveform
 
     BaselineNaive_CH0:
         algorithm:
@@ -58,7 +58,7 @@ objects:
             samples: 40
         execute:
             input: RawWaveform_CH0
-        waveform: RawWaveform_CH0
+        waveform: EVENT:board_0:ch_0:waveform
 
 
     BaselineNaive_CH1:
@@ -67,7 +67,7 @@ objects:
             samples: 40
         execute:
             input: RawWaveform_CH1
-        waveform: RawWaveform_CH1
+        waveform: EVENT:board_0:ch_1:waveform
 
 
     CorrectedWaveform_CH0:
@@ -81,7 +81,7 @@ objects:
             output:
         execute:
             input: RawWaveform_CH0, BaselineNaive_CH0
-        waveform: RawWaveform_CH0
+        waveform: EVENT:board_0:ch_0:waveform
         baseline: BaselineNaive_CH0
         wc_waveform: EVENT:GROUP:CH0:RawWaveform
 
@@ -97,7 +97,7 @@ objects:
             output:
         execute:
             input: RawWaveform_CH1, BaselineNaive_CH1
-        waveform: RawWaveform_CH1
+        waveform: EVENT:board_0:ch_1:waveform
         baseline: BaselineNaive_CH1
         wc_waveform: EVENT:GROUP:CH1:RawWaveform
 
@@ -179,11 +179,11 @@ objects:
         # Variables
         # -----------------------------------------------------------
 
-    Timestamp_CH0:
-        algorithm:
-            name: GetTimestamp
-        execute:
-            output:
+    # Timestamp_CH0:
+    #     algorithm:
+    #         name: GetTimestamp
+    #     execute:
+    #         output:
 
     PeakHeight_CH0:
         algorithm:
@@ -447,18 +447,19 @@ objects:
         initialise:
             output:
         execute:
-            input: RawWaveform_CH0, CorrectedWaveform_CH0, BaselineDynamic_CH0, BaselineNaive_CH0, PeakHeight_CH0,
+            input: EVENT:board_0:ch_0:waveform, CorrectedWaveform_CH0, BaselineDynamic_CH0, BaselineNaive_CH0, PeakHeight_CH0,
                 PeakLocation_CH0, PulseCharge_CH0, TotalCharge_CH0, PulseStart_CH0, PulseStart_CH1,
                 PulseTime_CH0, PulseTime_CH1, PromptDelayChargeRatio_CH0, PromptCharge_CH0,
                 DelayedCharge_CH0, MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0, TimeDifference_CH01,
-                Moments_CH0, Timestamp_CH0, AverageWaveform_CH0, AverageWaveform_CH1, DAMAX1_CH0, DAMAX2_CH0, FFT_CH0, LeadingEdge_CH0
+                Moments_CH0, EVENT:board_0:ch_0:timestamp, AverageWaveform_CH0, AverageWaveform_CH1, DAMAX1_CH0, DAMAX2_CH0, FFT_CH0, LeadingEdge_CH0
         finalise:
             output:
 
         trees:
         - Channel_0:
                 event:
-                    vector<int>: RawWaveform_CH0
+                    vector<int>: 
+                                - RawWaveform_CH0: EVENT:board_0:ch_0:waveform
                     vector<double>: 
                                 - FFT_CH0, Moments_CH0
                                 - CorrectedWaveform: CorrectedWaveform_CH0
@@ -467,7 +468,7 @@ objects:
                             TotalCharge_CH0, PulseStart_CH0, PulseTime_CH0, PromptDelayChargeRatio_CH0,
                             MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0,
                             LeadingEdge_CH0, BaselineDynamic_CH0, BaselineNaive_CH0
-                        - Timestamp: Timestamp_CH0
+                        - Timestamp: EVENT:board_0:ch_0:timestamp
                         - {DAMAX1: DAMAX1_CH0, DAMAX2_CH0: DAMAX2_CH0}
                 single:
                     vector<double>: AverageWaveform_CH0

@@ -123,7 +123,7 @@ class ReaderCAEN1730_RAW(Reader):
             return Pyrate.NONE
 
         #Return the waveform and mark that this channel has been read
-        return self._evtTime[ch]
+        return self._evtTime
 
     def _read_event(self):
         #Reset event
