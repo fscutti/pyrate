@@ -8,6 +8,7 @@ import os
 import mmap
 import struct
 from pyrate.utils.enums import Pyrate
+import numpy as np
 
 from pyrate.core.Reader import Reader
 
@@ -136,7 +137,7 @@ class ReaderCAEN1730_PSD(Reader):
             return Pyrate.NONE
 
         #Return the waveform and mark that this channel has been read
-        return self._evtWaveforms[ch]
+        return np.array(self._evtWaveforms[ch], dtype='int32')
 
     def _get_timestamps(self, ch):
         #If the channel is not in the event return an empty list

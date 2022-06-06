@@ -119,9 +119,9 @@ class CorrectedWaveform(Algorithm):
     def execute(self):
         """Calculates the baseline corrected waveform"""
         if self.reader == "ReaderWaveCatcherMMAP":
-            waveform = np.array(self.store.get(self.config["wc_waveform"]))
+            waveform = self.store.get(self.config["wc_waveform"])
         else:
-            waveform = np.array(self.store.get(self.config["waveform"]))
+            waveform = self.store.get(self.config["waveform"])
         
         baseline = self.store.get(self.config["baseline"])
         if waveform is Pyrate.NONE or baseline is Pyrate.NONE:

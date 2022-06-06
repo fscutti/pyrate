@@ -8,6 +8,7 @@ import os
 import mmap
 import struct
 from pyrate.utils.enums import Pyrate
+import numpy as np
 
 from pyrate.core.Reader import Reader
 
@@ -114,7 +115,7 @@ class ReaderCAEN1730_RAW(Reader):
         if(ch not in self._inEvt.keys()):
             return Pyrate.NONE
 
-        return self._evtWaveforms[ch]
+        return np.array(self._evtWaveforms[ch], dtype='int32')
 
     def _get_timestamps(self, ch):
         #If the channel is not in the event return an empty list
