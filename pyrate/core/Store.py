@@ -14,12 +14,9 @@ class Store:
         self._store = {}
         self._saved = {}
 
-    def put(self, name, obj, copy=False):
-        """Objects should be put on the store only once!"""
-        if not copy:
-            self._store[name] = obj
-        else:
-            self._store[name] = copy(obj)
+    def put(self, name, obj):
+        """Puts an object on the store."""
+        self._store[name] = obj
 
     def get(self, name):
         """Get an object."""
@@ -34,10 +31,11 @@ class Store:
         return copy(self.get(name))
 
     def clear(self):
-        """Clears the store or portions of it."""
+        """Clears the store."""
         self._store[l].clear()
 
     def save(self, name):
+        """Saves an object for later collection."""
         try:
             self._saved[name] = copy(self._store[name])
 
