@@ -48,6 +48,7 @@ board_(b_idx):
 import os
 import mmap
 import struct
+import numpy as np
 
 from pyrate.core.Reader import Reader
 
@@ -262,7 +263,7 @@ class ReaderBlueTongueMMAP(Reader):
         value = self._get_items(items_number, items_type)
 
         if "raw_waveform" in name:
-            value = list(value)
+            value = np.array(value)
         else:
             value = value[0]
 

@@ -47,7 +47,7 @@ class BaselineNaive(Algorithm):
 
     def execute(self):
         """Calculates the baseline from the first n samples of the waveform"""
-        self.store.get(self.config["waveform"])
+        waveform = self.store.get(self.config["waveform"])
 
         if "samples" not in self.config["algorithm"]:
             sys.exit("ERROR in Baseline, 'samples' not found in the config")
