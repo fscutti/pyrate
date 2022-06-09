@@ -8,7 +8,7 @@ class WriterROOT(Writer):
     __slots__ = ["f"]
 
     def __init__(self, name, config, store, logger):
-        super().__init__(name, store, logger)
+        super().__init__(name, config, store, logger)
 
     def load(self):
         """Creates the file and set targets."""

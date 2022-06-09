@@ -92,8 +92,9 @@ class Run:
 
         self.store = Store(self.name)
 
+        self.output_init = {}
         for out_name, out_config in self.outputs.items():
-            out = self.output(out_name)
+            out = self.outinit(out_name)
 
         sys.exit()
 
@@ -114,11 +115,11 @@ class Run:
 
                     # print(RenderTree(self.targets[t_name]))
 
-    def output(self, output_name):
+    def outinit(self, output_name):
         """Returns a specific output instance."""
 
-        if output_name in self.outputs:
-            return self.outputs[output_name]
+        if output_name in self.output_init:
+            return self.output_init[output_name]
 
         else:
 
@@ -126,35 +127,34 @@ class Run:
 
                 output_config = self.outputs[output_name]
 
-                self.outputs[output_name] = Output(
+                self.output_init[output_name] = Output(
                     output_name, output_config, self.store, self.logger
                 )
 
-                self.outputs[output_name].load()
+                self.output_init[output_name].load()
 
-                return self.outputs[output_name]
+                return self.output_init[output_name]
 
             else:
-                sys.exit(f"ERROR: output {output_name} not defined in the configuration.")
+                sys.exit(
+                    f"ERROR: output {output_name} not defined in the configuration."
+                )
                 return None
 
+    def node(self, obj_name, samples=[]):
+        """Gets node tree of an object. This is a recursive function."""
+        if not obj_name in self.nodes:
 
+            self.nodes[obj_name] = Node(obj_name, algorithm=None, samples=samples)
 
+        if self.nodes[obj_name].algorithm is None:
 
+            self.nodes[obj_name].algorithm = self.alg(obj_name)
 
-    def node(self, obj_name, samples=None):
-        """Gets node tree of an object.
-        This is a recursive function."""
-
-        if obj_name in self.nodes:
-            return self.nodes[obj_name]
-
-        else:
-            self.nodes[obj_name] = Node(
-                obj_name, algorithm=self.alg(obj_name), samples=samples
-            )
-
-            if self.nodes[obj_name].algorithm is not None:
+            if (
+                self.nodes[obj_name].algorithm is not None
+                and not self.nodes[obj_name].children
+            ):
 
                 for i in self.nodes[obj_name].algorithm.input:
 
@@ -167,6 +167,15 @@ class Run:
                         )
 
         return self.nodes[obj_name]
+
+    def reset(self, obj_name):
+        """Clears the algorithm instance of a node."""
+
+        if len(self.nodes[obj_name].samples) <= 1:
+
+            del self.algorithms[obj_name]
+
+            self.nodes[obj_name].algorithm = None
 
     def alg(self, obj_name):
         """Gets instance of algorithm from the configuration."""
@@ -390,7 +399,7 @@ class Run:
         return store
 
     def loop(self):
-        """Loop over required targets to resolve them. Skips completed ones."""
+        """Loop over required targets to resolve them."""
         for t in self.targets:
             self.call(t)
 
@@ -403,8 +412,8 @@ class Run:
 
             if alg is not None:
 
-                # preparing input and checking conditions.
-                if not self.is_done(obj_name, alg):
+                # check whether the alg meets the conditions to run.
+                if self.is_meeting_conditions(obj_name, alg):
 
                     getattr(alg, self.state)()
 
@@ -419,22 +428,26 @@ class Run:
 
         return
 
-    def is_done(self, obj_name, alg):
+    def is_meeting_conditions(self, obj_name, alg):
         """In order to get out of the dependency loop
         the algorithm has to put False/0 on the store."""
 
-        for dep_name, dep_cond in alg.input.items():
+        n_deps = len(alg.input) - 1
+
+        for dep_idx, dep_name in enumerate(alg.input):
 
             self.call(dep_name)
+
+            dep_cond = alg.input[dep_name]
 
             if dep_cond is not None:
 
                 getattr(alg, self.state)(dep_cond)
 
-                if not self.store.get(obj_name):
-                    return True
+                if not self.store.get(obj_name) or dep_idx == n_deps:
+                    return False
 
-        return False
+        return True
 
     def is_complete(self, obj_name, alg):
         """If the main object is on the store with a valid value,

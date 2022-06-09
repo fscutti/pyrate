@@ -30,7 +30,7 @@ class Output(Writer):
 
             if self.name.endswith(".root"):
                 self._writer = WriterROOT(
-                    name,
+                    self.name,
                     config,
                     self.store,
                     self.logger,
@@ -41,7 +41,7 @@ class Output(Writer):
 
     def load(self):
 
-        self.writer = config
+        self.writer = self.config
         self.is_loaded = True
 
 

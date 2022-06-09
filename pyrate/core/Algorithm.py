@@ -66,12 +66,10 @@ class Algorithm:
                 for s, c in self.parse_input(i).items():
                     self._input[s] = c
 
-    def parse_input(self, s):
+    def parse_input(self, l=[]):
         """Returns a dictionary where keys are dependencies
-        and values are conditions for their evaluation. If
-        dependencies should be evaluated no matter what, then
-        values should be None.This function is reimplemented
-        by derived algorithms."""
+        and values are conditions to be evaluated by the Algorithm. 
+        This function is reimplemented by derived algorithms."""
         return {}
 
     @property
