@@ -39,6 +39,14 @@ class Output(Writer):
             elif ".dat" in file_format:
                 pass
 
+    @property
+    def file(self):
+        return self.writer.file
+
+    @property
+    def targets(self):
+        return self.writer.targets
+
     def load(self):
 
         # this calls the setter method above.

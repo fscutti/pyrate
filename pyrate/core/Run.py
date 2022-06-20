@@ -92,53 +92,45 @@ class Run:
 
         self.store = Store(self.name)
 
-        self.output_init = {}
+        self.targets = {}
+        self.nodes = {}
+        self.algorithms = {}
+        self.loaded_outputs = {}
+
         for out_name, out_config in self.outputs.items():
-            out = self.outinit(out_name)
+            out = self.out(out_name)
+
+        for out_name, out_instance in self.loaded_outputs.items():
+            for t_name, t_samples in out_instance.targets.items():
+                self.targets[t_name] = self.node(t_name, samples=t_samples)
 
         sys.exit()
 
         # maybe change the way this is retrieved. Use nodes directly.
         all_inputs_vs_targets = self._out.get_inputs_vs_targets()
 
-        self.targets = {}
-        self.nodes = {}
-        self.algorithms = {}
-
-        for out_name, out_config in self.outputs.items():
-            for t_dict in out_config["targets"]:
-                for t_name, t_samples in t_dict.items():
-
-                    obj_name = t_name.split(":")[0]
-
-                    self.targets[t_name] = self.node(t_name, samples=t_samples)
-
-                    # print(RenderTree(self.targets[t_name]))
-
-    def outinit(self, output_name):
+    def out(self, out_name):
         """Returns a specific output instance."""
 
-        if output_name in self.output_init:
-            return self.output_init[output_name]
+        if out_name in self.loaded_outputs:
+            return self.loaded_outputs[out_name]
 
         else:
 
-            if output_name in self.outputs:
+            if out_name in self.outputs:
 
-                output_config = self.outputs[output_name]
+                out_config = self.outputs[out_name]
 
-                self.output_init[output_name] = Output(
-                    output_name, output_config, self.store, self.logger
+                self.loaded_outputs[out_name] = Output(
+                    out_name, out_config, self.store, self.logger
                 )
 
-                self.output_init[output_name].load()
+                self.loaded_outputs[out_name].load()
 
-                return self.output_init[output_name]
+                return self.loaded_outputs[out_name]
 
             else:
-                sys.exit(
-                    f"ERROR: output {output_name} not defined in the configuration."
-                )
+                sys.exit(f"ERROR: output {out_name} not defined in the configuration.")
                 return None
 
     def node(self, obj_name, samples=[]):
