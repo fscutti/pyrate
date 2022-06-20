@@ -150,11 +150,11 @@ class Job:
 
         for o_name, o_attr in self.config["outputs"].items():
 
-            self.job["outputs"][o_name] = {"files": []}
+            self.job["outputs"][o_name] = {"files": None}
 
-            o_attr["path"] = FN.find_env(o_attr["path"], "PYRATE")
+            o_attr["file"]["path"] = FN.find_env(o_attr["file"]["path"], "PYRATE")
 
-            outdir = os.path.dirname(os.path.abspath(o_attr["path"]))
+            outdir = os.path.dirname(os.path.abspath(o_attr["file"]["path"]))
 
             if not os.path.exists(outdir):
                 sys.exit("ERROR: Output directory does not exist, please create it.")
@@ -162,7 +162,9 @@ class Job:
             if not os.path.isdir(outdir):
                 sys.exist("ERROR: Output path is a file, not a directory.")
 
-            self.job["outputs"][o_name]["files"] = os.path.join(o_attr["path"], o_name)
+            self.job["outputs"][o_name]["files"] = os.path.join(
+                o_attr["file"]["path"], o_name + o_attr["file"]["format"]
+            )
 
             for target in o_attr["targets"]:
                 for t_name, t_attr in target.items():
@@ -192,5 +194,6 @@ class Job:
     def launch(self):
         """Launch Run objects. """
         self.run.launch()
+
 
 # EOF

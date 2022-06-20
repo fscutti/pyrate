@@ -13,10 +13,11 @@ class WriterROOT(Writer):
     def load(self):
         """Creates the file and set targets."""
 
-        self.targets = self.config["targets"]
-        self.file = self.config["path"]
-
         self.is_loaded = True
+
+        self.file = self.config["files"]
+
+        self.targets = self.config["targets"]
 
         self.f = R.TFile(self.file, "RECREATE")
 
@@ -24,14 +25,14 @@ class WriterROOT(Writer):
         # by accessing the OUTPUT keys like follows, then is better for the
         # target to belong to just one output file.
         for t in self.targets:
-            self.store.put(f"OUTPUT:{t}", self.f, "PERM")
+            self.store.put(f"OUTPUT:{t}", self.f)
 
     def write(self, name):
         """Write an object to file. This can be represented by a structure
         indicating the folder structure of the output yet to be created at
         this point.
         """
-        obj = self.store.copy(name, "PERM")
+        obj = self.store.copy(name)
 
         if isinstance(obj, dict):
             self._write_dirs(obj)

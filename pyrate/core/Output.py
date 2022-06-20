@@ -24,24 +24,28 @@ class Output(Writer):
         return self._writer
 
     @writer.setter
-    def writer(self, config):
+    def writer(self, file_format):
 
         if self._writer is None:
 
-            if self.name.endswith(".root"):
+            if ".root" in file_format:
                 self._writer = WriterROOT(
                     self.name,
-                    config,
+                    self.config,
                     self.store,
                     self.logger,
                 )
 
-            elif self.name.endswith(".dat"):
+            elif ".dat" in file_format:
                 pass
 
     def load(self):
 
-        self.writer = self.config
+        # this calls the setter method above.
+        self.writer = self.config["file"]["format"]
+
+        self.writer.load()
+
         self.is_loaded = True
 
 

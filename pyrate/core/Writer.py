@@ -1,5 +1,7 @@
 """ Generic Writer base class.
 """
+import os
+
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
 
@@ -7,6 +9,7 @@ from pyrate.utils import functions as FN
 class Writer:
     __slots__ = [
         "name",
+        "config",
         "store",
         "logger",
         "is_loaded",
@@ -21,7 +24,8 @@ class Writer:
         self.logger = logger
 
         self.is_loaded = False
-        self._targets = None
+
+        self._targets = {}
         self._file = None
 
     def load(self):
@@ -38,14 +42,10 @@ class Writer:
         return self._file
 
     @file.setter
-    def file(self, path):
+    def file(self, file_path):
         """Setter method for targets."""
-
-        if len(self.name.split(".")) == 1:
-            sys.exit(f"ERROR: format not declared for writer {self.name}")
-
-        else:
-            self._file = os.path.join(path, self.name)
+        if self._file is None:
+            self._file = file_path
 
     @property
     def targets(self):
@@ -53,14 +53,15 @@ class Writer:
         return self._targets
 
     @targets.setter
-    def targets(self, config):
+    def targets(self, target_list):
         """Setter method for targets."""
-        for t in config:
+        if not any(self._targets):
 
-            t_name = t.replace(" ", "")
-            t_inputs = ST.get_items(t.split(":")[1])
+            for t in target_list:
 
-            self._targets[t_name] = t_inputs
+                for t_name, t_inputs in t.items():
+                    t_name = t_name.replace(" ", "")
+                    self._targets[t_name] = t_inputs
 
 
 # EOF
