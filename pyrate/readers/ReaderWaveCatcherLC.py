@@ -13,8 +13,8 @@ from pyrate.core.Reader import Reader
 class ReaderWaveCatcherLC(Reader):
     __slots__ = ["f", "structure", "_event", "_mmf", "_n_channels", "_header_size"]
 
-    def __init__(self, name, store, logger, f_name, structure):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger, f_name, structure):
+        super().__init__(name, config, store, logger)
         self.f = f_name
         self.structure = structure
 

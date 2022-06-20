@@ -9,8 +9,8 @@ from pyrate.core.Reader import Reader
 class ReaderPostgreSQL(Reader):
     __slots__ = ["db", "_db_connection", "_db_cursor", "_dbidx", "_tables"]
 
-    def __init__(self, name, store, logger, db):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger, db):
+        super().__init__(name, config, store, logger)
         self.db = db
 
     def load(self):

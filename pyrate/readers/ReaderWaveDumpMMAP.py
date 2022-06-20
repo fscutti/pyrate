@@ -20,8 +20,8 @@ class ReaderWaveDumpMMAP(Reader):
         "_len_waveform",
     ]
 
-    def __init__(self, name, store, logger, f_name, structure):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger, f_name, structure):
+        super().__init__(name, config, store, logger)
         self.f = f_name
         self.structure = structure
 

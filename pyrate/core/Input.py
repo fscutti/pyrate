@@ -25,8 +25,8 @@ GB = 1e9
 
 
 class Input(Reader):
-    def __init__(self, name, store, logger, iterable=(), **kwargs):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger, iterable=(), **kwargs):
+        super().__init__(name, config, store, logger)
         self.__dict__.update(iterable, **kwargs)
 
     def load(self):
@@ -53,7 +53,9 @@ class Input(Reader):
                         ST.get_items(self.samples["tags"]["groups"])
                     ):
                         g_names[g_idx] = g_name
-
+            
+            self.files = self.config["files"]            
+            
             self._n_groups = len(self.files)
             self._n_files = len(self.files[0])
 
@@ -355,7 +357,7 @@ class Input(Reader):
                 if f_name.endswith(".root"):
                     self.logger.info(f"Auto-setting reader for {f_name} to ReaderROOT")
                     reader = ReaderROOT(
-                        r_name, self.store, self.logger, f_name, self.structure
+                        r_name, self.config, self.store, self.logger, f_name, self.structure
                     )
 
                 elif FN.is_bt(f_name, self.store, self.logger, self.structure):
@@ -364,7 +366,7 @@ class Input(Reader):
                         f"Auto-setting reader for {f_name} to ReaderBlueTongueMMAP"
                     )
                     reader = ReaderBlueTongueMMAP(
-                        r_name, self.store, self.logger, f_name, self.structure
+                        r_name, self.config, self.store, self.logger, f_name, self.structure
                     )
 
                 elif FN.is_wd_ascii(f_name):
@@ -373,7 +375,7 @@ class Input(Reader):
                         f"Auto-setting reader for {f_name} to ReaderWaveDumpMMAP"
                     )
                     reader = ReaderWaveDumpMMAP(
-                        r_name, self.store, self.logger, f_name, self.structure
+                        r_name, self.config, self.store, self.logger, f_name, self.structure
                     )
                 elif FN.is_wc_ascii(f_name):
                     # WaveCatcher file
@@ -381,7 +383,7 @@ class Input(Reader):
                         f"Auto-setting reader for {f_name} to ReaderWaveCatcherMMAP"
                     )
                     reader = ReaderWaveCatcherMMAP(
-                        r_name, self.store, self.logger, f_name, self.structure
+                        r_name, self.config, self.store, self.logger, f_name, self.structure
                     )
 
                 if not reader:
