@@ -54,9 +54,9 @@ class Algorithm:
         return self._input
 
     @input.setter
-    def input(self, config):
+    def input(self, config_input):
         """Setter method for input objects."""
-        for i in FN.get_nested_values(config):
+        for i in FN.get_nested_values(config_input):
 
             if isinstance(i, str):
                 for s in ST.get_items(i):
@@ -68,7 +68,7 @@ class Algorithm:
 
     def parse_input(self, l=[]):
         """Returns a dictionary where keys are dependencies
-        and values are conditions to be evaluated by the Algorithm. 
+        and values are conditions to be evaluated by the Algorithm.
         This function is reimplemented by derived algorithms."""
         return {}
 
@@ -78,9 +78,9 @@ class Algorithm:
         return self._output
 
     @output.setter
-    def output(self, config):
+    def output(self, config_output):
         """Setter method for output objects."""
-        self._output[self.name] = [f"{self.name}:{o}" for o in ST.get_items(config)]
+        self._output[self.name] = [f"{self.name}:{o}" for o in ST.get_items(config_output)]
 
 
 # EOF
