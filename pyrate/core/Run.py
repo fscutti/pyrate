@@ -96,14 +96,18 @@ class Run:
         self.nodes = {}
         self.algorithms = {}
         self.loaded_outputs = {}
-
+        
+        # loading outputs.
         for out_name, out_config in self.outputs.items():
             out = self.out(out_name)
-
+        
+        # initialising algorithms/objects.
         for out_name, out_instance in self.loaded_outputs.items():
             for t_name, t_samples in out_instance.targets.items():
                 self.targets[t_name] = self.node(t_name, samples=t_samples)
 
+        # loading inputs.
+        # TO DO...
         sys.exit()
 
         # maybe change the way this is retrieved. Use nodes directly.
@@ -405,11 +409,11 @@ class Run:
             if alg is not None:
 
                 # check whether the alg meets the conditions to run.
-                if self.is_meeting_conditions(obj_name, alg):
+                if self.is_meeting_alg_conditions(obj_name, alg):
 
                     getattr(alg, self.state)()
 
-                # checking ouput.
+                # checking output.
                 if not self.is_complete(obj_name, alg):
                     sys.exit(
                         f"ERROR: object {obj_name} is on the store but additional output is missing !!!"
@@ -420,7 +424,7 @@ class Run:
 
         return
 
-    def is_meeting_conditions(self, obj_name, alg):
+    def is_meeting_alg_conditions(self, obj_name, alg):
         """In order to get out of the dependency loop
         the algorithm has to put False/0 on the store."""
 
