@@ -6,6 +6,7 @@ from copy import copy
 import ROOT as R
 
 from pyrate.core.Reader import Reader
+from pyrate.utils import enums as EN
 
 
 class ReaderROOT(Reader):
@@ -92,23 +93,18 @@ class ReaderROOT(Reader):
 
         if h:
 
-            if not self.store.check(name, "TRAN"):
-                self.store.put(name, h, "TRAN")
-
-            elif not self.store.get(name, "TRAN"):
-                self.store.put(name, h, "TRAN", replace=True)
+            if self.store.get(name) is EN.Pyrate.NONE:
+                self.store.put(name, h)
 
             else:
-                self.store.get(name, "TRAN").Add(h)
-        else:
-            self.store.put(name, None, "TRAN")
+                self.store.get(name).Add(h)
 
     def _read_variable(self, name, tree, variable):
         """Reads a variable from a tree and puts it on the transient store."""
 
         tree.GetBranch(variable).GetEntry(self._idx)
 
-        self.store.put(name, getattr(tree, variable), "TRAN")
+        self.store.put(name, getattr(tree, variable))
 
     def _break_path(self, name, k, n):
         """Breaks a given path excluding the INPUT/EVENT/:/GROUP prefix

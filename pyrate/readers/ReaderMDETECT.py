@@ -84,7 +84,7 @@ class ReaderMDETECT(Reader):
 
         elif name.startswith("INPUT:"):
 
-            self.store.put(name, enums.Pyrate.NONE, "TRAN")
+            self.store.put(name, enums.Pyrate.NONE)
 
     def set_n_events(self):
         """Retrieves total number of events using the number of events."""
@@ -125,7 +125,7 @@ class ReaderMDETECT(Reader):
             ]
             value = float(value)
 
-        self.store.put(name, value, "TRAN")
+        self.store.put(name, value)
 
     def _break_path(self, name):
         """This function breaks the name field."""

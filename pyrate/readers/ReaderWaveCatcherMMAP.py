@@ -80,7 +80,7 @@ class ReaderWaveCatcherMMAP(Reader):
                 value = str(s).replace("[", "").replace("]", "")
                 break
 
-        self.store.put(name, value, "TRAN")
+        self.store.put(name, value)
 
         self._mmf.seek(pos_current_line)
 
@@ -122,7 +122,7 @@ class ReaderWaveCatcherMMAP(Reader):
                     value = str(s)
                     break
 
-        self.store.put(name, value, "TRAN")
+        self.store.put(name, value)
 
         self._mmf.seek(pos_current_line)
 

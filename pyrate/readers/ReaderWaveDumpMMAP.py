@@ -112,7 +112,7 @@ class ReaderWaveDumpMMAP(Reader):
             self._move(variable, "bkw")
             value = int(self._mmf.readline().decode("utf-8").split(" ")[-1])
 
-        self.store.put(name, value, "TRAN")
+        self.store.put(name, value)
 
         self._mmf.seek(pos_current_line)
 
@@ -145,7 +145,7 @@ class ReaderWaveDumpMMAP(Reader):
                     value = str(s.split("\n")[0])
                     break
 
-        self.store.put(name, value, "TRAN")
+        self.store.put(name, value)
 
         self._mmf.seek(pos_current_line)
 

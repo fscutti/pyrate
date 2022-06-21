@@ -247,7 +247,7 @@ class ReaderBlueTongueMMAP(Reader):
 
         value = FN.grab(variable, self._hd)
 
-        self.store.put(name, value, "TRAN")
+        self.store.put(name, value)
 
     def _read_variable(self, name, variable):
         """Reads variable from the event and puts it in the transient store."""
@@ -266,7 +266,7 @@ class ReaderBlueTongueMMAP(Reader):
         else:
             value = value[0]
 
-        self.store.put(name, value, "TRAN")
+        self.store.put(name, value)
 
         self._mmf.seek(pos_current_line)
 

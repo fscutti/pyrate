@@ -57,7 +57,7 @@ class ReaderCAEN1730_ZLE(Reader):
                 value = self._get_waveform(path["ch"])
 
             # Add the value to the transiant store
-            self.store.put(name, value, "TRAN")
+            self.store.put(name, value)
 
         elif name.startswith("INPUT:"):
             pass

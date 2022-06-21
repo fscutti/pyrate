@@ -88,7 +88,7 @@ class ReaderWaveCatcherLC(Reader):
         if no_store:
             return value
         else:
-            self.store.put(name, value, "TRAN")
+            self.store.put(name, value)
 
     def _read_variable(self, name, channel, variable, variable_line_idx):
         """Reads variable from the event and puts it in the transient store."""
@@ -122,7 +122,7 @@ class ReaderWaveCatcherLC(Reader):
         # print("LineNo: ", variable_line_idx)
         # print()
 
-        self.store.put(name, value, "TRAN")
+        self.store.put(name, value)
 
     def _get_line(self, l_idx):
         """Get line using cached file."""

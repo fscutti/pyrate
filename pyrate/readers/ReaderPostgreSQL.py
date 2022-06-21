@@ -57,7 +57,7 @@ class ReaderPostgreSQL(Reader):
 
         value = self._db_cursor.fetchall()
 
-        self.store.put(name, value, "TRAN")
+        self.store.put(name, value)
 
     def _read_variable(self, name, table, row, variable):
         """Reads variable from specific row, considered to be an event."""
@@ -66,7 +66,7 @@ class ReaderPostgreSQL(Reader):
 
         value = self._db_cursor.fetchall()[0][0]
 
-        self.store.put(name, value, "TRAN")
+        self.store.put(name, value)
 
     def set_n_events(self):
         """Reads number of events which in this case are the table rows."""
