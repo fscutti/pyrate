@@ -56,15 +56,17 @@ class Algorithm:
     @input.setter
     def input(self, config_input):
         """Setter method for input objects."""
-        for i in FN.get_nested_values(config_input):
+        if self._input == {}:
 
-            if isinstance(i, str):
-                for s in ST.get_items(i):
-                    self._input[s] = None
+            for i in FN.get_nested_values(config_input):
 
-            elif isinstance(i, list):
-                for s, c in self.parse_input(i).items():
-                    self._input[s] = c
+                if isinstance(i, str):
+                    for s in ST.get_items(i):
+                        self._input[s] = None
+
+                elif isinstance(i, list):
+                    for s, c in self.parse_input(i).items():
+                        self._input[s] = c
 
     def parse_input(self, l=[]):
         """Returns a dictionary where keys are dependencies
@@ -80,9 +82,11 @@ class Algorithm:
     @output.setter
     def output(self, config_output):
         """Setter method for output objects."""
-        self._output[self.name] = [
-            f"{self.name}:{o}" for o in ST.get_items(config_output)
-        ]
+        if self._output == {}:
+
+            self._output[self.name] = [
+                f"{self.name}:{o}" for o in ST.get_items(config_output)
+            ]
 
 
 # EOF
