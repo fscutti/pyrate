@@ -53,9 +53,9 @@ class Input(Reader):
                         ST.get_items(self.samples["tags"]["groups"])
                     ):
                         g_names[g_idx] = g_name
-            
-            self.files = self.config["files"]            
-            
+
+            self.files = self.config["files"]
+
             self._n_groups = len(self.files)
             self._n_files = len(self.files[0])
 
@@ -114,17 +114,13 @@ class Input(Reader):
                         variable = name.split(":")[-1]
                         if variable == "name":
                             self.store.put(
-                                name, g_readers[self._f_idx].__class__.__name__, "TRAN"
+                                name, g_readers[self._f_idx].__class__.__name__
                             )
                         elif variable == "slots":
-                            self.store.put(
-                                name, g_readers[self._f_idx].__slots__, "TRAN"
-                            )
+                            self.store.put(name, g_readers[self._f_idx].__slots__)
                         elif variable == "module":
                             self.store.put(
-                                name,
-                                g_readers[self._f_idx].__class__.__module__,
-                                "TRAN",
+                                name, g_readers[self._f_idx].__class__.__module__
                             )
                         else:
                             sys.exit(
@@ -357,7 +353,12 @@ class Input(Reader):
                 if f_name.endswith(".root"):
                     self.logger.info(f"Auto-setting reader for {f_name} to ReaderROOT")
                     reader = ReaderROOT(
-                        r_name, self.config, self.store, self.logger, f_name, self.structure
+                        r_name,
+                        self.config,
+                        self.store,
+                        self.logger,
+                        f_name,
+                        self.structure,
                     )
 
                 elif FN.is_bt(f_name, self.store, self.logger, self.structure):
@@ -366,7 +367,12 @@ class Input(Reader):
                         f"Auto-setting reader for {f_name} to ReaderBlueTongueMMAP"
                     )
                     reader = ReaderBlueTongueMMAP(
-                        r_name, self.config, self.store, self.logger, f_name, self.structure
+                        r_name,
+                        self.config,
+                        self.store,
+                        self.logger,
+                        f_name,
+                        self.structure,
                     )
 
                 elif FN.is_wd_ascii(f_name):
@@ -375,7 +381,12 @@ class Input(Reader):
                         f"Auto-setting reader for {f_name} to ReaderWaveDumpMMAP"
                     )
                     reader = ReaderWaveDumpMMAP(
-                        r_name, self.config, self.store, self.logger, f_name, self.structure
+                        r_name,
+                        self.config,
+                        self.store,
+                        self.logger,
+                        f_name,
+                        self.structure,
                     )
                 elif FN.is_wc_ascii(f_name):
                     # WaveCatcher file
@@ -383,7 +394,12 @@ class Input(Reader):
                         f"Auto-setting reader for {f_name} to ReaderWaveCatcherMMAP"
                     )
                     reader = ReaderWaveCatcherMMAP(
-                        r_name, self.config, self.store, self.logger, f_name, self.structure
+                        r_name,
+                        self.config,
+                        self.store,
+                        self.logger,
+                        f_name,
+                        self.structure,
                     )
 
                 if not reader:

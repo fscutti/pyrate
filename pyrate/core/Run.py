@@ -42,8 +42,7 @@ class Run:
         # defined after being read from the configuration yaml file.
         # -----------------------------------------------------------------------
         self.state = None
-        self._in = None
-        self._out = None
+        self._current_input = None
         self._config = self.configs["global"]["objects"]
 
         self._history = {"CURRENT TARGET": None}
@@ -95,47 +94,55 @@ class Run:
         self.targets = {}
         self.nodes = {}
         self.algorithms = {}
-        self.loaded_outputs = {}
-        
-        # loading outputs.
-        for out_name, out_config in self.outputs.items():
-            out = self.out(out_name)
-        
-        # initialising algorithms/objects.
-        for out_name, out_instance in self.loaded_outputs.items():
-            for t_name, t_samples in out_instance.targets.items():
-                self.targets[t_name] = self.node(t_name, samples=t_samples)
+        self.loaded_io = {}
 
         # loading inputs.
-        # TO DO...
-        sys.exit()
+        for i_name in self.inputs:
+            i = self.io(i_name)
 
+        # loading outputs.
+        for o_name in self.outputs:
+            o = self.io(o_name)
+
+        # initialising algorithms/objects.
+        for out_name in self.outputs:
+            for t_name, t_samples in self.io(out_name).targets.items():
+                self.targets[t_name] = self.node(t_name, samples=t_samples)
+        
         # maybe change the way this is retrieved. Use nodes directly.
-        all_inputs_vs_targets = self._out.get_inputs_vs_targets()
+        # all_inputs_vs_targets = self._out.get_inputs_vs_targets()
 
-    def out(self, out_name):
+    def io(self, io_name):
         """Returns a specific output instance."""
 
-        if out_name in self.loaded_outputs:
-            return self.loaded_outputs[out_name]
+        if io_name in self.loaded_io:
+            return self.loaded_io[io_name]
 
         else:
 
-            if out_name in self.outputs:
+            if io_name in self.inputs:
+                io_config = self.inputs[io_name]
 
-                out_config = self.outputs[out_name]
-
-                self.loaded_outputs[out_name] = Output(
-                    out_name, out_config, self.store, self.logger
+                self.loaded_io[io_name] = Input(
+                    io_name, io_config, self.store, self.logger
                 )
 
-                self.loaded_outputs[out_name].load()
+            elif io_name in self.outputs:
+                io_config = self.outputs[io_name]
 
-                return self.loaded_outputs[out_name]
+                self.loaded_io[io_name] = Output(
+                    io_name, io_config, self.store, self.logger
+                )
 
             else:
-                sys.exit(f"ERROR: output {out_name} not defined in the configuration.")
+                sys.exit(
+                    f"ERROR: input / ouput {io_name} not defined in the configuration."
+                )
                 return None
+
+            self.loaded_io[io_name].load()
+
+            return self.loaded_io[io_name]
 
     def node(self, obj_name, samples=[]):
         """Gets node tree of an object. This is a recursive function."""
@@ -164,10 +171,9 @@ class Run:
 
         return self.nodes[obj_name]
 
-    def reset(self, obj_name):
+    def reset(self):
         """Clears the algorithm instance of a node."""
-
-        if len(self.nodes[obj_name].samples) <= 1:
+        for obj_name in list(self.algorithms.keys()):
 
             del self.algorithms[obj_name]
 
@@ -229,18 +235,18 @@ class Run:
         # Instanciate/load the output. Files are opened and ready to be written.
         # -----------------------------------------------------------------------
 
-        self._out = Output(self.name, self.store, self.logger, outputs=self.outputs)
+        # self._out = Output(self.name, self.store, self.logger, outputs=self.outputs)
 
-        if not self._out.is_loaded:
-            self._out.load()
+        # if not self._out.is_loaded:
+        #    self._out.load()
 
         # maybe change the way this is retrieved. Use nodes directly.
-        all_inputs_vs_targets = self._out.get_inputs_vs_targets()
+        # all_inputs_vs_targets = self._out.get_inputs_vs_targets()
 
         # -----------------------------------------------------------------------
         # Inputs will be initialised dynamically in the run function.
         # -----------------------------------------------------------------------
-        self.instanciated_inputs = {}
+        # self.instanciated_inputs = {}
 
         # -----------------------------------------------------------------------
         # Update the store in three steps: initialise, execute, finalise.
@@ -257,7 +263,7 @@ class Run:
             # )
 
             # update the store.
-            store = self.run(state, current_inputs_vs_targets)
+            store = self.run(state)
 
         print("\n")
 
@@ -270,7 +276,7 @@ class Run:
 
         return store
 
-    def run(self, state, inputs_vs_targets):
+    def run(self, state):
         """Run the loop function."""
 
         prefix_types = {
@@ -285,45 +291,45 @@ class Run:
 
         info = self.state.rjust(70, ".")
 
-        for i_name, targets in tqdm(
-            inputs_vs_targets.items(),
+        for i_name in tqdm(
+            self.inputs,
             desc=f"{prefix}{info}",
             disable=self.no_progress_bar,
             bar_format=self.colors[self.state]["input"],
         ):
-
+            
             # if there are no targets for this state, skip all loops.
-            if not targets:
-                continue
+            # if not targets:
+            #    continue
 
-            if not i_name in self.instanciated_inputs:
-                self.instanciated_inputs[i_name] = Input(
-                    i_name, self.store, self.logger, self.inputs[i_name]
-                )
+            # if not i_name in self.loaded_inputs:
+            #    self.loaded_inputs[i_name] = Input(
+            #        i_name, self.store, self.logger, self.inputs[i_name]
+            #    )
 
-            self._in = self.instanciated_inputs[i_name]
+            self._current_input = self.loaded_io[i_name]
 
-            if not self._in.is_loaded:
-                self._in.load()
+            # if not self._in.is_loaded:
+            #    self._in.load()
 
             if self.state in {"initialise", "finalise"}:
                 # ---------------------------------------------------------------
                 # Initialise and finalise loops
                 # ---------------------------------------------------------------
-                store.put("INPUT:name", i_name)
+                self.store.put("INPUT:name", i_name)
 
-                store.put("INPUT:config", self.inputs[i_name])
+                self.store.put("INPUT:config", self.inputs[i_name])
 
                 self.loop()
 
-                store.clear()
+                self.store.clear()
 
             elif self.state == "execute":
                 # ---------------------------------------------------------------
                 # Execute loop
                 # ---------------------------------------------------------------
 
-                tot_n_events = self._in.get_n_events()
+                tot_n_events = self._current_input.get_n_events()
 
                 eslices = self.get_events_slices(tot_n_events)
 
@@ -339,7 +345,7 @@ class Run:
                         )
                     )
 
-                    self._in.set_idx(emin)
+                    self._current_input.set_idx(emin)
 
                     erange = emax - emin + 1
 
@@ -349,17 +355,17 @@ class Run:
                         disable=self.no_progress_bar,
                         bar_format=self.colors[self.state]["event"],
                     ):
-                        store.put("INPUT:name", i_name)
+                        self.store.put("INPUT:name", i_name)
 
-                        store.put("INPUT:config", self.inputs[i_name])
+                        self.store.put("INPUT:config", self.inputs[i_name])
 
-                        store.put("EVENT:idx", self._in.get_idx())
+                        self.store.put("EVENT:idx", self._current_input.get_idx())
 
                         self.loop()
 
-                        store.clear()
+                        self.store.clear()
 
-                        self._in.set_next_event()
+                        self._current_input.set_next_event()
 
                 # Printing average time taken to execute an alg for a single event
                 # if self.alg_timing:
@@ -373,54 +379,58 @@ class Run:
                 #                f"{self.algorithms[alg].name:<40}{self.alg_times[alg]/erange:>20.2f} ns"
                 #            )
 
-                self._in.offload()
+                # is this necessary?
+                #self._current_input.offload()
+
+            self.reset()
+
 
         if self.state == "finalise":
             # ---------------------------------------------------------------
             # Write outputs after finalise input loop
             # ---------------------------------------------------------------
+            for out_name, out_instance in self.loaded_io.items():
 
-            for t in targets:
+                if hasattr(out_instance, "targets"):
 
-                if not store.check(t["name"], "PERM"):
-                    msg = f"finalise has been run for {t['name']} but object has not been put on PERM store!!!"
+                    for t in self.targets:
 
-                    sys.exit(f"ERROR: {msg}")
-                    self.logger.error(msg)
-
-                else:
-                    if store.get(t["name"], "PERM") is not EN.Pyrate.SKIP_WRITE:
-                        self._out.write(t["name"])
-
+                        if t in out_instance.targets:
+                            out_instance.write(t.name)
+        
+        
         return store
 
     def loop(self):
         """Loop over required targets to resolve them."""
-        for t in self.targets:
-            self.call(t)
+        for t_name, t_instance in self.targets.items():
+
+            if self._current_input.name in t_instance.samples:
+
+                self.call(t_name)
 
     def call(self, obj_name):
         """Calls an algorithm."""
 
         if self.store.get(obj_name) is EN.Pyrate.NONE:
 
-            alg = self.nodes[obj_name].algorithm
+            alg = self.node(obj_name).algorithm
 
             if alg is not None:
 
-                # check whether the alg meets the conditions to run.
+                # check whether the obj meets the alg conditions to run.
                 if self.is_meeting_alg_conditions(obj_name, alg):
 
                     getattr(alg, self.state)()
 
-                # checking output.
+                # checking that the object is complete.
                 if not self.is_complete(obj_name, alg):
                     sys.exit(
                         f"ERROR: object {obj_name} is on the store but additional output is missing !!!"
                     )
 
             else:
-                self._in.read(obj_name)
+                self._current_input.read(obj_name)
 
         return
 
@@ -466,22 +476,25 @@ class Run:
         # ---------------------------------------------------------------
         # Reading input events
         # ---------------------------------------------------------------
-        if hasattr(self._in, "eslices"):
+        if hasattr(self._current_input, "eslices"):
 
-            if isinstance(self._in.eslices, dict):
+            if isinstance(self._current_input.eslices, dict):
                 emin, emax = 0, tot - 1
 
-                if "emin" in self._in.eslices:
-                    emin = self._in.eslices["emin"]
+                if "emin" in self._current_input.eslices:
+                    emin = self._current_input.eslices["emin"]
 
-                if "emax" in self._in.eslices and self._in.eslices["emax"] > -1:
-                    emax = self._in.eslices["emax"]
+                if (
+                    "emax" in self._current_input.eslices
+                    and self._current_input.eslices["emax"] > -1
+                ):
+                    emax = self._current_input.eslices["emax"]
 
                 eslices.append((emin, emax))
 
-            elif isinstance(self._in.eslices, list):
+            elif isinstance(self._current_input.eslices, list):
 
-                for s in self._in.eslices:
+                for s in self._current_input.eslices:
 
                     if "slice" in s:
 
@@ -529,7 +542,7 @@ class Run:
                         eslices.append((emin, emax))
 
             else:
-                emin, emax = 0, self._in.eslices - 1
+                emin, emax = 0, self._current_input.eslices - 1
 
                 eslices.append((emin, emax))
 

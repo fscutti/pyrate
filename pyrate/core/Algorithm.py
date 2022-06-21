@@ -80,7 +80,9 @@ class Algorithm:
     @output.setter
     def output(self, config_output):
         """Setter method for output objects."""
-        self._output[self.name] = [f"{self.name}:{o}" for o in ST.get_items(config_output)]
+        self._output[self.name] = [
+            f"{self.name}:{o}" for o in ST.get_items(config_output)
+        ]
 
 
 # EOF

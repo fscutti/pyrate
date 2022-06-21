@@ -32,7 +32,12 @@ class WriterROOT(Writer):
         indicating the folder structure of the output yet to be created at
         this point.
         """
-        obj = self.store.copy(name)
+        obj = self.store.collect(name)
+
+        if obj is EN.Pyrate.NONE:
+            msg = f"ERROR: trying to write {name} but object has not been saved."
+            sys.exit(msg)
+            self.logger.error(msg)
 
         if isinstance(obj, dict):
             self._write_dirs(obj)
