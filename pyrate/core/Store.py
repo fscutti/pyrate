@@ -34,19 +34,12 @@ class Store:
         """Clears the store."""
         self._store[l].clear()
 
-    def save(self, name, replace=False, copy=True):
+    def save(self, name, obj, copy=True):
         """Saves an object for later collection."""
-        if not name in self._store:
-            sys.exit(
-                f"ERROR: trying to save {name} but the object is not on the store."
-            )
-        if not replace and name in self._saved:
-            sys.exit(f"ERROR: trying to save {name} but the object is already saved.")
-
         if copy:
-            self._saved[name] = copy(self._store[name])
+            self._saved[name] = copy(obj)
         else:
-            self._saved[name] = self._store[name]
+            self._saved[name] = obj
 
     def collect(self, name):
         """Get a saved object."""
