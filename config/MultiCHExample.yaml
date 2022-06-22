@@ -354,7 +354,7 @@ objects:
             output:
         execute:
             input: PulseStart_CH0
-        time: PulseStart_CH0
+        sample number: PulseStart_CH0
 
 
     PulseTime_CH1:
@@ -366,7 +366,7 @@ objects:
             output:
         execute:
             input: PulseStart_CH1
-        time: PulseStart_CH1
+        sample number: PulseStart_CH1
 
 
     TimeDifference_CH01:

@@ -251,7 +251,7 @@ objects:
             output:
         execute:
             input: PulseStart_CHX
-        time: PulseStart_CHX
+        sample number: PulseStart_CHX
 
     TimeDifference_CH01:
         algorithm:
