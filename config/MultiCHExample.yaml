@@ -314,8 +314,8 @@ objects:
             name: Ratio
         execute:
             input: PromptCharge_CH0, DelayedCharge_CH0
-        x1: PromptCharge_CH0
-        x2: DelayedCharge_CH0
+        numerator: PromptCharge_CH0
+        denominator: DelayedCharge_CH0
 
 
     MeanTime_CH0:

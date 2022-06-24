@@ -214,8 +214,8 @@ objects:
             name: Ratio
         execute:
             input: PromptCharge_CHX, DelayCharge_CHX
-        x1: PromptCharge_CHX
-        x2: DelayedCharge_CHX
+        numerator: PromptCharge_CHX
+        denominator: DelayedCharge_CHX
 
     MeanTime_CHX:
         algorithm:

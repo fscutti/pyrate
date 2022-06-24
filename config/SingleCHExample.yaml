@@ -266,8 +266,8 @@ objects:
             name: Ratio
         execute:
             input: PromptCharge, DelayCharge
-        x1: PromptCharge
-        x2: DelayedCharge
+        numerator: PromptCharge
+        denominator: DelayedCharge
 
     MeanTime:
         algorithm:
