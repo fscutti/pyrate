@@ -58,16 +58,24 @@ class Algorithm:
         """Setter method for input objects."""
         if self._input == {}:
 
-            for i in FN.get_nested_values(config_input):
+            dependencies = FN.get_nested_values(config_input)
 
-                if isinstance(i, str):
-                    for s in ST.get_items(i):
-                        self._input[s] = None
+            conditional, unconditional = {}, {}
 
-                elif isinstance(i, list):
-                    for s, c in self.parse_input(i).items():
-                        self._input[s] = c
+            for i in dependencies:
 
+                if isinstance(i, list):
+                    conditional.update({v: c for v, c in self.parse_input(i).items()})
+
+                elif isinstance(i, str):
+                    unconditional.update({v: None for v in ST.get_items(i)})
+
+            # the order of these update instructions matters, as for selection 
+            # algorithms we might want to interrupt input evaluation if all 
+            # conditional ones are satisfied.
+            self._input.update(conditional)
+            self._input.update(unconditional)
+            
     def parse_input(self, l=[]):
         """Returns a dictionary where keys are dependencies
         and values are conditions to be evaluated by the Algorithm.
