@@ -32,7 +32,7 @@ class Store:
 
     def clear(self):
         """Clears the store."""
-        self._store[l].clear()
+        self._store.clear()
 
     def save(self, name, obj, copy=True):
         """Saves an object for later collection."""
