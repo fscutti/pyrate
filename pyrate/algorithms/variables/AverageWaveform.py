@@ -50,28 +50,6 @@ class AverageWaveform(Algorithm):
     def initialise(self):
         """ Create entry for the cummulative waveform structure
         """
-        # Todo: replace this pile of code with a simple recordlength getter 
-        #       once the reader inputs have been unified.
-        
-        # All this just to get the record length
-        # First we find out what kind of grouping is being used
-        # groups = ['0']
-
-        # # Temporary, needs fixing, not generalised for all possible group structures
-        # if groups[0] == '0':
-        #     # Default, no group specified
-        #     reader = self.store.get("INPUT:READER:name")
-        # else:
-        #     reader = self.store.get(f"INPUT:READER:GROUP:name")
-        # if reader == "ReaderBlueTongueMMAP":
-        #     board_dict = self.store.get(f"INPUT:board_1") # This needs to be fixed when we have more boards 
-        #     RecordLength = board_dict["record_length"]
-        # elif reader == "ReaderWaveDumpMMAP":
-        #     RecordLength = self.store.get(f"INPUT:Record Length")
-        # elif reader == "ReaderWaveCatcherMMAP":
-        #     RecordLength = int(self.store.get(f"INPUT:DATA SAMPLES"))
-        
-        # self.nevents = 1 + self.store.get("INPUT:config")["eslices"]["emax"] - self.store.get("INPUT:config")["eslices"]["emin"]
         self.nevents = 0
         self.cum_waveform = np.array([])
 
