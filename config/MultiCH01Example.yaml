@@ -446,9 +446,9 @@ objects:
         sample_number: PulseStart_CH1
     PulseWindow_CH0:
         algorithm:
-            left: 50
+            left: 0
             name: Window
-            right: 0
+            right: 50
         execute:
             input: PulseStart_CH0
         initialise:
@@ -456,9 +456,9 @@ objects:
         pivot: PulseStart_CH0
     PulseWindow_CH1:
         algorithm:
-            left: 50
+            left: 0
             name: Window
-            right: 0
+            right: 50
         execute:
             input: PulseStart_CH1
         initialise:
