@@ -1,4 +1,3 @@
-from pyrate.algorithms.variables.RawWaveform import RawWaveform
 from pyrate.algorithms.variables.BaselineDynamic import BaselineDynamic
 from pyrate.algorithms.variables.BaselineNaive import BaselineNaive
 from pyrate.algorithms.variables.Charge import Charge
@@ -19,7 +18,6 @@ from pyrate.algorithms.variables.CFD import CFD
 from pyrate.algorithms.variables.TrapezoidFilter import TrapezoidFilter
 from pyrate.algorithms.variables.Moment import Moment
 from pyrate.algorithms.variables.Calculator import Calculator
-from pyrate.algorithms.variables.GetTimestamp import GetTimestamp
 from pyrate.algorithms.variables.AverageWaveform import AverageWaveform
 from pyrate.algorithms.variables.DAMAX1 import DAMAX1
 from pyrate.algorithms.variables.DAMAX2 import DAMAX2
