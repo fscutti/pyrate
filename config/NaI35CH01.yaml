@@ -417,7 +417,7 @@ objects:
             input: PulseStart_CH0
         initialise:
             output: null
-        sample number: PulseStart_CH0
+        sample_number: PulseStart_CH0
     PulseTime_CH1:
         algorithm:
             name: TimeConverter
@@ -427,7 +427,7 @@ objects:
             input: PulseStart_CH1
         initialise:
             output: null
-        sample number: PulseStart_CH1
+        sample_number: PulseStart_CH1
     PulseWindow_CH0:
         algorithm:
             left: 50
