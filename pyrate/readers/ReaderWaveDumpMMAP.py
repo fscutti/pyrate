@@ -131,7 +131,7 @@ class ReaderWaveDumpMMAP(Reader):
                 for w_idx in range(self._len_waveform)
             ]
             # # Convert to numpy
-            # value = np.fromiter(value, dtype=np.int, count=self._len_waveform)
+            value = np.fromiter(value, dtype='int32', count=self._len_waveform)
 
         else:
             self._move(variable)

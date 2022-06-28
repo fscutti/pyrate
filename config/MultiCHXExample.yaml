@@ -80,8 +80,8 @@ objects:
     PulseWindow_CHX:
         algorithm:
             name: Window
-            left: 50
-            right: 0
+            left: 0
+            right: 50
         initialise:
             output:
         execute:
@@ -214,8 +214,8 @@ objects:
             name: Ratio
         execute:
             input: PromptCharge_CHX, DelayCharge_CHX
-        x1: PromptCharge_CHX
-        x2: DelayedCharge_CHX
+        numerator: PromptCharge_CHX
+        denominator: DelayedCharge_CHX
 
     MeanTime_CHX:
         algorithm:
@@ -342,7 +342,7 @@ objects:
                 event:
                     vector<int>: RawWaveform_CHX
                     vector<double>: CorrectedWaveform_CHX, FFT_CHX, Moments_CHX
-                    float: BaselineDynamic_CHX, BaselineNaive_CHX, PeakHeight_CHX, PeakLocation_CHX, PulseCharge_CHX, 
+                    float:  BaselineDynamic_CHX, BaselineNaive_CHX, PeakHeight_CHX, PeakLocation_CHX, PulseCharge_CHX, 
                             TotalCharge_CHX, PulseStart_CHX, PulseTime_CHX, PromptDelayChargeRatio_CHX, 
                             MeanTime_CHX, PromptDelayChargeRatioCalculator_CHX,
                             Timestamp_CHX, DAMAX1_CHX, DAMAX2_CHX, LeadingEdge_CHX
