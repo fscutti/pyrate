@@ -75,6 +75,9 @@ class Algorithm:
             # conditional ones are satisfied.
             self._input.update(conditional)
             self._input.update(unconditional)
+        print() 
+        print(self.name)
+        FN.pretty(self._input)
             
     def parse_input(self, l=[]):
         """Returns a dictionary where keys are dependencies

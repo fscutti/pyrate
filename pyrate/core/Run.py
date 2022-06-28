@@ -103,12 +103,12 @@ class Run:
         # loading outputs.
         for o_name in self.outputs:
             o = self.io(o_name)
-
+        
         # initialising algorithms/objects.
         for out_name in self.outputs:
             for t_name, t_samples in self.io(out_name).targets.items():
                 self.targets[t_name] = self.node(t_name, samples=t_samples)
-        
+
         # maybe change the way this is retrieved. Use nodes directly.
         # all_inputs_vs_targets = self._out.get_inputs_vs_targets()
 
@@ -255,17 +255,26 @@ class Run:
         msg = f"Launching pyrate run {self.name}"
         print("\n", "*" * len(msg), msg, "*" * len(msg))
 
-        for state in ["initialise", "execute", "finalise"]:
+        # for state in ["initialise", "execute", "finalise"]:
+        #    self.run(i_name)
 
-            # updating list of targets to be considered for the next loop.
-            # current_inputs_vs_targets = self.update_inputs_vs_targets(
-            #    state, store, all_inputs_vs_targets
-            # )
+        # print("\n")
 
-            # update the store.
-            store = self.run(state)
+        for i_name in self.inputs:
 
-        print("\n")
+            self._current_input = self.loaded_io[i_name]
+
+            self.run(i_name)
+            self.reset()
+
+        for o_name in self.outputs:
+            for t in self.targets:
+
+                if t in self.loaded_io[o_name].targets:
+
+                    self._current_output = self.loaded_io[o_name]
+
+                    self._current_output.write(t.name)
 
         stop = timeit.default_timer()
 
@@ -274,45 +283,41 @@ class Run:
 
         # self.logger.info("Execution time: ", str(stop - start))
 
-        return store
+        return
 
-    def run(self, state):
+    def run(self, i_name):
         """Run the loop function."""
 
-        prefix_types = {
-            "initialise": "Inputs:  ",
-            "execute": "Events:  ",
-            "finalise": "Inputs: ",
-        }
+        # prefix_types = {
+        #    "initialise": "Inputs:  ",
+        #    "execute": "Events:  ",
+        #    "finalise": "Inputs: ",
+        # }
 
-        self.state = state
+        """
+        for state in tqdm(["initialise", "execute", "finalise"]
+                desc=f"{input_name}{info}",
+                disable=self.no_progress_bar,
+                bar_format=self.colors[state]["input"]
 
-        prefix = prefix_types[state]
+                ):
+        """
+        # for i_name in tqdm(
+        #    self.inputs,
+        #    desc=f"{prefix}{info}",
+        #    disable=self.no_progress_bar,
+        #    bar_format=self.colors[self.state]["input"],
+        # ):
 
-        info = self.state.rjust(70, ".")
+        for state in ["initialise", "execute", "finalise"]:
 
-        for i_name in tqdm(
-            self.inputs,
-            desc=f"{prefix}{info}",
-            disable=self.no_progress_bar,
-            bar_format=self.colors[self.state]["input"],
-        ):
-            
-            # if there are no targets for this state, skip all loops.
-            # if not targets:
-            #    continue
+            self.state = state
 
-            # if not i_name in self.loaded_inputs:
-            #    self.loaded_inputs[i_name] = Input(
-            #        i_name, self.store, self.logger, self.inputs[i_name]
-            #    )
+            # prefix = prefix_types[state]
 
-            self._current_input = self.loaded_io[i_name]
+            # info = self.state.rjust(70, ".")
 
-            # if not self._in.is_loaded:
-            #    self._in.load()
-
-            if self.state in {"initialise", "finalise"}:
+            if state in ["initialise", "finalise"]:
                 # ---------------------------------------------------------------
                 # Initialise and finalise loops
                 # ---------------------------------------------------------------
@@ -321,8 +326,6 @@ class Run:
                 self.store.put("INPUT:config", self.inputs[i_name])
 
                 self.loop()
-
-                self.store.clear()
 
             elif self.state == "execute":
                 # ---------------------------------------------------------------
@@ -363,43 +366,7 @@ class Run:
 
                         self.loop()
 
-                        self.store.clear()
-
                         self._current_input.set_next_event()
-
-                # Printing average time taken to execute an alg for a single event
-                # if self.alg_timing:
-                #    for alg in sorted(self.algorithms):
-                #        if self.alg_timing == True:
-                #            self.logger.info(
-                #                f"{self.algorithms[alg].name:<40}{self.alg_times[alg]/erange:>20.2f} ns"
-                #            )
-                #        elif self.alg_timing == "print" or self.alg_timing == "p":
-                #            print(
-                #                f"{self.algorithms[alg].name:<40}{self.alg_times[alg]/erange:>20.2f} ns"
-                #            )
-
-                # is this necessary?
-                #self._current_input.offload()
-
-            self.reset()
-
-
-        if self.state == "finalise":
-            # ---------------------------------------------------------------
-            # Write outputs after finalise input loop
-            # ---------------------------------------------------------------
-            for out_name, out_instance in self.loaded_io.items():
-
-                if hasattr(out_instance, "targets"):
-
-                    for t in self.targets:
-
-                        if t in out_instance.targets:
-                            out_instance.write(t.name)
-        
-        
-        return store
 
     def loop(self):
         """Loop over required targets to resolve them."""
@@ -408,6 +375,8 @@ class Run:
             if self._current_input.name in t_instance.samples:
 
                 self.call(t_name)
+
+        self.store.clear()
 
     def call(self, obj_name):
         """Calls an algorithm."""
@@ -441,18 +410,23 @@ class Run:
         n_deps = len(alg.input) - 1
 
         for dep_idx, dep_name in enumerate(alg.input):
-
-            self.call(dep_name)
+            
+            # sometimes the Region alg needs to run
+            # on previously evaluated variables with 
+            # a new condition. There is no need to 
+            # re-evaluate the dependency in this case.
+            if not dep_name.startswith(":"):
+                self.call(dep_name)
 
             dep_cond = alg.input[dep_name]
-
+            
             if dep_cond is not None:
 
-                getattr(alg, self.state)(dep_cond)
-
-                if not self.store.get(obj_name) or dep_idx == n_deps:
+                interrupt = getattr(alg, self.state)(dep_cond)
+                
+                if dep_idx == n_deps or interrupt:
                     return False
-
+                
         return True
 
     def is_complete(self, obj_name, alg):

@@ -131,32 +131,33 @@ objects:
      muonDetPlot1D:
 
          algorithm: Make1DHistPlot
+         overlay: regions
 
          input:
              folders:
                  main/pmt_variables1:
                      regions: muonDetParticlePos5, muonDetParticlePos1
                      variables:
-                       - measEnergyPMT8, 30, 0., 4e-6, "# of photons", "Entries", "R:0.|G:1.0| B:0.", regions
-                       - measEnergyPMT12, 30, 0., 4e-6, "# of photons", "Entries", "R:1.0| G:1.| B:0.", regions
+                       - measEnergyPMT8, 30, 0., 4e-6, "# of photons", "Entries", "R:0.|G:1.0| B:0."
+                       - measEnergyPMT12, 30, 0., 4e-6, "# of photons", "Entries", "R:1.0| G:1.| B:0."
                  
                  main/pmt_variables2:
                      regions: muonDetParticlePos5
                      variables:
-                       - measEnergyPMT9, 30, 0., 4e-6, "# of photons", "Entries", "R:0.6| G:0.6| B:0.2", Gamma
-                       - measEnergyPMT13, 30, 0., 4e-6, "# of photons", "Entries", "R:1.0| G:0.8| B:0.2", Gamma
+                       - measEnergyPMT9, 30, 0., 4e-6, "# of photons", "Entries", "R:0.6| G:0.6| B:0.2"
+                       - measEnergyPMT13, 30, 0., 4e-6, "# of photons", "Entries", "R:1.0| G:0.8| B:0.2"
                  
                  main:
                      regions: muonDetParticlePos5
                      variables:
-                       - measEnergyPMT12, 30, 0., 4e-6, "# of photons", "Entries", "R:0.7|G:0.0|B:0.1", variables
-                       - measEnergyPMT13, 30, 0., 4e-6, "# of photons", "Entries", "R:.2|G:.2|B:0.6", variables
+                       - measEnergyPMT12, 30, 0., 4e-6, "# of photons", "Entries", "R:0.7|G:0.0|B:0.1"
+                       - measEnergyPMT13, 30, 0., 4e-6, "# of photons", "Entries", "R:.2|G:.2|B:0.6"
                  
                  main:
                      regions: muonDetParticlePos5
                      variables:
-                       - measEnergyPMT8, 30, 0., 4e-6, "# of photons", "Entries", "R:.2|G:.6|B:.6", inputs
-                       - measEnergyPMT13, 30, 0., 4e-6, "# of photons", "Entries", "R:.1|G:1.0|B:.0", inputs
+                       - measEnergyPMT8, 30, 0., 4e-6, "# of photons", "Entries", "R:.2|G:.6|B:.6"
+                       - measEnergyPMT13, 30, 0., 4e-6, "# of photons", "Entries", "R:.1|G:1.0|B:.0"
                  
                  main:
                      regions: muonDetParticlePos5
@@ -168,30 +169,31 @@ objects:
      
      muonDetPlot2D:
          algorithm: Make2DHistPlot
+         overlay: regions
 
          input:
              folders:
                main/pmt_variables1:
                    regions: muonDetParticlePos5, muonDetParticlePos1
                    variables:
-                     - measEnergyPMT8, measEnergyPMT12, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.|G:1.0| B:0.", regions
-                     - measEnergyPMT12, measEnergyPMT13, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:1.0| G:1.| B:0.", regions
+                     - measEnergyPMT8, measEnergyPMT12, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.|G:1.0| B:0."
+                     - measEnergyPMT12, measEnergyPMT13, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:1.0| G:1.| B:0."
                
                main/pmt_variables2:
                    regions: muonDetParticlePos5
                    variables:
-                     - measEnergyPMT8, measEnergyPMT12, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.6| G:0.6| B:0.2", Gamma
-                     - measEnergyPMT9, measEnergyPMT13, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:1.0| G:0.8| B:0.2", Gamma
+                     - measEnergyPMT8, measEnergyPMT12, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.6| G:0.6| B:0.2"
+                     - measEnergyPMT9, measEnergyPMT13, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:1.0| G:0.8| B:0.2"
                
                main:
                    regions: muonDetParticlePos5
                    variables:
-                     - measEnergyPMT9, measEnergyPMT13, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.7|G:0.0|B:0.1", variables
+                     - measEnergyPMT9, measEnergyPMT13, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.7|G:0.0|B:0.1"
                
                main:
                    regions: muonDetParticlePos5
                    variables:
-                     - measEnergyPMT8, measEnergyPMT9, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:.2|G:.2|B:0.6", inputs
+                     - measEnergyPMT8, measEnergyPMT9, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:.2|G:.2|B:0.6"
                
                main:
                    regions: muonDetParticlePos5
@@ -202,6 +204,7 @@ objects:
      
      muonDetPlotProfile1D:
          algorithm: Make1DProfilePlot
+         overlay: regions
 
          input:
              folders:
@@ -209,19 +212,19 @@ objects:
                main/pmt_variables1:
                    regions: muonDetParticlePos5, muonDetParticlePos1
                    variables:
-                     - measEnergyPMT8, numPhotonsPMT8, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.|G:1.0| B:0.", regions
-                     - measEnergyPMT12, numPhotonsPMT12, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:1.0| G:1.| B:0.", regions
+                     - measEnergyPMT8, numPhotonsPMT8, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.|G:1.0| B:0."
+                     - measEnergyPMT12, numPhotonsPMT12, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:1.0| G:1.| B:0."
                
                main/pmt_variables2:
                    regions: muonDetParticlePos5
                    variables:
-                     - measEnergyPMT8, numPhotonsPMT8, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.6| G:0.6| B:0.2", Gamma
-                     - measEnergyPMT9, numPhotonsPMT9, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:1.0| G:0.8| B:0.2", Gamma
+                     - measEnergyPMT8, numPhotonsPMT8, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.6| G:0.6| B:0.2"
+                     - measEnergyPMT9, numPhotonsPMT9, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:1.0| G:0.8| B:0.2"
                
                main:
                    regions: muonDetParticlePos5
                    variables:
-                     - measEnergyPMT9, numPhotonsPMT9, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.7|G:0.0|B:0.1", variables
+                     - measEnergyPMT9, numPhotonsPMT9, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.7|G:0.0|B:0.1"
                
                main:
                    regions: muonDetParticlePos5

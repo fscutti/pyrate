@@ -36,6 +36,7 @@ from pyrate.core.Algorithm import Algorithm
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
 from pyrate.utils import ROOT_classes as CL
+from pyrate.utils import enums as EN
 
 import ROOT as R
 
@@ -44,10 +45,15 @@ R.gROOT.SetBatch()
 
 
 class Make1DHistPlot(Algorithm):
-    __slots__ = ()
+    __slots__ = "histograms"
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
+
+        self.histograms = {}
+
+    def parse_input(self, input_list):
+        return {i.split(",")[0]: None for i in input_list}
 
     def initialise(self):
         """Prepares histograms.
@@ -55,55 +61,37 @@ class Make1DHistPlot(Algorithm):
 
         i_name = self.store.get("INPUT:name")
 
-        for f_name, f_attr in self.config["folders"].items():
-            for v_name, v_attr in f_attr["variables"].items():
+        for f_name, f_attr in self.config["input"]["folders"].items():
+            for v_string in f_attr["variables"]:
+
+                v_name = v_string.split(",")[0]
+
                 for r_name in self.make_regions_list(f_attr):
 
                     h_name = self.get_hist_name(r_name, v_name)
 
-                    path = ""
-                    if "path" in f_attr:
-                        path = f_attr["path"]
-
                     target_dir = self.name.replace(",", "_").replace(":", "_")
-                    path = os.path.join(target_dir, path)
-
-                    # WARNING: if the histogram is not present in the input, the value of
-                    # h is None. This operation is performed on the TRAN store as the
-                    # input name changes in the loop. Later, if found, the histogram will
-                    # need to be put on the PERM store including the name of the input
-                    # it was created for.
-                    h = self.store.copy("INPUT:" + os.path.join(path, h_name))
-                    # The object is unique and has been saved on the TRAN store. When it will later
-                    # be put on the PERM store, it will anyway disappear from there after
-                    # the TRAN store is cleared at the end of the target loop. Therefore above we
-                    # don't simply use the self.store.get instruction but self.store.copy
-                    # to copy the object and prevent its deletion.
-                    # This should be a general approach when moving objects from the TRAN
-                    # store to the permanent store.
+                    path = os.path.join(target_dir, f_name).replace("main", ".")
 
                     obj_name = self.get_object_name(i_name, h_name)
 
-                    # Only creates the object if it is not retrievable from the INPUT and
-                    # has not previously been saved on the permanent store.
-                    # IMPORTANT: pyrate does not save the same object on the store multiple
-                    # times anyway!!! The check in the if condition below only serves to
-                    # avoid a message from ROOT which would see the creation of an histogram
-                    # with the same name in case we are rerunning on the same input.
-                    if not h and not self.store.check(obj_name):
-                        h = self.make_hist(h_name, v_attr, f_attr)
+                    h = self.make_hist(h_name, v_string, f_attr)
 
-                    # put the object on the store with a different name which
-                    # includes the input name, as our final plot will be a stack
-                    # potentially including histograms from different samples.
-                    self.store.put(obj_name, h)
+                    # self.store.put(obj_name, h)
+
+                    self.histograms[obj_name] = h
+
+                    # self.store.save(obj_name)
 
     def execute(self):
         """Fills histograms."""
         i_name = self.store.get("INPUT:name")
 
-        for f_name, f_attr in self.config["folders"].items():
-            for v_name, v_attr in f_attr["variables"].items():
+        for f_name, f_attr in self.config["input"]["folders"].items():
+            for v_string in f_attr["variables"]:
+
+                v_name = v_string.split(",")[0]
+
                 for r_name in self.make_regions_list(f_attr):
 
                     h_name = self.get_hist_name(r_name, v_name)
@@ -117,7 +105,7 @@ class Make1DHistPlot(Algorithm):
 
                     obj_counter = ":".join([obj_name, "counter"])
 
-                    if not self.store.check(obj_counter):
+                    if self.store.get(obj_counter) is EN.Pyrate.NONE:
 
                         region = {"r_weight": 1, "weights": {}}
 
@@ -125,6 +113,8 @@ class Make1DHistPlot(Algorithm):
 
                             if sr_name == "NOSEL":
                                 continue
+                            
+                            print("This is the subregion name", sr_name)
 
                             subregion = self.store.get(sr_name)
 
@@ -146,7 +136,7 @@ class Make1DHistPlot(Algorithm):
 
                             variable = self.store.get(v_name)
 
-                            self.store.get(obj_name).Fill(variable, region["r_weight"])
+                            self.histograms[obj_name].Fill(variable, region["r_weight"])
 
                             # Save the counter on the transient store with some value.
                             # Which value is arbitrary as the "check" method only checks for
@@ -160,8 +150,11 @@ class Make1DHistPlot(Algorithm):
 
         inputs = ST.get_items(self.name.split(":", -1)[-1])
 
-        for f_name, f_attr in self.config["folders"].items():
-            for v_name, v_attr in f_attr["variables"].items():
+        for f_name, f_attr in self.config["input"]["folders"].items():
+            for v_string in f_attr["variables"]:
+
+                v_name = v_string.split(",")[0]
+
                 for r_name in self.make_regions_list(f_attr):
 
                     h_name = self.get_hist_name(r_name, v_name)
@@ -169,10 +162,9 @@ class Make1DHistPlot(Algorithm):
                     for i_name in inputs:
                         obj_name = self.get_object_name(i_name, h_name)
 
-                        path = f_name
+                        path = f_name.replace("main", ".")
 
-                        if "path" in f_attr:
-                            path = os.path.join(f_attr["path"], path)
+                        # path = os.path.join(f_attr["path"], path)
 
                         target_dir = self.name.replace(",", "_").replace(":", "_")
                         path = os.path.join(target_dir, path)
@@ -189,7 +181,10 @@ class Make1DHistPlot(Algorithm):
 
         # FN.pretty(plot_collection)
 
-        canvas_collection = {}
+        canvas_collection = self.store.collect(self.name) 
+
+        if canvas_collection is EN.Pyrate.NONE:
+            canvas_collection = {}
 
         for f_path, p_dict in plot_collection.items():
 
@@ -219,7 +214,7 @@ class Make1DHistPlot(Algorithm):
 
                         l_entry, obj_name = obj.split("|")
 
-                        h = self.store.get(obj_name)
+                        h = self.histograms[obj_name]
 
                         if mode == "stack" and not h_stack:
 
@@ -272,7 +267,8 @@ class Make1DHistPlot(Algorithm):
 
         # the True option is just a placeholder, this algorithm might need some
         # restructuring by putting the definition of the main object in the initialise function.
-        self.store.put(self.name, canvas_collection, replace=True)
+        
+        self.store.save(self.name, canvas_collection)
 
     def get_var_dict(self, variable):
         """Build dictionary for variable attributes."""
@@ -280,20 +276,20 @@ class Make1DHistPlot(Algorithm):
         a = ST.get_items(variable)
 
         d = {
-            "n_bins": int(a[0]),
-            "x_low": float(a[1]),
-            "x_high": float(a[2]),
-            "x_label": a[3],
-            "y_label": a[4],
+            "n_bins": int(a[1]),
+            "x_low": float(a[2]),
+            "x_high": float(a[3]),
+            "x_label": a[4],
+            "y_label": a[5],
             "color": None,
             "legend_entry": None,
         }
 
-        if len(a) >= 6:
-            d["color"] = a[5]
-
         if len(a) >= 7:
-            d["legend_entry"] = a[6]
+            d["color"] = a[6]
+
+        if len(a) >= 8:
+            d["legend_entry"] = a[7]
 
         return d
 
@@ -312,11 +308,8 @@ class Make1DHistPlot(Algorithm):
     def make_regions_list(self, folder):
         """Build list of selection regions considered for histogram filling."""
 
-        overlay_regions = False
+        overlay_regions = self.config["overlay"] == "regions"
         regions_list = []
-
-        if "overlay" in folder:
-            overlay_regions = folder["overlay"] == "regions"
 
         if "regions" in folder:
             regions = ST.get_items(folder["regions"])
@@ -347,32 +340,25 @@ class Make1DHistPlot(Algorithm):
         if "color" in self.store.get("INPUT:config"):
             color_list.append(FN.get_color(self.store.get("INPUT:config")["color"]))
 
-        if "overlay" in folder:
+        if self.config["overlay"] == "variables":
 
-            if folder["overlay"] == "variables":
+            if var["color"]:
+                color_list.append(FN.get_color(var["color"]))
 
-                # h.GetXaxis().SetTitle("x")
-                # h.GetYaxis().SetTitle("y")
+        elif self.config["overlay"] == "inputs":
+            pass
 
-                if var["color"]:
-                    color_list.append(FN.get_color(var["color"]))
+        elif self.config["overlay"] == "regions":
 
-            elif folder["overlay"] == "inputs":
-                pass
+            for idx, r_name in enumerate(self.make_regions_list(folder)):
+                if r_name in h_name:
 
-            elif folder["overlay"] == "regions":
+                    pixels = ["R", "G", "B"]
 
-                for idx, r_name in enumerate(self.make_regions_list(folder)):
-                    if r_name in h_name:
+                    primary = pixels[idx % 3]
+                    others = [p for p in pixels if p != primary]
 
-                        pixels = ["R", "G", "B"]
-
-                        primary = pixels[idx % 3]
-                        others = [p for p in pixels if p != primary]
-
-                        color_list.append(
-                            {primary: 0.7, others[0]: 0.0, others[1]: 0.0}
-                        )
+                    color_list.append({primary: 0.7, others[0]: 0.0, others[1]: 0.0})
 
         color = FN.add_colors(color_list)
         ROOT_color = self.get_ROOT_colors(color)
@@ -390,24 +376,22 @@ class Make1DHistPlot(Algorithm):
         l_name = ",".join([r_name, v_name])
         mode = "stack"
 
-        if "overlay" in folder:
+        if self.config["overlay"] == "regions":
+            c_name = "plot_1d_" + v_name
+            l_entry = ",".join([i_name, r_name])
+            l_name = v_name
+            mode = "overlay"
 
-            if folder["overlay"] == "regions":
-                c_name = "plot_1d_" + v_name
-                l_entry = ",".join([i_name, r_name])
-                l_name = v_name
-                mode = "overlay"
+        elif self.config["overlay"] == "variables":
+            c_name = obj_name.replace(f"{i_name}:hist", "plot_1d").replace(
+                f"_{v_name}", ""
+            )
+            l_entry = ",".join([i_name, v_name])
+            l_name = r_name
+            mode = "overlay"
 
-            elif folder["overlay"] == "variables":
-                c_name = obj_name.replace(f"{i_name}:hist", "plot_1d").replace(
-                    f"_{v_name}", ""
-                )
-                l_entry = ",".join([i_name, v_name])
-                l_name = r_name
-                mode = "overlay"
-
-            elif folder["overlay"] == "inputs" or folder["overlay"] == i_name:
-                mode = "overlay"
+        elif self.config["overlay"] == "inputs" or self.config["overlay"] == i_name:
+            mode = "overlay"
 
         c_name = "|".join([l_name, c_name])
         e_name = "|".join([l_entry, obj_name])
