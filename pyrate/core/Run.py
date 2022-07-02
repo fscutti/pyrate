@@ -103,7 +103,7 @@ class Run:
         # loading outputs.
         for o_name in self.outputs:
             o = self.io(o_name)
-        
+
         # initialising algorithms/objects.
         for out_name in self.outputs:
             for t_name, t_samples in self.io(out_name).targets.items():
@@ -410,23 +410,19 @@ class Run:
         n_deps = len(alg.input) - 1
 
         for dep_idx, dep_name in enumerate(alg.input):
-            
-            # sometimes the Region alg needs to run
-            # on previously evaluated variables with 
-            # a new condition. There is no need to 
-            # re-evaluate the dependency in this case.
-            if not dep_name.startswith(":"):
-                self.call(dep_name)
+
+            for d in dep_name.split(","):
+                self.call(d)
 
             dep_cond = alg.input[dep_name]
-            
+
             if dep_cond is not None:
 
-                interrupt = getattr(alg, self.state)(dep_cond)
-                
-                if dep_idx == n_deps or interrupt:
+                passed = getattr(alg, self.state)(dep_cond)
+
+                if not passed or dep_idx == n_deps:
                     return False
-                
+
         return True
 
     def is_complete(self, obj_name, alg):
