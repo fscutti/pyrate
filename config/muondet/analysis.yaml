@@ -54,12 +54,12 @@ objects:
           selection:
             - xParticleHitPos == 0.0
             - yParticleHitPos  == 0.0
-            - "A >0  && B== False"
-            - "C< 0 || D != 1000. && F> D"
-            - "B>A   &&  A>0 || C>0"
-            - "myWeight1, myWeighto2"
-            - "myCut1>0 && myCut2>0"
-            - "myWeight1"
+            #- "A >0  && B== False"
+            #- "C< 0 || D != 1000. && F> D"
+            #- "B>A   &&  A>0 || C>D || G<0 && H>0"
+            #- "myWeight1, myWeighto2"
+            #- "myCut1>0 && myCut2>0"
+            #- "myWeight1"
 
     muonDetParticlePos6:
       algorithm: Region

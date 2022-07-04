@@ -59,12 +59,12 @@ class SimulatedWaveformsBuilder(Algorithm):
         for pmt, position in self.pmt_intervals.items():
             waveforms[pmt] = {"energy": [], "time": []}
 
-        x_hits = self.store.get(self.config["hits_x_positions"])
-        y_hits = self.store.get(self.config["hits_y_positions"])
-        z_hits = self.store.get(self.config["hits_z_positions"])
+        x_hits = self.store.get(self.config["input"]["hits_x_positions"])
+        y_hits = self.store.get(self.config["input"]["hits_y_positions"])
+        z_hits = self.store.get(self.config["input"]["hits_z_positions"])
 
-        energy_hits = self.store.get(self.config["energy"])
-        time_hits = self.store.get(self.config["time"])
+        energy_hits = self.store.get(self.config["input"]["energy"])
+        time_hits = self.store.get(self.config["input"]["time"])
 
         for pmt, position in self.pmt_intervals.items():
             for idxHit, (x, y, z) in enumerate(zip(x_hits, y_hits, z_hits)):

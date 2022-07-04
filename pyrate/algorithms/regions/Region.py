@@ -70,6 +70,11 @@ class Region(Algorithm):
         is_passed = 1
 
         for c in condition.split(","):
+
+            for v in self.get_variables(c):
+
+                c = c.replace(v, f"self.store.get('{v}')")
+
             is_passed *= eval(c)
 
         current_value = self.store.get(self.name)

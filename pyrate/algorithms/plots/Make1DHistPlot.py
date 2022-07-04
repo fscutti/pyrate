@@ -71,17 +71,15 @@ class Make1DHistPlot(Algorithm):
                     h_name = self.get_hist_name(r_name, v_name)
 
                     target_dir = self.name.replace(",", "_").replace(":", "_")
-                    path = os.path.join(target_dir, f_name).replace("main", ".")
+                    path = os.path.join(target_dir, f_name)
 
                     obj_name = self.get_object_name(i_name, h_name)
 
                     h = self.make_hist(h_name, v_string, f_attr)
 
-                    # self.store.put(obj_name, h)
+                    # self.histograms[obj_name] = h
 
-                    self.histograms[obj_name] = h
-
-                    # self.store.save(obj_name)
+                    self.store.save(obj_name, h)
 
     def execute(self):
         """Fills histograms."""
@@ -113,30 +111,22 @@ class Make1DHistPlot(Algorithm):
 
                             if sr_name == "NOSEL":
                                 continue
-                            
-                            print("This is the subregion name", sr_name)
 
                             subregion = self.store.get(sr_name)
 
-                            region["r_weight"] *= subregion["is_passed"]
+                            region["r_weight"] *= subregion
 
                             if not region["r_weight"]:
                                 # Only fill the histogram if the selection is passed
                                 break
 
-                            else:
-                                for w_name, w_value in subregion["weights"].items():
-                                    if not w_name in region["weights"]:
-
-                                        region["weights"][w_name] = w_value
-
-                                        region["r_weight"] *= w_value
-
                         if region["r_weight"]:
 
                             variable = self.store.get(v_name)
 
-                            self.histograms[obj_name].Fill(variable, region["r_weight"])
+                            self.store.collect(obj_name).Fill(
+                                variable, region["r_weight"]
+                            )
 
                             # Save the counter on the transient store with some value.
                             # Which value is arbitrary as the "check" method only checks for
@@ -160,9 +150,13 @@ class Make1DHistPlot(Algorithm):
                     h_name = self.get_hist_name(r_name, v_name)
 
                     for i_name in inputs:
+
+                        if i_name != self.store.get("INPUT:name"):
+                            continue
+
                         obj_name = self.get_object_name(i_name, h_name)
 
-                        path = f_name.replace("main", ".")
+                        path = f_name
 
                         # path = os.path.join(f_attr["path"], path)
 
@@ -179,9 +173,9 @@ class Make1DHistPlot(Algorithm):
                             f_attr,
                         )
 
-        # FN.pretty(plot_collection)
+        #FN.pretty(plot_collection)
 
-        canvas_collection = self.store.collect(self.name) 
+        canvas_collection = self.store.collect(self.name)
 
         if canvas_collection is EN.Pyrate.NONE:
             canvas_collection = {}
@@ -214,7 +208,7 @@ class Make1DHistPlot(Algorithm):
 
                         l_entry, obj_name = obj.split("|")
 
-                        h = self.histograms[obj_name]
+                        h = self.store.collect(obj_name)
 
                         if mode == "stack" and not h_stack:
 
@@ -267,7 +261,7 @@ class Make1DHistPlot(Algorithm):
 
         # the True option is just a placeholder, this algorithm might need some
         # restructuring by putting the definition of the main object in the initialise function.
-        
+
         self.store.save(self.name, canvas_collection)
 
     def get_var_dict(self, variable):

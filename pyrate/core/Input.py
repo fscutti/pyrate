@@ -35,6 +35,15 @@ class Input(Reader):
 
         self._f_idx = 0
 
+
+        # This is just a hack.
+        self.structure = self.config["structure"]
+        self.samples = self.config["samples"]
+        self.eslices = self.config["eslices"]
+        self.path = self.config["path"]
+        self.color = self.config["color"]
+        
+
         if not hasattr(self, "structure"):
             self.structure = {}
 

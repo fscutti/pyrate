@@ -131,7 +131,7 @@ objects:
      muonDetPlot1D:
 
          algorithm: Make1DHistPlot
-         overlay: regions
+         overlay: variables
 
          input:
              folders:

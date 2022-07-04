@@ -45,8 +45,6 @@ class Run:
         self._current_input = None
         self._config = self.configs["global"]["objects"]
 
-        self._history = {"CURRENT TARGET": None}
-
         log_file_name = f"{self.name}.{time.strftime('%Y-%m-%d-%Hh%M')}.log"
 
         # Will need to change handling of log files.
@@ -70,35 +68,28 @@ class Run:
 
         self.logger.addHandler(fileHandler)
 
-        self.colors = {"initialise": {}, "execute": {}, "finalise": {}}
-
-        self.colors["initialise"]["input"] = "{l_bar}%s{bar}%s{r_bar}" % (
-            Fore.BLUE,
-            Fore.RESET,
-        )
-        self.colors["execute"]["input"] = "{l_bar}%s{bar}%s{r_bar}" % (
+        blue = "{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)
+        yellow = "{l_bar}%s{bar}%s{r_bar}" % (
             Fore.YELLOW,
             Fore.RESET,
         )
-        self.colors["finalise"]["input"] = "{l_bar}%s{bar}%s{r_bar}" % (
+        green = "{l_bar}%s{bar}%s{r_bar}" % (
             Fore.GREEN,
             Fore.RESET,
         )
-        self.colors["execute"]["event"] = "{l_bar}%s{bar}%s{r_bar}" % (
+        white = "{l_bar}%s{bar}%s{r_bar}" % (
             Fore.WHITE,
             Fore.RESET,
         )
+
+        self.colors = {"blue": blue, "yellow": yellow, "green": green, "white": white}
 
         self.store = Store(self.name)
 
         self.targets = {}
         self.nodes = {}
         self.algorithms = {}
-        self.loaded_io = {}
-
-        # loading inputs.
-        for i_name in self.inputs:
-            i = self.io(i_name)
+        self.loaded_io = {"inputs": {}, "outputs": {}}
 
         # loading outputs.
         for o_name in self.outputs:
@@ -109,40 +100,50 @@ class Run:
             for t_name, t_samples in self.io(out_name).targets.items():
                 self.targets[t_name] = self.node(t_name, samples=t_samples)
 
-        # maybe change the way this is retrieved. Use nodes directly.
-        # all_inputs_vs_targets = self._out.get_inputs_vs_targets()
+        # loading inputs.
+        for t_name, t_instance in self.targets.items():
+            for i_name in t_instance.samples:
+                i = self.io(i_name)
 
     def io(self, io_name):
         """Returns a specific output instance."""
 
-        if io_name in self.loaded_io:
-            return self.loaded_io[io_name]
+        for category in ["inputs", "outputs"]:
+            if io_name in self.loaded_io[category]:
+
+                return self.loaded_io[category][io_name]
 
         else:
 
             if io_name in self.inputs:
+
                 io_config = self.inputs[io_name]
 
-                self.loaded_io[io_name] = Input(
+                self.loaded_io["inputs"][io_name] = Input(
                     io_name, io_config, self.store, self.logger
                 )
+
+                self.loaded_io["inputs"][io_name].load()
+
+                return self.loaded_io["inputs"][io_name]
 
             elif io_name in self.outputs:
+
                 io_config = self.outputs[io_name]
 
-                self.loaded_io[io_name] = Output(
+                self.loaded_io["outputs"][io_name] = Output(
                     io_name, io_config, self.store, self.logger
                 )
+
+                self.loaded_io["outputs"][io_name].load()
+
+                return self.loaded_io["outputs"][io_name]
 
             else:
                 sys.exit(
                     f"ERROR: input / ouput {io_name} not defined in the configuration."
                 )
                 return None
-
-            self.loaded_io[io_name].load()
-
-            return self.loaded_io[io_name]
 
     def node(self, obj_name, samples=[]):
         """Gets node tree of an object. This is a recursive function."""
@@ -229,52 +230,38 @@ class Run:
 
         start = timeit.default_timer()
 
-        # self.store.put("history", self._history, "PERM")
-
-        # -----------------------------------------------------------------------
-        # Instanciate/load the output. Files are opened and ready to be written.
-        # -----------------------------------------------------------------------
-
-        # self._out = Output(self.name, self.store, self.logger, outputs=self.outputs)
-
-        # if not self._out.is_loaded:
-        #    self._out.load()
-
-        # maybe change the way this is retrieved. Use nodes directly.
-        # all_inputs_vs_targets = self._out.get_inputs_vs_targets()
-
-        # -----------------------------------------------------------------------
-        # Inputs will be initialised dynamically in the run function.
-        # -----------------------------------------------------------------------
-        # self.instanciated_inputs = {}
-
-        # -----------------------------------------------------------------------
-        # Update the store in three steps: initialise, execute, finalise.
-        # -----------------------------------------------------------------------
-
         msg = f"Launching pyrate run {self.name}"
         print("\n", "*" * len(msg), msg, "*" * len(msg))
 
-        # for state in ["initialise", "execute", "finalise"]:
-        #    self.run(i_name)
+        for i_name in tqdm(
+            self.loaded_io["inputs"],
+            desc="Input loop".ljust(70, "."),
+            disable=self.no_progress_bar,
+            bar_format=self.colors["blue"],
+        ):
 
-        # print("\n")
+            self._current_input = self.loaded_io["inputs"][i_name]
 
-        for i_name in self.inputs:
+            for state in ["initialise", "execute", "finalise"]:
 
-            self._current_input = self.loaded_io[i_name]
+                self.state = state
 
-            self.run(i_name)
+                self.run(i_name, state)
+
             self.reset()
 
-        for o_name in self.outputs:
-            for t in self.targets:
+        for o_name in tqdm(
+            self.loaded_io["outputs"],
+            desc="Output loop".ljust(70, "."),
+            disable=self.no_progress_bar,
+            bar_format=self.colors["green"],
+        ):
 
-                if t in self.loaded_io[o_name].targets:
+            for t_name in self.targets:
 
-                    self._current_output = self.loaded_io[o_name]
+                self._current_output = self.loaded_io["outputs"][o_name]
 
-                    self._current_output.write(t.name)
+                self._current_output.write(t_name)
 
         stop = timeit.default_timer()
 
@@ -285,94 +272,73 @@ class Run:
 
         return
 
-    def run(self, i_name):
+    def run(self, i_name, state):
         """Run the loop function."""
 
-        # prefix_types = {
-        #    "initialise": "Inputs:  ",
-        #    "execute": "Events:  ",
-        #    "finalise": "Inputs: ",
-        # }
+        if state in ["initialise", "finalise"]:
+            # ---------------------------------------------------------------
+            # Initialise and finalise loops
+            # ---------------------------------------------------------------
+            self.store.put("INPUT:name", i_name)
 
-        """
-        for state in tqdm(["initialise", "execute", "finalise"]
-                desc=f"{input_name}{info}",
-                disable=self.no_progress_bar,
-                bar_format=self.colors[state]["input"]
+            self.store.put("INPUT:config", self.inputs[i_name])
 
+            self.loop()
+
+        elif state == "execute":
+            # ---------------------------------------------------------------
+            # Execute loop
+            # ---------------------------------------------------------------
+
+            # print("Prepare total number of events for event loop.")
+
+            tot_n_events = self._current_input.get_n_events()
+
+            # print(f"Total number of events for input {self._current_input.name}: {tot_n_events}")
+
+            eslices = self.get_events_slices(tot_n_events)
+
+            # print(f"Total eslices for input {self._current_input.name}: {eslices}")
+            # ---------------------------------------------------------------
+            # Event loop
+            # ---------------------------------------------------------------
+
+            info = "Event loop"
+
+            for emin, emax in eslices:
+
+                info += f"({i_name},  emin: {emin},  emax: {emax})".rjust(60, ".")
+
+                # print(f"Emin, Emax: {emin}, {emax}")
+
+                self._current_input.set_idx(emin)
+
+                erange = emax - emin + 1
+
+                for idx in tqdm(
+                    range(erange),
+                    desc=f"{info}",
+                    disable=self.no_progress_bar,
+                    bar_format=self.colors["white"],
                 ):
-        """
-        # for i_name in tqdm(
-        #    self.inputs,
-        #    desc=f"{prefix}{info}",
-        #    disable=self.no_progress_bar,
-        #    bar_format=self.colors[self.state]["input"],
-        # ):
+                    self.store.put("INPUT:name", i_name)
 
-        for state in ["initialise", "execute", "finalise"]:
+                    self.store.put("INPUT:config", self.inputs[i_name])
 
-            self.state = state
+                    self.store.put("EVENT:idx", self._current_input.get_idx())
 
-            # prefix = prefix_types[state]
+                    self.loop()
 
-            # info = self.state.rjust(70, ".")
-
-            if state in ["initialise", "finalise"]:
-                # ---------------------------------------------------------------
-                # Initialise and finalise loops
-                # ---------------------------------------------------------------
-                self.store.put("INPUT:name", i_name)
-
-                self.store.put("INPUT:config", self.inputs[i_name])
-
-                self.loop()
-
-            elif self.state == "execute":
-                # ---------------------------------------------------------------
-                # Execute loop
-                # ---------------------------------------------------------------
-
-                tot_n_events = self._current_input.get_n_events()
-
-                eslices = self.get_events_slices(tot_n_events)
-
-                # ---------------------------------------------------------------
-                # Event loop
-                # ---------------------------------------------------------------
-
-                for emin, emax in eslices:
-
-                    info = (
-                        f"{self.state} ({i_name},  emin: {emin},  emax: {emax})".rjust(
-                            70, "."
-                        )
-                    )
-
-                    self._current_input.set_idx(emin)
-
-                    erange = emax - emin + 1
-
-                    for idx in tqdm(
-                        range(erange),
-                        desc=f"{prefix}{info}",
-                        disable=self.no_progress_bar,
-                        bar_format=self.colors[self.state]["event"],
-                    ):
-                        self.store.put("INPUT:name", i_name)
-
-                        self.store.put("INPUT:config", self.inputs[i_name])
-
-                        self.store.put("EVENT:idx", self._current_input.get_idx())
-
-                        self.loop()
-
-                        self._current_input.set_next_event()
+                    # print("About to call set next event")
+                    self._current_input.set_next_event()
 
     def loop(self):
         """Loop over required targets to resolve them."""
         for t_name, t_instance in self.targets.items():
 
             if self._current_input.name in t_instance.samples:
+
+                # print(f"Currently calling {t_name} for {self._current_input.name}")
 
                 self.call(t_name)
 
@@ -390,13 +356,14 @@ class Run:
                 # check whether the obj meets the alg conditions to run.
                 if self.is_meeting_alg_conditions(obj_name, alg):
 
+                    # print(f"Calling algorithm {alg.name} in state: {self.state} after meeting conditions.")
                     getattr(alg, self.state)()
 
                 # checking that the object is complete.
-                if not self.is_complete(obj_name, alg):
-                    sys.exit(
-                        f"ERROR: object {obj_name} is on the store but additional output is missing !!!"
-                    )
+                # if not self.is_complete(obj_name, alg):
+                #    sys.exit(
+                #        f"ERROR: object {obj_name} is on the store but additional output is missing !!!"
+                #    )
 
             else:
                 self._current_input.read(obj_name)

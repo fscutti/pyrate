@@ -18,7 +18,7 @@ class SimulatedWaveformsGetter(Algorithm):
 
         waveform = {"energy": [], "time": []}
 
-        wf_map = self.store.get(self.config["waveform_map"])
+        wf_map = self.store.get(self.config["input"]["waveform_map"])
 
         if self.config["pmt_name"] in wf_map:
             waveform = wf_map[self.config["pmt_name"]]

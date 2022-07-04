@@ -16,7 +16,7 @@ class MuonDetCharge(Algorithm):
 
         if self.config["format"] == "ROOT":
 
-            e = self.store.get(self.config["edep"])
+            e = self.store.get(self.config["input"]["edep"])
 
             self.store.put(self.name, e)
 

@@ -3,6 +3,7 @@
 import ROOT as R
 from pyrate.core.Writer import Writer
 
+from pyrate.utils import enums as EN
 
 class WriterROOT(Writer):
     __slots__ = ["f"]

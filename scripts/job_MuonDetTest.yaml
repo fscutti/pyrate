@@ -51,12 +51,14 @@ configs:
 
 
 outputs:
-  TestFile.root:
-    path: PYRATE/test
+  TestFile:
+    file:
+      path: PYRATE/test
+      format: .root
     targets:
-        - muonDetPlot1D: Gamma, Neutron, Photons
-        - muonDetPlot2D: all
-        - muonDetPlot2D: Neutron
+      - muonDetPlot1D: Photons, Gamma, Neutron
+      #- muonDetPlot2D: all
+      #- muonDetPlot2D: Neutron
 
 
 
