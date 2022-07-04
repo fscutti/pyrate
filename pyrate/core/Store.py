@@ -34,9 +34,9 @@ class Store:
         """Clears the store."""
         self._store.clear()
 
-    def save(self, name, obj, copy=True):
+    def save(self, name, obj, save_copy=True):
         """Saves an object for later collection."""
-        if copy:
+        if save_copy:
             self._saved[name] = copy(obj)
         else:
             self._saved[name] = obj
