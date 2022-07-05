@@ -72,13 +72,14 @@ class Region(Algorithm):
             n_variables = len(variables) - 1
 
             for v_idx, v in enumerate(variables):
-
-                if v_idx < n_variables:
-                    parsed[v] = None
-
-                else:
-                    parsed[v] = s
-
+               
+                if not v in parsed:
+                    if v_idx < n_variables:
+                        parsed[v] = None
+                    
+                    else:
+                        parsed[v] = s
+                
         return parsed
 
     def execute(self, condition):
