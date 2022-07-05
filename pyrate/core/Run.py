@@ -45,6 +45,7 @@ class Run:
         # -----------------------------------------------------------------------
 
         self.state = None
+
         self._current_input = None
         self._current_output = None
 
@@ -85,19 +86,21 @@ class Run:
 
         self.store = Store(self.name)
 
-        self.targets = {}
-        self.nodes = {}
-        self.algorithms = {}
+        self.targets, self.nodes, self.algorithms = {}, {}, {}
         self.loaded_io = {"inputs": {}, "outputs": {}}
 
-        # loading output, initialising algorithms, loading input.
+        # Loading input / output and initialising algorithms.
+        # Not all inputs are loaded. Only those relevant for
+        # requested targets.
         for o_name in self.outputs:
-            for t_name, t_samples in self.io(o_name).targets.items():
+            o = self.io(o_name)
+
+            for t_name, t_samples in o.targets.items():
 
                 self.targets[t_name] = self.node(t_name, samples=t_samples)
 
-                for i_name in self.targets[t_name].samples:
-                    self.io(i_name)
+                for i_name in t_samples:
+                    i = self.io(i_name)
 
     def io(self, io_name):
         """Returns a specific input/output instance."""
@@ -107,37 +110,30 @@ class Run:
 
                 return self.loaded_io[category][io_name]
 
+        if io_name in self.inputs:
+
+            io_config, category = self.inputs[io_name], "inputs"
+
+            self.loaded_io[category][io_name] = Input(
+                io_name, io_config, self.store, self.logger
+            )
+
+        elif io_name in self.outputs:
+
+            io_config, category = self.outputs[io_name], "outputs"
+
+            self.loaded_io[category][io_name] = Output(
+                io_name, io_config, self.store, self.logger
+            )
+
         else:
+            sys.exit(
+                f"ERROR: input / ouput {io_name} not defined in the configuration."
+            )
 
-            if io_name in self.inputs:
+        self.loaded_io[category][io_name].load()
 
-                io_config = self.inputs[io_name]
-
-                self.loaded_io["inputs"][io_name] = Input(
-                    io_name, io_config, self.store, self.logger
-                )
-
-                self.loaded_io["inputs"][io_name].load()
-
-                return self.loaded_io["inputs"][io_name]
-
-            elif io_name in self.outputs:
-
-                io_config = self.outputs[io_name]
-
-                self.loaded_io["outputs"][io_name] = Output(
-                    io_name, io_config, self.store, self.logger
-                )
-
-                self.loaded_io["outputs"][io_name].load()
-
-                return self.loaded_io["outputs"][io_name]
-
-            else:
-                sys.exit(
-                    f"ERROR: input / ouput {io_name} not defined in the configuration."
-                )
-                return None
+        return self.loaded_io[category][io_name]
 
     def node(self, obj_name, samples=[]):
         """Instantiates a node for an object, including the corresponding algorithm instance
@@ -351,7 +347,7 @@ class Run:
         """Evaluates object dependencies. Some might
         have a condition associated. If this condition
         is not met it is not necessary to run the
-        dependent algorith."""
+        dependent algorithm."""
 
         n_deps = len(alg.input) - 1
 
