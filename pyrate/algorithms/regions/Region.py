@@ -63,7 +63,23 @@ class Region(Algorithm):
                 return False
 
     def parse_input(self, selection):
-        return {",".join(self.get_variables(s)): s for s in selection}
+
+        parsed = {}
+
+        for s in selection:
+
+            variables = self.get_variables(s)
+            n_variables = len(variables) - 1
+
+            for v_idx, v in enumerate(variables):
+
+                if v_idx < n_variables:
+                    parsed[v] = None
+
+                else:
+                    parsed[v] = s
+
+        return parsed
 
     def execute(self, condition):
 
@@ -72,8 +88,11 @@ class Region(Algorithm):
         for c in condition.split(","):
 
             for v in self.get_variables(c):
-
+                
+                # yes one can improve this.
                 c = c.replace(v, f"self.store.get('{v}')")
+                c = c.replace("&&", "and")
+                c = c.replace("||", "or")
 
             is_passed *= eval(c)
 

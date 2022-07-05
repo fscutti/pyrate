@@ -378,8 +378,7 @@ class Run:
 
         for dep_idx, dep_name in enumerate(alg.input):
 
-            for d in dep_name.split(","):
-                self.call(d)
+            self.call(dep_name)
 
             dep_cond = alg.input[dep_name]
 
