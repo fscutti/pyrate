@@ -37,14 +37,16 @@ class Run:
 
     def setup(self):
         """First instance of 'private' members."""
+
+        self.objects = self.configs["global"]["objects"]
         # -----------------------------------------------------------------------
-        # At this point the Run object should have self.input/config/output
+        # At this point the Run object should have self.inputs/objects/outputs
         # defined after being read from the configuration yaml file.
         # -----------------------------------------------------------------------
+
         self.state = None
         self._current_input = None
         self._current_output = None
-        self._global_obj_config = self.configs["global"]["objects"]
 
         log_file_name = f"{self.name}.{time.strftime('%Y-%m-%d-%Hh%M')}.log"
 
@@ -69,19 +71,15 @@ class Run:
 
         self.logger.addHandler(fileHandler)
 
-        blue = "{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)
-        yellow = "{l_bar}%s{bar}%s{r_bar}" % (
-            Fore.YELLOW,
-            Fore.RESET,
-        )
-        green = "{l_bar}%s{bar}%s{r_bar}" % (
-            Fore.GREEN,
-            Fore.RESET,
-        )
-        white = "{l_bar}%s{bar}%s{r_bar}" % (
-            Fore.WHITE,
-            Fore.RESET,
-        )
+        blue = "{l_bar}%s{bar}%s{r_bar}"
+        yellow = "{l_bar}%s{bar}%s{r_bar}"
+        green = "{l_bar}%s{bar}%s{r_bar}"
+        white = "{l_bar}%s{bar}%s{r_bar}"
+
+        blue = blue % (Fore.BLUE, Fore.RESET)
+        yellow = yellow % (Fore.YELLOW, Fore.RESET)
+        green = green % (Fore.GREEN, Fore.RESET)
+        white = white % (Fore.WHITE, Fore.RESET)
 
         self.colors = {"blue": blue, "yellow": yellow, "green": green, "white": white}
 
@@ -92,19 +90,14 @@ class Run:
         self.algorithms = {}
         self.loaded_io = {"inputs": {}, "outputs": {}}
 
-        # loading outputs.
+        # loading output, initialising algorithms, loading input.
         for o_name in self.outputs:
-            o = self.io(o_name)
+            for t_name, t_samples in self.io(o_name).targets.items():
 
-        # initialising algorithms/objects.
-        for out_name in self.outputs:
-            for t_name, t_samples in self.io(out_name).targets.items():
                 self.targets[t_name] = self.node(t_name, samples=t_samples)
 
-        # loading inputs.
-        for t_name, t_instance in self.targets.items():
-            for i_name in t_instance.samples:
-                i = self.io(i_name)
+                for i_name in self.targets[t_name].samples:
+                    self.io(i_name)
 
     def io(self, io_name):
         """Returns a specific output instance."""
@@ -190,9 +183,9 @@ class Run:
         else:
             obj = obj_name.split(":")[0]
 
-            if obj in self._global_obj_config:
+            if obj in self.objects:
 
-                obj_config = self._global_obj_config[obj]
+                obj_config = self.objects[obj]
 
                 for m in sys.modules:
 
