@@ -246,7 +246,7 @@ class Run:
 
                 self.state = state
 
-                self.run(i_name, state)
+                self.run(i_name)
 
             self.reset()
 
@@ -272,10 +272,10 @@ class Run:
 
         return
 
-    def run(self, i_name, state):
+    def run(self, i_name):
         """Run the loop function."""
 
-        if state in ["initialise", "finalise"]:
+        if self.state in ["initialise", "finalise"]:
             # ---------------------------------------------------------------
             # Initialise and finalise loops
             # ---------------------------------------------------------------
@@ -285,7 +285,7 @@ class Run:
 
             self.loop()
 
-        elif state == "execute":
+        elif self.state == "execute":
             # ---------------------------------------------------------------
             # Execute loop
             # ---------------------------------------------------------------
