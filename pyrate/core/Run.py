@@ -100,7 +100,7 @@ class Run:
                     self.io(i_name)
 
     def io(self, io_name):
-        """Returns a specific output instance."""
+        """Returns a specific input/output instance."""
 
         for category in ["inputs", "outputs"]:
             if io_name in self.loaded_io[category]:
@@ -140,7 +140,9 @@ class Run:
                 return None
 
     def node(self, obj_name, samples=[]):
-        """Gets node tree of an object. This is a recursive function."""
+        """Instantiates a node for an object, including the corresponding algorithm instance
+        and the list of relevant samples. This function checks for circular dependencies. 
+        The node instance is returned. This is a recursive function."""
         if not obj_name in self.nodes:
 
             self.nodes[obj_name] = Node(obj_name, algorithm=None, samples=samples)
@@ -175,7 +177,8 @@ class Run:
             self.nodes[obj_name].algorithm = None
 
     def alg(self, obj_name):
-        """Gets instance of algorithm from the configuration."""
+        """Instantiates an algorithm/object according to the 
+        global configuration and returns its instance."""
 
         if obj_name in self.algorithms:
             return self.algorithms[obj_name]
@@ -217,16 +220,15 @@ class Run:
                 sys.exit(f"ERROR: object {obj} not defined in the configuration.")
 
     def launch(self):
-        """Implement input/output loop."""
-        # -----------------------------------------------------------------------
-        # The store object is the output of the launch function.
-        # -----------------------------------------------------------------------
-
+        """Launches loops over inputs and outputs."""
         start = timeit.default_timer()
 
         msg = f"Launching pyrate run {self.name}"
         print("\n", "*" * len(msg), msg, "*" * len(msg))
 
+        # -----------------------------------------------------------------------
+        # Input loop.
+        # -----------------------------------------------------------------------
         for i_name in tqdm(
             self.loaded_io["inputs"],
             desc="Input loop".ljust(70, "."),
@@ -244,6 +246,9 @@ class Run:
 
             self.clear_algorithms()
 
+        # -----------------------------------------------------------------------
+        # Output loop.
+        # -----------------------------------------------------------------------
         for o_name in tqdm(
             self.loaded_io["outputs"],
             desc="Output loop".ljust(70, "."),
@@ -267,11 +272,11 @@ class Run:
         return
 
     def run(self):
-        """Run the loop function."""
+        """Run the loop function for the current state."""
 
         if self.state in ["initialise", "finalise"]:
             # ---------------------------------------------------------------
-            # Initialise and finalise loops
+            # Initialise or finalise loop.
             # ---------------------------------------------------------------
             self.store.put("INPUT:name", self._current_input.name)
 
@@ -281,7 +286,7 @@ class Run:
 
         elif self.state == "execute":
             # ---------------------------------------------------------------
-            # Execute loop
+            # Execute loop.
             # ---------------------------------------------------------------
             tot_n_events = self._current_input.get_n_events()
 
@@ -318,7 +323,7 @@ class Run:
                     self._current_input.set_next_event()
 
     def loop(self):
-        """Loop over required targets to resolve them."""
+        """Loop over targets and calls them."""
         for t_name, t_instance in self.targets.items():
 
             if self._current_input.name in t_instance.samples:
@@ -328,8 +333,7 @@ class Run:
         self.store.clear()
 
     def call(self, obj_name):
-        """Calls an algorithm."""
-
+        """Calls an algorithm for the current state."""
         if self.store.get(obj_name) is EN.Pyrate.NONE:
 
             alg = self.node(obj_name).algorithm
@@ -354,8 +358,10 @@ class Run:
         return
 
     def is_meeting_alg_conditions(self, obj_name, alg):
-        """In order to get out of the dependency loop
-        the algorithm has to put False/0 on the store."""
+        """Evaluates object dependencies. Some might
+        have a condition associated. If this condition
+        is not met it is not necessary to run the 
+        dependent algorith."""
 
         n_deps = len(alg.input) - 1
 
