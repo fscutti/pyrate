@@ -56,7 +56,7 @@ outputs:
       path: PYRATE/test
       format: .root
     targets:
-      - muonDetPlot1D: Photons, Gamma, Neutron
+      - muonDetPlot1D: Photons, Gamma
       #- muonDetPlot2D: all
       #- muonDetPlot2D: Neutron
 

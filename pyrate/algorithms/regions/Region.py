@@ -74,6 +74,7 @@ class Region(Algorithm):
             for v_idx, v in enumerate(variables):
                
                 if not v in parsed:
+
                     if v_idx < n_variables:
                         parsed[v] = None
                     
