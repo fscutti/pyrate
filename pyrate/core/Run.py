@@ -141,7 +141,7 @@ class Run:
 
     def node(self, obj_name, samples=[]):
         """Instantiates a node for an object, including the corresponding algorithm instance
-        and the list of relevant samples. This function checks for circular dependencies. 
+        and the list of relevant samples. This function checks for circular dependencies.
         The node instance is returned. This is a recursive function."""
         if not obj_name in self.nodes:
 
@@ -177,7 +177,7 @@ class Run:
             self.nodes[obj_name].algorithm = None
 
     def alg(self, obj_name):
-        """Instantiates an algorithm/object according to the 
+        """Instantiates an algorithm/object according to the
         global configuration and returns its instance."""
 
         if obj_name in self.algorithms:
@@ -202,14 +202,6 @@ class Run:
                         self.algorithms[obj_name] = getattr(module, alg_name)(
                             obj_name, obj_config, self.store, self.logger
                         )
-
-                        # initialisation of inputs and outputs.
-                        self.algorithms[obj_name].input = obj_config["input"]
-
-                        if "output" in obj_config:
-                            self.algorithms[obj_name].output = obj_config["output"]
-                        else:
-                            self.algorithms[obj_name].output = ""
 
                         return self.algorithms[obj_name]
 
@@ -275,9 +267,7 @@ class Run:
         """Run the loop function for the current state."""
 
         if self.state in ["initialise", "finalise"]:
-            # ---------------------------------------------------------------
-            # Initialise or finalise loop.
-            # ---------------------------------------------------------------
+
             self.store.put("INPUT:name", self._current_input.name)
 
             self.store.put("INPUT:config", self._current_input.config)
@@ -285,19 +275,19 @@ class Run:
             self.loop()
 
         elif self.state == "execute":
-            # ---------------------------------------------------------------
-            # Execute loop.
-            # ---------------------------------------------------------------
+
             tot_n_events = self._current_input.get_n_events()
 
             eslices = self.get_events_slices(tot_n_events)
 
-            info = "Event loop"
-
+            # ---------------------------------------------------------------
+            # Event loop.
+            # ---------------------------------------------------------------
             for emin, emax in eslices:
 
-                info += (
-                    f"({self._current_input.name},  emin: {emin},  emax: {emax})".rjust(
+                info = (
+                    "Event loop"
+                    + f"({self._current_input.name},  emin: {emin},  emax: {emax})".rjust(
                         60, "."
                     )
                 )
@@ -360,7 +350,7 @@ class Run:
     def is_meeting_alg_conditions(self, obj_name, alg):
         """Evaluates object dependencies. Some might
         have a condition associated. If this condition
-        is not met it is not necessary to run the 
+        is not met it is not necessary to run the
         dependent algorith."""
 
         n_deps = len(alg.input) - 1
