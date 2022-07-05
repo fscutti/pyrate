@@ -246,7 +246,7 @@ class Run:
 
                 self.state = state
 
-                self.run(i_name)
+                self.run()
 
             self.reset()
 
@@ -272,16 +272,16 @@ class Run:
 
         return
 
-    def run(self, i_name):
+    def run(self):
         """Run the loop function."""
 
         if self.state in ["initialise", "finalise"]:
             # ---------------------------------------------------------------
             # Initialise and finalise loops
             # ---------------------------------------------------------------
-            self.store.put("INPUT:name", i_name)
+            self.store.put("INPUT:name", self._current_input.name)
 
-            self.store.put("INPUT:config", self.inputs[i_name])
+            self.store.put("INPUT:config", self._current_input.config)
 
             self.loop()
 
@@ -289,27 +289,15 @@ class Run:
             # ---------------------------------------------------------------
             # Execute loop
             # ---------------------------------------------------------------
-
-            # print("Prepare total number of events for event loop.")
-
             tot_n_events = self._current_input.get_n_events()
 
-            # print(f"Total number of events for input {self._current_input.name}: {tot_n_events}")
-
             eslices = self.get_events_slices(tot_n_events)
-
-            # print(f"Total eslices for input {self._current_input.name}: {eslices}")
-            # ---------------------------------------------------------------
-            # Event loop
-            # ---------------------------------------------------------------
 
             info = "Event loop"
 
             for emin, emax in eslices:
 
-                info += f"({i_name},  emin: {emin},  emax: {emax})".rjust(60, ".")
-
-                # print(f"Emin, Emax: {emin}, {emax}")
+                info += f"({self._current_input.name},  emin: {emin},  emax: {emax})".rjust(60, ".")
 
                 self._current_input.set_idx(emin)
 
@@ -321,15 +309,14 @@ class Run:
                     disable=self.no_progress_bar,
                     bar_format=self.colors["white"],
                 ):
-                    self.store.put("INPUT:name", i_name)
+                    self.store.put("INPUT:name", self._current_input.name)
 
-                    self.store.put("INPUT:config", self.inputs[i_name])
+                    self.store.put("INPUT:config", self._current_input.config)
 
                     self.store.put("EVENT:idx", self._current_input.get_idx())
 
                     self.loop()
 
-                    # print("About to call set next event")
                     self._current_input.set_next_event()
 
     def loop(self):
@@ -337,8 +324,6 @@ class Run:
         for t_name, t_instance in self.targets.items():
 
             if self._current_input.name in t_instance.samples:
-
-                # print(f"Currently calling {t_name} for {self._current_input.name}")
 
                 self.call(t_name)
 
@@ -356,9 +341,9 @@ class Run:
                 # check whether the obj meets the alg conditions to run.
                 if self.is_meeting_alg_conditions(obj_name, alg):
 
-                    # print(f"Calling algorithm {alg.name} in state: {self.state} after meeting conditions.")
                     getattr(alg, self.state)()
-
+                
+                # the block below is work in progress.
                 # checking that the object is complete.
                 # if not self.is_complete(obj_name, alg):
                 #    sys.exit(
