@@ -43,7 +43,8 @@ class Run:
         # -----------------------------------------------------------------------
         self.state = None
         self._current_input = None
-        self._config = self.configs["global"]["objects"]
+        self._current_output = None
+        self._global_obj_config = self.configs["global"]["objects"]
 
         log_file_name = f"{self.name}.{time.strftime('%Y-%m-%d-%Hh%M')}.log"
 
@@ -172,8 +173,8 @@ class Run:
 
         return self.nodes[obj_name]
 
-    def reset(self):
-        """Clears the algorithm instance of a node."""
+    def clear_algorithms(self):
+        """Clears all algorithm instances."""
         for obj_name in list(self.algorithms.keys()):
 
             del self.algorithms[obj_name]
@@ -189,9 +190,9 @@ class Run:
         else:
             obj = obj_name.split(":")[0]
 
-            if obj in self._config:
+            if obj in self._global_obj_config:
 
-                obj_config = self._config[obj]
+                obj_config = self._global_obj_config[obj]
 
                 for m in sys.modules:
 
@@ -248,7 +249,7 @@ class Run:
 
                 self.run()
 
-            self.reset()
+            self.clear_algorithms()
 
         for o_name in tqdm(
             self.loaded_io["outputs"],
@@ -257,9 +258,9 @@ class Run:
             bar_format=self.colors["green"],
         ):
 
-            for t_name in self.targets:
+            self._current_output = self.loaded_io["outputs"][o_name]
 
-                self._current_output = self.loaded_io["outputs"][o_name]
+            for t_name in self.targets:
 
                 self._current_output.write(t_name)
 
@@ -297,7 +298,11 @@ class Run:
 
             for emin, emax in eslices:
 
-                info += f"({self._current_input.name},  emin: {emin},  emax: {emax})".rjust(60, ".")
+                info += (
+                    f"({self._current_input.name},  emin: {emin},  emax: {emax})".rjust(
+                        60, "."
+                    )
+                )
 
                 self._current_input.set_idx(emin)
 
@@ -342,7 +347,7 @@ class Run:
                 if self.is_meeting_alg_conditions(obj_name, alg):
 
                     getattr(alg, self.state)()
-                
+
                 # the block below is work in progress.
                 # checking that the object is complete.
                 # if not self.is_complete(obj_name, alg):
