@@ -80,7 +80,7 @@ class Region(Algorithm):
                     
                     else:
                         parsed[v] = s
-                
+        
         return parsed
 
     def execute(self, condition):

@@ -78,12 +78,9 @@ class Algorithm:
                 elif isinstance(i, str):
                     unconditional.update({v: None for v in ST.get_items(i)})
 
-            # the order of these update instructions matters, as for selection 
-            # algorithms we might want to interrupt input evaluation if all 
-            # conditional ones are satisfied.
             self._input.update(conditional)
             self._input.update(unconditional)
-        
+
     def parse_input(self, l=[]):
         """Returns a dictionary where keys are dependencies
         and values are conditions to be evaluated by the Algorithm.
@@ -99,10 +96,7 @@ class Algorithm:
     def output(self, config_output):
         """Setter method for output objects."""
         if self._output == {}:
-
-            self._output[self.name] = [
-                f"{self.name}:{o}" for o in ST.get_items(config_output)
-            ]
+            self._output = config_output
 
 
 # EOF

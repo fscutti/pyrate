@@ -44,11 +44,6 @@ class Run:
         # defined after being read from the configuration yaml file.
         # -----------------------------------------------------------------------
 
-        self.state = None
-
-        self._current_input = None
-        self._current_output = None
-
         log_file_name = f"{self.name}.{time.strftime('%Y-%m-%d-%Hh%M')}.log"
 
         # Will need to change handling of log files.
@@ -83,6 +78,11 @@ class Run:
         white = white % (Fore.WHITE, Fore.RESET)
 
         self.colors = {"blue": blue, "yellow": yellow, "green": green, "white": white}
+        
+        self.state = None
+
+        self._current_input = None
+        self._current_output = None
 
         self.store = Store(self.name)
 
@@ -226,9 +226,7 @@ class Run:
 
             self._current_input = self.loaded_io["inputs"][i_name]
 
-            for state in ["initialise", "execute", "finalise"]:
-
-                self.state = state
+            for self.state in ["initialise", "execute", "finalise"]:
 
                 self.run()
 
@@ -256,7 +254,6 @@ class Run:
             print("Execution time: ", str(stop - start))
 
         # self.logger.info("Execution time: ", str(stop - start))
-
         return
 
     def run(self):
