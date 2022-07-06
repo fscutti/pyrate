@@ -70,10 +70,12 @@ class Algorithm:
 
                 if not isinstance(dependency, list):
 
+                    variables = set(ST.get_items(str(dependency)))
+
                     if not None in self._input:
-                        self._input[None] = set(ST.get_items(str(dependency)))
+                        self._input[None] = variables
                     else:
-                        self._input[None].update(set(ST.get_items(str(dependency))))
+                        self._input[None].update(variables)
 
                 else:
                     for string in dependency:
