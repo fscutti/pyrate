@@ -42,6 +42,7 @@ class Input(Reader):
         self.eslices = self.config["eslices"]
         self.path = self.config["path"]
         self.color = self.config["color"]
+        self.reader = self.config["reader"]
         
 
         if not hasattr(self, "structure"):
@@ -356,7 +357,7 @@ class Input(Reader):
 
                 self.logger.info(f"User-set reader for {f_name} to {self.reader}")
                 reader = ReaderClass(
-                    r_name, self.store, self.logger, f_name, self.structure
+                    r_name, self.config, self.store, self.logger, f_name, self.structure
                 )
             else:
                 if f_name.endswith(".root"):
