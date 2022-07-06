@@ -325,16 +325,14 @@ class Run:
 
             if alg is not None:
 
-                n_conds = len(alg.input) - 1
-
-                for cond_idx, (condition, dependencies) in enumerate(alg.input.items()):
+                for condition, dependencies in alg.input.items():
 
                     for d in dependencies:
                         self.call(d)
 
                     passed = getattr(alg, self.state)(condition)
 
-                    if not passed or cond_idx == n_conds:
+                    if not passed:
                         return
 
                 #    getattr(alg, self.state)()
