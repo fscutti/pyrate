@@ -78,7 +78,7 @@ class Run:
         white = white % (Fore.WHITE, Fore.RESET)
 
         self.colors = {"blue": blue, "yellow": yellow, "green": green, "white": white}
-        
+
         self.state = None
 
         self._current_input = None
@@ -152,15 +152,17 @@ class Run:
                 and not self.nodes[obj_name].children
             ):
 
-                for i in self.nodes[obj_name].algorithm.input:
+                for _, dependencies in self.nodes[obj_name].algorithm.input.items():
 
-                    try:
-                        self.node(i).parent = self.nodes[obj_name]
+                    for d in dependencies:
 
-                    except anytreeExceptions.LoopError:
-                        sys.exit(
-                            f"ERROR: circular node detected between {i} and {obj_name}"
-                        )
+                        try:
+                            self.node(d).parent = self.nodes[obj_name]
+
+                        except anytreeExceptions.LoopError:
+                            sys.exit(
+                                f"ERROR: circular node detected between {d} and {obj_name}"
+                            )
 
         return self.nodes[obj_name]
 
@@ -323,10 +325,19 @@ class Run:
 
             if alg is not None:
 
-                # check whether the obj meets the alg conditions to run.
-                if self.is_meeting_alg_conditions(obj_name, alg):
+                n_conds = len(alg.input) - 1
 
-                    getattr(alg, self.state)()
+                for cond_idx, (condition, dependencies) in enumerate(alg.input.items()):
+
+                    for d in dependencies:
+                        self.call(d)
+
+                    passed = getattr(alg, self.state)(condition)
+
+                    if not passed or cond_idx == n_conds:
+                        return
+
+                #    getattr(alg, self.state)()
 
                 # the block below is work in progress.
                 # checking that the object is complete.
@@ -339,29 +350,6 @@ class Run:
                 self._current_input.read(obj_name)
 
         return
-
-    def is_meeting_alg_conditions(self, obj_name, alg):
-        """Evaluates object dependencies. Some might
-        have a condition associated. If this condition
-        is not met it is not necessary to run the
-        dependent algorithm."""
-
-        n_deps = len(alg.input) - 1
-
-        for dep_idx, dep_name in enumerate(alg.input):
-
-            self.call(dep_name)
-
-            dep_cond = alg.input[dep_name]
-
-            if dep_cond is not None:
-
-                passed = getattr(alg, self.state)(dep_cond)
-
-                if not passed or dep_idx == n_deps:
-                    return False
-
-        return True
 
     def is_complete(self, obj_name, alg):
         """If the main object is on the store with a valid value,

@@ -53,7 +53,7 @@ class SimulatedWaveformsBuilder(Algorithm):
                 position["z"] + self.pc_width,
             ]
 
-    def execute(self):
+    def execute(self, condition=None):
 
         waveforms = {}
         for pmt, position in self.pmt_intervals.items():

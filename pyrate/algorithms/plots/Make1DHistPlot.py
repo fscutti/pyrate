@@ -52,10 +52,10 @@ class Make1DHistPlot(Algorithm):
 
         self.histograms = {}
 
-    def parse_input(self, input_list):
-        return {i.split(",")[0]: None for i in input_list}
+    def parse_input(self, input_string):
+        return {None: set(input_string.split(",")[:1])}
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Prepares histograms.
         If not found in the input already it will create new ones."""
 
@@ -81,7 +81,7 @@ class Make1DHistPlot(Algorithm):
 
                     self.store.save(obj_name, h)
 
-    def execute(self):
+    def execute(self, condition=None):
         """Fills histograms."""
         i_name = self.store.get("INPUT:name")
 
@@ -133,7 +133,7 @@ class Make1DHistPlot(Algorithm):
                             # the presence of an object, not its value.
                             self.store.put(obj_counter, "done")
 
-    def finalise(self):
+    def finalise(self, condition=None):
         """Makes the plot."""
 
         plot_collection = {}
@@ -173,7 +173,7 @@ class Make1DHistPlot(Algorithm):
                             f_attr,
                         )
 
-        #FN.pretty(plot_collection)
+        # FN.pretty(plot_collection)
 
         canvas_collection = self.store.collect(self.name)
 

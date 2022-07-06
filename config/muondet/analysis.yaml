@@ -60,6 +60,10 @@ objects:
             #- "myWeight1, myWeighto2"
             #- "myCut1>0 && myCut2>0"
             #- "myWeight1"
+      #output:
+      #    myVar1: This_is_my_var1
+      #    myVar2: This_is_my_var2
+
 
     muonDetParticlePos6:
       algorithm: Region

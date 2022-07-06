@@ -66,26 +66,29 @@ class Algorithm:
         """Setter method for input objects."""
         if self._input == {}:
 
-            dependencies = FN.get_nested_values(config_input)
+            for dependency in FN.get_nested_values(config_input):
 
-            conditional, unconditional = {}, {}
+                if not isinstance(dependency, list):
 
-            for i in dependencies:
+                    if not None in self._input:
+                        self._input[None] = set(ST.get_items(str(dependency)))
+                    else:
+                        self._input[None].update(set(ST.get_items(str(dependency))))
 
-                if isinstance(i, list):
-                    conditional.update({v: c for v, c in self.parse_input(i).items()})
+                else:
+                    for string in dependency:
 
-                elif isinstance(i, str):
-                    unconditional.update({v: None for v in ST.get_items(i)})
+                        for condition, variables in self.parse_input(string).items():
 
-            self._input.update(conditional)
-            self._input.update(unconditional)
+                            if not condition in self._input:
+                                self._input[condition] = variables
+                            else:
+                                self._input[condition].update(variables)
 
-    def parse_input(self, l=[]):
-        """Returns a dictionary where keys are dependencies
-        and values are conditions to be evaluated by the Algorithm.
-        This function is reimplemented by derived algorithms."""
-        return {}
+    def parse_input(self, s):
+        """Returns a dictionary where keys are dependency conditions and values
+        are the variables associated to them."""
+        return {None: set()}
 
     @property
     def output(self):

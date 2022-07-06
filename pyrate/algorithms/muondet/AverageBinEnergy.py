@@ -12,7 +12,7 @@ class AverageBinEnergy(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def execute(self):
+    def execute(self, condition=None):
 
         e = self.store.get("EVENT:nT:edepScint")
 
