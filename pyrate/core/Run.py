@@ -333,7 +333,7 @@ class Run:
                     passed = getattr(alg, self.state)(condition)
 
                     if not passed:
-                        return
+                        break
 
                 #    getattr(alg, self.state)()
 
