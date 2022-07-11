@@ -6,7 +6,7 @@
         rate: (float) The sample rate of the digitiser
         unit: (float/string) The desired units of the output time. Choose from
                              the predefined units or specify your own.
-        time: (int) The orignal time in units of samples from another object.
+        sample_number: (int) The orignal sample number (time) to be converted.
     
     Required states:
         initialise:
@@ -25,7 +25,7 @@
             output:
         execute:
             input: PulseStart_CHX
-        time: PulseStart_CHXCFD
+        sample_number: PulseStart_CHXCFD
 """
 
 from pyrate.core.Algorithm import Algorithm
@@ -56,7 +56,7 @@ class TimeConverter(Algorithm):
 
     def execute(self):
         """Converts the sample time to physical units"""
-        sample_time = self.store.get(self.config["input"]["time"])
+        sample_time = self.store.get(self.config["sample_number"])
         if sample_time is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             return

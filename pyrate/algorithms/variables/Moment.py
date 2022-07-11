@@ -61,6 +61,10 @@ class Moment(Algorithm):
         window = self.store.get(self.config["input"]["window"])
         if waveform is Pyrate.NONE or window is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
+            self.store.put(f"{self.name}Mean", Pyrate.NONE)
+            self.store.put(f"{self.name}Stddev", Pyrate.NONE)
+            self.store.put(f"{self.name}Skew", Pyrate.NONE)
+            self.store.put(f"{self.name}Kurtosis", Pyrate.NONE)
             return
 
         waveform_len = waveform.size

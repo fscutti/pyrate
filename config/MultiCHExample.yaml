@@ -298,7 +298,6 @@ objects:
         input:
             time: PulseStart_CH1
 
-
     TimeDifference_CH01:
         algorithm: Difference
         input:
