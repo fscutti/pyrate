@@ -42,7 +42,8 @@ class Input(Reader):
         self.eslices = self.config["eslices"]
         self.path = self.config["path"]
         self.color = self.config["color"]
-        self.reader = self.config["reader"]
+        if "reader" in self.config:
+            self.reader = self.config["reader"]
         
 
         if not hasattr(self, "structure"):
