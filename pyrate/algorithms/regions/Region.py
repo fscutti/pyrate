@@ -27,6 +27,7 @@ class Region(Algorithm):
 
         cut = cut.replace(" ", ",")
 
+        # The logic operators && and || are not supported.
         symbols = [
             ">=",
             "<=",
@@ -34,8 +35,8 @@ class Region(Algorithm):
             "<",
             "==",
             "!=",
-            "||",
-            "&&",
+            "and",
+            "or",
             "False",
             "True",
             "false",
@@ -73,10 +74,7 @@ class Region(Algorithm):
 
             for v in self.get_variables(c):
 
-                # yes one can improve this.
                 c = c.replace(v, f"self.store.get('{v}')")
-                c = c.replace("&&", "and")
-                c = c.replace("||", "or")
 
             is_passed *= eval(c)
 

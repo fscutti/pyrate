@@ -52,13 +52,12 @@ objects:
       algorithm: Region
       input:
           selection:
-            - xParticleHitPos == 0.0
-            - yParticleHitPos  == 0.0
-            #- "A >0  && B== False"
-            #- "C< 0 || D != 1000. && F> D"
-            #- "B>A   &&  A>0 || C>D || G<0 && H>0"
+            - xParticleHitPos == 0.0 and yParticleHitPos  == 0.0
+            #- "A >0  and B== False"
+            #- "C< 0 or D != 1000. and F> D"
+            #- "B>A   and  A>0 or C>D or G<0 and H>0"
             #- "myWeight1, myWeighto2"
-            #- "myCut1>0 && myCut2>0"
+            #- "myCut1>0 and myCut2>0"
             #- "myWeight1"
       #output:
       #    myVar1: This_is_my_var1
