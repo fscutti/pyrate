@@ -98,12 +98,12 @@ pip3 $QUIET install pip --upgrade
 
 # Check if we're running on an arm64 architecture
 if [[ $(uname -m) == 'arm64' ]]; then
-	# special numba install for M1 mac, required temporarily for now
+	# special numba install for Apple Silicon, required temporarily for now
 	currentver="$python3 --version"
 	requiredver="3.9.0"
 	if [ "$(printf '%s\n' "$requiredver" "$currentver" | sort -V | head -n1)" = "$requiredver" ]; then 
 		# Only run this if we have the right python version
-		pip3 $QUIET install -r $PYRATE/requirements_m1.txt
+		pip3 $QUIET install -r $PYRATE/requirements_arm64.txt
 		pip3 $QUIET install -i https://pypi.anaconda.org/numba/label/wheels_experimental_m1/simple numba
 	else
 		echo "${RED}Python version must be greater than 3.9 for using numba with M1${NC}"
