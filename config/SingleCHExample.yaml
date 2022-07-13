@@ -7,27 +7,18 @@ objects:
         # Waveform and Baseline algorithms
         # -----------------------------------------------------------
 
-    RawWaveform_CH0:
-        algorithm: RawWaveform
-        initialise:
-            output:
-        input:
-            waveform_bt: EVENT:board_0:raw_waveform_ch_0  # Channels need to be specified here
-            waveform_md: EVENT:board_0:ch_0:waveform
-            waveform_wd: EVENT:RawWaveform
-
     BaselineDynamic_CH0:
         algorithm: BaselineDynamic
         samples: 40
         threshold: 20
         input:
-            waveform: RawWaveform_CH0
+            waveform: EVENT:board_0:ch_0:waveform
 
     BaselineNaive_CH0:
         algorithm: BaselineNaive
         samples: 40
         input:
-            waveform: RawWaveform_CH0
+            waveform: EVENT:board_0:ch_0:waveform
 
     CorrectedWaveform_CH0:
         algorithm: CorrectedWaveform
@@ -36,9 +27,8 @@ objects:
         polarity: neg
         units: mV
         input:
-            waveform: RawWaveform_CH0
+            waveform: EVENT:board_0:ch_0:waveform
             baseline: BaselineNaive_CH0
-            wc_waveform: EVENT:GROUP:CH0:RawWaveform
 
     AverageWaveform_CH0:
         algorithm: AverageWaveform
@@ -260,7 +250,7 @@ objects:
         trees:
         - Channel_0:
                 event:
-                    vector<int>: RawWaveform_CH0
+                    vector<int>: {RawWaveform: EVENT:board_0:ch_0:waveform}
                     vector<double>: 
                                 - FFT_CH0, Moments_CH0
                                 - CorrectedWaveform: CorrectedWaveform_CH0
