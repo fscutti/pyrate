@@ -61,19 +61,19 @@ class FFT(Algorithm):
         if "window" in self.config:
             self.use_window = True
 
-        self.sample_rate = float(self.config["algorithm"]["rate"])
-        self.fft_bins = self.config["algorithm"]["bins"]
+        self.sample_rate = float(self.config["rate"])
+        self.fft_bins = self.config["bins"]
 
     def execute(self):
         """Caclulates the FFT based on the chosen mode"""
-        waveform = self.store.get(self.config["waveform"])
+        waveform = self.store.get(self.config["input"]["waveform"])
         if waveform is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             return
 
         # Checks if window is used
         if self.use_window:
-            window = self.store.get(self.config["window"])
+            window = self.store.get(self.config["input"]["window"])
         else:
             window = (None, None)
 

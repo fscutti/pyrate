@@ -5,13 +5,16 @@ which are not fully defined, i.e. those containing the 'pass' instruction.
 
 
 class Reader:
-    __slots__ = ["name", "store", "logger", "is_loaded", "_idx", "_n_events"]
+    __slots__ = ["name", "config", "store", "logger", "is_loaded", "_idx", "_n_events"]
 
-    def __init__(self, name, store, logger):
+    def __init__(self, name, config, store, logger):
         self.name = name
+        self.config = config
         self.store = store
         self.logger = logger
+
         self.is_loaded = False
+
         self._idx = 0
         self._n_events = None
 

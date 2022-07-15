@@ -41,9 +41,9 @@ class PeakHeight(Algorithm):
 
     def execute(self):
         """Caclulates the waveform peak height (maximum)"""
-        waveform = self.store.get(self.config["waveform"])
+        waveform = self.store.get(self.config["input"]["waveform"])
         if self.use_window:
-            window = self.store.get(self.config["window"])
+            window = self.store.get(self.config["input"]["window"])
         else:
             window = (None, None)
         

@@ -27,9 +27,9 @@ class TimeWeightedPulse(Algorithm):
         self.quantum_efficiency.Fill(650, 1)
         self.quantum_efficiency.Fill(750, 0.001)
 
-    def execute(self):
+    def execute(self, condition=None):
 
-        wf = self.store.get(self.config["waveform"])
+        wf = self.store.get(self.config["input"]["waveform"])
 
         measured_energy = 0.0
         e_num, e_den = 0.0, 0.0

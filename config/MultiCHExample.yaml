@@ -7,121 +7,65 @@ objects:
         # Waveform and Baseline algorithms
         # -----------------------------------------------------------
 
-    # RawWaveform_CH0:
-    #     algorithm:
-    #         name: RawWaveform
-    #     initialise:
-    #         output:
-    #     execute:
-    #         input: EVENT:board_0:ch_0:waveform, EVENT:board_0:raw_waveform_ch_0, EVENT:RawWaveform
-    #         output:
-    #     waveform_bt: EVENT:board_0:raw_waveform_ch_0         # Channels need to be specified here
-    #     waveform_md: EVENT:board_0:ch_0:waveform
-    #     waveform_wd: EVENT:RawWaveform
-
-
-    # RawWaveform_CH1:
-    #     algorithm:
-    #         name: RawWaveform
-    #     initialise:
-    #         output:
-    #     execute:
-    #         input: EVENT:board_0:ch_1:waveform, EVENT:board_0:raw_waveform_ch_1, EVENT:RawWaveform
-    #         output:
-    #     waveform_bt: EVENT:board_0:raw_waveform_ch_1         # Channels need to be specified here
-    #     waveform_md: EVENT:board_0:ch_1:waveform
-    #     waveform_wd: EVENT:RawWaveform
-
-
     BaselineDynamic_CH0:
-        algorithm:
-            name: BaselineDynamic
-            samples: 40
-            threshold: 20
-        execute:
-            input: EVENT:board_0:ch_0:waveform
-        waveform: EVENT:board_0:ch_0:waveform
+        algorithm: BaselineDynamic
+        samples: 40
+        threshold: 20
+        input:
+            waveform: EVENT:board_0:ch_0:waveform
 
 
     BaselineDynamic_CH1:
-        algorithm:
-            name: BaselineDynamic
-            samples: 40
-            threshold: 20
-        execute:
-            input: EVENT:board_0:ch_1:waveform
-        waveform: EVENT:board_0:ch_1:waveform
+        algorithm: BaselineDynamic
+        samples: 40
+        threshold: 20
+        input:
+            waveform: EVENT:board_0:ch_1:waveform
 
     BaselineNaive_CH0:
-        algorithm:
-            name: BaselineNaive
-            samples: 40
-        execute:
-            input: EVENT:board_0:ch_0:waveform
-        waveform: EVENT:board_0:ch_0:waveform
+        algorithm: BaselineNaive
+        samples: 40
+        input:
+            waveform: EVENT:board_0:ch_0:waveform
 
 
     BaselineNaive_CH1:
-        algorithm:
-            name: BaselineNaive
-            samples: 40
-        execute:
-            input: EVENT:board_0:ch_1:waveform
-        waveform: EVENT:board_0:ch_1:waveform
+        algorithm: BaselineNaive
+        samples: 40
+        input:
+            waveform: EVENT:board_0:ch_1:waveform
 
 
     CorrectedWaveform_CH0:
-        algorithm:
-            name: CorrectedWaveform
-            vpp: 2.5
-            adcrange: 16384
-            polarity: neg
-            units: mV
-        initialise:
-            output:
-        execute:
-            input: RawWaveform_CH0, BaselineNaive_CH0
-        waveform: EVENT:board_0:ch_0:waveform
-        baseline: BaselineNaive_CH0
-        wc_waveform: EVENT:GROUP:CH0:RawWaveform
+        algorithm: CorrectedWaveform
+        vpp: 2.5
+        adcrange: 16384
+        polarity: neg
+        units: mV
+        input:
+            waveform: EVENT:board_0:ch_0:waveform
+            baseline: BaselineNaive_CH0
 
 
     CorrectedWaveform_CH1:
-        algorithm:
-            name: CorrectedWaveform
-            vpp: 2.5
-            adcrange: 16384
-            polarity: neg
-            units: mV
-        initialise:
-            output:
-        execute:
-            input: RawWaveform_CH1, BaselineNaive_CH1
-        waveform: EVENT:board_0:ch_1:waveform
-        baseline: BaselineNaive_CH1
-        wc_waveform: EVENT:GROUP:CH1:RawWaveform
+        algorithm: CorrectedWaveform
+        vpp: 2.5
+        adcrange: 16384
+        polarity: neg
+        units: mV
+        input:
+            waveform: EVENT:board_0:ch_1:waveform
+            baseline: BaselineNaive_CH1
 
     AverageWaveform_CH0:
-        algorithm:
-            name: AverageWaveform
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CH0
-        finalise:
-            output:
-        waveform: CorrectedWaveform_CH0
+        algorithm: AverageWaveform
+        input:
+            waveform: CorrectedWaveform_CH0
 
     AverageWaveform_CH1:
-        algorithm:
-            name: AverageWaveform
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CH1
-        finalise:
-            output:
-        waveform: CorrectedWaveform_CH1
+        algorithm: AverageWaveform
+        input:
+            waveform: CorrectedWaveform_CH1
 
 
         # -----------------------------------------------------------
@@ -129,312 +73,255 @@ objects:
         # -----------------------------------------------------------
 
     TotalWindow:
-        algorithm:
-            name: Window
-            window: full
-        initialise:
-            output:
-        execute:
-            output:
-
+        algorithm: Window
+        window: full
 
     PulseWindow_CH0:
-        algorithm:
-            name: Window
-            left: -50
-            right: 0
-        initialise:
-            output:
-        execute:
-            input: PulseStart_CH0
-        pivot: PulseStart_CH0
+        algorithm: Window
+        left: -50
+        right: 0
+        input:
+            pivot: PulseStart_CH0
 
 
     PromptWindow_CH0:
-        algorithm:
-            name: Window
-            left: -10
-            right: 0
-        initialise:
-            output:
-        execute:
-            input: PeakLocation_CH0
-        pivot: PeakLocation_CH0
+        algorithm: Window
+        left: -10
+        right: 0
+        input:
+            pivot: PeakLocation_CH0
 
 
     DelayedWindow_CH0:
-        algorithm:
-            name: Window
-            left: 0
-            right: 20
-            pivot index: end
-        initialise:
-            output:
-        execute:
-            input: PromptWindow_CH0
-        pivot: PromptWindow_CH0
+        algorithm: Window
+        left: 0
+        right: 20
+        pivot index: end
+        input:
+            pivot: PromptWindow_CH0
 
 
         # -----------------------------------------------------------
         # Variables
         # -----------------------------------------------------------
 
-    # Timestamp_CH0:
-    #     algorithm:
-    #         name: GetTimestamp
-    #     execute:
-    #         output:
+    Timestamp_CH0:
+        algorithm: GetTimestamp
 
     PeakHeight_CH0:
-        algorithm:
-            name: PeakHeight
-            window: true
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CH0, TotalWindow
-        waveform: CorrectedWaveform_CH0
-        window: TotalWindow
+        algorithm: PeakHeight
+        window: true
+        input:
+            waveform: CorrectedWaveform_CH0
+            window: TotalWindow
 
 
     PeakLocation_CH0:
-        algorithm:
-            name: PeakLocation
-            window: true
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CH0, TotalWindow
-        waveform: CorrectedWaveform_CH0
-        window: TotalWindow
-
+        algorithm: PeakLocation
+        window: true
+        input:
+            waveform: CorrectedWaveform_CH0
+            window: TotalWindow
+    
+    ChargeConstant:
+        algorithm: ChargeConstant
+        impedance: 50
+        rate: 500e6
+        unit: pC
+        waveform_unit: mV
+    
+    PulseSum_CH0:
+        algorithm: Sum
+        input:
+            waveform: CorrectedWaveform_CH0
+            window: PulseWindow_CH0
 
     PromptCharge_CH0:
-        algorithm:
-            name: Charge
-            impedance: 50
-            rate: 500e6
-            unit: pC
-            waveform_unit: mV
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CH0, PromptWindow_CH0
-        waveform: CorrectedWaveform_CH0
-        window: PromptWindow_CH0
+        algorithm: Charge
+        impedance: 50
+        rate: 500e6
+        unit: pC
+        waveform_unit: mV
+        input:
+            waveform: CorrectedWaveform_CH0
+            window: PromptWindow_CH0
 
 
     DelayedCharge_CH0:
-        algorithm:
-            name: Charge
-            impedance: 50
-            rate: 500e6
-            unit: pC
-            waveform_unit: mV
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CH0, DelayedWindow_CH0
-        waveform: CorrectedWaveform_CH0
-        window: DelayedWindow_CH0
+        algorithm: Charge
+        impedance: 50
+        rate: 500e6
+        unit: pC
+        waveform_unit: mV
+        input:
+            waveform: CorrectedWaveform_CH0
+            window: DelayedWindow_CH0
 
 
     TotalCharge_CH0:
-        algorithm:
-            name: Charge
-            impedance: 50
-            rate: 500e6
-            unit: pC
-            waveform_unit: mV
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CH0, TotalWindow
-        waveform: CorrectedWaveform_CH0
-        window: TotalWindow
+        algorithm: Charge
+        impedance: 50
+        rate: 500e6
+        unit: pC
+        waveform_unit: mV
+        input:
+            waveform: CorrectedWaveform_CH0
+            window: TotalWindow
 
 
     PulseCharge_CH0:
-        algorithm:
-            name: Charge
-            impedance: 50
-            rate: 500e6
-            unit: pC
-            waveform_unit: mV
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CH0, PulseWindow_CH0
-        waveform: CorrectedWaveform_CH0
-        window: PulseWindow_CH0
+        algorithm: Charge
+        impedance: 50
+        rate: 500e6
+        unit: pC
+        waveform_unit: mV
+        input:
+            waveform: CorrectedWaveform_CH0
+            window: PulseWindow_CH0
 
 
     PulseStart_CH0:
-        algorithm:
-            name: CFD
-            delay: 5
-            scale: 1
-            cfd_threshold: 1
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CH0
-        waveform: CorrectedWaveform_CH0
+        algorithm:  CFD
+        delay: 5
+        scale: 1
+        cfd_threshold: 1
+        input:
+            waveform: CorrectedWaveform_CH0
 
 
     PulseStart_CH1:
-        algorithm:
-            name: CFD
-            delay: 5
-            scale: 1
-            cfd_threshold: 1
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CH1
-        waveform: CorrectedWaveform_CH1
+        algorithm: CFD
+        delay: 5
+        scale: 1
+        cfd_threshold: 1
+        input:
+            waveform: CorrectedWaveform_CH1
 
+    TrapezoidWaveform_CH0:
+        algorithm: TrapezoidFilter
+        rise: 10
+        gap: 10
+        rate: 500e6
+        tau: 2e-6
+        zeropole: true
+        input:
+            waveform: CorrectedWaveform_CH0
 
-        # CFD_CHX:
-        #         algorithm:
-        #                 name: CFD
-        #                 delay: 5
-        #                 scale: 1
-        #                 cfd_threshold: 10
-        #                 savecfd: True
-        #         initialise:
-        #                 output:
-        #         execute:
-        #                 input: TrapezoidWaveform
-        #         waveform: TrapezoidWaveform
+    TrapezoidWaveform_CH1:
+        algorithm: TrapezoidFilter
+        rise: 10
+        gap: 10
+        rate: 500e6
+        tau: 2e-6
+        zeropole: true
+        input:
+            waveform: CorrectedWaveform_CH1
 
+    CFD_CH0:
+        algorithm: CFD
+        delay: 5
+        scale: 1
+        cfd_threshold: 10
+        savecfd: True
+        input:
+            waveform: TrapezoidWaveform_CH0
+    
+    CFD_CH1:
+        algorithm: CFD
+        delay: 5
+        scale: 1
+        cfd_threshold: 10
+        savecfd: True
+        input:
+            waveform: TrapezoidWaveform_CH1
 
     PromptDelayChargeRatio_CH0:
-        algorithm:
-            name: Ratio
-        execute:
-            input: PromptCharge_CH0, DelayedCharge_CH0
-        numerator: PromptCharge_CH0
-        denominator: DelayedCharge_CH0
+        algorithm: Ratio
+        input:
+            x1: PromptCharge_CH0
+            x2: DelayedCharge_CH0
 
 
     MeanTime_CH0:
-        algorithm:
-            name: MeanTime
-            rate: 500e6
-        initialise:
-            input:
-        execute:
-            input: CorrectedWaveform_CH0, PulseWindow_CH0
-        waveform: CorrectedWaveform_CH0
-        window: PulseWindow_CH0
+        algorithm: MeanTime
+        rate: 500e6
+        input:
+            waveform: CorrectedWaveform_CH0
+            window: PulseWindow_CH0
 
 
+######### !! Will need a custom config #########
     PromptDelayChargeRatioCalculator_CH0:
-        algorithm:
-            name: Calculator
+        algorithm: Calculator
         equation: A+(A+B)*(C+D)
         variables:
             A: 1
             B: 11.5
             C: PromptCharge_CH0
             D: 3e-1
-        initialise:
-            input:
-        execute:
-            input: PromptCharge_CH0
+        input:
+            C: PromptCharge_CH0
 
 
     PulseTime_CH0:
-        algorithm:
-            name: TimeConverter
-            rate: 500e6
-            unit: ns
-        initialise:
-            output:
-        execute:
-            input: PulseStart_CH0
-        sample_number: PulseStart_CH0
+        algorithm: TimeConverter
+        rate: 500e6
+        unit: ns
+        input:
+            time: PulseStart_CH0
 
 
     PulseTime_CH1:
-        algorithm:
-            name: TimeConverter
-            rate: 500e6
-            unit: ns
-        initialise:
-            output:
-        execute:
-            input: PulseStart_CH1
-        sample_number: PulseStart_CH1
-
+        algorithm: TimeConverter
+        rate: 500e6
+        unit: ns
+        input:
+            time: PulseStart_CH1
 
     TimeDifference_CH01:
-        algorithm:
-            name: Difference
-        execute:
-            input: PulseTime_CH0, PulseTime_CH1
-        x1: PulseTime_CH0
-        x2: PulseTime_CH1
+        algorithm: Difference
+        input:
+            x1: PulseTime_CH0
+            x2: PulseTime_CH1
 
     Moments_CH0:
-        algorithm:
-            name: Moment
-            rate: 500e6
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CH0, TotalWindow
-        waveform: CorrectedWaveform_CH0
-        window: TotalWindow
+        algorithm: Moment
+        rate: 500e6
+        input:
+            waveform: CorrectedWaveform_CH0
+            window: TotalWindow
 
 
     DAMAX1_CH0:
-        algorithm:
-            name: DAMAX1
-            rate: 500e6
-            cfd_delay: 10
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CH0, PulseStart_CH0
-        waveform: CorrectedWaveform_CH0
-        pulse_start: PulseStart_CH0
+        algorithm: DAMAX1
+        rate: 500e6
+        cfd_delay: 10
+        input:
+            waveform: CorrectedWaveform_CH0
+            pulse_start: PulseStart_CH0
 
     DAMAX2_CH0:
-        algorithm:
-            name: DAMAX2
-            rate: 500e6
-            cfd_delay: 10
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CH0, PulseStart_CH0
-        waveform: CorrectedWaveform_CH0
-        pulse_start: PulseStart_CH0
+        algorithm: DAMAX2
+        rate: 500e6
+        cfd_delay: 10
+        input:
+            waveform: CorrectedWaveform_CH0
+            pulse_start: PulseStart_CH0
         
     FFT_CH0:
-        algorithm:
-            name: FFT
-            rate: 500e6
-            bins: 100
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CH0, PulseWindow_CH0
-        waveform: CorrectedWaveform_CH0
-        window: PulseWindow_CH0
+        algorithm: FFT
+        rate: 500e6
+        bins: 100
+        input:
+            waveform: CorrectedWaveform_CH0
+            window: PulseWindow_CH0
 
     LeadingEdge_CH0:
-        algorithm:
-            name: LeadingEdgeThreshold
-            offset: 5
-            threshold: 5
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CH0
-        waveform: CorrectedWaveform_CH0
+        algorithm: LeadingEdgeThreshold
+        offset: 5
+        threshold: 5
+        input:
+            waveform: CorrectedWaveform_CH0
 
 
         # -----------------------------------------------------------
@@ -442,43 +329,32 @@ objects:
         # -----------------------------------------------------------
         #
     TreeMaker:
-        algorithm:
-            name: TreeMaker
-        initialise:
-            output:
-        execute:
-            input: EVENT:board_0:ch_0:waveform, CorrectedWaveform_CH0, BaselineDynamic_CH0, BaselineNaive_CH0, PeakHeight_CH0,
-                PeakLocation_CH0, PulseCharge_CH0, TotalCharge_CH0, PulseStart_CH0, PulseStart_CH1,
-                PulseTime_CH0, PulseTime_CH1, PromptDelayChargeRatio_CH0, PromptCharge_CH0,
-                DelayedCharge_CH0, MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0, TimeDifference_CH01,
-                Moments_CH0, EVENT:board_0:ch_0:timestamp, AverageWaveform_CH0, AverageWaveform_CH1, DAMAX1_CH0, DAMAX2_CH0, FFT_CH0, LeadingEdge_CH0
-        finalise:
-            output:
+        algorithm: TreeMaker
+        input:
+            trees:
+            - Channel_0:
+                    event:
+                        vector<int>: {RawWaveform: EVENT:board_0:ch_0:waveform}
+                        vector<double>:
+                                    - FFT_CH0, Moments_CH0, CFD_CH0Trace
+                                    - CorrectedWaveform: CorrectedWaveform_CH0
+                        float:
+                            -   PeakHeight_CH0, PeakLocation_CH0, PulseCharge_CH0,
+                                TotalCharge_CH0, PulseStart_CH0, PulseTime_CH0, PromptDelayChargeRatio_CH0,
+                                MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0,
+                                LeadingEdge_CH0, BaselineDynamic_CH0, BaselineNaive_CH0,
+                                Sum_CH0
+                            - Timestamp: Timestamp_CH0
+                            - {DAMAX1: DAMAX1_CH0, DAMAX2: DAMAX2_CH0}
+                    single:
+                        vector<double>: AverageWaveform_CH0
 
-        trees:
-        - Channel_0:
-                event:
-                    vector<int>: 
-                                - RawWaveform_CH0: EVENT:board_0:ch_0:waveform
-                    vector<double>: 
-                                - FFT_CH0, Moments_CH0
-                                - CorrectedWaveform: CorrectedWaveform_CH0
-                    float: 
-                        -   PeakHeight_CH0, PeakLocation_CH0, PulseCharge_CH0,
-                            TotalCharge_CH0, PulseStart_CH0, PulseTime_CH0, PromptDelayChargeRatio_CH0,
-                            MeanTime_CH0, PromptDelayChargeRatioCalculator_CH0,
-                            LeadingEdge_CH0, BaselineDynamic_CH0, BaselineNaive_CH0
-                        - Timestamp: EVENT:board_0:ch_0:timestamp
-                        - {DAMAX1: DAMAX1_CH0, DAMAX2_CH0: DAMAX2_CH0}
-                single:
-                    vector<double>: AverageWaveform_CH0
+            - Channel_1:
+                    event:
+                        float: PulseStart_CH1, PulseTime_CH1
+                    single:
+                        vector<double>: AverageWaveform_CH1
 
-        - Channel_1:
-                event:
-                    float: PulseStart_CH1, PulseTime_CH1
-                single:
-                    vector<double>: AverageWaveform_CH1
-
-        - MultiChannel:
-                event:
-                    float: TimeDifference_CH01
+            - MultiChannel:
+                    event:
+                        float: TimeDifference_CH01

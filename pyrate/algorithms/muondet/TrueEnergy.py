@@ -12,7 +12,7 @@ class TrueEnergy(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def execute(self):
+    def execute(self, condition=None):
 
         te = self.store.get(self.config["etrue"])[0]
 

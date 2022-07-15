@@ -25,8 +25,8 @@ class ReaderCAEN1730_ZLE(Reader):
         "_evtWaveforms",
     ]
 
-    def __init__(self, name, store, logger, f_name, structure):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger, f_name, structure):
+        super().__init__(name, config, store, logger)
         self.f = f_name
 
     def load(self):
@@ -61,7 +61,7 @@ class ReaderCAEN1730_ZLE(Reader):
                 value = self._get_timestamps(path["ch"])
 
             # Add the value to the transiant store
-            self.store.put(name, value, "TRAN")
+            self.store.put(name, value)
 
         elif name.startswith("INPUT:"):
             pass
@@ -127,13 +127,13 @@ class ReaderCAEN1730_ZLE(Reader):
         return self._evtTime
 
     def _read_event(self):
-        #Reset event
-        self._evtTime = 2**64
-        self._inEvt = {};
+        # Reset event
+        self._evtTime = 2 ** 64
+        self._inEvt = {}
         self._evtWaveforms = {}
 
-        self._mmf.seek(self._eventPos[self._idx],0)
-        #Read in the event info from the header
+        self._mmf.seek(self._eventPos[self._idx], 0)
+        # Read in the event info from the header
 
         head1 = self._mmf.read(4)
         head1 = int.from_bytes(head1, "little")
@@ -156,15 +156,15 @@ class ReaderCAEN1730_ZLE(Reader):
 
         self._evtTime = (pattern << 24) + TTT
         channelMask = (channelMaskHi << 8) + (channelMaskLo)
-        
-        #Read in the waveform data
+
+        # Read in the waveform data
         for i in range(15):
             if channelMask & (1 << i):
                 self._inEvt[i] = True
                 self._evtWaveforms[i] = []
-                
-                #Get the baseline and record size (in words)
-                sample = int.from_bytes(self._mmf.read(4),"little")
+
+                # Get the baseline and record size (in words)
+                sample = int.from_bytes(self._mmf.read(4), "little")
 
                 baseLine = (sample & 0b11111111111111110000000000000000) >> 16
                 recordSize = sample & 0b00000000000000001111111111111111

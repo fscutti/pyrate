@@ -45,12 +45,12 @@ class TimeConverter(Algorithm):
     def initialise(self):
         """Set up time conversion parameters"""
         # Time units
-        time_unit = self.config["algorithm"]["unit"]
+        time_unit = self.config["unit"]
         if type(time_unit) == str:
             unit = seconds_to_unit[time_unit]
         else:
             unit = float(time_unit)
-        sample_rate = float(self.config["algorithm"]["rate"])
+        sample_rate = float(self.config["rate"])
 
         self.time_conversion = unit / sample_rate
 

@@ -52,17 +52,17 @@ class BaselineDynamic(Algorithm):
 
     def execute(self):
         """Calculates the baseline from the first n samples of the waveform"""
-        waveform = self.store.get(self.config["waveform"])
+        waveform = self.store.get(self.config["input"]["waveform"])
 
-        if "samples" not in self.config["algorithm"]:
+        if "samples" not in self.config:
             sys.exit("ERROR in Baseline, 'samples' not found in the config")
         
-        if "threshold" not in self.config["algorithm"]:
+        if "threshold" not in self.config:
             check_thres = 20
-        elif "threshold" in self.config["algorithm"]:
-            check_thres = self.config["algorithm"]["threshold"]
+        elif "threshold" in self.config:
+            check_thres = self.config["threshold"]
 
-        nsamples = self.config["algorithm"]["samples"]
+        nsamples = self.config["samples"]
 
         if waveform is Pyrate.NONE or waveform.size < nsamples:
             self.store.put(self.name, Pyrate.NONE)

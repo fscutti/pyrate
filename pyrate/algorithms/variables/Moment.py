@@ -48,17 +48,17 @@ class Moment(Algorithm):
     def initialise(self):
         """Prepares the config order of the moment"""
         self.mode = 0
-        if "mode" in self.config["algorithm"]:
+        if "mode" in self.config:
             if self.mode.lower() == "algebraic":
                 self.mode = 1
 
-        self.time_period = 1 / float(self.config["algorithm"]["rate"])
+        self.time_period = 1 / float(self.config["rate"])
         self.times = np.arange(0)
 
     def execute(self):
         """Calculates the 4th order moments"""
-        waveform = self.store.get(self.config["waveform"])
-        window = self.store.get(self.config["window"])
+        waveform = self.store.get(self.config["input"]["waveform"])
+        window = self.store.get(self.config["input"]["window"])
         if waveform is Pyrate.NONE or window is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             self.store.put(f"{self.name}Mean", Pyrate.NONE)

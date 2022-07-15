@@ -13,8 +13,8 @@ from pyrate.core.Reader import Reader
 class ReaderWaveCatcherLC(Reader):
     __slots__ = ["f", "structure", "_event", "_mmf", "_n_channels", "_header_size"]
 
-    def __init__(self, name, store, logger, f_name, structure):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger, f_name, structure):
+        super().__init__(name, config, store, logger)
         self.f = f_name
         self.structure = structure
 
@@ -88,7 +88,7 @@ class ReaderWaveCatcherLC(Reader):
         if no_store:
             return value
         else:
-            self.store.put(name, value, "TRAN")
+            self.store.put(name, value)
 
     def _read_variable(self, name, channel, variable, variable_line_idx):
         """Reads variable from the event and puts it in the transient store."""
@@ -122,7 +122,7 @@ class ReaderWaveCatcherLC(Reader):
         # print("LineNo: ", variable_line_idx)
         # print()
 
-        self.store.put(name, value, "TRAN")
+        self.store.put(name, value)
 
     def _get_line(self, l_idx):
         """Get line using cached file."""

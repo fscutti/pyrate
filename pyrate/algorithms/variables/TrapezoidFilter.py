@@ -45,12 +45,12 @@ class TrapezoidFilter(Algorithm):
     def initialise(self):
         """Set up the trapezoid parameters"""
         # Trapezoid parameters
-        self.rise = int(self.config["algorithm"]["rise"])
-        self.gap = int(self.config["algorithm"]["gap"])
-        self.period = 1 / float(self.config["algorithm"]["rate"])
-        self.tau = float(self.config["algorithm"]["tau"])
-        if "zeropole" in self.config["algorithm"]:
-            self.zeropole = bool(self.config["algorithm"]["zeropole"])
+        self.rise = int(self.config["rise"])
+        self.gap = int(self.config["gap"])
+        self.period = 1 / float(self.config["rate"])
+        self.tau = float(self.config["tau"])
+        if "zeropole" in self.config:
+            self.zeropole = bool(self.config["zeropole"])
         else:
             self.zeropole = True
         
@@ -68,7 +68,7 @@ class TrapezoidFilter(Algorithm):
 
     def execute(self):
         """Caclulates the trap filtered waveform"""
-        waveform = self.store.get(self.config["waveform"])
+        waveform = self.store.get(self.config["input"]["waveform"])
         if waveform is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             self.clear_arrays() # just in case

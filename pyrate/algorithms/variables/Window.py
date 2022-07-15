@@ -88,15 +88,15 @@ class Window(Algorithm):
     def initialise(self):
         """Prepare for the calculation"""
         # Check the config contains the left and right parameters
-        if "window" in self.config["algorithm"]:
+        if "window" in self.config:
             # Store the fixed window in a way that the rest of the alg can use
-            self.left, self.right = self.str_to_window(self.config["algorithm"]["window"])
-        elif "left" not in self.config["algorithm"]:
+            self.left, self.right = self.str_to_window(self.config["window"])
+        elif "left" not in self.config:
                 sys.exit(f"ERROR: in config, window object '{self.name}' missing 'left' parameter")
-        elif "right" not in self.config["algorithm"]:
+        elif "right" not in self.config:
                 sys.exit(f"ERROR: in config, window object '{self.name}' missing 'right' parameter")
         else:
-            self.left, self.right = self.config["algorithm"]["left"], self.config["algorithm"]["right"]
+            self.left, self.right = self.config["left"], self.config["right"]
             if not is_float(self.left):
                 sys.exit(f"ERROR: in config, window object '{self.name}' 'left' bound not a number")
             if not is_float(self.right):
@@ -119,10 +119,10 @@ class Window(Algorithm):
 
         # Ok, we want to use a dynamic mode
         self.mode = "dynamic"  # Set the mode to use dynamic integer pivots
-        if "pivot index" in self.config["algorithm"]:           
+        if "pivot index" in self.config:           
             self.mode = "window_pivot"
             # We want to use a window as a pivot, now we just need to find out which part
-            self.pivot_index = self.config["algorithm"]["pivot index"]
+            self.pivot_index = self.config["pivot index"]
             if is_float(self.pivot_index):
                 # Can pass in numbers
                 self.pivot_index = int(self.pivot_index)
@@ -142,7 +142,7 @@ class Window(Algorithm):
             self.store.put(self.name, (self.left, self.right))
             return
     
-        pivot = self.store.get(self.config["pivot"])
+        pivot = self.store.get(self.config["input"]["pivot"])
         if pivot is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             return

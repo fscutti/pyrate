@@ -47,12 +47,12 @@ class BaselineNaive(Algorithm):
 
     def execute(self):
         """Calculates the baseline from the first n samples of the waveform"""
-        waveform = self.store.get(self.config["waveform"])
+        waveform = self.store.get(self.config["input"]["waveform"])
 
-        if "samples" not in self.config["algorithm"]:
+        if "samples" not in self.config:
             sys.exit("ERROR in Baseline, 'samples' not found in the config")
 
-        nsamples = self.config["algorithm"]["samples"]
+        nsamples = self.config["samples"]
 
         if waveform is Pyrate.NONE or waveform.size < nsamples:
             self.store.put(self.name, Pyrate.NONE)

@@ -1,7 +1,8 @@
 """ Calculates the CFD of a waveform.
     From this it also calculates the CFD zero crossing points - i.e. the cfd time
-    Outputs the first crossing point time. Also outputs the crossing point times
-    as an array. and outputs the CFD as an array, which can be accessed on the
+    Outputs the first crossing point time. 
+    Also outputs the crossing point timesas an array. 
+    Also outputs the CFD as an array, which can be accessed on the
     store using <OBJNAME>CrossTimes and <OBJNAME>Trace respectively
 
     Required parameters:
@@ -58,9 +59,9 @@ class CFD(Algorithm):
     def initialise(self):
         """Set up the CFD and trapezoid parameters"""
         # CFD parameters
-        self.delay = int(self.config["algorithm"]["delay"])
-        self.scale = int(self.config["algorithm"]["scale"])
-        self.cfd_threshold = float(self.config["algorithm"]["cfd_threshold"])
+        self.delay = int(self.config["delay"])
+        self.scale = int(self.config["scale"])
+        self.cfd_threshold = float(self.config["cfd_threshold"])
 
         self.cfd = np.zeros(0)
         self.waveform = np.zeros(0)
@@ -71,7 +72,7 @@ class CFD(Algorithm):
         # Reset all the waveforms, safer to do at the start
         self.clear_arrays()
 
-        waveform = self.store.get(self.config["waveform"])
+        waveform = self.store.get(self.config["input"]["waveform"])
         if waveform is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             return

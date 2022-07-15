@@ -12,8 +12,8 @@ from pyrate.core.Reader import Reader
 class ReaderWaveCatcherMMAP(Reader):
     __slots__ = ["f", "structure", "_event", "_mmf", "_mmidx"]
 
-    def __init__(self, name, store, logger, f_name, structure):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger, f_name, structure):
+        super().__init__(name, config, store, logger)
         self.f = f_name
         self.structure = structure
 
@@ -80,7 +80,7 @@ class ReaderWaveCatcherMMAP(Reader):
                 value = str(s).replace("[", "").replace("]", "")
                 break
 
-        self.store.put(name, value, "TRAN")
+        self.store.put(name, value)
 
         self._mmf.seek(pos_current_line)
 
@@ -122,7 +122,7 @@ class ReaderWaveCatcherMMAP(Reader):
                     value = str(s)
                     break
 
-        self.store.put(name, value, "TRAN")
+        self.store.put(name, value)
 
         self._mmf.seek(pos_current_line)
 
