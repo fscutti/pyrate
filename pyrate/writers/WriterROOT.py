@@ -1,5 +1,6 @@
 """ Generic Writer base class.
 """
+import sys
 import ROOT as R
 from pyrate.core.Writer import Writer
 
@@ -40,10 +41,11 @@ class WriterROOT(Writer):
             sys.exit(msg)
             self.logger.error(msg)
 
-        if isinstance(obj, dict):
-            self._write_dirs(obj)
-        else:
-            self.f.WriteObject(obj, obj.GetName())
+        if obj is not EN.Pyrate.SKIP_WRITE:
+            if isinstance(obj, dict):
+                self._write_dirs(obj)
+            else:
+                self.f.WriteObject(obj, obj.GetName())
 
     def _write_dirs(self, obj):
         """Write dictionary of objects to file. The keys are the paths."""
