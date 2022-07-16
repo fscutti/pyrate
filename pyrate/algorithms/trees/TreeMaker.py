@@ -370,15 +370,32 @@ class TreeMaker(Algorithm):
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
+    
+    @property
+    def input(self):
+        """Getter method for input objects."""
+        return self._input
 
-    def initialise(self):
+    @input.setter
+    def input(self, config_input):
+        """ Sets the input approrpriately for TreeMaker
+        """
+        if self._input == {}:
+            for dependency in FN.expand_nested_values(config_input):
+                variables = set(ST.get_items(str(dependency)))
+                if not None in self._input:
+                    self._input[None] = variables
+                else:
+                    self._input[None].update(variables)
+
+    def initialise(self, condition=None):
         """Defines a tree dictionary."""
-        out_file = self.store.get(f"OUTPUT:{self.name}", "PERM")
+        out_file = self.store.get(f"OUTPUT:{self.name}")
         self.file = out_file
 
         trees = {}
         # Get all trees
-        for tree in [t for t in self.config["trees"]]:
+        for tree in [t for t in self.config["input"]["trees"]]:
             for t_path_name, t_variables in tree.items():
                 t_path = os.path.dirname(t_path_name)  # If using a path, otherise empty
                 t_name = os.path.basename(t_path_name)
@@ -399,41 +416,19 @@ class TreeMaker(Algorithm):
                     # for vec_scalar in t_variables[fill_type]:
                     # loop over datatypes
                     for datatype, variables in t_variables[fill_type].items():
-                        # LEGACY SUPPORT TO BE REMOVED
-                        ########################################################
-                        if datatype == "vector" or datatype == "scalar":
-                            # ok, we're in legacy mode
-                            if datatype == "vector":
-                                new_syntax = {datatype + f"<{t}>":v for t, v in variables.items()}
-                            else:
-                                new_syntax = {t:v for t, v in variables.items()}
-                            for dtype, vars in new_syntax.items():
-                                variables_list = self._parse_tree_vars(vars)
-                                for b_name, var_name in variables_list:
-                                    # loop over individual variables
-                                    new_branch = Branch(
-                                        b_name,
-                                        var_name=var_name,
-                                        datatype=dtype,
-                                        event_based=event_based,
-                                        create_now=True,
-                                    )
-                                    trees[t_name].add_branch(new_branch)
-                        ########################################################
                         # New check to handle lists of vars
-                        else:
-                            variables_list = self._parse_tree_vars(variables)
-                            for b_name, var_name in variables_list:
-                                # loop over individual variables
-                                new_branch = Branch(
-                                    b_name,
-                                    var_name=var_name,
-                                    datatype=datatype,
-                                    event_based=event_based,
-                                    create_now=True,
-                                )
-                                # Add the new branch to the TTree
-                                trees[t_name].add_branch(new_branch)
+                        variables_list = self._parse_tree_vars(variables)
+                        for b_name, var_name in variables_list:
+                            # loop over individual variables
+                            new_branch = Branch(
+                                b_name,
+                                var_name=var_name,
+                                datatype=datatype,
+                                event_based=event_based,
+                                create_now=True,
+                            )
+                            # Add the new branch to the TTree
+                            trees[t_name].add_branch(new_branch)
 
         # Disable the non-event based branches
         for tree in trees:
@@ -443,27 +438,26 @@ class TreeMaker(Algorithm):
         # Save the trees for later
         self.trees = trees
 
-    def execute(self):
+    def execute(self, condition=None):
         """Fills in the ROOT tree dictionary with event data."""
         # Fill all the branches in the trees if they're event-based
         for tree in self.trees:
             for branch_name in self.trees[tree].branches:
                 # Only want to fill the branches that are event-based
                 if self.trees[tree].branches[branch_name].event_based:
-                    value = self.store.get(self.trees[tree].branches[branch_name].var_name, "TRAN")
-                    
+                    value = self.store.get(self.trees[tree].branches[branch_name].var_name)
                     # Handle invalid values using internal Pyrate.NONE
                     if value is enums.Pyrate.NONE:
                         # No valid value to store, storing the closest invalid value
                         value = self.trees[tree].branches[branch_name].invalid_value
-                    
+
                     # Fill the branch with the value
                     self.trees[tree].branches[branch_name].fill_branch(value)
 
             # Save all the values into the Tree
             self.trees[tree].fill()
 
-    def finalise(self):
+    def finalise(self, condition=None):
         """Fill in the single/run-based variables"""
         # First, disable all the event-based branches
         # and enable the single entry branches
@@ -478,7 +472,7 @@ class TreeMaker(Algorithm):
             for branch_name in self.trees[tree].branches:
                 # Only want to fill the branches that are run-based
                 if not self.trees[tree].branches[branch_name].event_based:
-                    value = self.store.get(self.trees[tree].branches[branch_name].var_name, "PERM")
+                    value = self.store.collect(self.trees[tree].branches[branch_name].var_name)
                     
                     # Handle invalid values using internal Pyrate.NONE
                     if value is enums.Pyrate.NONE:
@@ -493,17 +487,20 @@ class TreeMaker(Algorithm):
             # Finally we have to re-enable all the branches so they can be accessed
             all_branches = [bn for bn in self.trees[tree].branches]
             self.trees[tree].enable_branches(all_branches)
-        
+
         # Write the objects to the file - this is the most important step
         self.file.Write("", R.TObject.kOverwrite)
 
         # Store itself on the store with SKIP_WRITE code to show we have nothing
         # to return.
-        self.store.put(self.name, enums.Pyrate.SKIP_WRITE)
+        self.store.save(self.name, enums.Pyrate.SKIP_WRITE)
 
     def _parse_tree_vars(self, variables):
         """ Dedicated function to just parse the tree lists/dicts/strings
         """
+        if type(variables) == dict:
+            # Just a single dictionary here
+            variables = [variables]
         if type(variables) == list:
             # Dealing with a list
             retlist = []
