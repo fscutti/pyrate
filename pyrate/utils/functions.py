@@ -54,6 +54,26 @@ def get_nested_values(d):
         else:
             yield v
 
+def expand_nested_values(d):
+    """ Returns a generator like get_nested_values, but handles all iterables 
+        instead of just dictionaries. Stops when the last interable contains
+        not more iterables
+    """
+    if iterable(d) and not isinstance(d, str):
+        # Ok still dealing with an indexable object (but not a string)
+        if isinstance(d, dict):
+            # Dictionary case
+            for v in d.values():
+                yield from expand_nested_values(v)
+
+        else:
+            # List, tuple, array case...
+            for v in d:
+                yield from expand_nested_values(v)
+    else:
+        # Not iterable / is a string
+        yield d
+
 
 def flatten(l):
     """Flattens a list of lists."""
