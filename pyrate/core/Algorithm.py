@@ -37,7 +37,10 @@ class Algorithm:
         self._output = {}
 
         # initialisation of inputs and outputs.
-        self.input = self.config["input"]
+        if "input" in self.config:
+            self.input = self.config["input"]
+        else:
+            self.input = {}
 
         if "output" in self.config:
             self.output = self.config["output"]
