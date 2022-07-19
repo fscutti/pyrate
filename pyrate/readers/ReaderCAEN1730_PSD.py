@@ -51,16 +51,17 @@ class ReaderCAEN1730_PSD(Reader):
         # TODO: Configure thie
         self._coincWind = 1000
 
+        self._readIdx = -1
+
     def offload(self):
         self.is_loaded = False
         self._mmf.close()
 
     def read(self, name):
-        if self._readIdx != self._idx:
-            self._read_event()
-            self._readIdx = self._idx
-
         if name.startswith("EVENT:"):
+            if self._readIdx != self._idx:
+                self._read_event()
+                self._readIdx = self._idx
             # Split the request
             path = self._break_path(name)
 
