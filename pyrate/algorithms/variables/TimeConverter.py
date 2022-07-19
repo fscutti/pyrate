@@ -42,7 +42,7 @@ class TimeConverter(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Set up time conversion parameters"""
         # Time units
         time_unit = self.config["unit"]
@@ -54,7 +54,7 @@ class TimeConverter(Algorithm):
 
         self.time_conversion = unit / sample_rate
 
-    def execute(self):
+    def execute(self, condition=None):
         """Converts the sample time to physical units"""
         sample_time = self.store.get(self.config["sample_number"])
         if sample_time is Pyrate.NONE:

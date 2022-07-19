@@ -38,13 +38,13 @@ class Calculator(Algorithm):
         super().__init__(name, config, store, logger)
         self.opPrecedence = {"(": -1, "+": 2, "-": 2, "*": 3, "/": 3}
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Initialises the equation and variables to be calculated"""
         self.eqnStr = self.config["equation"]
         self.variables = self.config["variables"]
         self.ShuntingYard()
 
-    def execute(self):
+    def execute(self, condition=None):
         """Calculates a generic equation"""
         self.calc()
         if len(self.result) == 1:

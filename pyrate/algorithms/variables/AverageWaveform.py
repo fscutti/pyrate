@@ -47,13 +47,13 @@ class AverageWaveform(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """ Create entry for the cummulative waveform structure
         """
         self.nevents = 0
         self.cum_waveform = np.array([])
 
-    def execute(self):
+    def execute(self, condition=None):
         """ Calculates the baseline corrected waveform
         """
         waveform = self.store.get(self.config["input"]["waveform"])
@@ -74,10 +74,10 @@ class AverageWaveform(Algorithm):
             # If you dont trust emax - emin
             self.nevents += 1
 
-    def finalise(self):
+    def finalise(self, condition=None):
         """ Divides cum_waveform by number of events
         """
         AverageWaveform = self.cum_waveform / self.nevents
-        self.store.put(self.name, AverageWaveform)
+        self.store.save(self.name, AverageWaveform)
 
 # EOF

@@ -38,12 +38,12 @@ class MeanTime(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Gets the sample rate for later use in execute"""
         self.sample_period = 1 / float(self.config["rate"])*1e9
         self.range = np.arange(0)
 
-    def execute(self):
+    def execute(self, condition=None):
         waveform = self.store.get(self.config["input"]["waveform"])
         window = self.store.get(self.config["input"]["window"])
 

@@ -56,7 +56,7 @@ class CFD(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Set up the CFD and trapezoid parameters"""
         # CFD parameters
         self.delay = int(self.config["delay"])
@@ -67,7 +67,7 @@ class CFD(Algorithm):
         self.waveform = np.zeros(0)
         self.waveform_delay_scaled = np.zeros(0)
 
-    def execute(self):
+    def execute(self, condition=None):
         """Caclulates the waveform CFD"""
         # Reset all the waveforms, safer to do at the start
         self.clear_arrays()
@@ -109,8 +109,8 @@ class CFD(Algorithm):
         CFDTimes = zero_cross + f
         
         self.store.put(self.name, CFDTimes[0])
-        self.store.put(f"{self.name}CrossTimes", CFDTimes)
-        self.store.put(f"{self.name}Trace", self.cfd)
+        self.store.put(f"{self.output['times']}", CFDTimes)
+        self.store.put(f"{self.output['trace']}", self.cfd)
             # if cross_threshold.size:
             #     # Only look at the zero crosses after the threshold cross
             #     zero_cross = zero_cross[zero_cross>cross_threshold[0]]
@@ -125,7 +125,7 @@ class CFD(Algorithm):
         # if self.savecfd:
         #     self.store.put(f"{self.name}Trace", self.cfd)
 
-    def clear_arrays(self):
+    def clear_arrays(self, condition=None):
         """ Fills all the internal arrays with 0
         """
         self.waveform.fill(0)

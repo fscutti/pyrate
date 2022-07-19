@@ -31,7 +31,7 @@ class Difference(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def execute(self):
+    def execute(self, condition=None):
         """Caclulates the difference x2 - x1"""
         x1 = self.store.get(self.config["input"]["x1"])
         x2 = self.store.get(self.config["input"]["x2"])

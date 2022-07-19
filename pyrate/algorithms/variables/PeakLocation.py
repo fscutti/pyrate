@@ -37,13 +37,13 @@ class PeakLocation(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Allows the user to determine if the peak is in a smaller window"""
         self.use_window = False
         if "window" in self.config:
             self.use_window = True
 
-    def execute(self):
+    def execute(self, condition=None):
         """Caclulates the pulse time based on the mode chosen"""
         waveform = self.store.get(self.config["input"]["waveform"])
         # PeakHeight = self.store.get(self.config["peakheight"])

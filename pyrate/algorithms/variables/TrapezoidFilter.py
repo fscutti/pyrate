@@ -42,7 +42,7 @@ class TrapezoidFilter(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Set up the trapezoid parameters"""
         # Trapezoid parameters
         self.rise = int(self.config["rise"])
@@ -66,7 +66,7 @@ class TrapezoidFilter(Algorithm):
         self.dn2 = np.zeros(0)
         self.dn3 = np.zeros(0)
 
-    def execute(self):
+    def execute(self, condition=None):
         """Caclulates the trap filtered waveform"""
         waveform = self.store.get(self.config["input"]["waveform"])
         if waveform is Pyrate.NONE:

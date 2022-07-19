@@ -57,7 +57,7 @@ class DAMAX1(Algorithm):
         if "cfd_delay" in self.config:
             self.delay = self.config["cfd_delay"]
 
-    def execute(self):
+    def execute(self, condition=None):
         """Charge ratio X1 defined according to:
         Characterization of SABRE crystal NaI-33 with direct underground counting (arXiv:2012.02610)"""
 

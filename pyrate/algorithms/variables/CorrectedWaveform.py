@@ -58,7 +58,7 @@ class CorrectedWaveform(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Prepare the input waveform scaling and polarity"""
         # Again we need to check the reader as it determines what kind of input
         # we could have and how we access its information
@@ -116,7 +116,7 @@ class CorrectedWaveform(Algorithm):
         self.polarity = polarity
         self.conversion = conversion
 
-    def execute(self):
+    def execute(self, condition=None):
         """Calculates the baseline corrected waveform"""
         if self.reader == "ReaderWaveCatcherMMAP":
             waveform = self.store.get(self.config["input"]["wc_waveform"])

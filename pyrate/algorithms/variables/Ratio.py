@@ -30,7 +30,7 @@ class Ratio(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def execute(self):
+    def execute(self, condition=None):
         """Calculates the ratio of the two input values"""
         numerator = self.store.get(self.config["numerator"])
         denominator = self.store.get(self.config["denominator"])

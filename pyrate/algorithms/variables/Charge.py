@@ -55,7 +55,7 @@ class Charge(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Prepare the constant for calculating charge"""
         # Deal with charge constants
         impedance = self.config["impedance"]
@@ -90,7 +90,7 @@ class Charge(Algorithm):
 
         self.charge_constant = waveform_units * charge_units / (impedance * sample_rate)
 
-    def execute(self):
+    def execute(self, condition=None):
         """Calculates the charge by summing over the waveform"""
         window = self.store.get(self.config["input"]["window"])
         waveform = self.store.get(self.config["input"]["waveform"])

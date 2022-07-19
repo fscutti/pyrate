@@ -45,7 +45,7 @@ class BaselineNaive(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def execute(self):
+    def execute(self, condition=None):
         """Calculates the baseline from the first n samples of the waveform"""
         waveform = self.store.get(self.config["input"]["waveform"])
 

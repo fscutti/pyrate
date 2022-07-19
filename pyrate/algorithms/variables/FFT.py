@@ -54,7 +54,7 @@ class FFT(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Allows the user to determine if the FFT is calculated for a window 
         of the waveform"""
         self.use_window = False
@@ -64,7 +64,7 @@ class FFT(Algorithm):
         self.sample_rate = float(self.config["rate"])
         self.fft_bins = self.config["bins"]
 
-    def execute(self):
+    def execute(self, condition=None):
         """Caclulates the FFT based on the chosen mode"""
         waveform = self.store.get(self.config["input"]["waveform"])
         if waveform is Pyrate.NONE:

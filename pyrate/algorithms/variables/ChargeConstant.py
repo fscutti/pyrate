@@ -43,7 +43,7 @@ class ChargeConstant(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Prepare the constant for calculating charge"""
         # Deal with charge constants
         impedance = self.config["impedance"]

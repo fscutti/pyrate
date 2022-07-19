@@ -85,7 +85,7 @@ class Window(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Prepare for the calculation"""
         # Check the config contains the left and right parameters
         if "window" in self.config:
@@ -134,7 +134,7 @@ class Window(Algorithm):
                 self.pivot_index = 0 # Take the left most variable as default
 
 
-    def execute(self):
+    def execute(self, condition=None):
         """Calcualates the window if it's a variable, otherwise puts the window
         from the config on the store.
         """

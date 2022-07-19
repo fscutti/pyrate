@@ -32,7 +32,7 @@ class Sum(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def execute(self):
+    def execute(self, condition=None):
         """Sum over the waveform"""
         window = self.store.get(self.config["input"]["window"])
         waveform = self.store.get(self.config["input"]["waveform"])
