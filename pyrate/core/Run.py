@@ -183,8 +183,11 @@ class Run:
 
         else:
             obj = obj_name.split(":")[0]
+            
+            if obj in ["EVENT", "INPUT"]:
+                return None
 
-            if obj in self.objects:
+            elif obj in self.objects:
 
                 obj_config = self.objects[obj]
 
@@ -202,9 +205,8 @@ class Run:
                         )
 
                         return self.algorithms[obj_name]
-
-            elif obj in ["EVENT", "INPUT"]:
-                return None
+                
+                sys.exit(f"ERROR: object {obj} has requested a non-existing algorithm.")
 
             else:
                 sys.exit(f"ERROR: object {obj} not defined in the configuration.")
