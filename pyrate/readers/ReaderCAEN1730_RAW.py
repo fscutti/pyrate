@@ -44,11 +44,10 @@ class ReaderCAEN1730_RAW(Reader):
         self._mmf.close()
 
     def read(self, name):
-        if self._readIdx != self._idx:
-            self._read_event()
-            self._readIdx = self._idx
-
         if name.startswith("EVENT:"):
+            if self._readIdx != self._idx:
+                self._read_event()
+            self._readIdx = self._idx
             # Split the request
             path = self._break_path(name)
 
