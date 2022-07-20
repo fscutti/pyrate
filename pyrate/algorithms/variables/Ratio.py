@@ -32,8 +32,8 @@ class Ratio(Algorithm):
 
     def execute(self, condition=None):
         """Calculates the ratio of the two input values"""
-        numerator = self.store.get(self.config["numerator"])
-        denominator = self.store.get(self.config["denominator"])
+        numerator = self.store.get(self.config["input"]["numerator"])
+        denominator = self.store.get(self.config["input"]["denominator"])
         if numerator is Pyrate.NONE or denominator is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             return

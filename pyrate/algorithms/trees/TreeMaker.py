@@ -446,6 +446,9 @@ class TreeMaker(Algorithm):
                 # Only want to fill the branches that are event-based
                 if self.trees[tree].branches[branch_name].event_based:
                     value = self.store.get(self.trees[tree].branches[branch_name].var_name)
+                    if "stamp" in branch_name:
+                        from code import interact
+                        interact(local=locals())
                     # Handle invalid values using internal Pyrate.NONE
                     if value is enums.Pyrate.NONE:
                         # No valid value to store, storing the closest invalid value

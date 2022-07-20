@@ -30,6 +30,8 @@
 
 from pyrate.core.Algorithm import Algorithm
 from pyrate.utils.enums import Pyrate
+import pyrate.utils.functions as FN
+import pyrate.utils.strings as ST
 
 class Calculator(Algorithm):
     __slots__ = ["opPrecedence", "eqnStr", "variables", "pnVec", "result"]
@@ -38,10 +40,44 @@ class Calculator(Algorithm):
         super().__init__(name, config, store, logger)
         self.opPrecedence = {"(": -1, "+": 2, "-": 2, "*": 3, "/": 3}
 
+    @property
+    def input(self):
+        """Getter method for input objects."""
+        return self._input
+
+    @input.setter
+    def input(self, config_input):
+        """Setter method for input objects."""
+        if self._input == {}:
+
+            for dependency in FN.get_nested_values(config_input):
+                
+                if self.IsFloat(dependency):
+                    continue
+                
+                if not isinstance(dependency, list):
+
+                    variables = set(ST.get_items(str(dependency)))
+
+                    if not None in self._input:
+                        self._input[None] = variables
+                    else:
+                        self._input[None].update(variables)
+
+                else:
+                    for string in dependency:
+
+                        for condition, variables in self.parse_input(string).items():
+
+                            if not condition in self._input:
+                                self._input[condition] = variables
+                            else:
+                                self._input[condition].update(variables)
+
     def initialise(self, condition=None):
         """Initialises the equation and variables to be calculated"""
         self.eqnStr = self.config["equation"]
-        self.variables = self.config["variables"]
+        self.variables = self.config["input"]["variables"]
         self.ShuntingYard()
 
     def execute(self, condition=None):

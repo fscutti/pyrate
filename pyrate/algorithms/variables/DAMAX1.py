@@ -48,7 +48,7 @@ class DAMAX1(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Prepare Initialised variables - CFD delay and digitiser sample rate"""
         # Deal with CFD delay if CFD is being used as the timing
         self.sample_rate = float(self.config["rate"])
