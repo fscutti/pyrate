@@ -71,7 +71,7 @@ class ChargeConstant(Algorithm):
                 )
 
         charge_constant = waveform_units * charge_units / (impedance * sample_rate)
-        self.store.put(f"{self.name}", charge_constant)
+        self.store.save(f"{self.name}", charge_constant)
 
 
 # EOF

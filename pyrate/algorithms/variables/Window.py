@@ -106,7 +106,7 @@ class Window(Algorithm):
             self.right = int(self.right)
         
         # Must check here first, as a full window is (None, None)
-        if "pivot" not in self.config:
+        if "input" not in self.config or "pivot" not in self.config["input"]:
             self.mode = "fixed_window"  # Set the mode to fixed window mode
             return
         elif self.left is None or self.right is None:
