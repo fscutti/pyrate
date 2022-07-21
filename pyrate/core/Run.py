@@ -147,22 +147,31 @@ class Run:
 
             self.nodes[obj_name].algorithm = self.alg(obj_name)
 
-            if (
-                self.nodes[obj_name].algorithm is not None
-                and not self.nodes[obj_name].children
-            ):
+            if self.nodes[obj_name].algorithm is not None:
 
-                for _, dependencies in self.nodes[obj_name].algorithm.input.items():
+                if not self.nodes[obj_name].children:
 
-                    for d in dependencies:
+                    for _, dependencies in self.nodes[obj_name].algorithm.input.items():
 
-                        try:
-                            self.node(d).parent = self.nodes[obj_name]
+                        for d in dependencies:
 
-                        except anytreeExceptions.LoopError:
-                            sys.exit(
-                                f"ERROR: circular node detected between {d} and {obj_name}"
-                            )
+                            try:
+                                self.node(d).parent = self.nodes[obj_name]
+
+                            except anytreeExceptions.LoopError:
+                                sys.exit(
+                                    f"ERROR: circular node detected between {d} and {obj_name}"
+                                )
+
+                # make secondary outputs visible in the objects list.
+                for o_key, o_name in self.nodes[obj_name].algorithm.output.items():
+
+                    if o_key is not None:
+
+                        # this is necessary for the alg() function.
+                        self.objects[o_name] = self.objects[obj_name]
+
+                        self.nodes[o_name] = self.nodes[obj_name]
 
         return self.nodes[obj_name]
 
