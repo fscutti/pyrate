@@ -183,7 +183,7 @@ class Run:
 
         else:
             obj = obj_name.split(":")[0]
-            
+
             if obj in ["EVENT", "INPUT"]:
                 return None
 
@@ -204,8 +204,11 @@ class Run:
                             obj_name, obj_config, self.store, self.logger
                         )
 
+                        for o in FN.get_nested_values(self.algorithms[obj_name].output):
+                            self.algorithms[o] = self.algorithms[obj_name]
+
                         return self.algorithms[obj_name]
-                
+
                 sys.exit(f"ERROR: object {obj} has requested a non-existing algorithm.")
 
             else:
