@@ -37,12 +37,16 @@ class Algorithm:
         self._output = {}
 
         # initialisation of inputs and outputs.
-        for io in ["input", "output"]:
 
-            if io in self.config:
-                setattr(self, io, self.config[io])
-            else:
-                setattr(self, io, {None: set()})
+        if "input" in self.config:
+            self.input = self.config["input"]
+        else:
+            self.input = {None: set()}
+
+        if "output" in self.config:
+            self.output = self.config["output"]
+        else:
+            self.output = {None: set()}
 
     def initialise(self, condition=None):
         """At this stage the method knows the current input."""
