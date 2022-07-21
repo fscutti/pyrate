@@ -40,7 +40,7 @@ class Algorithm:
         if "input" in self.config:
             self.input = self.config["input"]
         else:
-            self.input = {}
+            self.input[None] = {}
 
         if "output" in self.config:
             self.output = self.config["output"]
