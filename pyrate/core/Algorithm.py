@@ -37,6 +37,7 @@ class Algorithm:
         self._output = {}
 
         # initialisation of inputs and outputs.
+
         if "input" in self.config:
             self.input = self.config["input"]
         else:
@@ -45,7 +46,7 @@ class Algorithm:
         if "output" in self.config:
             self.output = self.config["output"]
         else:
-            self.output = ""
+            self.output[None] = {}
 
     def initialise(self, condition=None):
         """At this stage the method knows the current input."""
