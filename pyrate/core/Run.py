@@ -204,7 +204,17 @@ class Run:
                             obj_name, obj_config, self.store, self.logger
                         )
 
-                        #for o in FN.get_nested_values(self.algorithms[obj_name].output):
+                        # initialisation of inputs and outputs. If no explicit
+                        # initialisation is found in the config default to the
+                        # empty dictionary.
+                        for io in ["input", "output"]:
+
+                            if io in obj_config:
+                                setattr(self.algorithms[obj_name], io, obj_config[io])
+
+                            setattr(self.algorithms[obj_name], io, {None: ""})
+
+                        # for o in FN.get_nested_values(self.algorithms[obj_name].output):
                         #    self.algorithms[o] = self.algorithms[obj_name]
 
                         return self.algorithms[obj_name]

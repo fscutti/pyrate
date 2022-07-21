@@ -36,17 +36,6 @@ class Algorithm:
         self._input = {}
         self._output = {}
 
-        # initialisation of inputs and outputs. If no explicit 
-        # initialisation is found in the config default to the 
-        # empty dictionary.
-        for io in ["input", "output"]:
-
-            if io in self.config:
-                setattr(self, io, self.config[io])
-
-            setattr(self, io, {None: ""})
-        
-
     def initialise(self, condition=None):
         """At this stage the method knows the current input."""
         pass
