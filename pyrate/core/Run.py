@@ -90,6 +90,8 @@ class Run:
         self.targets, self.algorithms = {}, {}
         self.loaded_io = {"inputs": {}, "outputs": {}}
 
+        self.translate()
+
         # Loading input / output and initialising algorithms.
         # Not all inputs are loaded. Only those relevant for
         # requested targets.
@@ -103,22 +105,28 @@ class Run:
                 for i_name in t_samples:
                     i = self.io(i_name)
 
-    def translate(self, obj_name):
+    def translate(self, obj_name=None):
         """This function constructs a dictionary to translate
         the name of any object to the name of the main object
         which computes them. This is just translating the name.
         It is not checking if the object exists in the config.
         The alg() function should check for that."""
 
-        try:
-            return self.oo_translator[obj_name]
+        if obj_name is not None:
 
-        except KeyError:
+            # simply returns the object name.
+            try:
+                return self.oo_translator[obj_name]
 
-            # preliminarily put the object in the dictionary.
-            self.oo_translator[obj_name] = obj_name
+            except KeyError:
 
-            # check if it needs substitution.
+                self.oo_translator[obj_name] = obj_name
+
+                return self.oo_translator[obj_name]
+
+        else:
+
+            # build global dictionary.
             for primary_name, primary_config in self.objects.items():
 
                 if "output" in primary_config:
@@ -126,8 +134,6 @@ class Run:
                     for out_name in FN.get_nested_values(primary_config["output"]):
 
                         self.oo_translator[out_name] = primary_name
-
-        return self.oo_translator[obj_name]
 
     def io(self, io_name):
         """Returns a specific input/output instance."""
@@ -165,7 +171,7 @@ class Run:
     def node(self, obj_name, samples=[]):
         """Instantiates a node for an object, including the corresponding algorithm instance
         and the list of relevant samples. This function checks for circular dependencies.
-        The node instance is returned. This is is a recursive function."""
+        The node instance is returned. This is a recursive function."""
 
         if not obj_name in self.nodes:
 
@@ -233,16 +239,13 @@ class Run:
 
                         # initialisation of inputs and outputs. If no explicit
                         # initialisation is found in the config default to the
-                        # empty dictionary.
+                        # empty dictionary {None: ""}.
                         for io in ["input", "output"]:
 
                             if io in obj_config:
                                 setattr(self.algorithms[obj_name], io, obj_config[io])
 
                             setattr(self.algorithms[obj_name], io, {None: ""})
-
-                        # for o in FN.get_nested_values(self.algorithms[obj_name].output):
-                        #    self.algorithms[o] = self.algorithms[obj_name]
 
                         return self.algorithms[obj_name]
 
