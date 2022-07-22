@@ -107,7 +107,8 @@ class Run:
         """This function constructs a dictionary to translate
         the name of any object to the name of the main object
         which computes them. This is just translating the name.
-        It is not checking if the object exists in the config."""
+        It is not checking if the object exists in the config.
+        The alg() function should check for that."""
 
         try:
             return self.oo_translator[obj_name]
