@@ -86,10 +86,10 @@ class Run:
 
         self.store = Store(self.name)
 
-        self.nodes, self.oo_translator = {}, {}
-        self.targets, self.algorithms = {}, {}
+        self.targets, self.nodes, self.algorithms = {}, {}, {}
         self.loaded_io = {"inputs": {}, "outputs": {}}
 
+        self.translation = {}
         self.translate()
 
         # Loading input / output and initialising algorithms.
@@ -116,13 +116,13 @@ class Run:
 
             # simply returns the object name.
             try:
-                return self.oo_translator[obj_name]
+                return self.translation[obj_name]
 
             except KeyError:
 
-                self.oo_translator[obj_name] = obj_name
+                self.translation[obj_name] = obj_name
 
-                return self.oo_translator[obj_name]
+                return self.translation[obj_name]
 
         else:
 
@@ -133,7 +133,7 @@ class Run:
 
                     for out_name in FN.get_nested_values(primary_config["output"]):
 
-                        self.oo_translator[out_name] = primary_name
+                        self.translation[out_name] = primary_name
 
     def io(self, io_name):
         """Returns a specific input/output instance."""
