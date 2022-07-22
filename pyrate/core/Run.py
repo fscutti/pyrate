@@ -86,7 +86,8 @@ class Run:
 
         self.store = Store(self.name)
 
-        self.targets, self.nodes, self.algorithms = {}, {}, {}
+        self.nodes, self.oo_translator = {}, {}
+        self.targets, self.algorithms = {}, {}
         self.loaded_io = {"inputs": {}, "outputs": {}}
 
         # Loading input / output and initialising algorithms.
@@ -101,6 +102,31 @@ class Run:
 
                 for i_name in t_samples:
                     i = self.io(i_name)
+
+    def translate(self, obj_name):
+        """This function constructs a dictionary to translate
+        the name of any object to the name of the main object
+        which computes them. This is just translating the name.
+        It is not checking if the object exists in the config."""
+
+        try:
+            return self.oo_translator[obj_name]
+
+        except KeyError:
+
+            # preliminarily put the object in the dictionary.
+            self.oo_translator[obj_name] = obj_name
+
+            # check if it needs substitution.
+            for primary_name, primary_config in self.objects.items():
+
+                if "output" in primary_config:
+
+                    for out_name in FN.get_nested_values(primary_config["output"]):
+
+                        self.oo_translator[out_name] = primary_name
+
+        return self.oo_translator[obj_name]
 
     def io(self, io_name):
         """Returns a specific input/output instance."""
@@ -138,7 +164,8 @@ class Run:
     def node(self, obj_name, samples=[]):
         """Instantiates a node for an object, including the corresponding algorithm instance
         and the list of relevant samples. This function checks for circular dependencies.
-        The node instance is returned. This is a recursive function."""
+        The node instance is returned. This is is a recursive function."""
+
         if not obj_name in self.nodes:
 
             self.nodes[obj_name] = Node(obj_name, algorithm=None, samples=samples)
@@ -162,16 +189,6 @@ class Run:
                                 sys.exit(
                                     f"ERROR: circular node detected between {d} and {obj_name}"
                                 )
-
-                # make secondary outputs visible in the objects list.
-                for o_key, o_name in self.nodes[obj_name].algorithm.output.items():
-
-                    if o_key is not None:
-
-                        # this is necessary for the alg() function.
-                        self.objects[o_name] = self.objects[obj_name]
-
-                        self.nodes[o_name] = self.nodes[obj_name]
 
         return self.nodes[obj_name]
 
@@ -344,6 +361,10 @@ class Run:
     def call(self, obj_name):
         """Calls an algorithm for the current state."""
         if self.store.get(obj_name) is EN.Pyrate.NONE:
+
+            # this call is necessary to find the correct
+            # algorithm for secondary outputs.
+            obj_name = self.translate(obj_name)
 
             alg = self.node(obj_name).algorithm
 
