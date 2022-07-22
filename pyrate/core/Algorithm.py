@@ -36,14 +36,6 @@ class Algorithm:
         self._input = {}
         self._output = {}
 
-        # initialisation of inputs and outputs.
-        for io in ["input", "output"]:
-
-            if io in self.config:
-                setattr(self, io, self.config[io])
-            else:
-                setattr(self, io, {None: set()})
-
     def initialise(self, condition=None):
         """At this stage the method knows the current input."""
         pass
@@ -64,7 +56,7 @@ class Algorithm:
     @input.setter
     def input(self, config_input):
         """Setter method for input objects."""
-        if self._input == {} and not config_input == {None: set()}:
+        if self._input == {}:
 
             for dependency in FN.get_nested_values(config_input):
 
@@ -100,7 +92,7 @@ class Algorithm:
     @output.setter
     def output(self, config_output):
         """Setter method for output objects."""
-        if self._output == {} and not config_output == {None: set()}:
+        if self._output == {}:
             self._output = config_output
 
 
