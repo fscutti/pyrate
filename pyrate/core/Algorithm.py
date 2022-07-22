@@ -64,6 +64,9 @@ class Algorithm:
 
                     variables = set(ST.get_items(str(dependency)))
 
+                    if "" in variables:
+                        variables.remove("")
+
                     if not None in self._input:
                         self._input[None] = variables
                     else:
