@@ -1,8 +1,7 @@
 """ Calculates the CFD of a waveform.
     From this it also calculates the CFD zero crossing points - i.e. the cfd time
-    Outputs the first crossing point time. 
-    Also outputs the crossing point timesas an array. 
-    Also outputs the CFD as an array, which can be accessed on the
+    Outputs the first crossing point time. Also outputs the crossing point times
+    as an array. and outputs the CFD as an array, which can be accessed on the
     store using <OBJNAME>CrossTimes and <OBJNAME>Trace respectively
 
     Required parameters:
@@ -51,28 +50,28 @@ from pyrate.core.Algorithm import Algorithm
 from pyrate.utils.enums import Pyrate
 
 class CFD(Algorithm):
-    __slots__ = ("delay", "scale", "cfd_threshold", "cfd", "waveform", "waveform_delay_scaled")
+    __slots__ = ("delay", "scale", "cfd_threshold", "cfd", "waveform", "waveform_delayed")
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self, condition=None):
+    def initialise(self):
         """Set up the CFD and trapezoid parameters"""
         # CFD parameters
-        self.delay = int(self.config["delay"])
-        self.scale = int(self.config["scale"])
-        self.cfd_threshold = float(self.config["cfd_threshold"])
+        self.delay = int(self.config["algorithm"]["delay"])
+        self.scale = int(self.config["algorithm"]["scale"])
+        self.cfd_threshold = float(self.config["algorithm"]["cfd_threshold"])
 
         self.cfd = np.zeros(0)
         self.waveform = np.zeros(0)
-        self.waveform_delay_scaled = np.zeros(0)
+        self.waveform_delayed = np.zeros(0)
 
-    def execute(self, condition=None):
+    def execute(self):
         """Caclulates the waveform CFD"""
         # Reset all the waveforms, safer to do at the start
         self.clear_arrays()
 
-        waveform = self.store.get(self.config["input"]["waveform"])
+        waveform = self.store.get(self.config["waveform"])
         if waveform is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             return
@@ -82,14 +81,14 @@ class CFD(Algorithm):
             # Our waveform is larger than the storage
             # we need to grow our arrays
             self.waveform.resize(waveform_len + self.delay)
-            self.waveform_delay_scaled.resize(waveform_len + self.delay)
+            self.waveform_delayed.resize(waveform_len + self.delay)
 
         # Parameters and formula from Digital techniques for real-time pulse shaping in radiation measurements
         # https://doi.org/10.1016/0168-9002(94)91652-7
 
         self.waveform[:-self.delay] = waveform
-        self.waveform_delay_scaled[self.delay:] = self.scale * waveform
-        self.cfd = self.waveform - self.waveform_delay_scaled
+        self.waveform_delayed[self.delay:] = waveform
+        self.cfd = (self.scale * self.waveform) - self.waveform_delayed
 
         # Possible numpy way to do it quickly
         # https://stackoverflow.com/questions/3843017/efficiently-detect-sign-changes-in-python
@@ -109,8 +108,8 @@ class CFD(Algorithm):
         CFDTimes = zero_cross + f
         
         self.store.put(self.name, CFDTimes[0])
-        self.store.put(f"{self.output['times']}", CFDTimes)
-        self.store.put(f"{self.output['trace']}", self.cfd)
+        self.store.put(f"{self.name}CrossTimes", CFDTimes)
+        self.store.put(f"{self.name}Trace", self.cfd)
             # if cross_threshold.size:
             #     # Only look at the zero crosses after the threshold cross
             #     zero_cross = zero_cross[zero_cross>cross_threshold[0]]
@@ -125,10 +124,10 @@ class CFD(Algorithm):
         # if self.savecfd:
         #     self.store.put(f"{self.name}Trace", self.cfd)
 
-    def clear_arrays(self, condition=None):
+    def clear_arrays(self):
         """ Fills all the internal arrays with 0
         """
         self.waveform.fill(0)
-        self.waveform_delay_scaled.fill(0)
+        self.waveform_delayed.fill(0)
 
 # EOF
