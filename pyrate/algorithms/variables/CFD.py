@@ -55,23 +55,23 @@ class CFD(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Set up the CFD and trapezoid parameters"""
         # CFD parameters
-        self.delay = int(self.config["algorithm"]["delay"])
-        self.scale = int(self.config["algorithm"]["scale"])
-        self.cfd_threshold = float(self.config["algorithm"]["cfd_threshold"])
+        self.delay = int(self.config["delay"])
+        self.scale = int(self.config["scale"])
+        self.cfd_threshold = float(self.config["cfd_threshold"])
 
         self.cfd = np.zeros(0)
         self.waveform = np.zeros(0)
         self.waveform_delayed = np.zeros(0)
 
-    def execute(self):
+    def execute(self, condition=None):
         """Caclulates the waveform CFD"""
         # Reset all the waveforms, safer to do at the start
         self.clear_arrays()
 
-        waveform = self.store.get(self.config["waveform"])
+        waveform = self.store.get(self.config["input"]["waveform"])
         if waveform is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             return
@@ -108,8 +108,8 @@ class CFD(Algorithm):
         CFDTimes = zero_cross + f
         
         self.store.put(self.name, CFDTimes[0])
-        self.store.put(f"{self.name}CrossTimes", CFDTimes)
-        self.store.put(f"{self.name}Trace", self.cfd)
+        self.store.put(f"{self.output['times']}", CFDTimes)
+        self.store.put(f"{self.output['trace']}", self.cfd)
             # if cross_threshold.size:
             #     # Only look at the zero crosses after the threshold cross
             #     zero_cross = zero_cross[zero_cross>cross_threshold[0]]
