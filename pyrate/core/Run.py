@@ -92,6 +92,9 @@ class Run:
         self.translation = {}
         self.translate()
 
+        #FN.pretty(self.translation)
+        #sys.exit()
+
         # Loading input / output and initialising algorithms.
         # Not all inputs are loaded. Only those relevant for
         # requested targets.
@@ -172,6 +175,10 @@ class Run:
         """Instantiates a node for an object, including the corresponding algorithm instance
         and the list of relevant samples. This function checks for circular dependencies.
         The node instance is returned. This is a recursive function."""
+
+        # this call is necessary to find the correct algorithm for secondary outputs.
+        # N.B.: all object calls first pass through the node function.
+        obj_name = self.translate(obj_name)
 
         if not obj_name in self.nodes:
 
@@ -365,10 +372,6 @@ class Run:
     def call(self, obj_name):
         """Calls an algorithm for the current state."""
         if self.store.get(obj_name) is EN.Pyrate.NONE:
-
-            # this call is necessary to find the correct
-            # algorithm for secondary outputs.
-            obj_name = self.translate(obj_name)
 
             alg = self.node(obj_name).algorithm
 
