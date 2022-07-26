@@ -131,11 +131,6 @@ class Run:
 
                     for out_name in FN.get_nested_values(primary_config["output"]):
 
-                        if not primary_name in self.objects:
-                            sys.exit(
-                                f"ERROR: {primary_name} not found in the configuration when trying to match it with the {out_name} output."
-                            )
-
                         self.translation[out_name] = primary_name
 
     def io(self, io_name):
