@@ -92,8 +92,8 @@ class Run:
         self.translation = {}
         self.translate()
 
-        #FN.pretty(self.translation)
-        #sys.exit()
+        # FN.pretty(self.translation)
+        # sys.exit()
 
         # Loading input / output and initialising algorithms.
         # Not all inputs are loaded. Only those relevant for
@@ -111,9 +111,7 @@ class Run:
     def translate(self, obj_name=None):
         """This function constructs a dictionary to translate
         the name of any object to the name of the main object
-        which computes them. This is just translating the name.
-        It is not checking if the object exists in the config.
-        The alg() function should check for that."""
+        which computes them. This is just translating the name."""
 
         if obj_name is not None:
 
@@ -135,6 +133,11 @@ class Run:
                 if "output" in primary_config:
 
                     for out_name in FN.get_nested_values(primary_config["output"]):
+
+                        if not primary_name in self.objects:
+                            sys.exit(
+                                f"ERROR: {primary_name} not found in the configuration when trying to match it with the {out_name} output."
+                            )
 
                         self.translation[out_name] = primary_name
 
