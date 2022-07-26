@@ -92,9 +92,6 @@ class Run:
         self.translation = {}
         self.translate()
 
-        # FN.pretty(self.translation)
-        # sys.exit()
-
         # Loading input / output and initialising algorithms.
         # Not all inputs are loaded. Only those relevant for
         # requested targets.
