@@ -36,14 +36,6 @@ class Algorithm:
         self._input = {}
         self._output = {}
 
-        # initialisation of inputs and outputs.
-        self.input = self.config["input"]
-
-        if "output" in self.config:
-            self.output = self.config["output"]
-        else:
-            self.output = ""
-
     def initialise(self, condition=None):
         """At this stage the method knows the current input."""
         pass
@@ -71,6 +63,9 @@ class Algorithm:
                 if not isinstance(dependency, list):
 
                     variables = set(ST.get_items(str(dependency)))
+
+                    if "" in variables:
+                        variables.remove("")
 
                     if not None in self._input:
                         self._input[None] = variables
