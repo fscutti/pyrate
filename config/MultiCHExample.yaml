@@ -348,7 +348,6 @@ objects:
             window: PulseWindow_CH1
 
 
-######### !! Will need a custom config #########
     PromptDelayChargeRatioCalculator_CH0:
         algorithm: Calculator
         equation: A+(A+B)*(C+D)
@@ -508,37 +507,32 @@ objects:
                                 PulseTime_CH0, PromptDelayChargeRatio_CH0,
                                 PulseSum_CH0
 
-            - Single_channel_0:
+            - Single_channels:
                 single:
-                    vector<double>: AverageWaveform_CH0
+                    vector<double>: AverageWaveform_CH0, AverageWaveform_CH1
                     double: ChargeConstant
 
-            # - Channel_1:
-            #         single:
-            #             vector<double>: AverageWaveform_CH1
-            #             double: ChargeConstant
-            #         event:
-            #             vector<int>: {RawWaveform: EVENT:board_0:ch_1:waveform}
-            #             vector<float>: {CorrectedWaveform: CorrectedWaveform_CH1}
-            #             vector<double>:
-            #                         - FFT_CH1, Moments_CH1
-            #                         - {CFDTrace: CFD_CH1:CFDTrace_CH1,
-            #                            CFDTimes: CFD_CH1:CFDTimes_CH1}
-            #             float:
-            #                 -   BaselineDynamic_CH1, BaselineNaive_CH1,
-            #                     PromptDelayChargeRatioCalculator_CH1, CFD_CH1,
-            #                     PulseCharge_CH1, TotalCharge_CH1
-            #                 -   {DAMAX1: DAMAX1_CH1, DAMAX2: DAMAX2_CH1}
-            #                 -   LeadingEdge_CH1, MeanTime_CH1
-            #                 -   {Mean: Moments_CH1:Mean_CH1,
-            #                      Stddev: Moments_CH1:Stddev_CH1,
-            #                      Skew: Moments_CH1:Skew_CH1,
-            #                      Kurtosis: Moments_CH1:Kurtosis_CH1}
-            #                 -   PeakHeight_CH1, PeakLocation_CH1, PulseStart_CH1,
-            #                     PulseTime_CH1, PromptDelayChargeRatio_CH1,
-            #                     PulseSum_CH1
-            #                 -   Timestamp: Timestamp_CH1
-
-            # - MultiChannel:
-            #         event:
-            #             float: TimeDifference_CH01
+            - Channel_1:
+                    event:
+                        vector<int>: {RawWaveform: EVENT:board_0:ch_1:waveform}
+                        vector<float>: {CorrectedWaveform: CorrectedWaveform_CH1}
+                        vector<double>:
+                                    - FFT_CH1, Moments_CH1
+                                    - {CFDTrace: CFD_CH1:CFDTrace_CH1,
+                                       CFDTimes: CFD_CH1:CFDTimes_CH1}
+                        float:
+                            -   BaselineDynamic_CH1, BaselineNaive_CH1,
+                                PromptDelayChargeRatioCalculator_CH1, CFD_CH1,
+                                PulseCharge_CH1, TotalCharge_CH1
+                            -   {DAMAX1: DAMAX1_CH1, DAMAX2: DAMAX2_CH1}
+                            -   LeadingEdge_CH1, MeanTime_CH1
+                            -   {Mean: Moments_CH1:Mean_CH1,
+                                 Stddev: Moments_CH1:Stddev_CH1,
+                                 Skew: Moments_CH1:Skew_CH1,
+                                 Kurtosis: Moments_CH1:Kurtosis_CH1}
+                            -   PeakHeight_CH1, PeakLocation_CH1, PulseStart_CH1,
+                                PulseTime_CH1, PromptDelayChargeRatio_CH1,
+                                PulseSum_CH1
+            - MultiChannel:
+                    event:
+                        float: TimeDifference_CH01
