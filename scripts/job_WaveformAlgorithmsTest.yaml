@@ -27,6 +27,6 @@ outputs:
             path: PYRATE/test
             format: .root
         targets:
-        - TreeMaker2: Data
+        - TreeMaker: Data
 
 # EOF
