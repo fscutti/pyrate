@@ -383,10 +383,7 @@ class TreeMaker(Algorithm):
         if self._input == {}:
             for dependency in FN.expand_nested_values(config_input):
                 variables = set(ST.get_items(str(dependency)))
-                if not None in self._input:
-                    self._input[None] = variables
-                else:
-                    self._input[None].update(variables)
+                self._update_input(None, variables)
 
     def initialise(self, condition=None):
         """Defines a tree dictionary."""
