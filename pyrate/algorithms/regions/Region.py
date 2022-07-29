@@ -76,7 +76,7 @@ class Region(Algorithm):
 
                 c = c.replace(v, f"self.store.get('{v}')")
 
-            is_passed *= eval(c)
+            is_passed *= eval(compile(c, "<string>", "eval"))
 
         current_value = self.store.get(self.name)
 
