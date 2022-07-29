@@ -50,7 +50,7 @@ class Calculator(Algorithm):
         """Setter method for input objects."""
         if self._input == {}:
             for dependency in FN.get_nested_values(config_input):
-                if self.IsFloat(dependency):
+                if FN.is_float(dependency):
                     continue
                 if not isinstance(dependency, list):
                     variables = set(ST.get_items(str(dependency)))
@@ -61,22 +61,17 @@ class Calculator(Algorithm):
                         for condition, variables in self.parse_input(string).items():
                             self._update_input(condition, variables)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         self.executeMe = compile(self.config["equation"], '<string>', 'eval')
 
-        executeVars = []
-        if self.config["input"]:
-            executeVars = self.config["input"].split(", ")
-
         self.variables = self.config["input"]
-        variables = self.variables
         constantVars = {}
         self.storeVariables = {}
-        for variable in variables:
-            if variables[variable] in executeVars:
-                self.storeVariables[variable] = variables[variable]
+        for var, val in self.variables.items():
+            if FN.is_float(val):
+                self.storeVariables[var] = val
             else:
-                constantVars[variable] = variables[variable]
+                constantVars[var] = val
 
         #capture some of the local variables and add the constant input variables
         self.locals = {}
@@ -86,8 +81,7 @@ class Calculator(Algorithm):
         #capture the globals
         self.globals = globals()
 
-
-    def execute(self):
+    def execute(self, condition=None):
         #update variables from the store
         for storeVariable in self.storeVariables:
             self.locals[storeVariable] = self.store.get(self.storeVariables[storeVariable])
