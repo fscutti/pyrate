@@ -306,8 +306,6 @@ objects:
         input:
             waveform: TrapezoidWaveform_CH0
         output:
-            # times: CFD_CH0:CFDTimes_CH0
-            # trace: CFD_CH0:CFDTrace_CH0
             times: CFDTimes_CH0
             trace: CFDTrace_CH0
     
@@ -320,8 +318,8 @@ objects:
         input:
             waveform: TrapezoidWaveform_CH1
         output:
-            times: CFD_CH1:CFDTimes_CH1
-            trace: CFD_CH1:CFDTrace_CH1
+            times: CFDTimes_CH1
+            trace: CFDTrace_CH1
 
     PromptDelayChargeRatio_CH0:
         algorithm: Ratio
@@ -398,10 +396,10 @@ objects:
             waveform: CorrectedWaveform_CH0
             window: TotalWindow
         output:
-            mean: Moments_CH0:Mean_CH0
-            stddev: Moments_CH0:Stddev_CH0
-            skew: Moments_CH0:Skew_CH0
-            kurtosis: Moments_CH0:Kurtosis_CH0
+            mean: Mean_CH0
+            stddev: Stddev_CH0
+            skew: Skew_CH0
+            kurtosis: Kurtosis_CH0
     
     Moments_CH1:
         algorithm: Moment
@@ -410,10 +408,10 @@ objects:
             waveform: CorrectedWaveform_CH1
             window: TotalWindow
         output:
-            mean: Moments_CH1:Mean_CH1
-            stddev: Moments_CH1:Stddev_CH1
-            skew: Moments_CH1:Skew_CH1
-            kurtosis: Moments_CH1:Kurtosis_CH1
+            mean: Mean_CH1
+            stddev: Stddev_CH1
+            skew: Skew_CH1
+            kurtosis: Kurtosis_CH1
 
 
     DAMAX1_CH0:
@@ -493,8 +491,6 @@ objects:
                         vector<float>: {CorrectedWaveform: CorrectedWaveform_CH0}
                         vector<double>:
                                     - FFT_CH0, Moments_CH0
-                                    # - {CFDTrace: CFD_CH0:CFDTrace_CH0,
-                                    #    CFDTimes: CFD_CH0:CFDTimes_CH0}
                                     - {CFDTrace: CFDTrace_CH0,
                                        CFDTimes: CFDTimes_CH0}
                         float:
@@ -503,10 +499,10 @@ objects:
                                 PulseCharge_CH0, TotalCharge_CH0
                             -   {DAMAX1: DAMAX1_CH0, DAMAX2: DAMAX2_CH0}
                             -   LeadingEdge_CH0, MeanTime_CH0
-                            -   {Mean: Moments_CH0:Mean_CH0,
-                                 Stddev: Moments_CH0:Stddev_CH0,
-                                 Skew: Moments_CH0:Skew_CH0,
-                                 Kurtosis: Moments_CH0:Kurtosis_CH0}
+                            -   {Mean: Mean_CH0,
+                                 Stddev: Stddev_CH0,
+                                 Skew: Skew_CH0,
+                                 Kurtosis: Kurtosis_CH0}
                             -   PeakHeight_CH0, PeakLocation_CH0, PulseStart_CH0,
                                 PulseTime_CH0, PromptDelayChargeRatio_CH0,
                                 PulseSum_CH0
@@ -522,18 +518,18 @@ objects:
                         vector<float>: {CorrectedWaveform: CorrectedWaveform_CH1}
                         vector<double>:
                                     - FFT_CH1, Moments_CH1
-                                    - {CFDTrace: CFD_CH1:CFDTrace_CH1,
-                                       CFDTimes: CFD_CH1:CFDTimes_CH1}
+                                    - {CFDTrace: CFDTrace_CH1,
+                                       CFDTimes: CFDTimes_CH1}
                         float:
                             -   BaselineDynamic_CH1, BaselineNaive_CH1,
                                 PromptDelayChargeRatioCalculator_CH1, CFD_CH1,
                                 PulseCharge_CH1, TotalCharge_CH1
                             -   {DAMAX1: DAMAX1_CH1, DAMAX2: DAMAX2_CH1}
                             -   LeadingEdge_CH1, MeanTime_CH1
-                            -   {Mean: Moments_CH1:Mean_CH1,
-                                 Stddev: Moments_CH1:Stddev_CH1,
-                                 Skew: Moments_CH1:Skew_CH1,
-                                 Kurtosis: Moments_CH1:Kurtosis_CH1}
+                            -   {Mean: Mean_CH1,
+                                 Stddev: Stddev_CH1,
+                                 Skew: Skew_CH1,
+                                 Kurtosis: Kurtosis_CH1}
                             -   PeakHeight_CH1, PeakLocation_CH1, PulseStart_CH1,
                                 PulseTime_CH1, PromptDelayChargeRatio_CH1,
                                 PulseSum_CH1
