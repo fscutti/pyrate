@@ -49,30 +49,17 @@ class Calculator(Algorithm):
     def input(self, config_input):
         """Setter method for input objects."""
         if self._input == {}:
-
             for dependency in FN.get_nested_values(config_input):
-                
                 if self.IsFloat(dependency):
                     continue
-                
                 if not isinstance(dependency, list):
-
                     variables = set(ST.get_items(str(dependency)))
-
-                    if not None in self._input:
-                        self._input[None] = variables
-                    else:
-                        self._input[None].update(variables)
+                    self._update_input(None, variables)
 
                 else:
                     for string in dependency:
-
                         for condition, variables in self.parse_input(string).items():
-
-                            if not condition in self._input:
-                                self._input[condition] = variables
-                            else:
-                                self._input[condition].update(variables)
+                            self._update_input(condition, variables)
 
     def initialise(self, condition=None):
         """Initialises the equation and variables to be calculated"""

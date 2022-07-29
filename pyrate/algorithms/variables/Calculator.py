@@ -28,6 +28,8 @@
 
 from pyrate.core.Algorithm import Algorithm
 from pyrate.utils.enums import Pyrate
+import pyrate.utils.functions as FN
+import pyrate.utils.strings as ST
 
 import sys
 import math
@@ -37,6 +39,27 @@ import scipy
 class Calculator(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
+    
+    @property
+    def input(self):
+        """Getter method for input objects."""
+        return self._input
+
+    @input.setter
+    def input(self, config_input):
+        """Setter method for input objects."""
+        if self._input == {}:
+            for dependency in FN.get_nested_values(config_input):
+                if self.IsFloat(dependency):
+                    continue
+                if not isinstance(dependency, list):
+                    variables = set(ST.get_items(str(dependency)))
+                    self._update_input(None, variables)
+
+                else:
+                    for string in dependency:
+                        for condition, variables in self.parse_input(string).items():
+                            self._update_input(condition, variables)
 
     def initialise(self):
         self.executeMe = compile(self.config["equation"], '<string>', 'eval')
