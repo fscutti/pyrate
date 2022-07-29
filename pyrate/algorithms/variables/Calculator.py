@@ -42,10 +42,10 @@ class Calculator(Algorithm):
         self.executeMe = compile(self.config["equation"], '<string>', 'eval')
 
         executeVars = []
-        if self.config["execute"]["input"]:
-            executeVars = self.config["execute"]["input"].split(", ")
+        if self.config["input"]:
+            executeVars = self.config["input"].split(", ")
 
-        self.variables = self.config["variables"]
+        self.variables = self.config["input"]
         variables = self.variables
         constantVars = {}
         self.storeVariables = {}

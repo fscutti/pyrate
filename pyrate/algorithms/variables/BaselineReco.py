@@ -49,8 +49,8 @@ class BaselineReco(Algorithm):
         if "samples" not in self.config["algorithm"]:
             sys.exit("ERROR in Baseline, 'samples' not found in the config")
 
-        nsamples = self.config["algorithm"]["samples"]
-        method = self.config["algorithm"]["method"]
+        nsamples = self.config["samples"]
+        method = self.config["method"]
 
         if method == "NP":
             # Get the baseline.
@@ -67,8 +67,8 @@ class BaselineReco(Algorithm):
         #BaselineReco = [Baseline, StdDev, Delta]
 
         self.store.put(f"{self.name}", Baseline)
-        self.store.put(f"{self.name}StdDev", StdDev)
-        self.store.put(f"{self.name}Delta", Delta)
+        self.store.put(f"{self.config['StdDev']}", StdDev)
+        self.store.put(f"{self.config['Delta']}", Delta)
 
     @staticmethod
     def BaselineNP(waveform, nsamples):
