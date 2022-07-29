@@ -78,10 +78,10 @@ class Algorithm:
         if "" in variables:
             variables.remove("")
 
-        if not None in self._input:
-            self._input[None] = variables
+        if not condition in self._input:
+            self._input[condition] = variables
         else:
-            self._input[None].update(variables)
+            self._input[condition].update(variables)
 
     def parse_input(self, s):
         """Returns a dictionary where keys are dependency conditions and values
