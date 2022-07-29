@@ -64,23 +64,24 @@ class Algorithm:
 
                     variables = set(ST.get_items(str(dependency)))
 
-                    if "" in variables:
-                        variables.remove("")
-
-                    if not None in self._input:
-                        self._input[None] = variables
-                    else:
-                        self._input[None].update(variables)
+                    self._update_input(None, variables)
 
                 else:
                     for string in dependency:
 
                         for condition, variables in self.parse_input(string).items():
 
-                            if not condition in self._input:
-                                self._input[condition] = variables
-                            else:
-                                self._input[condition].update(variables)
+                            self._update_input(condition, variables)
+
+    def _update_input(self, condition, variables):
+        """Add condition and variables to the _input dictionary."""
+        if "" in variables:
+            variables.remove("")
+
+        if not None in self._input:
+            self._input[None] = variables
+        else:
+            self._input[None].update(variables)
 
     def parse_input(self, s):
         """Returns a dictionary where keys are dependency conditions and values
