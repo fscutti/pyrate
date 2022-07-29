@@ -77,7 +77,7 @@ class Calculator(Algorithm):
     def initialise(self, condition=None):
         """Initialises the equation and variables to be calculated"""
         self.eqnStr = self.config["equation"]
-        self.variables = self.config["input"]["variables"]
+        self.variables = self.config["input"]
         self.ShuntingYard()
 
     def execute(self, condition=None):
