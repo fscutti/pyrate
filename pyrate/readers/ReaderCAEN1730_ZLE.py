@@ -38,6 +38,7 @@ class ReaderCAEN1730_ZLE(Reader):
 
         self._eventPos = []
         self._mmfSize = self._mmf.size()
+        self._readIdx = -1
 
     def offload(self):
         self.is_loaded = False
@@ -92,7 +93,6 @@ class ReaderCAEN1730_ZLE(Reader):
             self._mmf.seek(seekSize, 1)
 
         self._mmf.seek(0, 0)
-        self._readIdx = -1
 
     def _break_path(self, path):
         """Takes a path request from pyrate and splits it into a dictionary"""
@@ -109,20 +109,20 @@ class ReaderCAEN1730_ZLE(Reader):
 
     def _get_waveform(self, ch):
         """Reads variable from the event and puts it in the transient store."""
-        #If the channel is not in the event return an empty list
-        #ToDo: Confirm this behaviour in pyrate
-        if(ch not in self._inEvt.keys()):
+        # If the channel is not in the event return an empty list
+        # ToDo: Confirm this behaviour in pyrate
+        if ch not in self._inEvt.keys():
             return Pyrate.NONE
 
-        return np.array(self._evtWaveforms[ch], dtype='int32')
+        return np.array(self._evtWaveforms[ch], dtype="int32")
 
     def _get_timestamps(self, ch):
-        #If the channel is not in the event return an empty list
-        #ToDo: Confirm this behaviour in pyrate
-        if(ch not in self._inEvt.keys()):
+        # If the channel is not in the event return an empty list
+        # ToDo: Confirm this behaviour in pyrate
+        if ch not in self._inEvt.keys():
             return Pyrate.NONE
 
-        #Return the waveform and mark that this channel has been read
+        # Return the waveform and mark that this channel has been read
         return self._evtTime
 
     def _read_event(self):
