@@ -293,7 +293,7 @@ class Run:
 
             self._current_output = self.loaded_io["outputs"][o_name]
 
-            for t_name in self.targets:
+            for t_name in self._current_output.targets:
 
                 self._current_output.write(t_name)
 
