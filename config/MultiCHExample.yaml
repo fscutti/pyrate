@@ -484,53 +484,53 @@ objects:
         input:
             trees:
             - Channel_0:
-                    event:
-                        vector<int>: {RawWaveform: EVENT:board_0:ch_0:waveform}
-                        vector<float>: {CorrectedWaveform: CorrectedWaveform_CH0}
-                        vector<double>:
-                                    - FFT_CH0, Moments_CH0
-                                    - {CFDTrace: CFDTrace_CH0,
-                                       CFDTimes: CFDTimes_CH0}
-                        float:
-                            -   BaselineDynamic_CH0, BaselineNaive_CH0,
-                                PromptDelayChargeRatioCalculator_CH0, CFD_CH0,
-                                PulseCharge_CH0, TotalCharge_CH0
-                            -   {DAMAX1: DAMAX1_CH0, DAMAX2: DAMAX2_CH0}
-                            -   LeadingEdge_CH0, MeanTime_CH0
-                            -   {Mean: Mean_CH0,
-                                 Stddev: Stddev_CH0,
-                                 Skew: Skew_CH0,
-                                 Kurtosis: Kurtosis_CH0}
-                            -   PeakHeight_CH0, PeakLocation_CH0, PulseStart_CH0,
-                                PulseTime_CH0, PromptDelayChargeRatio_CH0,
-                                PulseSum_CH0
+                    filltype: event
+                    vector<int>: {RawWaveform: EVENT:board_0:ch_0:waveform}
+                    vector<float>: {CorrectedWaveform: CorrectedWaveform_CH0}
+                    vector<double>:
+                                - FFT_CH0, Moments_CH0
+                                - {CFDTrace: CFDTrace_CH0,
+                                    CFDTimes: CFDTimes_CH0}
+                    float:
+                        -   BaselineDynamic_CH0, BaselineNaive_CH0,
+                            PromptDelayChargeRatioCalculator_CH0, CFD_CH0,
+                            PulseCharge_CH0, TotalCharge_CH0
+                        -   {DAMAX1: DAMAX1_CH0, DAMAX2: DAMAX2_CH0}
+                        -   LeadingEdge_CH0, MeanTime_CH0
+                        -   {Mean: Mean_CH0,
+                                Stddev: Stddev_CH0,
+                                Skew: Skew_CH0,
+                                Kurtosis: Kurtosis_CH0}
+                        -   PeakHeight_CH0, PeakLocation_CH0, PulseStart_CH0,
+                            PulseTime_CH0, PromptDelayChargeRatio_CH0,
+                            PulseSum_CH0
 
             - Single_channels:
-                single:
+                    filltype: single
                     vector<double>: AverageWaveform_CH0, AverageWaveform_CH1
                     double: ChargeConstant
 
             - Channel_1:
-                    event:
-                        vector<int>: {RawWaveform: EVENT:board_0:ch_1:waveform}
-                        vector<float>: {CorrectedWaveform: CorrectedWaveform_CH1}
-                        vector<double>:
-                                    - FFT_CH1, Moments_CH1
-                                    - {CFDTrace: CFDTrace_CH1,
-                                       CFDTimes: CFDTimes_CH1}
-                        float:
-                            -   BaselineDynamic_CH1, BaselineNaive_CH1,
-                                PromptDelayChargeRatioCalculator_CH1, CFD_CH1,
-                                PulseCharge_CH1, TotalCharge_CH1
-                            -   {DAMAX1: DAMAX1_CH1, DAMAX2: DAMAX2_CH1}
-                            -   LeadingEdge_CH1, MeanTime_CH1
-                            -   {Mean: Mean_CH1,
-                                 Stddev: Stddev_CH1,
-                                 Skew: Skew_CH1,
-                                 Kurtosis: Kurtosis_CH1}
-                            -   PeakHeight_CH1, PeakLocation_CH1, PulseStart_CH1,
-                                PulseTime_CH1, PromptDelayChargeRatio_CH1,
-                                PulseSum_CH1
+                    filltype: event
+                    vector<int>: {RawWaveform: EVENT:board_0:ch_1:waveform}
+                    vector<float>: {CorrectedWaveform: CorrectedWaveform_CH1}
+                    vector<double>:
+                                - FFT_CH1, Moments_CH1
+                                - {CFDTrace: CFDTrace_CH1,
+                                    CFDTimes: CFDTimes_CH1}
+                    float:
+                        -   BaselineDynamic_CH1, BaselineNaive_CH1,
+                            PromptDelayChargeRatioCalculator_CH1, CFD_CH1,
+                            PulseCharge_CH1, TotalCharge_CH1
+                        -   {DAMAX1: DAMAX1_CH1, DAMAX2: DAMAX2_CH1}
+                        -   LeadingEdge_CH1, MeanTime_CH1
+                        -   {Mean: Mean_CH1,
+                                Stddev: Stddev_CH1,
+                                Skew: Skew_CH1,
+                                Kurtosis: Kurtosis_CH1}
+                        -   PeakHeight_CH1, PeakLocation_CH1, PulseStart_CH1,
+                            PulseTime_CH1, PromptDelayChargeRatio_CH1,
+                            PulseSum_CH1
             - MultiChannel:
-                    event:
-                        float: TimeDifference_CH01
+                    filltype: event
+                    float: TimeDifference_CH01
