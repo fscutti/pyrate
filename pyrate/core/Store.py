@@ -13,6 +13,7 @@ class Store:
         self.name = name
         self._transient = {}
         self._permanent = {}
+        self._ready = set()
 
     def put(self, name, obj):
         """Puts an object on the store."""
@@ -40,12 +41,21 @@ class Store:
         """Clears the store."""
         self._transient.clear()
 
-    def save(self, name, obj, save_copy=True):
+    def save(self, name, obj, save_copy=True, is_ready=False):
         """Saves an object for later collection."""
         if save_copy:
             self._permanent[name] = copy(obj)
+
         else:
             self._permanent[name] = obj
+
+        if is_ready:
+            self._ready.add(name)
+
+    def status(self, name):
+        """Returns status of an object."""
+        if name in self._ready:
+            return enums.Pyrate.READY
 
 
 # EOF
