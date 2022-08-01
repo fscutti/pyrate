@@ -80,10 +80,12 @@ https://root.cern.ch/doc/master/classTTree.html
 
 """
 
+import os
 import sys
 import ROOT as R
 from array import array
 import ctypes
+import copy
 
 from pyrate.core.Algorithm import Algorithm
 
@@ -244,7 +246,7 @@ class Tree:
     """
 
     def __init__(
-        self, name, outfile, path=None, branch_list=[], event=False, create_now=True
+        self, name, outfile, path=None, branch_list=[], event=False, create_now=False
     ):
         self.name = name
         self.outfile = outfile
@@ -365,7 +367,7 @@ class Tree:
 
 
 class TreeMaker(Algorithm):
-    __slots__ = ('file', 'tree')
+    __slots__ = ('file', 'trees')
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
@@ -380,6 +382,8 @@ class TreeMaker(Algorithm):
         """ Sets the input approrpriately for TreeMaker
         """
         if self._input == {}:
+            config_input = copy.deepcopy(config_input)
+            a = [d[n].pop("filltype") for d in config_input["trees"] for n in d]
             for dependency in FN.expand_nested_values(config_input):
                 variables = set(ST.get_items(str(dependency)))
                 self._update_input(None, variables)
@@ -388,62 +392,97 @@ class TreeMaker(Algorithm):
         """Defines a tree dictionary."""
         out_file = self.store.get(f"OUTPUT:{self.name}")
         self.file = out_file
+        
+        trees = {}
+        # Get all trees
+        for tree in [t for t in self.config["input"]["trees"]]:
+            for t_path_name, t_variables in tree.items():
+                t_path = os.path.dirname(t_path_name)  # If using a path, otherise empty
+                t_name = os.path.basename(t_path_name)
 
-        name = self.name.split(':')[0]
-        t_path = self.config["path"] if "path" in self.config else ""
-        event_based = False if self.config["filltype"] == "single" else True
-        
-        self.tree = Tree(name, out_file, path=t_path, event=event_based, 
-                         create_now=True)
-        
-        for datatype, variables in self.config["input"].items():
-            # New check to handle lists of vars
-            variables_list = self._parse_tree_vars(variables)
-            for b_name, var_name in variables_list:
-                # loop over individual variables
-                new_branch = Branch(
-                    b_name,
-                    var_name=var_name,
-                    datatype=datatype,
-                    create_now=True,
+                # Pull out the fill type. Trees can only have one fill type now
+                event_based = False if t_variables.pop("filltype") == "single" else True
+
+                # create the instance of the new tree
+                trees[t_name] = Tree(
+                    t_name, out_file, path=t_path, event=event_based, create_now=True
                 )
-                # Add the new branch to the TTree
-                self.tree.add_branch(new_branch)
+
+                # Now set up all the variables in the tree
+                # Loop through vector and scalar type branches
+                # loop over datatypes
+                for datatype, variables in t_variables.items():
+                    # New check to handle lists of vars
+                    variables_list = self._parse_tree_vars(variables)
+                    for b_name, var_name in variables_list:
+                        # loop over individual variables
+                        new_branch = Branch(
+                            b_name,
+                            var_name=var_name,
+                            datatype=datatype,
+                            create_now=True,
+                        )
+                        # Add the new branch to the TTree
+                        trees[t_name].add_branch(new_branch)
+
+        # # Disable the non-event based branches
+        # for tree in trees:
+        #     branches_to_disable = [bn for bn in trees[tree].branches if not trees[tree].branches[bn].event_based]
+        #     trees[tree].disable_branches(branches_to_disable)
+        
+        # Save the trees for later
+        self.trees = trees
 
     def execute(self, condition=None):
         """Fills in the ROOT tree dictionary with event data."""
+        
         # Fill all the branches in the trees if they're event-based
-        if self.tree.event:
-            for branch_name in self.tree.branches:
-                value = self.store.get(self.tree.branches[branch_name].var_name)
-                # Handle invalid values using internal Pyrate.NONE
-                if value is enums.Pyrate.NONE:
-                    # No valid value to store, storing the closest invalid value
-                    value = self.tree.branches[branch_name].invalid_value
+        for tree in self.trees:
+            if self.trees[tree].event:
+                # Only want to fill the trees that are event-based
+                for branch_name in self.trees[tree].branches:
+                    value = self.store.get(self.trees[tree].branches[branch_name].var_name)
 
-                # Fill the branch with the value
-                self.tree.branches[branch_name].fill_branch(value)
+                    # Handle invalid values using internal Pyrate.NONE
+                    if value is enums.Pyrate.NONE:
+                        # No valid value to store, storing the closest invalid value
+                        value = self.trees[tree].branches[branch_name].invalid_value
 
-            # Save all the values into the Tree
-            self.tree.fill()
+                    # Fill the branch with the value
+                    self.trees[tree].branches[branch_name].fill_branch(value)
+
+                # Save all the values into the Tree
+                self.trees[tree].fill()
 
     def finalise(self, condition=None):
         """Fill in the single/run-based variables"""
-        # Fill all the branches in the trees if they're run-based
-        if not self.tree.event:
-            # Only want to fill the branches that are run-based
-            for branch_name in self.tree.branches:
-                value = self.store.get(self.tree.branches[branch_name].var_name)
-                
-                # Handle invalid values using internal Pyrate.NONE
-                if value is enums.Pyrate.NONE:
-                    # No valid value to store, storing the closest invalid value
-                    value = self.tree.branches[branch_name].invalid_value
+        # # First, disable all the event-based branches
+        # # and enable the single entry branches
+        # for tree in self.trees:
+        #     branches_to_disable = [bn for bn in self.trees[tree].branches if self.trees[tree].branches[bn].event_based]
+        #     branches_to_enable =  [bn for bn in self.trees[tree].branches if not self.trees[tree].branches[bn].event_based]
+        #     self.trees[tree].enable_branches(branches_to_enable)
+        #     self.trees[tree].disable_branches(branches_to_disable)
 
-                # Fill the branch with the value
-                self.tree.branches[branch_name].fill_branch(value)
-            # Save all the values into the Tree
-            self.tree.fill()
+        # Fill all the branches in the trees if they're run-based
+        for tree in self.trees:
+            if not self.trees[tree].event:
+                # Only want to fill the branches that are run-based
+                for branch_name in self.trees[tree].branches:
+                    value = self.store.get(self.trees[tree].branches[branch_name].var_name)
+                    
+                    # Handle invalid values using internal Pyrate.NONE
+                    if value is enums.Pyrate.NONE:
+                        # No valid value to store, storing the closest invalid value
+                        value = self.trees[tree].branches[branch_name].invalid_value
+
+                    # Fill the branch with the value
+                    self.trees[tree].branches[branch_name].fill_branch(value)
+                # Save all the values into the Tree
+                self.trees[tree].fill()
+            # # Finally we have to re-enable all the branches so they can be accessed
+            # all_branches = [bn for bn in self.trees[tree].branches]
+            # self.trees[tree].enable_branches(all_branches)
 
         # Write the objects to the file - this is the most important step
         self.file.Write("", R.TObject.kOverwrite)
