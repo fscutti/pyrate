@@ -34,7 +34,7 @@ class WriterROOT(Writer):
         indicating the folder structure of the output yet to be created at
         this point.
         """
-        obj = self.store.collect(name)
+        obj = self.store.get(name)
 
         if obj is EN.Pyrate.NONE:
             msg = f"ERROR: trying to write {name} but object has not been saved."

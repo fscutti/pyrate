@@ -11,17 +11,23 @@ from pyrate.utils import enums
 class Store:
     def __init__(self, name):
         self.name = name
-        self._store = {}
-        self._saved = {}
+        self._transient = {}
+        self._permanent = {}
 
     def put(self, name, obj):
         """Puts an object on the store."""
-        self._store[name] = obj
+        self._transient[name] = obj
 
     def get(self, name):
         """Get an object."""
         try:
-            return self._store[name]
+            return self._transient[name]
+
+        except KeyError:
+            pass
+
+        try:
+            return self._permanent[name]
 
         except KeyError:
             return enums.Pyrate.NONE
@@ -32,22 +38,14 @@ class Store:
 
     def clear(self):
         """Clears the store."""
-        self._store.clear()
+        self._transient.clear()
 
     def save(self, name, obj, save_copy=True):
         """Saves an object for later collection."""
         if save_copy:
-            self._saved[name] = copy(obj)
+            self._permanent[name] = copy(obj)
         else:
-            self._saved[name] = obj
-
-    def collect(self, name):
-        """Get a saved object."""
-        try:
-            return self._saved[name]
-
-        except KeyError:
-            return enums.Pyrate.NONE
+            self._permanent[name] = obj
 
 
 # EOF

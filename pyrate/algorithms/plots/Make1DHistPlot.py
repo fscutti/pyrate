@@ -124,7 +124,7 @@ class Make1DHistPlot(Algorithm):
 
                             variable = self.store.get(v_name)
 
-                            self.store.collect(obj_name).Fill(
+                            self.store.get(obj_name).Fill(
                                 variable, region["r_weight"]
                             )
 
@@ -175,7 +175,7 @@ class Make1DHistPlot(Algorithm):
 
         # FN.pretty(plot_collection)
 
-        canvas_collection = self.store.collect(self.name)
+        canvas_collection = self.store.get(self.name)
 
         if canvas_collection is EN.Pyrate.NONE:
             canvas_collection = {}
@@ -208,7 +208,7 @@ class Make1DHistPlot(Algorithm):
 
                         l_entry, obj_name = obj.split("|")
 
-                        h = self.store.collect(obj_name)
+                        h = self.store.get(obj_name)
 
                         if mode == "stack" and not h_stack:
 

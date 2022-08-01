@@ -392,7 +392,7 @@ class TreeMaker(Algorithm):
         """Defines a tree dictionary."""
         out_file = self.store.get(f"OUTPUT:{self.name}")
         self.file = out_file
-
+        
         trees = {}
         # Get all trees
         for tree in [t for t in self.config["input"]["trees"]]:
@@ -435,6 +435,7 @@ class TreeMaker(Algorithm):
 
     def execute(self, condition=None):
         """Fills in the ROOT tree dictionary with event data."""
+        
         # Fill all the branches in the trees if they're event-based
         for tree in self.trees:
             if self.trees[tree].event:
