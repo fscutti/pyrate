@@ -469,7 +469,7 @@ class TreeMaker(Algorithm):
             if not self.trees[tree].event:
                 # Only want to fill the branches that are run-based
                 for branch_name in self.trees[tree].branches:
-                    value = self.store.collect(self.trees[tree].branches[branch_name].var_name)
+                    value = self.store.get(self.trees[tree].branches[branch_name].var_name)
                     
                     # Handle invalid values using internal Pyrate.NONE
                     if value is enums.Pyrate.NONE:
