@@ -5,7 +5,7 @@ The store is cleaned after every event/input iteration.
 import sys
 from copy import copy
 
-from pyrate.utils import enums
+from pyrate.utils import enums as EN
 
 
 class Store:
@@ -31,7 +31,7 @@ class Store:
             return self._permanent[name]
 
         except KeyError:
-            return enums.Pyrate.NONE
+            return EN.Pyrate.NONE
 
     def copy(self, name):
         """Returns a copy of the object."""
@@ -55,7 +55,9 @@ class Store:
     def status(self, name):
         """Returns status of an object."""
         if name in self._ready:
-            return enums.Pyrate.READY
+            return EN.Pyrate.READY
 
+        else:
+            return EN.Pyrate.NONE
 
 # EOF
