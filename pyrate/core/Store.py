@@ -47,13 +47,5 @@ class Store:
         else:
             self._permanent[name] = obj
 
-    def collect(self, name):
-        """Get a saved object."""
-        try:
-            return self._permanent[name]
-
-        except KeyError:
-            return enums.Pyrate.NONE
-
 
 # EOF

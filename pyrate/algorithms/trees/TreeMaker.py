@@ -389,7 +389,7 @@ class TreeMaker(Algorithm):
         """Defines a tree dictionary."""
         out_file = self.store.get(f"OUTPUT:{self.name}")
         self.file = out_file
-
+        
         trees = {}
         # Get all trees
         for tree in [t for t in self.config["input"]["trees"]]:
@@ -437,6 +437,7 @@ class TreeMaker(Algorithm):
 
     def execute(self, condition=None):
         """Fills in the ROOT tree dictionary with event data."""
+        
         # Fill all the branches in the trees if they're event-based
         for tree in self.trees:
             for branch_name in self.trees[tree].branches:
@@ -470,7 +471,7 @@ class TreeMaker(Algorithm):
             for branch_name in self.trees[tree].branches:
                 # Only want to fill the branches that are run-based
                 if not self.trees[tree].branches[branch_name].event_based:
-                    value = self.store.collect(self.trees[tree].branches[branch_name].var_name)
+                    value = self.store.get(self.trees[tree].branches[branch_name].var_name)
                     
                     # Handle invalid values using internal Pyrate.NONE
                     if value is enums.Pyrate.NONE:
