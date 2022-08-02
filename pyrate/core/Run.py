@@ -124,7 +124,6 @@ class Run:
             if self.node(t_name).job_outputs == []:
                 self.node(t_name).job_outputs = t_io[t_name]["job_outputs"]
 
-
     def translate(self, obj_name=None):
         """This function constructs a dictionary to translate
         the name of any object to the name of the main object
@@ -317,7 +316,9 @@ class Run:
 
             for t_name in self._current_output.targets:
 
-                self._current_output.write(t_name)
+                if not self.store.status(t_name) is EN.Pyrate.WRITTEN:
+
+                    self._current_output.write(t_name)
 
         stop = timeit.default_timer()
 
@@ -337,7 +338,6 @@ class Run:
             self.store.put("INPUT:config", self._current_input.config)
 
             self.loop()
-            # check status here.
 
         elif self.state == "execute":
 
@@ -374,7 +374,6 @@ class Run:
                     self.store.put("EVENT:idx", self._current_input.get_idx())
 
                     self.loop()
-                    # check status here.
 
                     self._current_input.set_next_event()
 
@@ -417,15 +416,13 @@ class Run:
             else:
                 self._current_input.read(obj_name)
 
-        for o_name in self.node(obj_name).job_outputs:
-
-            if self.store.status(obj_name) is EN.Pyrate.READY:
-
-                #self._current_output = self.loaded_io["outputs"][o_name]
-
-                #self._current_output.write(obj_name)
-
-                pass
+        # for o_name in self.node(obj_name).job_outputs:
+        #
+        #    if self.store.status(obj_name) is EN.Pyrate.READY:
+        #
+        #        self._current_output = self.loaded_io["outputs"][o_name]
+        #
+        #        self._current_output.write(obj_name)
 
         return
 
