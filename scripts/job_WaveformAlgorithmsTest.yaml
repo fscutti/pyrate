@@ -27,9 +27,9 @@ outputs:
             path: PYRATE/test
             format: .root
         targets:
-        - Channel_0: Data
-        - Channel_1: Data
-        - Single_data: Data
-        - MultiChannels: Data
+            - Channel_0: Data
+            - Channel_1: Data
+            - Single_data: Data
+            - MultiChannels: Data
 
 # EOF
