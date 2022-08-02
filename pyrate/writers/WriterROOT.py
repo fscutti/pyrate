@@ -6,6 +6,7 @@ from pyrate.core.Writer import Writer
 
 from pyrate.utils import enums as EN
 
+
 class WriterROOT(Writer):
     __slots__ = ["f"]
 
@@ -41,11 +42,10 @@ class WriterROOT(Writer):
             sys.exit(msg)
             self.logger.error(msg)
 
-        if obj is not EN.Pyrate.SKIP_WRITE:
-            if isinstance(obj, dict):
-                self._write_dirs(obj)
-            else:
-                self.f.WriteObject(obj, obj.GetName())
+        if isinstance(obj, dict):
+            self._write_dirs(obj)
+        else:
+            self.f.WriteObject(obj, obj.GetName())
 
     def _write_dirs(self, obj):
         """Write dictionary of objects to file. The keys are the paths."""

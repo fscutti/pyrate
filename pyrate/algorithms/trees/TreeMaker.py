@@ -94,44 +94,66 @@ from pyrate.utils import enums
 GB = 1e9
 MB = 1e6
 
+
 def maxint(t, signed=False):
-    """ Calculates the max integer value for ctype integers
-        Takes in a ctypes.c_<type>() e.g. ctypes.c_int()
+    """Calculates the max integer value for ctype integers
+    Takes in a ctypes.c_<type>() e.g. ctypes.c_int()
     """
     if signed:
-        return 2**(8*ctypes.sizeof(t)-1)-1
-    return 2**(8*ctypes.sizeof(t))-1
+        return 2 ** (8 * ctypes.sizeof(t) - 1) - 1
+    return 2 ** (8 * ctypes.sizeof(t)) - 1
+
 
 _Type = {
-    "int": {"python": "i", "root": "I", "vector": "int", 
-            "invalid":-999},
-    "uint": {"python": "I", "root": "i", "vector": "unsigned int", 
-             "invalid":maxint(ctypes.c_uint())},
-    "short": {"python": "h", "root": "S", "vector": "short",
-              "invalid":-999},
-    "ushort": {"python": "H", "root": "s", "vector": "unsigned short",
-               "invalid":maxint(ctypes.c_ushort())},
-    "long": {"python": "l", "root": "L", "vector": "long",
-             "invalid":-999},
-    "ulong": {"python": "L", "root": "l", "vector": "unsigned long",
-              "invalid":maxint(ctypes.c_ulong())},
-    "float": {"python": "d", "root": "D", "vector": "double",  # Python arrays don't have float32's
-              "invalid": -999.0},
-    "double": {"python": "d", "root": "D", "vector": "double",
-               "invalid": -999.0,},
-    "bool": {"python": "H", "root": "O", "vector": "bool",
-             "invalid":0},
-    "string": {"python": "u", "root": "C", "vector": "string",  # Strings should be stored in vectors
-               "invalid": ""}
+    "int": {"python": "i", "root": "I", "vector": "int", "invalid": -999},
+    "uint": {
+        "python": "I",
+        "root": "i",
+        "vector": "unsigned int",
+        "invalid": maxint(ctypes.c_uint()),
+    },
+    "short": {"python": "h", "root": "S", "vector": "short", "invalid": -999},
+    "ushort": {
+        "python": "H",
+        "root": "s",
+        "vector": "unsigned short",
+        "invalid": maxint(ctypes.c_ushort()),
+    },
+    "long": {"python": "l", "root": "L", "vector": "long", "invalid": -999},
+    "ulong": {
+        "python": "L",
+        "root": "l",
+        "vector": "unsigned long",
+        "invalid": maxint(ctypes.c_ulong()),
+    },
+    "float": {
+        "python": "d",
+        "root": "D",
+        "vector": "double",  # Python arrays don't have float32's
+        "invalid": -999.0,
+    },
+    "double": {
+        "python": "d",
+        "root": "D",
+        "vector": "double",
+        "invalid": -999.0,
+    },
+    "bool": {"python": "H", "root": "O", "vector": "bool", "invalid": 0},
+    "string": {
+        "python": "u",
+        "root": "C",
+        "vector": "string",  # Strings should be stored in vectors
+        "invalid": "",
+    },
 }
 
 
 class Branch:
     """Class to store branch information
-        Name will be the name of the branch in the TTree
-        var_name is an optional string to store the name of the variable on the
-        store. If it exists, it will be used instead of 'name' to get the
-        variable from the store.
+    Name will be the name of the branch in the TTree
+    var_name is an optional string to store the name of the variable on the
+    store. If it exists, it will be used instead of 'name' to get the
+    variable from the store.
     """
 
     def __init__(
@@ -148,8 +170,8 @@ class Branch:
 
         if datatype == None:
             sys.exit(f"ERROR: in branch {self.name} - datatype not provided.")
-        
-        self._set_datatype(datatype) # set the datatype and vector type
+
+        self._set_datatype(datatype)  # set the datatype and vector type
         self.event_based = event_based
         self.created = False
         self.linked = False
@@ -185,17 +207,13 @@ class Branch:
             print(
                 f"Error: input data is not iterable, but this branch ({self.name}) expects an array"
             )
-            print(
-                f"Input data type: {type(data)}, branch datatype: {self.datatype}"
-            )
+            print(f"Input data type: {type(data)}, branch datatype: {self.datatype}")
             sys.exit(1)
         if isiter and not self.vector:
             print(
                 f"Error: input data is iterable, but this branch ({self.name}) expects a single element"
             )
-            print(
-                f"Input data type: {type(data)}, branch datatype: {self.datatype}"
-            )
+            print(f"Input data type: {type(data)}, branch datatype: {self.datatype}")
             sys.exit(1)
         assert isiter == self.vector
         if self.vector:
@@ -219,10 +237,10 @@ class Branch:
         if not self.vector:
             return
         self.data.clear()
-    
+
     def _set_datatype(self, datatype):
-        """ Parses the datatype, breaks up into type and 
-            vector mode
+        """Parses the datatype, breaks up into type and
+        vector mode
         """
         if datatype.startswith("vector"):
             # extract the datatype
@@ -234,7 +252,6 @@ class Branch:
         else:
             self.datatype = datatype
             self.vector = False
-
 
 
 class Tree:
@@ -346,30 +363,27 @@ class Tree:
         Won't be accessed anymore (hopefully)
         """
         del self.branches[branch.name]
-    
+
     def set_branches(self, branch_names, status=1):
-        """ Sets the branch status of a list of branches
-        """
+        """Sets the branch status of a list of branches"""
         for branch_name in branch_names:
             self.TTree.SetBranchStatus(branch_name, status)
-    
+
     def enable_branches(self, branch_names):
-        """ Enables all the branches in the input list
-        """
+        """Enables all the branches in the input list"""
         self.set_branches(branch_names, status=1)
-    
+
     def disable_branches(self, branch_names):
-        """ Disables all the branches in the input list
-        """
+        """Disables all the branches in the input list"""
         self.set_branches(branch_names, status=0)
 
 
 class TreeMaker(Algorithm):
-    __slots__ = ('file', 'tree')
+    __slots__ = ("file", "tree")
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
-    
+
     @property
     def input(self):
         """Getter method for input objects."""
@@ -377,8 +391,7 @@ class TreeMaker(Algorithm):
 
     @input.setter
     def input(self, config_input):
-        """ Sets the input approrpriately for TreeMaker
-        """
+        """Sets the input approrpriately for TreeMaker"""
         if self._input == {}:
             for dependency in FN.expand_nested_values(config_input):
                 variables = set(ST.get_items(str(dependency)))
@@ -389,13 +402,14 @@ class TreeMaker(Algorithm):
         out_file = self.store.get(f"OUTPUT:{self.name}")
         self.file = out_file
 
-        name = self.name.split(':')[0]
+        name = self.name.split(":")[0]
         t_path = self.config["path"] if "path" in self.config else ""
         event_based = False if self.config["filltype"] == "single" else True
-        
-        self.tree = Tree(name, out_file, path=t_path, event=event_based, 
-                         create_now=True)
-        
+
+        self.tree = Tree(
+            name, out_file, path=t_path, event=event_based, create_now=True
+        )
+
         for datatype, variables in self.config["input"].items():
             # New check to handle lists of vars
             variables_list = self._parse_tree_vars(variables)
@@ -426,10 +440,10 @@ class TreeMaker(Algorithm):
 
             # Save all the values into the Tree
             self.tree.fill()
-            
-            # some line like that to indicate that the writer has to 
+
+            # some line like that to indicate that the writer has to
             # call write on the object.
-            #self.store.save(self.name, self.tree, is_ready=True)
+            self.store.save(self.name, self.name, is_written=True)
 
     def finalise(self, condition=None):
         """Fill in the single/run-based variables"""
@@ -438,7 +452,7 @@ class TreeMaker(Algorithm):
             # Only want to fill the branches that are run-based
             for branch_name in self.tree.branches:
                 value = self.store.get(self.tree.branches[branch_name].var_name)
-                
+
                 # Handle invalid values using internal Pyrate.NONE
                 if value is enums.Pyrate.NONE:
                     # No valid value to store, storing the closest invalid value
@@ -454,11 +468,10 @@ class TreeMaker(Algorithm):
 
         # Store itself on the store with SKIP_WRITE code to show we have nothing
         # to return.
-        self.store.save(self.name, enums.Pyrate.SKIP_WRITE)
+        self.store.save(self.name, self.name, is_written=True)
 
     def _parse_tree_vars(self, variables):
-        """ Dedicated function to just parse the tree lists/dicts/strings
-        """
+        """Dedicated function to just parse the tree lists/dicts/strings"""
         if type(variables) == dict:
             # Just a single dictionary here
             variables = [variables]
@@ -478,5 +491,6 @@ class TreeMaker(Algorithm):
             # old style
             var_names = list(filter(None, ST.get_items(variables)))
             return list(zip(var_names, var_names))
+
 
 # EOF
