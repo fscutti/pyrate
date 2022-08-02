@@ -95,15 +95,37 @@ class Run:
         # Loading input / output and initialising algorithms.
         # Not all inputs are loaded. Only those relevant for
         # requested targets.
+
+        t_io = {}
+
         for o_name in self.outputs:
             o = self.io(o_name)
 
-            for t_name, t_samples in o.targets.items():
+            for t_name, t_job_inputs in o.targets.items():
 
-                self.targets[t_name] = self.node(t_name, samples=t_samples)
+                if not t_name in self.targets:
 
-                for i_name in t_samples:
+                    self.targets[t_name] = self.node(t_name)
+
+                    t_io[t_name] = {"job_inputs": t_job_inputs, "job_outputs": [o_name]}
+
+                else:
+                    t_io[t_name]["job_outputs"].append(o_name)
+
+                for i_name in t_job_inputs:
                     i = self.io(i_name)
+
+        # initialising job inputs / outputs for the targets.
+        for t_name in self.targets:
+
+            if self.node(t_name).job_inputs == []:
+                self.node(t_name).job_inputs = t_io[t_name]["job_inputs"]
+
+            if self.node(t_name).job_outputs == []:
+                self.node(t_name).job_outputs = t_io[t_name]["job_outputs"]
+
+        print(self.targets)
+        # sys.exit()
 
     def translate(self, obj_name=None):
         """This function constructs a dictionary to translate
@@ -119,7 +141,7 @@ class Run:
             except KeyError:
 
                 self.translation[obj_name] = obj_name
-                
+
                 return self.translation[obj_name]
 
         else:
@@ -166,7 +188,7 @@ class Run:
 
         return self.loaded_io[category][io_name]
 
-    def node(self, obj_name, samples=[]):
+    def node(self, obj_name, job_inputs=[], job_outputs=[]):
         """Instantiates a node for an object, including the corresponding algorithm instance
         and the list of relevant samples. This function checks for circular dependencies.
         The node instance is returned. This is a recursive function."""
@@ -177,7 +199,9 @@ class Run:
 
         if not obj_name in self.nodes:
 
-            self.nodes[obj_name] = Node(obj_name, algorithm=None, samples=samples)
+            self.nodes[obj_name] = Node(
+                obj_name, algorithm=None, job_inputs=job_inputs, job_outputs=job_outputs
+            )
 
         if self.nodes[obj_name].algorithm is None:
 
@@ -315,6 +339,7 @@ class Run:
             self.store.put("INPUT:config", self._current_input.config)
 
             self.loop()
+            # check status here.
 
         elif self.state == "execute":
 
@@ -351,14 +376,16 @@ class Run:
                     self.store.put("EVENT:idx", self._current_input.get_idx())
 
                     self.loop()
+                    # check status here.
 
                     self._current_input.set_next_event()
 
     def loop(self):
         """Loop over targets and calls them."""
+
         for t_name, t_instance in self.targets.items():
 
-            if self._current_input.name in t_instance.samples:
+            if self._current_input.name in t_instance.job_inputs:
 
                 self.call(t_name)
 
@@ -382,8 +409,6 @@ class Run:
                     if not passed:
                         break
 
-                #    getattr(alg, self.state)()
-
                 # the block below is work in progress.
                 # checking that the object is complete.
                 # if not self.is_complete(obj_name, alg):
@@ -393,6 +418,14 @@ class Run:
 
             else:
                 self._current_input.read(obj_name)
+
+        for o_name in self.node(obj_name).job_outputs:
+
+            if self.store.status(obj_name) is EN.Pyrate.READY:
+
+                self._current_output = self.loaded_io["outputs"][o_name]
+
+                self._current_output.write(obj_name)
 
         return
 
