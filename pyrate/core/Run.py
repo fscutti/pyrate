@@ -124,8 +124,6 @@ class Run:
             if self.node(t_name).job_outputs == []:
                 self.node(t_name).job_outputs = t_io[t_name]["job_outputs"]
 
-        print(self.targets)
-        # sys.exit()
 
     def translate(self, obj_name=None):
         """This function constructs a dictionary to translate
@@ -423,9 +421,11 @@ class Run:
 
             if self.store.status(obj_name) is EN.Pyrate.READY:
 
-                self._current_output = self.loaded_io["outputs"][o_name]
+                #self._current_output = self.loaded_io["outputs"][o_name]
 
-                self._current_output.write(obj_name)
+                #self._current_output.write(obj_name)
+
+                pass
 
         return
 

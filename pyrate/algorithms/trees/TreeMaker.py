@@ -426,6 +426,10 @@ class TreeMaker(Algorithm):
 
             # Save all the values into the Tree
             self.tree.fill()
+            
+            # some line like that to indicate that the writer has to 
+            # call write on the object.
+            #self.store.save(self.name, self.tree, is_ready=True)
 
     def finalise(self, condition=None):
         """Fill in the single/run-based variables"""
