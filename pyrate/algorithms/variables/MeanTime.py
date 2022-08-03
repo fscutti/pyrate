@@ -4,27 +4,19 @@
     Required parameters:
         rate: (float) The sample rate of the digitiser
         
+    Required inputs:
         waveform: The waveform used to calculate the mean time
         window: The window object (tuple) for the calculation region
-    
-    Required states:
-        initialise:
-            output:
-        execute:
-            input: <Waveform object>, <Window object>
     
     Example config:
 
     MeanTime_CHX:
-        algorithm:
+        algorithm: MeanTime
             name: MeanTime
-            rate: 500e6
-        initialise:
-            input:
-        execute:
-            input: CorrectedWaveform_CHX, Window_CHX
-        waveform: CorrectedWaveform_CHX
-        window: Window_CHX
+        rate: 500e6
+        input:
+            waveform: CorrectedWaveform_CHX
+            window: Window_CHX
 """
 
 import numpy as np

@@ -7,32 +7,25 @@
     
     Required parameters:
         rate: (float) The digitisation rate
+    
+    Required inputs:
+        waveform: (array-like) A waveform-like object
+        window: (tuple-like) A window object
 
     Optional parameters:
         mode: (str) Let's the user change to algebraic moments instead of
                     central, normalised moments. To get the algebraic moments
                     pass in the flag "algebraic"
-   
-
-    Required states:
-        initialise:
-            output:
-        execute:
-            input: <Waveform object>, <Window object>
     
 
     Example config:
     
     Skew_CHX:
-        algorithm:
-            name: Moment
-            rate: 500e6
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX, Window_CHX
-        waveform: CorrectedWaveform_CHX
-        window: Window_CHX
+        algorithm: Moment
+        rate: 500e6
+        input:
+            waveform: CorrectedWaveform_CHX
+            window: Window_CHX
 """
 
 import numpy as np

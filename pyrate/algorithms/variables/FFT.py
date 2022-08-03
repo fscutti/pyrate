@@ -6,42 +6,29 @@
         bins: (int) the range and number of frequency bins
         rate: (float) the sample rate of the digitiser
         waveform: The waveform to caluclate the charge of (typically physcial)
+
+    Required inputs:
         window: (bool) flag for using windowed mode
         window: (tuple) The start and stop window for calculating the charge
-    
-    Required states:
-    NB: <Window object> can be excluded if not using a window)
-        initialise:
-            output:
-        execute:
-            input: <Waveform object>, <Window object>
     
     Example config:
     
     (Windowed mode)
-    FFT_CHX:
-        algorithm:
-            name: FFT
-            rate: 500e6
-            bins: 100
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX, Window_CHX
-        waveform: CorrectedWaveform_CHX
-        window: Window_CHX
+    FFT_CHX: 
+        Algorithm: FFT
+        rate: 500e6
+        bins: 100
+        input:
+            waveform: CorrectedWaveform_CHX
+            window: Window_CHX
     
     (Non-windowed mode)
     FFT_CHX:
-        algorithm:
-            name: FFT
-            rate: 500e6
-            bins: 100
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX
-        waveform: CorrectedWaveform_CHX
+        algorithm: FFT
+        rate: 500e6
+        bins: 100
+        input:
+            waveform: CorrectedWaveform_CHX
 """
 
 import numpy as np

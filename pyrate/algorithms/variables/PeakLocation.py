@@ -2,30 +2,19 @@
     The current version avoids numpy as uses a neat trick found 
     on stack overflow https://stackoverflow.com/questions/2474015/getting-the-index-of-the-returned-max-or-min-item-using-max-min-on-a-list 
 
-    Required parameters:
+    Required inputs:
         waveform: The waveform for which the maximum will be calculated
 
-    Optional parameters:
+    Optional inputs:
         window: A sub window to search for the peak over
-
-    Required states:
-        initialise:
-            output:
-        execute:
-            input: <Waveform object>
 
     Example config:
     
     PeakLocation_CHX:
-        algorithm:
-            name: PeakLocation
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX, Window, PeakHeight
-        waveform: CorrectedWaveform_CHX
-        window: Window
-        peakheight: PeakHeight
+        algorithm: PeakLocation
+        input:
+            waveform: CorrectedWaveform_CHX
+            window: Window
 """
 import numpy as np
 from pyrate.core.Algorithm import Algorithm

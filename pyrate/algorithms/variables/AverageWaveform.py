@@ -2,29 +2,15 @@
     Sums all the waveforms for a single channel and divides by the number of 
     events. Stores in a numpy array, and finishes it in finalise
 
-    Required parameters:
+    Required inputs:
         waveform: A waveform object
-    
-    Required states:
-        initialise:
-            output:
-        execute:
-            input: <Waveform object>
-        finalise:
-            output:
 
     Example config:
     
     AverageWaveform_CHX:
-        algorithm:
-            name: AverageWaveform
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX
-        finalise:
-            output:
-        waveform: CorrectedWaveform_CHX
+        algorithm: AverageWaveform
+        input:
+            waveform: CorrectedWaveform_CHX
 
     Todo:
         1. Decide if the number of events 'nevents' should be pre-calcualted,

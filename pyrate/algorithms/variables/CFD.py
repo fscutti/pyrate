@@ -10,38 +10,27 @@
                        in the calculation.
         cfd_threshold: (float) The minimum height the CFD must cross before a
                                zero crossing point can be calculated
-    
-    Required states:
-        initialise:
-            output:
-        execute:
-            input: <Waveform object>
+
+    Required inputs:
+        waveform: A waveform-like object (list/array)
     
     Example configs:
 
     CFD_CHX:
-        algorithm:
-            name: CFD
-            delay: 5
-            scale: 1
-            cfd_threshold: 10
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX
-        waveform: CorrectedWaveform_CHX
+        algorithm: CFD
+        delay: 5
+        scale: 1
+        cfd_threshold: 10
+        input:
+            waveform: CorrectedWaveform_CHX
     
     CFD_CHX:
-        algorithm:
-            name: CFD
-            delay: 5
-            scale: 1
-            cfd_threshold: 10
-        initialise:
-            output:
-        execute:
-            input: TrapezoidWaveform_CHX
-        waveform: TrapezoidWaveform_CHX
+        algorithm: CFD
+        delay: 5
+        scale: 1
+        cfd_threshold: 10
+        input:
+            waveform: TrapezoidWaveform_CHX
 
 """
 

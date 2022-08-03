@@ -15,30 +15,22 @@
                        Accepts strings: e.g. V or mV
                        Otherwise accepts floats for the appropriate conversion
                        for non-physical waveforms (ADC).
+    
+    Required inputs:
         waveform: The waveform to caluclate the charge of (typically physcial)
         window: (tuple) The start and stop window for calculating the charge
-    
-    Required states:
-        initialise:
-            output:
-        execute:
-            input: <Waveform object>, <Window object>
     
     Example config:
     
     Charge_CHX:
-        algorithm:
-            name: Charge
-            impedance: 50
-            rate: 500e6
-            unit: pC
-            waveform_unit: mV
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX, Window_CHX
-        waveform: CorrectedWaveform_CHX
-        window: Window_CHX
+        algorithm: Charge
+        impedance: 50
+        rate: 500e6
+        unit: pC
+        waveform_unit: mV
+        input:
+            waveform: CorrectedWaveform_CHX
+            window: Window_CHX
 """
 import sys
 import numpy as np

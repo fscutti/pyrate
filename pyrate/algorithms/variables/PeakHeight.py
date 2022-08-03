@@ -2,25 +2,19 @@
     Currently just naively gets the maximum value of the entire trace
     PeakHeight = max(trace)
 
-    Required parameters:
+    Required inputs:
         waveform: A waveform for which the maximum value will be calculated
 
     Optional parameters:
         window: A sub window to search for the peak over
     
-    Required states:
-        execute:
-            input: <Waveform object>
-    
     Example config:
 
     PeakHeight_CHX:
-        algorithm:
-            name: PeakHeight
-        execute:
-            input: CorrectedWaveform_CHX, Window
-        waveform: CorrectedWaveform_CHX
-        window: Window
+        algorithm: PeakHeight
+        input:
+            waveform: CorrectedWaveform_CHX
+            window: Window
 
 """
 import numpy as np

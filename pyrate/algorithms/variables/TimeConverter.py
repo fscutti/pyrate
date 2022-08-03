@@ -8,24 +8,18 @@
                              the predefined units or specify your own.
         sample_number: (int) The orignal sample number (time) to be converted.
     
-    Required states:
-        initialise:
-            output:
-        execute:
-            input: <Time object>
+    Required inputs:
+        sample_number: (number) A numerical sample number (time in units of 
+                                sample number)
     
     Example config:
 
     PulseTime_CHX:
-        algorithm:
-            name: TimeConverter
-            rate: 500e6
-            unit: ns
-        initialise:
-            output:
-        execute:
-            input: PulseStart_CHX
-        sample_number: PulseStart_CHXCFD
+        algorithm: TimeConverter
+        rate: 500e6
+        unit: ns
+        input:
+            sample_number: PulseStart_CHXCFD
 """
 
 from pyrate.core.Algorithm import Algorithm

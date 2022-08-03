@@ -6,30 +6,23 @@
         rate: (float) The sample rate of the digitiser
         tau:  (float) The decay constant of the pulse
 
+    Required inputs:
+        waveform: (array-like) A waveform-like object
+
     Optional parameters:
         zeropole: (Bool) True by default
-    
-    Required states:
-        initialise:
-            output:
-        execute:
-            input: <Waveform object>
     
     Example config:
 
     TrapezoidFilter_CHX:
-        algorithm:
-            name: TrapezoidFilter
-            rise: 10
-            gap: 10
-            rate: 500e6
-            tau: 2e-6
-            zeropole: True
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX
-        waveform: CorrectedWaveform_CHX
+        algorithm: TrapezoidFilter
+        rise: 10
+        gap: 10
+        rate: 500e6
+        tau: 2e-6
+        zeropole: True
+        input:
+            waveform: CorrectedWaveform_CHX
 """
 
 import numpy as np

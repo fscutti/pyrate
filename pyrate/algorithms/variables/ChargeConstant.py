@@ -13,21 +13,15 @@
                        Otherwise accepts floats for the appropriate conversion
                        for non-physical waveforms (ADC).
     
-    Required states:
-        initialise:
-            output:
-    
     Example config:
     
     ChargeConstant_CHX:
-        algorithm:
-            name: ChargeConstant
-            impedance: 50
-            rate: 500e6
-            unit: pC
-            waveform_unit: mV
-        initialise:
-            output:
+        algorithm: ChargeConstant
+        impedance: 50
+        rate: 500e6
+        unit: pC
+        waveform_unit: mV
+
 """
 
 import sys
