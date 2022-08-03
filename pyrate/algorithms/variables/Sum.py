@@ -1,25 +1,17 @@
 """ Calculates a sum over a region of a waveform
     Sums the waveform over a passed in window object. 
 
-    Required parameters:
+    Required inputs:
         waveform: The waveform to caluclate the sum of (typically physcial)
         window: (tuple) The start and stop window for summing over
-    
-    Required states:
-        initialise:
-            output:
-        execute:
-            input: <Waveform object>, <Window object>
     
     Example config:
     
     Sum_CHX:
-        algorithm:
-            name: Sum
-        execute:
-            input: CorrectedWaveform_CHX, Window_CHX
-        waveform: CorrectedWaveform_CHX
-        window: Window_CHX
+        algorithm: Sum
+        input:
+            waveform: CorrectedWaveform_CHX
+            window: Window_CHX
 """
 
 import numpy as np
@@ -32,7 +24,7 @@ class Sum(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def execute(self):
+    def execute(self, condition=None):
         """Sum over the waveform"""
         window = self.store.get(self.config["input"]["window"])
         waveform = self.store.get(self.config["input"]["waveform"])

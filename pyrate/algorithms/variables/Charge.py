@@ -15,30 +15,22 @@
                        Accepts strings: e.g. V or mV
                        Otherwise accepts floats for the appropriate conversion
                        for non-physical waveforms (ADC).
+    
+    Required inputs:
         waveform: The waveform to caluclate the charge of (typically physcial)
         window: (tuple) The start and stop window for calculating the charge
-    
-    Required states:
-        initialise:
-            output:
-        execute:
-            input: <Waveform object>, <Window object>
     
     Example config:
     
     Charge_CHX:
-        algorithm:
-            name: Charge
-            impedance: 50
-            rate: 500e6
-            unit: pC
-            waveform_unit: mV
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX, Window_CHX
-        waveform: CorrectedWaveform_CHX
-        window: Window_CHX
+        algorithm: Charge
+        impedance: 50
+        rate: 500e6
+        unit: pC
+        waveform_unit: mV
+        input:
+            waveform: CorrectedWaveform_CHX
+            window: Window_CHX
 """
 import sys
 import numpy as np
@@ -55,7 +47,7 @@ class Charge(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Prepare the constant for calculating charge"""
         # Deal with charge constants
         impedance = self.config["impedance"]
@@ -90,7 +82,7 @@ class Charge(Algorithm):
 
         self.charge_constant = waveform_units * charge_units / (impedance * sample_rate)
 
-    def execute(self):
+    def execute(self, condition=None):
         """Calculates the charge by summing over the waveform"""
         window = self.store.get(self.config["input"]["window"])
         waveform = self.store.get(self.config["input"]["waveform"])

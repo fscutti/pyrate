@@ -5,26 +5,33 @@ The store is cleaned after every event/input iteration.
 import sys
 from copy import copy
 
-from pyrate.utils import enums
+from pyrate.utils import enums as EN
 
 
 class Store:
     def __init__(self, name):
         self.name = name
-        self._store = {}
-        self._saved = {}
+        self._transient = {}
+        self._permanent = {}
+        self._written = set()
 
     def put(self, name, obj):
         """Puts an object on the store."""
-        self._store[name] = obj
+        self._transient[name] = obj
 
     def get(self, name):
         """Get an object."""
         try:
-            return self._store[name]
+            return self._transient[name]
 
         except KeyError:
-            return enums.Pyrate.NONE
+            pass
+
+        try:
+            return self._permanent[name]
+
+        except KeyError:
+            return EN.Pyrate.NONE
 
     def copy(self, name):
         """Returns a copy of the object."""
@@ -32,22 +39,26 @@ class Store:
 
     def clear(self):
         """Clears the store."""
-        self._store.clear()
+        self._transient.clear()
 
-    def save(self, name, obj, save_copy=True):
+    def save(self, name, obj, save_copy=True, is_written=False):
         """Saves an object for later collection."""
         if save_copy:
-            self._saved[name] = copy(obj)
+            self._permanent[name] = copy(obj)
+
         else:
-            self._saved[name] = obj
+            self._permanent[name] = obj
 
-    def collect(self, name):
-        """Get a saved object."""
-        try:
-            return self._saved[name]
+        if is_written:
+            self._written.add(name)
 
-        except KeyError:
-            return enums.Pyrate.NONE
+    def status(self, name):
+        """Returns status of an object."""
+        if name in self._written:
+            return EN.Pyrate.WRITTEN
+
+        else:
+            return EN.Pyrate.NONE
 
 
 # EOF

@@ -9,24 +9,20 @@
     Baseline is an improvement to account for events/pulses at the start 
     of the event window, but is slower and so using this alg may still be preferable.
 
-    Required states:
-        execute:
-            input: <waveform>
-
     Required parameters:
         samples: The number of samples from the start to calculate the 
                  baseline over.
+    
+    Required inputs:
         waveform: The waveform object for which the baseline will be caluclated.
     
     Example config:
 
     Baseline_CHX:
-        algorithm: 
-            name: BaselineNaive
-            samples: 40
-        execute:
-            input: PhysicalWaveform_CHX
-        waveform: PhysicalWaveform_CHX
+        algorithm: BaselineNaive
+        samples: 40
+        input:
+            waveform: PhysicalWaveform_CHX
 
     Todo: Get baseline automatically for ZLE firmware
 
@@ -45,7 +41,7 @@ class BaselineNaive(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def execute(self):
+    def execute(self, condition=None):
         """Calculates the baseline from the first n samples of the waveform"""
         waveform = self.store.get(self.config["input"]["waveform"])
 

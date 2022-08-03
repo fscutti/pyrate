@@ -13,21 +13,15 @@
                        Otherwise accepts floats for the appropriate conversion
                        for non-physical waveforms (ADC).
     
-    Required states:
-        initialise:
-            output:
-    
     Example config:
     
     ChargeConstant_CHX:
-        algorithm:
-            name: ChargeConstant
-            impedance: 50
-            rate: 500e6
-            unit: pC
-            waveform_unit: mV
-        initialise:
-            output:
+        algorithm: ChargeConstant
+        impedance: 50
+        rate: 500e6
+        unit: pC
+        waveform_unit: mV
+
 """
 
 import sys
@@ -43,7 +37,7 @@ class ChargeConstant(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Prepare the constant for calculating charge"""
         # Deal with charge constants
         impedance = self.config["impedance"]
@@ -71,7 +65,7 @@ class ChargeConstant(Algorithm):
                 )
 
         charge_constant = waveform_units * charge_units / (impedance * sample_rate)
-        self.store.put(f"{self.name}", charge_constant)
+        self.store.save(f"{self.name}", charge_constant)
 
 
 # EOF

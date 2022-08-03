@@ -4,27 +4,19 @@
     Required parameters:
         rate: (float) The sample rate of the digitiser
         
+    Required inputs:
         waveform: The waveform used to calculate the mean time
         window: The window object (tuple) for the calculation region
-    
-    Required states:
-        initialise:
-            output:
-        execute:
-            input: <Waveform object>, <Window object>
     
     Example config:
 
     MeanTime_CHX:
-        algorithm:
+        algorithm: MeanTime
             name: MeanTime
-            rate: 500e6
-        initialise:
-            input:
-        execute:
-            input: CorrectedWaveform_CHX, Window_CHX
-        waveform: CorrectedWaveform_CHX
-        window: Window_CHX
+        rate: 500e6
+        input:
+            waveform: CorrectedWaveform_CHX
+            window: Window_CHX
 """
 
 import numpy as np
@@ -38,12 +30,12 @@ class MeanTime(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Gets the sample rate for later use in execute"""
         self.sample_period = 1 / float(self.config["rate"])*1e9
         self.range = np.arange(0)
 
-    def execute(self):
+    def execute(self, condition=None):
         waveform = self.store.get(self.config["input"]["waveform"])
         window = self.store.get(self.config["input"]["window"])
 

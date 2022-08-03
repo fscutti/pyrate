@@ -13,28 +13,21 @@
                        for non-physical waveforms (ADC).
         cfd_delay: (int) The delay used in the CFD timing algorithm, is subtracted off of
                     a cfd PulseStart to get the actual PulseStart
+    
+    Required inputs:
         waveform: The waveform to caluclate the charge of (typically physcial)
         pulse_start: The trigger location of the pulse (either CFD or something else)
     
-    Required states:
-        initialise:
-            output:
-        execute:
-            input: <Waveform object>, <PulseStart object>
     
     Example config:
     
     DAMAX1_CHX:
-        algorithm:
-            name: DAMAX1
-            rate: 500e6
-            cfd_delay: 10
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX, PulseStart_CHX
-        waveform: CorrectedWaveform_CHX
-        pulse_start: PulseStart_CHX
+        algorithm: DAMAX1
+        rate: 500e6
+        cfd_delay: 10
+        input:
+            waveform: CorrectedWaveform_CHX
+            pulse_start: PulseStart_CHX
 """
 
 import numpy as np
@@ -48,7 +41,7 @@ class DAMAX1(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Prepare Initialised variables - CFD delay and digitiser sample rate"""
         # Deal with CFD delay if CFD is being used as the timing
         self.sample_rate = float(self.config["rate"])
@@ -57,7 +50,7 @@ class DAMAX1(Algorithm):
         if "cfd_delay" in self.config:
             self.delay = self.config["cfd_delay"]
 
-    def execute(self):
+    def execute(self, condition=None):
         """Charge ratio X1 defined according to:
         Characterization of SABRE crystal NaI-33 with direct underground counting (arXiv:2012.02610)"""
 

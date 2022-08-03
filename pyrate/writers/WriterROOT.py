@@ -1,9 +1,11 @@
 """ Generic Writer base class.
 """
+import sys
 import ROOT as R
 from pyrate.core.Writer import Writer
 
 from pyrate.utils import enums as EN
+
 
 class WriterROOT(Writer):
     __slots__ = ["f"]
@@ -33,7 +35,7 @@ class WriterROOT(Writer):
         indicating the folder structure of the output yet to be created at
         this point.
         """
-        obj = self.store.collect(name)
+        obj = self.store.get(name)
 
         if obj is EN.Pyrate.NONE:
             msg = f"ERROR: trying to write {name} but object has not been saved."

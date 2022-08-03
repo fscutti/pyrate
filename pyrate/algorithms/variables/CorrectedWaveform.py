@@ -7,41 +7,29 @@
     after having subtracted the baseline.
 
     Required parameters:
-        In algorithm:
-            vpp:      Voltage range of the digitiser
-            adcrange: Number of bits in the digitiser's ADC range
-            polarity: Polarity of the input waveform: (pos)itive, (neg)ative,
-                      1, -1 etc...
+        vpp:      Voltage range of the digitiser
+        adcrange: Number of bits in the digitiser's ADC range
+        polarity: Polarity of the input waveform: (pos)itive, (neg)ative,
+                    1, -1 etc...
         
-        In main:
-            baseline: A Baseline object
-            waveform: A Waveform object
+    Required inputs:
+        baseline: (number) A Baseline object
+        waveform: (array-like) A Waveform-like object
     
     Optional parameter:
         units: (string)/(float) V, mV, uV, or float for the units conversion
 
-    Requires states:
-        initialise:
-            output:
-        execute:
-            intput: <Waveform object>, <Baseline object>
-
     Example config:
 
     CorrectedWaveform_CHX:
-        algorithm: 
-            name: CorrectedWaveform
-            vpp: 2.5
-            adcrange: 16384
-            polarity: neg
-            units: mV
-        initialise:
-            output:
-        execute:
-            input: RawWaveform_CHX, Baseline_CHX
-        raw_waveform: RawWaveform_CHX
-        baseline: Baseline_CHX
-        wc_waveform: EVENT:GROUP:CHX:RawWaveform
+        algorithm: CorrectedWaveform
+        vpp: 2.5
+        adcrange: 16384
+        polarity: neg
+        units: mV
+        input:
+            waveform: RawWaveform_CHX
+            baseline: Baseline_CHX
 """
 
 import sys
@@ -58,7 +46,7 @@ class CorrectedWaveform(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Prepare the input waveform scaling and polarity"""
         # Again we need to check the reader as it determines what kind of input
         # we could have and how we access its information
@@ -116,7 +104,7 @@ class CorrectedWaveform(Algorithm):
         self.polarity = polarity
         self.conversion = conversion
 
-    def execute(self):
+    def execute(self, condition=None):
         """Calculates the baseline corrected waveform"""
         if self.reader == "ReaderWaveCatcherMMAP":
             waveform = self.store.get(self.config["input"]["wc_waveform"])

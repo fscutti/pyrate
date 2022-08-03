@@ -46,22 +46,10 @@ class Region(Algorithm):
         for s in symbols:
             cut = cut.replace(s, ",").replace("(", "").replace(")", "")
 
-        return set(v for v in cut.split(",") if not self.is_number(v))
+        return set(v for v in cut.split(",") if not FN.is_float(v) and not v == "")
 
     def check_var(self, v, c):
         return v in self.get_variables(c)
-
-    def is_number(self, v):
-
-        try:
-            float(v)
-            return True
-
-        except ValueError:
-            if v == "":
-                return True
-            else:
-                return False
 
     def parse_input(self, selection):
         return {selection: self.get_variables(selection)}
@@ -76,7 +64,7 @@ class Region(Algorithm):
 
                 c = c.replace(v, f"self.store.get('{v}')")
 
-            is_passed *= eval(c)
+            is_passed *= eval(compile(c, "<string>", "eval"))
 
         current_value = self.store.get(self.name)
 
