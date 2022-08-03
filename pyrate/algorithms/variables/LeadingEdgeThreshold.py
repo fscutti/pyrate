@@ -6,24 +6,17 @@
                         to define the start of the waveform
         threshold: (float) The minimum height the waveform must cross before a starting point is saved
     
-    Required states:
-        initialise:
-            output:
-        execute:
-            input: <Waveform object>
-    
+    Required inputs:
+        waveform: (array-like) A waveform-like object
+
     Example configs:
 
     LeadingEdge_CHX:
-        algorithm:
-            name: LeadingEdgeThreshold
-            offset: 5
-            threshold: 5
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX
-        waveform: CorrectedWaveform_CHX
+        algorithm: LeadingEdgeThreshold
+        offset: 5
+        threshold: 5
+        input:
+            waveform: CorrectedWaveform_CHX
 """
 
 import numpy as np

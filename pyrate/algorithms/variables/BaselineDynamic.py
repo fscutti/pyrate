@@ -13,25 +13,21 @@
     This is an improvement on BaselineNaive to account for events/pulses at the start 
     of the event window.
 
-    Required states:
-        execute:
-            input: <waveform>
-
     Required parameters:
         samples: The number of samples from the start to calculate the 
                  baseline over.
+    
+    Required inputs:
         waveform: The waveform object for which the baseline will be caluclated.
     
     Example config:
 
     Baseline_CHX:
-        algorithm: 
-            name: Baseline
-            samples: 40
-            threshold: 20
-        execute:
-            input: PhysicalWaveform_CHX
-        waveform: PhysicalWaveform_CHX
+        algorithm: BaselineDynamic
+        samples: 40
+        threshold: 20
+        input: 
+            waveform: PhysicalWaveform_CHX
 
     Todo: Get baseline automatically for ZLE firmware
 

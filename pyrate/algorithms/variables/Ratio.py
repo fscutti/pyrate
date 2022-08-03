@@ -2,23 +2,17 @@
     Uses pre-calculated values, set up as separate objects
     Ratio = numerator/denominator
 
-    Required parameters:
+    Required inputs:
         numerator: (Number) Ratio numerator (object), calculated by a 
                          previously defined algorithm
         denominator: (Number) Ratio denominator (object) see above.
     
-    Required states:
-        execute:
-            input: <Number object 1>, <Number object 2>
-    
     Example config:
     PromptDelayChargeRatio_CHX:
-        algorithm:
-            name: Ratio
-        execute:
-            input: PromptCharge_CHX, DelayCharge_CHX
-        numerator: PromptCharge_CHX
-        denominator: DelayCharge_CHX
+        algorithm: Ratio
+        input:
+            numerator: PromptCharge_CHX
+            denominator: DelayCharge_CHX
 """
 
 from pyrate.core.Algorithm import Algorithm

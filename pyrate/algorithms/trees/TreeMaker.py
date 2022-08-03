@@ -3,19 +3,20 @@ https://root.cern.ch/doc/master/classTTree.html
 https://root.cern/manual/trees/
 
     Required parameters:
-        trees: Valid config of trees containing all the variables and their branch
+        input:  Valid config of all the variables and their branch
                 names sorted by the appropriate datatypes and fill-type
         
         Config requirememnts: TreeMaker uses a specialised config that maps out
-            the shape and variables in the TTree, listed in the "trees"
-            parameter. "trees" contains a list (using the yaml list 
-            character '-'). Each tree must then separate its variables 
-            (branches) into 'event' or 'single' fill-types, then 'vector' or
-            'scalar' types, and finally the variable's data type. Objects can
-            be listed as a comma separated string, and will be filled into
-            the tree with the branch name the same as the object name.
+            the shape and variables in the TTree. Each tree must state its
+            filltype, either 'event' or 'single', which is filled either each 
+            event, or once per job. Each variable must be specified as a
+            'vector' or 'scalar' type, and finally the variable's data type.
+            Objects can be listed as a comma separated string, and will be
+            filled into the tree with the branch name the same as the 
+            object name.
                 e.g. 
                 Tree1:
+                    algorithm: TreeMaker
                     event:
                         float: Baseline_CH0, Charge_CH0, Skew_CH0
                         vector<int>: RawWaveform_CH0
@@ -32,52 +33,29 @@ https://root.cern/manual/trees/
             possible.
                 e.g.
                 Tree1:
-                    event:
+                    algorithm: TreeMaker
+                    filltype: event
+                    input:
                         float: 
                             - Baseline: Baseline_CH0                # Single custom branch
                             - {Charge: Charge_CH0, Skew: Skew_CH0}  # Multiple custom branches 
                             - CFDTime_CH0, Timestamp_CH0,           # Older comma separated strings still compatible
                                 LeadingEdge_CH0
                         vector<float>: CorrectedWaveform: CorrectedWaveform_CH0
-      
-    
-    Required states:
-        initialise:
-            input:
-        execute:
-            input: <Execute objects to be stored>
-        finalise:
-            input: <Finalise objects>
     
     Example config:
     
     TreeObject:
-        algorithm:
-            name: TreeMaker
-        initialise:
-            input: RawWaveform_CH0, CorrectedWaveform_CH0, Baseline_CH0, Charge_CH0
-                   Skew_CH0, CFDTime_CH0, Timestamp_CH0, LeadingEdge_CH0,
-                   CorrectedWaveform_CH1, AverageWaveform_CH1
-        execute:
-            input: 
-        finalise:
-            input: AverageWaveform_CH0
-        trees:
-            - TreeName1:
-                event:
-                    vector<int>: RawWaveform_CH0
-                    vector<float>: CorrectedWaveform_CH0
-                    float: 
-                        - Baseline: Baseline_CH0
-                        - {Charge: Charge_CH0, Skew: Skew_CH0}
-                        - CFDTime_CH0, Timestamp_CH0,
-                            LeadingEdge_CH0
-
-            - TreeName2:
-                event:
-                    vector<float>: CorrectedWaveform: CorrectedWaveform_CH1
-                single:
-                    vector<float>: AverageWaveform: AverageWaveform_CH0
+        algorithm: TreeMaker
+        filltype: event
+        input:
+            vector<int>: RawWaveform_CH0
+            vector<float>: CorrectedWaveform_CH0
+            float: 
+                - Baseline: Baseline_CH0
+                - {Charge: Charge_CH0, Skew: Skew_CH0}
+                - CFDTime_CH0, Timestamp_CH0,
+                    LeadingEdge_CH0
 
 """
 

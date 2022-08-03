@@ -3,29 +3,20 @@
 
     Required parameters:
         equation: (string) Infix equation string
-        variables: List of variables used in the equation can be floats or objects in the store
     
-    Required states:
-        initialise:
-            input:
-        execute:
-            input:
-      
+    Required inputs:
+        variables: Variables with keys linked to the equation
     
     Example config:
+
     PromptDelayChargeRatio_CHX:
-        algorithm:
-            name: Calculator
+        algorithm: ShuntingCalculator
         equation: A+(A+B)*(C+D)
-        variables:
-          A: 1
-          B: 11.5
-          C: PromptCharge_CHX
-          D: 3e-1
-        initialise:
-            input:
-        execute:
-            input: PromptCharge_CHX
+        input:
+            A: 1
+            B: 11.5
+            C: PromptCharge_CHX
+            D: 3e-1
 """
 
 from pyrate.core.Algorithm import Algorithm

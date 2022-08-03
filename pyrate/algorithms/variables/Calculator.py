@@ -2,15 +2,12 @@
 
     Required parameters:
         equation: (string) Infix equation string
-        variables: List of variables used in the equation can be python values or objects in the store
     
-    Required states:
-        initialise:
-            input:
-        execute:
-            input:
+    Required inputs:
+        variables: Variables with keys linked to the equation
     
     Example config:
+
     PromptDelayChargeRatio_CHX:
         algorithm: Calculator
         equation: A+(A+B)*(C+D)

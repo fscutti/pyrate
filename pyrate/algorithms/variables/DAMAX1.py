@@ -13,28 +13,21 @@
                        for non-physical waveforms (ADC).
         cfd_delay: (int) The delay used in the CFD timing algorithm, is subtracted off of
                     a cfd PulseStart to get the actual PulseStart
+    
+    Required inputs:
         waveform: The waveform to caluclate the charge of (typically physcial)
         pulse_start: The trigger location of the pulse (either CFD or something else)
     
-    Required states:
-        initialise:
-            output:
-        execute:
-            input: <Waveform object>, <PulseStart object>
     
     Example config:
     
     DAMAX1_CHX:
-        algorithm:
-            name: DAMAX1
-            rate: 500e6
-            cfd_delay: 10
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX, PulseStart_CHX
-        waveform: CorrectedWaveform_CHX
-        pulse_start: PulseStart_CHX
+        algorithm: DAMAX1
+        rate: 500e6
+        cfd_delay: 10
+        input:
+            waveform: CorrectedWaveform_CHX
+            pulse_start: PulseStart_CHX
 """
 
 import numpy as np
