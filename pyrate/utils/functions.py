@@ -6,12 +6,20 @@ import mmap
 
 
 def modus_ponens(p, q):
-    """Implements the modus ponens logic table: p -> q"""
+    """Implements the modus ponens logic table: p -> q."""
     if p:
         return q
     else:
         return not p
 
+def is_float(v):
+    """Checks if value string is a number."""
+    try:
+        float(v)
+        return True
+
+    except ValueError:
+        return False
 
 def find_env(path, env):
     """Checks existence of environment variable in path and eventually replaces it."""
@@ -254,15 +262,6 @@ def iterable(obj):
         return False
     else:
         return True
-
-
-def is_float(var):
-    """Checks if a string can be converted to a float"""
-    try:
-        float(var)
-        return True
-    except:
-        return False
 
 
 def is_wc_ascii(filepath):

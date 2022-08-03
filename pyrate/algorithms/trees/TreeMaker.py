@@ -1,5 +1,6 @@
 """ Creates and fills a ROOT TTree based on the config
 https://root.cern.ch/doc/master/classTTree.html
+https://root.cern/manual/trees/
 
     Required parameters:
         trees: Valid config of trees containing all the variables and their branch

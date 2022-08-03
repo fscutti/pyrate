@@ -185,13 +185,9 @@ objects:
     PromptDelayChargeRatioCalculator_CH0:
         algorithm: Calculator
         equation: A+(A+B)*(C+D)
-        variables:
-            A: 1
-            B: 11.5
-            C: PromptCharge_CH0
-            D: 3e-1
-            input:
-                C: PromptCharge_CH0
+        input:
+          variables:
+             - "A = 1; B = 11.5; C = PromptCharge_CH0; D = 3e-1"
 
 
     PulseTime_CH0:
