@@ -41,7 +41,7 @@ class Store:
         """Clears the store."""
         self._transient.clear()
 
-    def save(self, name, obj, save_copy=True, is_written=False):
+    def save(self, name, obj, save_copy=True):
         """Saves an object for later collection."""
         if save_copy:
             self._permanent[name] = copy(obj)
@@ -49,16 +49,19 @@ class Store:
         else:
             self._permanent[name] = obj
 
-        if is_written:
-            self._written.add(name)
-
-    def status(self, name):
+    def status(self, name, is_written=None):
         """Returns status of an object."""
-        if name in self._written:
-            return EN.Pyrate.WRITTEN
+        if is_written is not None:
+
+            if is_written:
+                self._written.add(name)
 
         else:
-            return EN.Pyrate.NONE
+            if name in self._written:
+                return EN.Pyrate.WRITTEN
+
+            else:
+                return EN.Pyrate.NONE
 
 
 # EOF
