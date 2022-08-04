@@ -25,7 +25,7 @@ from pyrate.utils import enums
 
 
 class Algorithm:
-    __slots__ = ["name", "config", "store", "logger", "_input", "_output"]
+    __slots__ = ["name", "config", "store", "logger", "_input", "_output", "has_been_run"]
 
     def __init__(self, name, config, store, logger):
         self.name = name
@@ -35,6 +35,8 @@ class Algorithm:
 
         self._input = {}
         self._output = {}
+
+        self.has_been_run = False
 
     def initialise(self, condition=None):
         """At this stage the method knows the current input."""
