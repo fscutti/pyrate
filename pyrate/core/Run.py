@@ -316,7 +316,7 @@ class Run:
 
             for t_name in self._current_output.targets:
 
-                if not self.store.status(t_name) is EN.Pyrate.WRITTEN:
+                if not self.store.get(t_name) is EN.Pyrate.WRITTEN:
 
                     self._current_output.write(t_name)
 
@@ -390,7 +390,7 @@ class Run:
 
     def call(self, obj_name):
         """Calls an algorithm for the current state."""
-        if self.store.get(obj_name) is EN.Pyrate.NONE:
+        if self.store.status(obj_name) is EN.Pyrate.NONE:
 
             alg = self.node(obj_name).algorithm
 
@@ -404,6 +404,7 @@ class Run:
                     passed = getattr(alg, self.state)(condition)
 
                     if not passed:
+                        self.store.status(obj_name, EN.Pyrate.EXECUTED)
                         break
 
                 # the block below is work in progress.
@@ -430,10 +431,13 @@ class Run:
         """If the main object is on the store with a valid value,
         additional output is checked to be on the store."""
 
-        if self.store.get(obj_name) is not EN.Pyrate.NONE:
+        if self.store.get(obj_name) is not EN.Pyrate.NOT_FOUND:
 
             return all(
-                [self.store.get(o) is not EN.Pyrate.NONE for o in alg.output[obj_name]]
+                [
+                    self.store.get(o) is not EN.Pyrate.NOT_FOUND
+                    for o in alg.output[obj_name]
+                ]
             )
 
         else:

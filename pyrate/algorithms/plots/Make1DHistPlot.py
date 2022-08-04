@@ -261,7 +261,7 @@ class Make1DHistPlot(Algorithm):
 
         # the True option is just a placeholder, this algorithm might need some
         # restructuring by putting the definition of the main object in the initialise function.
-
+        
         self.store.save(self.name, canvas_collection)
 
     def get_var_dict(self, variable):

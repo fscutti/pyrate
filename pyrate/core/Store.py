@@ -13,7 +13,7 @@ class Store:
         self.name = name
         self._transient = {}
         self._permanent = {}
-        self._written = set()
+        self._status = {}
 
     def put(self, name, obj):
         """Puts an object on the store."""
@@ -40,6 +40,7 @@ class Store:
     def clear(self):
         """Clears the store."""
         self._transient.clear()
+        self._status.clear()
 
     def save(self, name, obj, save_copy=True):
         """Saves an object for later collection."""
@@ -49,18 +50,16 @@ class Store:
         else:
             self._permanent[name] = obj
 
-    def status(self, name, is_written=None):
+    def status(self, name, status=None):
         """Returns status of an object."""
-        if is_written is not None:
-
-            if is_written:
-                self._written.add(name)
+        if status is not None:
+            self._status[name] = status
 
         else:
-            if name in self._written:
-                return EN.Pyrate.WRITTEN
+            try:
+                return self._status[name]
 
-            else:
+            except KeyError:
                 return EN.Pyrate.NONE
 
 
