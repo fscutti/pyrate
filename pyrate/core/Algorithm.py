@@ -36,8 +36,6 @@ class Algorithm:
         self._input = {}
         self._output = {}
 
-        self.has_been_run = False
-
     def initialise(self, condition=None):
         """At this stage the method knows the current input."""
         pass

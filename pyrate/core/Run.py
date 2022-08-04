@@ -200,7 +200,8 @@ class Run:
     
         # Create a new node
         self.nodes[obj_name] = Node(
-            obj_name, algorithm=None, job_inputs=job_inputs, job_outputs=job_outputs
+            obj_name, algorithm=None, job_inputs=job_inputs, job_outputs=job_outputs,
+            has_been_run=False
         )
 
         # Create a new algorithm
@@ -387,7 +388,8 @@ class Run:
         """Loop over targets and calls them."""
         for obj_name in self.nodes:
             if self.nodes[obj_name].algorithm:
-                self.nodes[obj_name].algorithm.has_been_run = False
+                # self.nodes[obj_name].algorithm.has_been_run = False
+                self.nodes[obj_name].has_been_run = False
 
         for t_name, t_instance in self.targets.items():
 
@@ -399,9 +401,10 @@ class Run:
 
     def call(self, obj_name):
         """Calls an algorithm for the current state."""
-        alg = self.node(obj_name).algorithm
+        node = self.node(obj_name)
+        alg = node.algorithm
 
-        if alg is not None and not alg.has_been_run:
+        if alg is not None and not node.has_been_run:
 
             for condition, dependencies in alg.input.items():
 
@@ -412,7 +415,7 @@ class Run:
                     passed = getattr(alg, self.state)(condition)
                 else:
                     passed = getattr(alg, self.state)()
-                alg.has_been_run = True
+                node.has_been_run = True
 
                 if not passed:
                     break
