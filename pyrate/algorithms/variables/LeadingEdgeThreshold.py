@@ -42,13 +42,13 @@ class LeadingEdgeThreshold(Algorithm):
         """Caclulates the waveform threshold crossing point"""
         # Get the actual waveform, finally.
         waveform = self.store.get(self.config["input"]["waveform"])
-        if waveform is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
+        if waveform is Pyrate.INVALID_VALUE:
+            self.put_invalid()
             return
 
         cross_index = np.argmax(waveform > self.threshold)
         if not cross_index:
-            self.store.put(self.name, Pyrate.NONE)
+            self.put_invalid()
             return
 
         if self.interpolate:

@@ -409,8 +409,8 @@ class TreeMaker(Algorithm):
         if self.tree.event:
             for branch_name in self.tree.branches:
                 value = self.store.get(self.tree.branches[branch_name].var_name)
-                # Handle invalid values using internal Pyrate.NONE
-                if value is enums.Pyrate.NONE:
+                # Handle invalid values using internal Pyrate.INVALID_VALUE
+                if value is enums.Pyrate.INVALID_VALUE:
                     # No valid value to store, storing the closest invalid value
                     value = self.tree.branches[branch_name].invalid_value
 
@@ -432,8 +432,8 @@ class TreeMaker(Algorithm):
             for branch_name in self.tree.branches:
                 value = self.store.get(self.tree.branches[branch_name].var_name)
 
-                # Handle invalid values using internal Pyrate.NONE
-                if value is enums.Pyrate.NONE:
+                # Handle invalid values using internal Pyrate.INVALID_VALUE
+                if value is enums.Pyrate.INVALID_VALUE:
                     # No valid value to store, storing the closest invalid value
                     value = self.tree.branches[branch_name].invalid_value
 

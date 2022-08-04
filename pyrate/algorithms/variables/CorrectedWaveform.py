@@ -112,8 +112,8 @@ class CorrectedWaveform(Algorithm):
             waveform = self.store.get(self.config["input"]["waveform"])
         
         baseline = self.store.get(self.config["input"]["baseline"])
-        if waveform is Pyrate.NONE or baseline is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
+        if waveform is Pyrate.INVALID_VALUE or baseline is Pyrate.INVALID_VALUE:
+            self.put_invalid()
             return
         
         # Flip the waveform if needed, and subtract baseline

@@ -88,8 +88,8 @@ class Charge(Algorithm):
         waveform = self.store.get(self.config["input"]["waveform"])
 
         # check for invalid windows
-        if waveform is Pyrate.NONE or window is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
+        if waveform is Pyrate.INVALID_VALUE or window is Pyrate.INVALID_VALUE:
+            self.put_invalid()
             return
 
         # Calcualte the actual charge over the window

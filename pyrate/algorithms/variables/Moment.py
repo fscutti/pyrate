@@ -52,12 +52,8 @@ class Moment(Algorithm):
         """Calculates the 4th order moments"""
         waveform = self.store.get(self.config["input"]["waveform"])
         window = self.store.get(self.config["input"]["window"])
-        if waveform is Pyrate.NONE or window is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
-            self.store.put(f"{self.output['mean']}", Pyrate.NONE)
-            self.store.put(f"{self.output['stddev']}", Pyrate.NONE)
-            self.store.put(f"{self.output['skew']}", Pyrate.NONE)
-            self.store.put(f"{self.output['kurtosis']}", Pyrate.NONE)
+        if waveform is Pyrate.INVALID_VALUE or window is Pyrate.INVALID_VALUE:
+            self.put_invalid()
             return
 
         waveform_len = waveform.size
@@ -71,11 +67,7 @@ class Moment(Algorithm):
         fx = waveform[window[0]:window[1]]
         fsum = np.sum(fx)
         if fsum == 0:
-            self.store.put(self.name, Pyrate.NONE)
-            self.store.put(f"{self.output['mean']}", Pyrate.NONE)
-            self.store.put(f"{self.output['stddev']}", Pyrate.NONE)
-            self.store.put(f"{self.output['skew']}", Pyrate.NONE)
-            self.store.put(f"{self.output['kurtosis']}", Pyrate.NONE)
+            self.put_invalid()
             return
 
         inner = fx * x

@@ -64,7 +64,7 @@ class Calculator(Algorithm):
         if len(self.result) == 1:
             self.store.put(self.name, self.result[0])
         else:
-            self.store.put(self.name, Pyrate.NONE)
+            self.put_invalid()
 
     # -------------------------------------------------------------------
     def Arithmetic(self, op, varL, varR):
@@ -104,7 +104,7 @@ class Calculator(Algorithm):
         if self.IsFloat(var):
             return float(var)
         
-        return Pyrate.NONE
+        return Pyrate.INVALID_VALUE
 
     # -------------------------------------------------------------------
     def ShuntingYard(self):
@@ -154,8 +154,8 @@ class Calculator(Algorithm):
             else:
                 # If i is a variable
                 res = self.GetVariable(i)
-                if res is Pyrate.NONE:
-                    self.result = [Pyrate.NONE]
+                if res is Pyrate.INVALID_VALUE:
+                    self.result = [Pyrate.INVALID_VALUE]
                     return
 
             self.result.append(res)

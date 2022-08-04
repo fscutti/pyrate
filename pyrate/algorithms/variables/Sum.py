@@ -30,8 +30,8 @@ class Sum(Algorithm):
         waveform = self.store.get(self.config["input"]["waveform"])
 
         # check for invalid windows
-        if window is Pyrate.NONE or waveform is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
+        if window is Pyrate.INVALID_VALUE or waveform is Pyrate.INVALID_VALUE:
+            self.put_invalid()
             return
 
         # Sum the waveform

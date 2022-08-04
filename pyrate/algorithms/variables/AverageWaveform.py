@@ -44,8 +44,8 @@ class AverageWaveform(Algorithm):
         """
         waveform = self.store.get(self.config["input"]["waveform"])
 
-        if waveform is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
+        if waveform is Pyrate.INVALID_VALUE:
+            self.put_invalid()
             return
         
         # Handles the case when a channel wasn't present in the event - specific to ZLE and PSD firmware which don't collect waveforms in that case
