@@ -50,8 +50,7 @@ class BaselineNaive(Algorithm):
 
         nsamples = self.config["samples"]
 
-        if waveform is Pyrate.INVALID_VALUE or waveform.size < nsamples:
-            self.put_invalid()
+        if waveform is Pyrate.NONE or waveform.size < nsamples:
             return
 
         # Get the baseline from the front of the waveform.

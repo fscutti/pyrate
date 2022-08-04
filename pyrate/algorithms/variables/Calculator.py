@@ -79,8 +79,7 @@ class Calculator(Algorithm):
                 self.storeVars[storeVariable]
             )
 
-            if self.locals[storeVariable] is Pyrate.INVALID_VALUE:
-                self.put_invalid()
+            if self.locals[storeVariable] is Pyrate.NONE:
                 return
 
         result = eval(self.executeMe, self.globals, self.locals)

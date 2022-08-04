@@ -98,16 +98,5 @@ class Algorithm:
         """Setter method for output objects."""
         if self._output == {}:
             self._output = config_output
-    
-    def put_invalid(self):
-        """ Puts Pyrate.INVALID_VALUE on the store for ALL outputs and 
-            self.name
-            Typically the state function should be returned after this call
-        """
-        self.store.put(self.name, enums.Pyrate.INVALID_VALUE)
-        if self._output == {None: ''}:
-            return
-        for key in self.output:
-            self.store.put(self.output[key], enums.Pyrate.INVALID_VALUE)
 
 # EOF

@@ -28,8 +28,7 @@ class Ratio(Algorithm):
         """Calculates the ratio of the two input values"""
         numerator = self.store.get(self.config["input"]["numerator"])
         denominator = self.store.get(self.config["input"]["denominator"])
-        if numerator is Pyrate.INVALID_VALUE or denominator is Pyrate.INVALID_VALUE:
-            self.put_invalid()
+        if numerator is Pyrate.NONE or denominator is Pyrate.NONE:
             return
         elif denominator == 0:
             self.store.put(self.name, float("inf"))

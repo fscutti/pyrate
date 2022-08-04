@@ -42,8 +42,7 @@ class PeakLocation(Algorithm):
             window = self.store.get(self.config["input"]["window"])
         else:
             window = (None, None)
-        if window is Pyrate.INVALID_VALUE or waveform is Pyrate.INVALID_VALUE:
-            self.put_invalid()
+        if window is Pyrate.NONE or waveform is Pyrate.NONE:
             return
         
         PeakLocation = np.argmax(waveform[window])

@@ -61,8 +61,7 @@ class CFD(Algorithm):
         self.clear_arrays()
 
         waveform = self.store.get(self.config["input"]["waveform"])
-        if waveform is Pyrate.INVALID_VALUE:
-            self.put_invalid()
+        if waveform is Pyrate.NONE:
             return
         
         waveform_len = waveform.size
@@ -85,12 +84,10 @@ class CFD(Algorithm):
         cross_threshold = np.where(self.cfd > self.cfd_threshold)[0]
 
         if cross_threshold.size == 0:
-            self.put_invalid()
             return
         
         zero_cross = zero_cross[zero_cross>cross_threshold[0]]
         if zero_cross.size == 0:
-            self.put_invalid()
             return
 
         f = self.cfd[zero_cross]/(self.cfd[zero_cross] - self.cfd[zero_cross+1])

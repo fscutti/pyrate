@@ -112,7 +112,7 @@ class ReaderCAEN1730_RAW(Reader):
         # If the channel is not in the event return an empty list
         # ToDo: Confirm this behaviour in pyrate
         if ch not in self._inEvt.keys():
-            return Pyrate.INVALID_VALUE
+            return Pyrate.NONE
 
         return np.array(self._evtWaveforms[ch], dtype="int32")
 
@@ -120,7 +120,7 @@ class ReaderCAEN1730_RAW(Reader):
         # If the channel is not in the event return an empty list
         # ToDo: Confirm this behaviour in pyrate
         if ch not in self._inEvt.keys():
-            return Pyrate.INVALID_VALUE
+            return Pyrate.NONE
 
         # Return the waveform and mark that this channel has been read
         return self._evtTime

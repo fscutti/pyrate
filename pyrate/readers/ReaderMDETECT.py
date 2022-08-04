@@ -84,7 +84,7 @@ class ReaderMDETECT(Reader):
 
         elif name.startswith("INPUT:"):
 
-            self.store.put(name, enums.Pyrate.INVALID_VALUE)
+            self.store.put(name, enums.Pyrate.NONE)
 
     def set_n_events(self):
         """Retrieves total number of events using the number of events."""
@@ -94,7 +94,7 @@ class ReaderMDETECT(Reader):
     def _read_variable(self, name, variable):
         """Reads a variable value from the HDF5 and puts it on the transient store."""
 
-        value = enums.Pyrate.INVALID_VALUE
+        value = enums.Pyrate.NONE
 
         if variable == "elevation_i":
             value = self.f[self.structure["datasetname"]][self._idx, 2]

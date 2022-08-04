@@ -62,8 +62,7 @@ class TrapezoidFilter(Algorithm):
     def execute(self, condition=None):
         """Caclulates the trap filtered waveform"""
         waveform = self.store.get(self.config["input"]["waveform"])
-        if waveform is Pyrate.INVALID_VALUE:
-            self.put_invalid()
+        if waveform is Pyrate.NONE:
             self.clear_arrays() # just in case
             return
 

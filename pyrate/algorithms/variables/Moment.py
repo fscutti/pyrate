@@ -52,8 +52,7 @@ class Moment(Algorithm):
         """Calculates the 4th order moments"""
         waveform = self.store.get(self.config["input"]["waveform"])
         window = self.store.get(self.config["input"]["window"])
-        if waveform is Pyrate.INVALID_VALUE or window is Pyrate.INVALID_VALUE:
-            self.put_invalid()
+        if waveform is Pyrate.NONE or window is Pyrate.NONE:
             return
 
         waveform_len = waveform.size
@@ -67,7 +66,6 @@ class Moment(Algorithm):
         fx = waveform[window[0]:window[1]]
         fsum = np.sum(fx)
         if fsum == 0:
-            self.put_invalid()
             return
 
         inner = fx * x

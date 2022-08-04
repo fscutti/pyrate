@@ -40,8 +40,7 @@ class MeanTime(Algorithm):
         window = self.store.get(self.config["input"]["window"])
 
         # Check for valid values
-        if waveform is Pyrate.INVALID_VALUE or window is Pyrate.INVALID_VALUE:
-            self.put_invalid()
+        if waveform is Pyrate.NONE or window is Pyrate.NONE:
             return
 
         window_range = waveform[window[0]:window[1]].size # Number of indexes to sum over, just in case it goes over the end

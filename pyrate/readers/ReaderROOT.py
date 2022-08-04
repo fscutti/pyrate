@@ -93,7 +93,7 @@ class ReaderROOT(Reader):
 
         if h:
 
-            if self.store.get(name) is EN.Pyrate.INVALID_VALUE:
+            if self.store.get(name) is EN.Pyrate.NONE:
                 self.store.put(name, h)
 
             else:
