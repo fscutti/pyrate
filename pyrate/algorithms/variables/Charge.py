@@ -89,7 +89,6 @@ class Charge(Algorithm):
 
         # check for invalid windows
         if waveform is Pyrate.NONE or window is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
             return
 
         # Calcualte the actual charge over the window

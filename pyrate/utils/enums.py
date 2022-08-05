@@ -5,6 +5,5 @@ from enum import Enum
 
 
 class Pyrate(Enum):
-    NONE = 0  # A None object for usage between algorithms.
-    EXECUTED = 1  # A None object for usage between algorithms.
-    WRITTEN = 2  # Tells the Run to skip writing for a target.
+    NONE = 0            # A None object for internal pyrate core use.
+    WRITTEN = 1         # Tells the Run to skip writing for a target.

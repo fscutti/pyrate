@@ -24,6 +24,10 @@ class WriterROOT(Writer):
 
         self.f = R.TFile(self.file, "RECREATE")
 
+        # Set the file compression
+        compression = 1 if "compression" not in self.config["file"] else int(self.config["file"]["compression"])
+        self.f.SetCompressionSettings(compression)
+
         # WARNING: if the file pointer needs to be retrieved from the store
         # by accessing the OUTPUT keys like follows, then is better for the
         # target to belong to just one output file.

@@ -41,7 +41,6 @@ class MeanTime(Algorithm):
 
         # Check for valid values
         if waveform is Pyrate.NONE or window is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
             return
 
         window_range = waveform[window[0]:window[1]].size # Number of indexes to sum over, just in case it goes over the end

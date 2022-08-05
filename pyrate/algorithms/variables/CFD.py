@@ -62,7 +62,6 @@ class CFD(Algorithm):
 
         waveform = self.store.get(self.config["input"]["waveform"])
         if waveform is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
             return
         
         waveform_len = waveform.size
@@ -85,17 +84,14 @@ class CFD(Algorithm):
         cross_threshold = np.where(self.cfd > self.cfd_threshold)[0]
 
         if cross_threshold.size == 0:
-            self.store.put(self.name, Pyrate.NONE)
             return
         
         zero_cross = zero_cross[zero_cross>cross_threshold[0]]
         if zero_cross.size == 0:
-            self.store.put(self.name, Pyrate.NONE)
             return
 
         f = self.cfd[zero_cross]/(self.cfd[zero_cross] - self.cfd[zero_cross+1])
         CFDTimes = zero_cross + f
-        
         self.store.put(self.name, CFDTimes[0])
         self.store.put(f"{self.output['times']}", CFDTimes)
         self.store.put(f"{self.output['trace']}", self.cfd)

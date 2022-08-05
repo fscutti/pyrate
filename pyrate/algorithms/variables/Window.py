@@ -128,7 +128,6 @@ class Window(Algorithm):
     
         pivot = self.store.get(self.config["input"]["pivot"])
         if pivot is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
             return
     
         pivot_is_iterable = iterable(pivot)

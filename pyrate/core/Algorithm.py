@@ -25,7 +25,7 @@ from pyrate.utils import enums
 
 
 class Algorithm:
-    __slots__ = ["name", "config", "store", "logger", "_input", "_output"]
+    __slots__ = ["name", "config", "store", "logger", "_input", "_output", "has_been_run"]
 
     def __init__(self, name, config, store, logger):
         self.name = name
@@ -98,6 +98,5 @@ class Algorithm:
         """Setter method for output objects."""
         if self._output == {}:
             self._output = config_output
-
 
 # EOF

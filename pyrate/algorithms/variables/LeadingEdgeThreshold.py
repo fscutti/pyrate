@@ -43,12 +43,10 @@ class LeadingEdgeThreshold(Algorithm):
         # Get the actual waveform, finally.
         waveform = self.store.get(self.config["input"]["waveform"])
         if waveform is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
             return
 
         cross_index = np.argmax(waveform > self.threshold)
         if not cross_index:
-            self.store.put(self.name, Pyrate.NONE)
             return
 
         if self.interpolate:
