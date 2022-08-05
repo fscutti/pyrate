@@ -40,7 +40,6 @@ class Store:
     def clear(self):
         """Clears the store."""
         self._transient.clear()
-        self._status.clear()
 
     def save(self, name, obj, save_copy=True):
         """Saves an object for later collection."""
@@ -49,18 +48,5 @@ class Store:
 
         else:
             self._permanent[name] = obj
-
-    def status(self, name, status=None):
-        """Returns status of an object."""
-        if status is not None:
-            self._status[name] = status
-
-        else:
-            try:
-                return self._status[name]
-
-            except KeyError:
-                return EN.Pyrate.NONE
-
 
 # EOF

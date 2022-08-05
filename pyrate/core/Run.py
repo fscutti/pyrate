@@ -197,11 +197,14 @@ class Run:
         # Node already exists, just return it
         if obj_name in self.nodes:
             return self.nodes[obj_name]
-    
+
         # Create a new node
         self.nodes[obj_name] = Node(
-            obj_name, algorithm=None, job_inputs=job_inputs, job_outputs=job_outputs,
-            has_been_run=False
+            obj_name,
+            was_called=False,
+            algorithm=None,
+            job_inputs=job_inputs,
+            job_outputs=job_outputs,
         )
 
         # Create a new algorithm
@@ -228,15 +231,13 @@ class Run:
         # Return our finished node
         return self.nodes[obj_name]
 
-    def _reset_has_run(self):
-        """ Resets all algorithm's has_been_run flag
-        """
+    def _reset_nodes_status(self):
+        """Resets all node's was_called flag"""
         for obj_name in self.nodes:
-            if self.nodes[obj_name].algorithm:
-                # self.nodes[obj_name].algorithm.has_been_run = False
-                self.nodes[obj_name].has_been_run = False
 
-    def clear_algorithms(self):
+            self.nodes[obj_name].was_called = False
+
+    def _reset_algorithms_instance(self):
         """Clears all algorithm instances."""
         for obj_name in list(self.algorithms.keys()):
 
@@ -314,7 +315,7 @@ class Run:
 
                 self.run()
 
-            self.clear_algorithms()
+            self._reset_algorithms_instance()
 
         # -----------------------------------------------------------------------
         # Output loop.
@@ -393,8 +394,7 @@ class Run:
 
     def loop(self):
         """Loop over targets and calls them."""
-        # Reset all the has_been_run flags
-        self._reset_has_run()
+        self._reset_nodes_status()
 
         for t_name, t_instance in self.targets.items():
 
@@ -406,34 +406,36 @@ class Run:
 
     def call(self, obj_name):
         """Calls an algorithm for the current state."""
+
         node = self.node(obj_name)
-        alg = node.algorithm
 
-        if alg is not None and not node.has_been_run:
+        if not node.was_called:
 
-            for condition, dependencies in alg.input.items():
+            alg = node.algorithm
 
-                for d in dependencies:
-                    self.call(d)
-
-                if condition is not None:
+            if alg is not None:
+            
+                for condition, dependencies in alg.input.items():
+            
+                    for d in dependencies:
+                        self.call(d)
+            
                     passed = getattr(alg, self.state)(condition)
-                else:
-                    passed = getattr(alg, self.state)()
-                node.has_been_run = True
+            
+                    if not passed:
+                        break
+            
+                # the block below is work in progress.
+                # checking that the object is complete.
+                # if not self.is_complete(obj_name, alg):
+                #    sys.exit(
+                #        f"ERROR: object {obj_name} is on the store but additional output is missing !!!"
+                #    )
+            
+            else:
+                self._current_input.read(obj_name)
 
-                if not passed:
-                    break
-
-            # the block below is work in progress.
-            # checking that the object is complete.
-            # if not self.is_complete(obj_name, alg):
-            #    sys.exit(
-            #        f"ERROR: object {obj_name} is on the store but additional output is missing !!!"
-            #    )
-
-        else:
-            self._current_input.read(obj_name)
+            node.was_called = True
 
     # for o_name in self.node(obj_name).job_outputs:
     #
@@ -442,7 +444,6 @@ class Run:
     #        self._current_output = self.loaded_io["outputs"][o_name]
     #
     #        self._current_output.write(obj_name)
-
 
     def is_complete(self, obj_name, alg):
         """If the main object is on the store with a valid value,
