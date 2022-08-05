@@ -228,6 +228,13 @@ class Run:
         # Return our finished node
         return self.nodes[obj_name]
 
+    def _reset_has_run(self):
+        """ Resets all algorithm's has_been_run flag
+        """
+        for obj_name in self.nodes:
+            if self.nodes[obj_name].algorithm:
+                # self.nodes[obj_name].algorithm.has_been_run = False
+                self.nodes[obj_name].has_been_run = False
 
     def clear_algorithms(self):
         """Clears all algorithm instances."""
@@ -386,10 +393,8 @@ class Run:
 
     def loop(self):
         """Loop over targets and calls them."""
-        for obj_name in self.nodes:
-            if self.nodes[obj_name].algorithm:
-                # self.nodes[obj_name].algorithm.has_been_run = False
-                self.nodes[obj_name].has_been_run = False
+        # Reset all the has_been_run flags
+        self._reset_has_run()
 
         for t_name, t_instance in self.targets.items():
 
