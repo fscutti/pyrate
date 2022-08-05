@@ -25,7 +25,7 @@ from pyrate.utils import enums
 
 
 class Algorithm:
-    __slots__ = ["name", "config", "store", "logger", "_input", "_output", "has_been_run"]
+    __slots__ = ["name", "config", "store", "logger", "_input", "_output"]
 
     def __init__(self, name, config, store, logger):
         self.name = name
