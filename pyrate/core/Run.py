@@ -445,21 +445,21 @@ class Run:
     #
     #        self._current_output.write(obj_name)
 
-    def is_complete(self, obj_name, alg):
-        """If the main object is on the store with a valid value,
-        additional output is checked to be on the store."""
-
-        if self.store.get(obj_name) is not EN.Pyrate.NOT_FOUND:
-
-            return all(
-                [
-                    self.store.get(o) is not EN.Pyrate.NOT_FOUND
-                    for o in alg.output[obj_name]
-                ]
-            )
-
-        else:
-            return True
+    #def is_complete(self, obj_name, alg):
+    #    """If the main object is on the store with a valid value,
+    #    additional output is checked to be on the store."""
+    # 
+    #    if self.store.get(obj_name) is not EN.Pyrate.NONE:
+    #
+    #        return all(
+    #            [
+    #                self.store.get(o) is not EN.Pyrate.NONE
+    #                for o in alg.output[obj_name]
+    #            ]
+    #        )
+    #
+    #    else:
+    #        return True
 
     def get_events_slices(self, tot):
         """Updates emin and emax attributes for running on valid slice."""

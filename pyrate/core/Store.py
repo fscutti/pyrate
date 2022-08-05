@@ -13,7 +13,6 @@ class Store:
         self.name = name
         self._transient = {}
         self._permanent = {}
-        self._status = {}
 
     def put(self, name, obj):
         """Puts an object on the store."""
