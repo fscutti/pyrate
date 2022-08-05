@@ -128,6 +128,9 @@ objects:
      # -----------------------------------------------------------
      # Plots
      # -----------------------------------------------------------
+     # WARNING: there is a bug in Make1DHistPlot ovewriting instances
+     # of plots in the internal dictionary. This is happening because
+     # different canvases have the same name. 
      muonDetPlot1D:
 
          algorithm: Make1DHistPlot
@@ -152,7 +155,7 @@ objects:
                      variables:
                        - measEnergyPMT12, 30, 0., 4e-6, "# of photons", "Entries", "R:0.7|G:0.0|B:0.1"
                        - measEnergyPMT13, 30, 0., 4e-6, "# of photons", "Entries", "R:.2|G:.2|B:0.6"
-                 
+                            
                  main:
                      regions: muonDetParticlePos5
                      variables:
