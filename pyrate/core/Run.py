@@ -105,6 +105,9 @@ class Run:
 
                 if not t_name in self.targets:
 
+                    # Where the magic happens!
+                    # Dependecies for this target are all
+                    # resolved recursively here 
                     self.targets[t_name] = self.node(t_name)
 
                     t_io[t_name] = {"job_inputs": t_job_inputs, "job_outputs": [o_name]}
@@ -222,6 +225,8 @@ class Run:
                 for d in dependencies:
 
                     try:
+                        # Set this current node as the parent to the dependency
+                        # being created in self.node(d)
                         self.node(d).parent = self.nodes[obj_name]
 
                     except anytreeExceptions.LoopError:
@@ -414,7 +419,7 @@ class Run:
             alg = node.algorithm
 
             if alg is not None:
-            
+
                 for condition, dependencies in alg.input.items():
             
                     for d in dependencies:
