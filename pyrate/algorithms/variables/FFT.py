@@ -55,7 +55,6 @@ class FFT(Algorithm):
         """Caclulates the FFT based on the chosen mode"""
         waveform = self.store.get(self.config["input"]["waveform"])
         if waveform is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
             return
 
         # Checks if window is used
@@ -65,7 +64,6 @@ class FFT(Algorithm):
             window = (None, None)
 
         if window is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
             return
 
         # Getting the FFT using numpy functions. FFT for real valued input is 

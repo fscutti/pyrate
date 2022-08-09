@@ -63,8 +63,6 @@ class Calculator(Algorithm):
         self.calc()
         if len(self.result) == 1:
             self.store.put(self.name, self.result[0])
-        else:
-            self.store.put(self.name, Pyrate.NONE)
 
     # -------------------------------------------------------------------
     def Arithmetic(self, op, varL, varR):

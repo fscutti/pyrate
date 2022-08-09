@@ -52,7 +52,6 @@ class TimeConverter(Algorithm):
         """Converts the sample time to physical units"""
         sample_time = self.store.get(self.config["input"]["sample_number"])
         if sample_time is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
             return
         real_time = sample_time * self.time_conversion
         self.store.put(self.name, real_time)

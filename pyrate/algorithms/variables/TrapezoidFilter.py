@@ -63,7 +63,6 @@ class TrapezoidFilter(Algorithm):
         """Caclulates the trap filtered waveform"""
         waveform = self.store.get(self.config["input"]["waveform"])
         if waveform is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
             self.clear_arrays() # just in case
             return
 

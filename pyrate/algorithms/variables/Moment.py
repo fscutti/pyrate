@@ -53,11 +53,6 @@ class Moment(Algorithm):
         waveform = self.store.get(self.config["input"]["waveform"])
         window = self.store.get(self.config["input"]["window"])
         if waveform is Pyrate.NONE or window is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
-            self.store.put(f"{self.output['mean']}", Pyrate.NONE)
-            self.store.put(f"{self.output['stddev']}", Pyrate.NONE)
-            self.store.put(f"{self.output['skew']}", Pyrate.NONE)
-            self.store.put(f"{self.output['kurtosis']}", Pyrate.NONE)
             return
 
         waveform_len = waveform.size
@@ -71,11 +66,6 @@ class Moment(Algorithm):
         fx = waveform[window[0]:window[1]]
         fsum = np.sum(fx)
         if fsum == 0:
-            self.store.put(self.name, Pyrate.NONE)
-            self.store.put(f"{self.output['mean']}", Pyrate.NONE)
-            self.store.put(f"{self.output['stddev']}", Pyrate.NONE)
-            self.store.put(f"{self.output['skew']}", Pyrate.NONE)
-            self.store.put(f"{self.output['kurtosis']}", Pyrate.NONE)
             return
 
         inner = fx * x
