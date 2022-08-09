@@ -20,13 +20,13 @@ class ReaderCAEN1730_RAW(Reader):
         "_mmfSize",
         "_eventPos",
         "_readIdx",
-        "_inEvt",        
+        "_inEvt",
         "_evtTime",
         "_evtWaveforms",
     ]
 
-    def __init__(self, name, store, logger, f_name, structure):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger, f_name, structure):
+        super().__init__(name, config, store, logger)
         self.f = f_name
 
     def load(self):
@@ -38,22 +38,22 @@ class ReaderCAEN1730_RAW(Reader):
 
         self._eventPos = []
         self._mmfSize = self._mmf.size()
+        self._readIdx = -1
 
     def offload(self):
         self.is_loaded = False
         self._mmf.close()
 
     def read(self, name):
-        if self._readIdx != self._idx:
-            self._read_event()
-            self._readIdx = self._idx
-
         if name.startswith("EVENT:"):
+            if self._readIdx != self._idx:
+                self._read_event()
+            self._readIdx = self._idx
             # Split the request
             path = self._break_path(name)
 
-            #Get the event value
-            if path["variable"]=="timestamp":
+            # Get the event value
+            if path["variable"] == "timestamp":
                 value = self._evtTime
             elif path["variable"] == "waveform":
                 value = self._get_waveform(path["ch"])
@@ -61,7 +61,7 @@ class ReaderCAEN1730_RAW(Reader):
                 value = self._get_timestamps(path["ch"])
 
             # Add the value to the transient store
-            self.store.put(name, value, "TRAN")
+            self.store.put(name, value)
 
         elif name.startswith("INPUT:"):
             pass
@@ -93,7 +93,6 @@ class ReaderCAEN1730_RAW(Reader):
             self._mmf.seek(seekSize, 1)
 
         self._mmf.seek(0, 0)
-        self._readIdx = -1
 
     def _break_path(self, path):
         """Takes a path request from pyrate and splits it into a dictionary"""
@@ -110,30 +109,30 @@ class ReaderCAEN1730_RAW(Reader):
 
     def _get_waveform(self, ch):
         """Reads variable from the event and puts it in the transient store."""
-        #If the channel is not in the event return an empty list
-        #ToDo: Confirm this behaviour in pyrate
-        if(ch not in self._inEvt.keys()):
+        # If the channel is not in the event return an empty list
+        # ToDo: Confirm this behaviour in pyrate
+        if ch not in self._inEvt.keys():
             return Pyrate.NONE
 
-        return np.array(self._evtWaveforms[ch], dtype='int32')
+        return np.array(self._evtWaveforms[ch], dtype="int32")
 
     def _get_timestamps(self, ch):
-        #If the channel is not in the event return an empty list
-        #ToDo: Confirm this behaviour in pyrate
-        if(ch not in self._inEvt.keys()):
+        # If the channel is not in the event return an empty list
+        # ToDo: Confirm this behaviour in pyrate
+        if ch not in self._inEvt.keys():
             return Pyrate.NONE
 
-        #Return the waveform and mark that this channel has been read
+        # Return the waveform and mark that this channel has been read
         return self._evtTime
 
     def _read_event(self):
-        #Reset event
-        self._evtTime = 2**64
-        self._inEvt = {};
+        # Reset event
+        self._evtTime = 2 ** 64
+        self._inEvt = {}
         self._evtWaveforms = {}
-        
-        self._mmf.seek(self._eventPos[self._idx],0)
-        #Read in the event info from the header
+
+        self._mmf.seek(self._eventPos[self._idx], 0)
+        # Read in the event info from the header
 
         head1 = self._mmf.read(4)
         head1 = int.from_bytes(head1, "little")
@@ -142,7 +141,7 @@ class ReaderCAEN1730_RAW(Reader):
         head2 = self._mmf.read(4)
         head2 = int.from_bytes(head2, "little")
         boardID = head2 & 0b11111000000000000000000000000000
-        pattern = (head2 & 0b00000000111111111111111100000000)
+        pattern = head2 & 0b00000000111111111111111100000000
         channelMaskLo = head2 & 0b11111111
 
         head3 = self._mmf.read(4)
@@ -156,8 +155,8 @@ class ReaderCAEN1730_RAW(Reader):
 
         self._evtTime = (pattern << 24) + TTT
         channelMask = (channelMaskHi << 8) + (channelMaskLo)
-        
-        #Figure out what channels are in the event
+
+        # Figure out what channels are in the event
         numCh = 0
 
         for i in range(15):
@@ -166,13 +165,14 @@ class ReaderCAEN1730_RAW(Reader):
                 self._inEvt[i] = True
                 self._evtWaveforms[i] = []
 
-        recordSize = int(2*(eventSize - 4)/numCh)
-        #Read in the waveform data
+        recordSize = int(2 * (eventSize - 4) / numCh)
+        # Read in the waveform data
 
         for i in range(15):
             if channelMask & (1 << i):
                 for j in range(recordSize):
                     sample = self._mmf.read(2)
-                    self._evtWaveforms[i].append(int.from_bytes(sample,"little"))
+                    self._evtWaveforms[i].append(int.from_bytes(sample, "little"))
+
 
 # EOF

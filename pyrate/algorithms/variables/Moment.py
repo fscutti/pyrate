@@ -7,32 +7,25 @@
     
     Required parameters:
         rate: (float) The digitisation rate
+    
+    Required inputs:
+        waveform: (array-like) A waveform-like object
+        window: (tuple-like) A window object
 
     Optional parameters:
         mode: (str) Let's the user change to algebraic moments instead of
                     central, normalised moments. To get the algebraic moments
                     pass in the flag "algebraic"
-   
-
-    Required states:
-        initialise:
-            output:
-        execute:
-            input: <Waveform object>, <Window object>
     
 
     Example config:
     
     Skew_CHX:
-        algorithm:
-            name: Moment
-            rate: 500e6
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX, Window_CHX
-        waveform: CorrectedWaveform_CHX
-        window: Window_CHX
+        algorithm: Moment
+        rate: 500e6
+        input:
+            waveform: CorrectedWaveform_CHX
+            window: Window_CHX
 """
 
 import numpy as np
@@ -45,26 +38,26 @@ class Moment(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Prepares the config order of the moment"""
         self.mode = 0
-        if "mode" in self.config["algorithm"]:
+        if "mode" in self.config:
             if self.mode.lower() == "algebraic":
                 self.mode = 1
 
-        self.time_period = 1 / float(self.config["algorithm"]["rate"])
+        self.time_period = 1 / float(self.config["rate"])
         self.times = np.arange(0)
 
-    def execute(self):
+    def execute(self, condition=None):
         """Calculates the 4th order moments"""
-        waveform = self.store.get(self.config["waveform"])
-        window = self.store.get(self.config["window"])
+        waveform = self.store.get(self.config["input"]["waveform"])
+        window = self.store.get(self.config["input"]["window"])
         if waveform is Pyrate.NONE or window is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
-            self.store.put(f"{self.name}Mean", Pyrate.NONE)
-            self.store.put(f"{self.name}Stddev", Pyrate.NONE)
-            self.store.put(f"{self.name}Skew", Pyrate.NONE)
-            self.store.put(f"{self.name}Kurtosis", Pyrate.NONE)
+            self.store.put(f"{self.output['mean']}", Pyrate.NONE)
+            self.store.put(f"{self.output['stddev']}", Pyrate.NONE)
+            self.store.put(f"{self.output['skew']}", Pyrate.NONE)
+            self.store.put(f"{self.output['kurtosis']}", Pyrate.NONE)
             return
 
         waveform_len = waveform.size
@@ -79,10 +72,10 @@ class Moment(Algorithm):
         fsum = np.sum(fx)
         if fsum == 0:
             self.store.put(self.name, Pyrate.NONE)
-            self.store.put(f"{self.name}Mean", Pyrate.NONE)
-            self.store.put(f"{self.name}Stddev", Pyrate.NONE)
-            self.store.put(f"{self.name}Skew", Pyrate.NONE)
-            self.store.put(f"{self.name}Kurtosis", Pyrate.NONE)
+            self.store.put(f"{self.output['mean']}", Pyrate.NONE)
+            self.store.put(f"{self.output['stddev']}", Pyrate.NONE)
+            self.store.put(f"{self.output['skew']}", Pyrate.NONE)
+            self.store.put(f"{self.output['kurtosis']}", Pyrate.NONE)
             return
 
         inner = fx * x
@@ -112,10 +105,10 @@ class Moment(Algorithm):
             moments = [mean, stddev, skew, excess_kurtosis]
 
         self.store.put(self.name, moments)
-        self.store.put(f"{self.name}Mean", moments[0])
-        self.store.put(f"{self.name}Stddev", moments[1])
-        self.store.put(f"{self.name}Skew", moments[2])
-        self.store.put(f"{self.name}Kurtosis", moments[3])
+        self.store.put(f"{self.output['mean']}", moments[0])
+        self.store.put(f"{self.output['stddev']}", moments[1])
+        self.store.put(f"{self.output['skew']}", moments[2])
+        self.store.put(f"{self.output['kurtosis']}", moments[3])
 
         # Old version
         # if self.mode == 0:

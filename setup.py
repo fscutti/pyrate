@@ -6,7 +6,7 @@ from setuptools import setup
 from platform import platform
 
 platform = platform()
-req = "requirements_m1.txt" if "arm64" in platform else "requirements.txt"
+req = "requirements_arm64.txt" if "arm64" in platform else "requirements.txt"
 
 with open(req, "r") as f:
 	required_packages = [line.strip() for line in  f.readlines()]

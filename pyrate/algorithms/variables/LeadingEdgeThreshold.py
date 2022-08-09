@@ -6,24 +6,17 @@
                         to define the start of the waveform
         threshold: (float) The minimum height the waveform must cross before a starting point is saved
     
-    Required states:
-        initialise:
-            output:
-        execute:
-            input: <Waveform object>
-    
+    Required inputs:
+        waveform: (array-like) A waveform-like object
+
     Example configs:
 
     LeadingEdge_CHX:
-        algorithm:
-            name: LeadingEdgeThreshold
-            offset: 5
-            threshold: 5
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX
-        waveform: CorrectedWaveform_CHX
+        algorithm: LeadingEdgeThreshold
+        offset: 5
+        threshold: 5
+        input:
+            waveform: CorrectedWaveform_CHX
 """
 
 import numpy as np
@@ -36,19 +29,19 @@ class LeadingEdgeThreshold(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Set up the CFD and trapezoid parameters"""
         # offset parameter decides offset from threshold crossing point
-        self.offset = int(self.config["algorithm"]["offset"])
-        self.threshold = self.config["algorithm"]["threshold"]
+        self.offset = int(self.config["offset"])
+        self.threshold = self.config["threshold"]
         self.interpolate = False
-        if "interpolate" in self.config["algorithm"]:
+        if "interpolate" in self.config:
             self.interpolate = True
 
-    def execute(self):
+    def execute(self, condition=None):
         """Caclulates the waveform threshold crossing point"""
         # Get the actual waveform, finally.
-        waveform = self.store.get(self.config["waveform"])
+        waveform = self.store.get(self.config["input"]["waveform"])
         if waveform is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             return

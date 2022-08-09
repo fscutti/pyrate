@@ -1,37 +1,46 @@
 """ Generic Writer base class.
 """
+import sys
 import ROOT as R
 from pyrate.core.Writer import Writer
 
+from pyrate.utils import enums as EN
+
 
 class WriterROOT(Writer):
-    __slots__ = ["f", "w_targets"]
+    __slots__ = ["f"]
 
-    def __init__(self, name, store, logger, f, w_targets):
-        super().__init__(name, store, logger)
-        self.f = f
-        self.w_targets = w_targets
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
 
     def load(self):
         """Creates the file and set targets."""
+
         self.is_loaded = True
 
-        self.set_inputs_vs_targets(self.w_targets)
+        self.file = self.config["files"]
 
-        self.f = R.TFile(self.f, "RECREATE")
+        self.targets = self.config["targets"]
+
+        self.f = R.TFile(self.file, "RECREATE")
 
         # WARNING: if the file pointer needs to be retrieved from the store
         # by accessing the OUTPUT keys like follows, then is better for the
         # target to belong to just one output file.
-        for t in self.get_targets():
-            self.store.put(f"OUTPUT:{t}", self.f, "PERM")
+        for t in self.targets:
+            self.store.put(f"OUTPUT:{t}", self.f)
 
     def write(self, name):
         """Write an object to file. This can be represented by a structure
         indicating the folder structure of the output yet to be created at
         this point.
         """
-        obj = self.store.copy(name, "PERM")
+        obj = self.store.get(name)
+
+        if obj is EN.Pyrate.NONE:
+            msg = f"ERROR: trying to write {name} but object has not been saved."
+            sys.exit(msg)
+            self.logger.error(msg)
 
         if isinstance(obj, dict):
             self._write_dirs(obj)

@@ -6,30 +6,23 @@
         rate: (float) The sample rate of the digitiser
         tau:  (float) The decay constant of the pulse
 
+    Required inputs:
+        waveform: (array-like) A waveform-like object
+
     Optional parameters:
         zeropole: (Bool) True by default
-    
-    Required states:
-        initialise:
-            output:
-        execute:
-            input: <Waveform object>
     
     Example config:
 
     TrapezoidFilter_CHX:
-        algorithm:
-            name: TrapezoidFilter
-            rise: 10
-            gap: 10
-            rate: 500e6
-            tau: 2e-6
-            zeropole: True
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX
-        waveform: CorrectedWaveform_CHX
+        algorithm: TrapezoidFilter
+        rise: 10
+        gap: 10
+        rate: 500e6
+        tau: 2e-6
+        zeropole: True
+        input:
+            waveform: CorrectedWaveform_CHX
 """
 
 import numpy as np
@@ -42,15 +35,15 @@ class TrapezoidFilter(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Set up the trapezoid parameters"""
         # Trapezoid parameters
-        self.rise = int(self.config["algorithm"]["rise"])
-        self.gap = int(self.config["algorithm"]["gap"])
-        self.period = 1 / float(self.config["algorithm"]["rate"])
-        self.tau = float(self.config["algorithm"]["tau"])
-        if "zeropole" in self.config["algorithm"]:
-            self.zeropole = bool(self.config["algorithm"]["zeropole"])
+        self.rise = int(self.config["rise"])
+        self.gap = int(self.config["gap"])
+        self.period = 1 / float(self.config["rate"])
+        self.tau = float(self.config["tau"])
+        if "zeropole" in self.config:
+            self.zeropole = bool(self.config["zeropole"])
         else:
             self.zeropole = True
         
@@ -66,9 +59,9 @@ class TrapezoidFilter(Algorithm):
         self.dn2 = np.zeros(0)
         self.dn3 = np.zeros(0)
 
-    def execute(self):
+    def execute(self, condition=None):
         """Caclulates the trap filtered waveform"""
-        waveform = self.store.get(self.config["waveform"])
+        waveform = self.store.get(self.config["input"]["waveform"])
         if waveform is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             self.clear_arrays() # just in case

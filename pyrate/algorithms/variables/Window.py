@@ -25,50 +25,34 @@
                             use as a pivot
             pivot: A window object / iterable object with a length of 2.
 
-
-    Required states:
-        initialise:
-            output:
-        execute:
-            input: (optional) Pivot object
-            output: (required only if no input provided)
-
     Example config:
     # With a fixed window
     Window_CHX:
-        algorithm:
-            name: Window
-            window: 0, 50
-        initialise:
-            output:
-        execute:
-            output:
+        algorithm: Window
+        left: 0
+        right: 50
+    
+    Window_CHX:
+        algorithm: Window
+        window: 0, 50
     
     # With a standard dynamic window
     DynWindow_CHX:
-        algorithm:
-            name: Window
-            left: -20
-            right: 100
-        initialise:
-            output:
-        execute:
-            input: <Pivot object (integer)>
-        pivot: <Pivot object (integer)>
+        algorithm: Window
+        left: -20
+        right: 100
+        input:
+            pivot: <Pivot object (integer)>
 
     # With a dynamic window, pivoting from a window
 
     PromptWindow_CHX:
-        algorithm:
-            name: Window
-            left: -20
-            right: 0
-            pivot index: start
-        initialise:
-            output:
-        execute:
-            input: <Pivot object (window)>
-        pivot: <Pivot object (window)>
+        algorithm: Window
+        left: -20
+        right: 0
+        pivot index: start
+        input:
+            pivot: <Pivot object (window)>
 """
 
 
@@ -85,18 +69,18 @@ class Window(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Prepare for the calculation"""
         # Check the config contains the left and right parameters
-        if "window" in self.config["algorithm"]:
+        if "window" in self.config:
             # Store the fixed window in a way that the rest of the alg can use
-            self.left, self.right = self.str_to_window(self.config["algorithm"]["window"])
-        elif "left" not in self.config["algorithm"]:
+            self.left, self.right = self.str_to_window(self.config["window"])
+        elif "left" not in self.config:
                 sys.exit(f"ERROR: in config, window object '{self.name}' missing 'left' parameter")
-        elif "right" not in self.config["algorithm"]:
+        elif "right" not in self.config:
                 sys.exit(f"ERROR: in config, window object '{self.name}' missing 'right' parameter")
         else:
-            self.left, self.right = self.config["algorithm"]["left"], self.config["algorithm"]["right"]
+            self.left, self.right = self.config["left"], self.config["right"]
             if not is_float(self.left):
                 sys.exit(f"ERROR: in config, window object '{self.name}' 'left' bound not a number")
             if not is_float(self.right):
@@ -106,7 +90,7 @@ class Window(Algorithm):
             self.right = int(self.right)
         
         # Must check here first, as a full window is (None, None)
-        if "pivot" not in self.config:
+        if "input" not in self.config or "pivot" not in self.config["input"]:
             self.mode = "fixed_window"  # Set the mode to fixed window mode
             return
         elif self.left is None or self.right is None:
@@ -119,10 +103,10 @@ class Window(Algorithm):
 
         # Ok, we want to use a dynamic mode
         self.mode = "dynamic"  # Set the mode to use dynamic integer pivots
-        if "pivot index" in self.config["algorithm"]:           
+        if "pivot index" in self.config:           
             self.mode = "window_pivot"
             # We want to use a window as a pivot, now we just need to find out which part
-            self.pivot_index = self.config["algorithm"]["pivot index"]
+            self.pivot_index = self.config["pivot index"]
             if is_float(self.pivot_index):
                 # Can pass in numbers
                 self.pivot_index = int(self.pivot_index)
@@ -134,7 +118,7 @@ class Window(Algorithm):
                 self.pivot_index = 0 # Take the left most variable as default
 
 
-    def execute(self):
+    def execute(self, condition=None):
         """Calcualates the window if it's a variable, otherwise puts the window
         from the config on the store.
         """
@@ -142,7 +126,7 @@ class Window(Algorithm):
             self.store.put(self.name, (self.left, self.right))
             return
     
-        pivot = self.store.get(self.config["pivot"])
+        pivot = self.store.get(self.config["input"]["pivot"])
         if pivot is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             return

@@ -6,26 +6,20 @@
         rate: (float) The sample rate of the digitiser
         unit: (float/string) The desired units of the output time. Choose from
                              the predefined units or specify your own.
-        time: (int) The orignal time in units of samples from another object.
+        sample_number: (int) The orignal sample number (time) to be converted.
     
-    Required states:
-        initialise:
-            output:
-        execute:
-            input: <Time object>
+    Required inputs:
+        sample_number: (number) A numerical sample number (time in units of 
+                                sample number)
     
     Example config:
 
     PulseTime_CHX:
-        algorithm:
-            name: TimeConverter
-            rate: 500e6
-            unit: ns
-        initialise:
-            output:
-        execute:
-            input: PulseStart_CHX
-        time: PulseStart_CHXCFD
+        algorithm: TimeConverter
+        rate: 500e6
+        unit: ns
+        input:
+            sample_number: PulseStart_CHXCFD
 """
 
 from pyrate.core.Algorithm import Algorithm
@@ -42,21 +36,21 @@ class TimeConverter(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Set up time conversion parameters"""
         # Time units
-        time_unit = self.config["algorithm"]["unit"]
+        time_unit = self.config["unit"]
         if type(time_unit) == str:
             unit = seconds_to_unit[time_unit]
         else:
             unit = float(time_unit)
-        sample_rate = float(self.config["algorithm"]["rate"])
+        sample_rate = float(self.config["rate"])
 
         self.time_conversion = unit / sample_rate
 
-    def execute(self):
+    def execute(self, condition=None):
         """Converts the sample time to physical units"""
-        sample_time = self.store.get(self.config["time"])
+        sample_time = self.store.get(self.config["input"]["sample_number"])
         if sample_time is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             return

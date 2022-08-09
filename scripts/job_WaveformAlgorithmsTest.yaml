@@ -3,9 +3,9 @@ inputs:
         eslices:
             emin: 0
             emax: -1
-        reader: ReaderCAEN1730_RAW
+        reader: ReaderCAEN1730_PSD
         path:
-        - PYRATE/test/data/1730_RAWTest-Board_0-001.dat
+        - PYRATE/test/data/1730_PSDTest-Board_0-001.dat
         
         # Redundant stuff
         samples:
@@ -22,11 +22,14 @@ configs:
             any: MultiCHExample
 
 outputs:
-    RAWTest:
+    AlgorithmTest:
         file:
             path: PYRATE/test
             format: .root
         targets:
-        - TreeMaker: Data
+            - Channel_0: Data
+            - Channel_1: Data
+            - Single_data: Data
+            - MultiChannels: Data
 
 # EOF

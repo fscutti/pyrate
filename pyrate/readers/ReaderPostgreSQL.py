@@ -9,8 +9,8 @@ from pyrate.core.Reader import Reader
 class ReaderPostgreSQL(Reader):
     __slots__ = ["db", "_db_connection", "_db_cursor", "_dbidx", "_tables"]
 
-    def __init__(self, name, store, logger, db):
-        super().__init__(name, store, logger)
+    def __init__(self, name, config, store, logger, db):
+        super().__init__(name, config, store, logger)
         self.db = db
 
     def load(self):
@@ -57,7 +57,7 @@ class ReaderPostgreSQL(Reader):
 
         value = self._db_cursor.fetchall()
 
-        self.store.put(name, value, "TRAN")
+        self.store.put(name, value)
 
     def _read_variable(self, name, table, row, variable):
         """Reads variable from specific row, considered to be an event."""
@@ -66,7 +66,7 @@ class ReaderPostgreSQL(Reader):
 
         value = self._db_cursor.fetchall()[0][0]
 
-        self.store.put(name, value, "TRAN")
+        self.store.put(name, value)
 
     def set_n_events(self):
         """Reads number of events which in this case are the table rows."""

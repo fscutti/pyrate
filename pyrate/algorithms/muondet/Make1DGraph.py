@@ -21,7 +21,7 @@ class Make1DGraph(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Creates data structures."""
 
         i_name = self.store.get("INPUT:name", "TRAN")
@@ -61,7 +61,7 @@ class Make1DGraph(Algorithm):
                     self.store.put(obj_a_name, a, "PERM")
                     self.store.put(obj_g_name, g, "PERM")
 
-    def execute(self):
+    def execute(self, condition=None):
         """Fills data structures."""
 
         i_name = self.store.get("INPUT:name")
@@ -98,7 +98,7 @@ class Make1DGraph(Algorithm):
 
                             self.store.put(obj_counter, "done")
 
-    def finalise(self):
+    def finalise(self, condition=None):
         """Makes the plot."""
 
         if "gather" in self.config["algorithm"]:

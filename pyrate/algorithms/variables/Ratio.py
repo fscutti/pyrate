@@ -2,23 +2,17 @@
     Uses pre-calculated values, set up as separate objects
     Ratio = numerator/denominator
 
-    Required parameters:
+    Required inputs:
         numerator: (Number) Ratio numerator (object), calculated by a 
                          previously defined algorithm
         denominator: (Number) Ratio denominator (object) see above.
     
-    Required states:
-        execute:
-            input: <Number object 1>, <Number object 2>
-    
     Example config:
     PromptDelayChargeRatio_CHX:
-        algorithm:
-            name: Ratio
-        execute:
-            input: PromptCharge_CHX, DelayCharge_CHX
-        numerator: PromptCharge_CHX
-        denominator: DelayCharge_CHX
+        algorithm: Ratio
+        input:
+            numerator: PromptCharge_CHX
+            denominator: DelayCharge_CHX
 """
 
 from pyrate.core.Algorithm import Algorithm
@@ -30,10 +24,10 @@ class Ratio(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def execute(self):
+    def execute(self, condition=None):
         """Calculates the ratio of the two input values"""
-        numerator = self.store.get(self.config["numerator"])
-        denominator = self.store.get(self.config["denominator"])
+        numerator = self.store.get(self.config["input"]["numerator"])
+        denominator = self.store.get(self.config["input"]["denominator"])
         if numerator is Pyrate.NONE or denominator is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             return

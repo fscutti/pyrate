@@ -14,11 +14,11 @@ class SimulatedWaveformsGetter(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def execute(self):
+    def execute(self, condition=None):
 
         waveform = {"energy": [], "time": []}
 
-        wf_map = self.store.get(self.config["waveform_map"])
+        wf_map = self.store.get(self.config["input"]["waveform_map"])
 
         if self.config["pmt_name"] in wf_map:
             waveform = wf_map[self.config["pmt_name"]]

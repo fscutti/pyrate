@@ -6,42 +6,29 @@
         bins: (int) the range and number of frequency bins
         rate: (float) the sample rate of the digitiser
         waveform: The waveform to caluclate the charge of (typically physcial)
+
+    Required inputs:
         window: (bool) flag for using windowed mode
         window: (tuple) The start and stop window for calculating the charge
-    
-    Required states:
-    NB: <Window object> can be excluded if not using a window)
-        initialise:
-            output:
-        execute:
-            input: <Waveform object>, <Window object>
     
     Example config:
     
     (Windowed mode)
-    FFT_CHX:
-        algorithm:
-            name: FFT
-            rate: 500e6
-            bins: 100
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX, Window_CHX
-        waveform: CorrectedWaveform_CHX
-        window: Window_CHX
+    FFT_CHX: 
+        Algorithm: FFT
+        rate: 500e6
+        bins: 100
+        input:
+            waveform: CorrectedWaveform_CHX
+            window: Window_CHX
     
     (Non-windowed mode)
     FFT_CHX:
-        algorithm:
-            name: FFT
-            rate: 500e6
-            bins: 100
-        initialise:
-            output:
-        execute:
-            input: CorrectedWaveform_CHX
-        waveform: CorrectedWaveform_CHX
+        algorithm: FFT
+        rate: 500e6
+        bins: 100
+        input:
+            waveform: CorrectedWaveform_CHX
 """
 
 import numpy as np
@@ -54,26 +41,26 @@ class FFT(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Allows the user to determine if the FFT is calculated for a window 
         of the waveform"""
         self.use_window = False
         if "window" in self.config:
             self.use_window = True
 
-        self.sample_rate = float(self.config["algorithm"]["rate"])
-        self.fft_bins = self.config["algorithm"]["bins"]
+        self.sample_rate = float(self.config["rate"])
+        self.fft_bins = self.config["bins"]
 
-    def execute(self):
+    def execute(self, condition=None):
         """Caclulates the FFT based on the chosen mode"""
-        waveform = self.store.get(self.config["waveform"])
+        waveform = self.store.get(self.config["input"]["waveform"])
         if waveform is Pyrate.NONE:
             self.store.put(self.name, Pyrate.NONE)
             return
 
         # Checks if window is used
         if self.use_window:
-            window = self.store.get(self.config["window"])
+            window = self.store.get(self.config["input"]["window"])
         else:
             window = (None, None)
 

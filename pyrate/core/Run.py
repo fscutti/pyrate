@@ -1,14 +1,17 @@
 """ This class controls the execution of algorithms
     as a single local instance. 
 """
-from cmath import log
 import os
 import sys
 import importlib
 import timeit
 import time
 import logging
+import anytree.node.exceptions as anytreeExceptions
+
+from cmath import log
 from collections import defaultdict
+from anytree import Node, RenderTree
 
 from colorama import Fore
 from tqdm import tqdm
@@ -19,125 +22,303 @@ from pyrate.core.Output import Output
 
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
-from pyrate.utils import enums
+from pyrate.utils import enums as EN
 
 
 class Run:
     def __init__(self, name, iterable=(), **kwargs):
         self.__dict__.update(iterable, **kwargs)
         self.name = name
-        self.alg_times = defaultdict(float) # Initialising the alg_times dictionary which stores the average run times of each alg
+
+        # will handle this within the algorithm.
+        # self.alg_times = defaultdict(
+        #    float
+        # )  # Initialising the alg_times dictionary which stores the average run times of each alg
 
     def setup(self):
         """First instance of 'private' members."""
+
+        self.objects = self.configs["global"]["objects"]
         # -----------------------------------------------------------------------
-        # At this point the Run object should have self.input/config/output
+        # At this point the Run object should have self.inputs/objects/outputs
         # defined after being read from the configuration yaml file.
         # -----------------------------------------------------------------------
-        self.state = None
-        self._in = None
-        self._out = None
-        self._config = self.configs["global"]["objects"]
-
-        self._history = {"CURRENT TARGET": None}
 
         log_file_name = f"{self.name}.{time.strftime('%Y-%m-%d-%Hh%M')}.log"
-        # Handles the case where log files have the same name
+
+        # Will need to change handling of log files.
+
+        """
         while os.path.exists(log_file_name):
             base_name = log_file_name.split(".log")[0]
-            if base_name[-2] == '_':
-                log_file_name = base_name[:-1] + str(int(base_name[-1])+1) + ".log"
+
+            if base_name[-2] == "_":
+                log_file_name = base_name[:-1] + str(int(base_name[-1]) + 1) + ".log"
+
             else:
                 log_file_name = base_name + "_1.log"
+        """
 
-        fileHandler = logging.FileHandler(
-            log_file_name, 
-            delay=True
-        )
+        fileHandler = logging.FileHandler(log_file_name, delay=True)
+
         fileHandler.setFormatter(
             logging.Formatter("[%(asctime)s %(name)-16s %(levelname)-7s]  %(message)s")
         )
 
         self.logger.addHandler(fileHandler)
 
-        self.colors = {"initialise": {}, "execute": {}, "finalise": {}}
+        blue = "{l_bar}%s{bar}%s{r_bar}"
+        yellow = "{l_bar}%s{bar}%s{r_bar}"
+        green = "{l_bar}%s{bar}%s{r_bar}"
+        white = "{l_bar}%s{bar}%s{r_bar}"
 
-        self.colors["initialise"]["input"] = "{l_bar}%s{bar}%s{r_bar}" % (
-            Fore.BLUE,
-            Fore.RESET,
-        )
-        self.colors["execute"]["input"] = "{l_bar}%s{bar}%s{r_bar}" % (
-            Fore.YELLOW,
-            Fore.RESET,
-        )
-        self.colors["finalise"]["input"] = "{l_bar}%s{bar}%s{r_bar}" % (
-            Fore.GREEN,
-            Fore.RESET,
-        )
-        self.colors["execute"]["event"] = "{l_bar}%s{bar}%s{r_bar}" % (
-            Fore.WHITE,
-            Fore.RESET,
-        )
+        blue = blue % (Fore.BLUE, Fore.RESET)
+        yellow = yellow % (Fore.YELLOW, Fore.RESET)
+        green = green % (Fore.GREEN, Fore.RESET)
+        white = white % (Fore.WHITE, Fore.RESET)
+
+        self.colors = {"blue": blue, "yellow": yellow, "green": green, "white": white}
+
+        self.state = None
+
+        self._current_input = None
+        self._current_output = None
+
+        self.store = Store(self.name)
+
+        self.targets, self.nodes, self.algorithms = {}, {}, {}
+        self.loaded_io = {"inputs": {}, "outputs": {}}
+
+        self.translation = {}
+        self.translate()
+
+        # Loading input / output and initialising algorithms.
+        # Not all inputs are loaded. Only those relevant for
+        # requested targets.
+
+        t_io = {}
+
+        for o_name in self.outputs:
+            o = self.io(o_name)
+
+            for t_name, t_job_inputs in o.targets.items():
+
+                if not t_name in self.targets:
+
+                    self.targets[t_name] = self.node(t_name)
+
+                    t_io[t_name] = {"job_inputs": t_job_inputs, "job_outputs": [o_name]}
+
+                else:
+                    t_io[t_name]["job_outputs"].append(o_name)
+
+                for i_name in t_job_inputs:
+                    i = self.io(i_name)
+
+        # initialising job inputs / outputs for the targets.
+        for t_name in self.targets:
+
+            if self.node(t_name).job_inputs == []:
+                self.node(t_name).job_inputs = t_io[t_name]["job_inputs"]
+
+            if self.node(t_name).job_outputs == []:
+                self.node(t_name).job_outputs = t_io[t_name]["job_outputs"]
+
+    def translate(self, obj_name=None):
+        """This function constructs a dictionary to translate
+        the name of any object to the name of the main object
+        which computes them. This is just translating the name."""
+
+        if obj_name is not None:
+
+            # simply returns the object name.
+            try:
+                return self.translation[obj_name]
+
+            except KeyError:
+
+                self.translation[obj_name] = obj_name
+
+                return self.translation[obj_name]
+
+        else:
+
+            # build global dictionary.
+            for primary_name, primary_config in self.objects.items():
+
+                if "output" in primary_config:
+
+                    for out_name in FN.get_nested_values(primary_config["output"]):
+
+                        self.translation[out_name] = primary_name
+
+    def io(self, io_name):
+        """Returns a specific input/output instance."""
+
+        for category in ["inputs", "outputs"]:
+            if io_name in self.loaded_io[category]:
+
+                return self.loaded_io[category][io_name]
+
+        if io_name in self.inputs:
+
+            io_config, category = self.inputs[io_name], "inputs"
+
+            self.loaded_io[category][io_name] = Input(
+                io_name, io_config, self.store, self.logger
+            )
+
+        elif io_name in self.outputs:
+
+            io_config, category = self.outputs[io_name], "outputs"
+
+            self.loaded_io[category][io_name] = Output(
+                io_name, io_config, self.store, self.logger
+            )
+
+        else:
+            sys.exit(
+                f"ERROR: input / ouput {io_name} not defined in the configuration."
+            )
+
+        self.loaded_io[category][io_name].load()
+
+        return self.loaded_io[category][io_name]
+
+    def node(self, obj_name, job_inputs=[], job_outputs=[]):
+        """Instantiates a node for an object, including the corresponding algorithm instance
+        and the list of relevant samples. This function checks for circular dependencies.
+        The node instance is returned. This is a recursive function."""
+
+        # this call is necessary to find the correct algorithm for secondary outputs.
+        # N.B.: all object calls first pass through the node function.
+        obj_name = self.translate(obj_name)
+
+        if not obj_name in self.nodes:
+
+            self.nodes[obj_name] = Node(
+                obj_name, algorithm=None, job_inputs=job_inputs, job_outputs=job_outputs
+            )
+
+        if self.nodes[obj_name].algorithm is None:
+
+            self.nodes[obj_name].algorithm = self.alg(obj_name)
+
+            if self.nodes[obj_name].algorithm is not None:
+
+                if not self.nodes[obj_name].children:
+
+                    for _, dependencies in self.nodes[obj_name].algorithm.input.items():
+
+                        for d in dependencies:
+
+                            try:
+                                self.node(d).parent = self.nodes[obj_name]
+
+                            except anytreeExceptions.LoopError:
+                                sys.exit(
+                                    f"ERROR: circular node detected between {d} and {obj_name}"
+                                )
+
+        return self.nodes[obj_name]
+
+    def clear_algorithms(self):
+        """Clears all algorithm instances."""
+        for obj_name in list(self.algorithms.keys()):
+
+            del self.algorithms[obj_name]
+
+            self.nodes[obj_name].algorithm = None
+
+    def alg(self, obj_name):
+        """Instantiates an algorithm/object according to the
+        global configuration and returns its instance."""
+
+        if obj_name in self.algorithms:
+            return self.algorithms[obj_name]
+
+        else:
+            obj = obj_name.split(":")[0]
+
+            if obj in ["EVENT", "INPUT"]:
+                return None
+
+            elif obj in self.objects:
+
+                obj_config = self.objects[obj]
+
+                for m in sys.modules:
+
+                    alg_name = m.split(".")[-1]
+
+                    if obj_config["algorithm"] == alg_name:
+
+                        module = importlib.import_module(m)
+
+                        # algorithm instance.
+                        self.algorithms[obj_name] = getattr(module, alg_name)(
+                            obj_name, obj_config, self.store, self.logger
+                        )
+
+                        # initialisation of inputs and outputs. If no explicit
+                        # initialisation is found in the config default to the
+                        # empty dictionary {None: ""}.
+                        for io in ["input", "output"]:
+
+                            if io in obj_config:
+                                setattr(self.algorithms[obj_name], io, obj_config[io])
+
+                            setattr(self.algorithms[obj_name], io, {None: ""})
+
+                        return self.algorithms[obj_name]
+
+                sys.exit(f"ERROR: object {obj} has requested a non-existing algorithm.")
+
+            else:
+                sys.exit(f"ERROR: object {obj} not defined in the configuration.")
 
     def launch(self):
-        """Implement input/output loop."""
-        # -----------------------------------------------------------------------
-        # The store object is the output of the launch function.
-        # -----------------------------------------------------------------------
-
+        """Launches loops over inputs and outputs."""
         start = timeit.default_timer()
-
-        store = Store(self)
-
-        store.put("history", self._history, "PERM")
-
-        # -----------------------------------------------------------------------
-        # Instanciate/load the output. Files are opened and ready to be written.
-        # -----------------------------------------------------------------------
-
-        self._out = Output(self.name, store, self.logger, outputs=self.outputs)
-
-        if not self._out.is_loaded:
-            self._out.load()
-
-        all_inputs_vs_targets = self._out.get_inputs_vs_targets()
-
-        # -----------------------------------------------------------------------
-        # Instanciate algorithms for all targets specified in the job options.
-        # -----------------------------------------------------------------------
-
-        self.algorithms = {}
-        for i_name, targets in all_inputs_vs_targets.items():
-            for t in targets:
-
-                alg_name = self._config[t["object"]]["algorithm"]["name"]
-                obj_name = t["name"]
-
-                self.add(obj_name, alg_name, store)
-
-        # -----------------------------------------------------------------------
-        # Inputs will be initialised dynamically in the run function.
-        # -----------------------------------------------------------------------
-        self.instanciated_inputs = {}
-
-        # -----------------------------------------------------------------------
-        # Update the store in three steps: initialise, execute, finalise.
-        # -----------------------------------------------------------------------
 
         msg = f"Launching pyrate run {self.name}"
         print("\n", "*" * len(msg), msg, "*" * len(msg))
 
-        for state in ["initialise", "execute", "finalise"]:
+        # -----------------------------------------------------------------------
+        # Input loop.
+        # -----------------------------------------------------------------------
+        for i_name in tqdm(
+            self.loaded_io["inputs"],
+            desc="Input loop".ljust(70, "."),
+            disable=self.no_progress_bar,
+            bar_format=self.colors["blue"],
+        ):
 
-            # updating list of targets to be considered for the next loop.
-            current_inputs_vs_targets = self.update_inputs_vs_targets(
-                state, store, all_inputs_vs_targets
-            )
+            self._current_input = self.loaded_io["inputs"][i_name]
 
-            # update the store.
-            store = self.run(state, store, current_inputs_vs_targets)
+            for self.state in ["initialise", "execute", "finalise"]:
 
-        print("\n")
+                self.run()
+
+            self.clear_algorithms()
+
+        # -----------------------------------------------------------------------
+        # Output loop.
+        # -----------------------------------------------------------------------
+        for o_name in tqdm(
+            self.loaded_io["outputs"],
+            desc="Output loop".ljust(70, "."),
+            disable=self.no_progress_bar,
+            bar_format=self.colors["green"],
+        ):
+
+            self._current_output = self.loaded_io["outputs"][o_name]
+
+            for t_name in self._current_output.targets:
+
+                if not self.store.status(t_name) is EN.Pyrate.WRITTEN:
+
+                    self._current_output.write(t_name)
 
         stop = timeit.default_timer()
 
@@ -145,247 +326,118 @@ class Run:
             print("Execution time: ", str(stop - start))
 
         # self.logger.info("Execution time: ", str(stop - start))
+        return
 
-        return store
+    def run(self):
+        """Run the loop function for the current state."""
 
-    def run(self, state, store, inputs_vs_targets):
-        """Run the loop function."""
+        if self.state in ["initialise", "finalise"]:
 
-        prefix_types = {
-            "initialise": "Inputs:  ",
-            "execute": "Events:  ",
-            "finalise": "Inputs: ",
-        }
+            self.store.put("INPUT:name", self._current_input.name)
 
-        self.state = state
+            self.store.put("INPUT:config", self._current_input.config)
 
-        prefix = prefix_types[state]
+            self.loop()
 
-        info = self.state.rjust(70, ".")
+        elif self.state == "execute":
 
-        for i_name, targets in tqdm(
-            inputs_vs_targets.items(),
-            desc=f"{prefix}{info}",
-            disable=self.no_progress_bar,
-            bar_format=self.colors[self.state]["input"],
-        ):
+            tot_n_events = self._current_input.get_n_events()
 
-            # if there are no targets for this state, skip all loops.
-            if not targets:
-                continue
+            eslices = self.get_events_slices(tot_n_events)
 
-            if not i_name in self.instanciated_inputs:
-                self.instanciated_inputs[i_name] = Input(
-                    i_name, store, self.logger, self.inputs[i_name]
+            # ---------------------------------------------------------------
+            # Event loop.
+            # ---------------------------------------------------------------
+            for emin, emax in eslices:
+
+                info = (
+                    "Event loop"
+                    + f"({self._current_input.name},  emin: {emin},  emax: {emax})".rjust(
+                        60, "."
+                    )
                 )
 
-            self._in = self.instanciated_inputs[i_name]
+                self._current_input.set_idx(emin)
 
-            if not self._in.is_loaded:
-                self._in.load()
+                erange = emax - emin + 1
 
-            if self.state in {"initialise", "finalise"}:
-                # ---------------------------------------------------------------
-                # Initialise and finalise loops
-                # ---------------------------------------------------------------
-                store.put("INPUT:name", i_name, "TRAN")
-                store.put("INPUT:config", self.inputs[i_name], "TRAN")
+                for idx in tqdm(
+                    range(erange),
+                    desc=f"{info}",
+                    disable=self.no_progress_bar,
+                    bar_format=self.colors["white"],
+                ):
+                    self.store.put("INPUT:name", self._current_input.name)
 
-                self.loop(store, targets)
+                    self.store.put("INPUT:config", self._current_input.config)
 
-                store.clear("TRAN")
+                    self.store.put("EVENT:idx", self._current_input.get_idx())
 
-            elif self.state == "execute":
-                # ---------------------------------------------------------------
-                # Execute loop
-                # ---------------------------------------------------------------
+                    self.loop()
 
-                tot_n_events = self._in.get_n_events()
+                    self._current_input.set_next_event()
 
-                eslices = self.get_events_slices(tot_n_events)
+    def loop(self):
+        """Loop over targets and calls them."""
 
-                # ---------------------------------------------------------------
-                # Event loop
-                # ---------------------------------------------------------------
+        for t_name, t_instance in self.targets.items():
 
-                for emin, emax in eslices:
+            if self._current_input.name in t_instance.job_inputs:
 
-                    info = (
-                        f"{self.state} ({i_name},  emin: {emin},  emax: {emax})".rjust(
-                            70, "."
-                        )
-                    )
+                self.call(t_name)
 
-                    self._in.set_idx(emin)
+        self.store.clear()
 
-                    erange = emax - emin + 1
+    def call(self, obj_name):
+        """Calls an algorithm for the current state."""
+        if self.store.get(obj_name) is EN.Pyrate.NONE:
 
-                    for idx in tqdm(
-                        range(erange),
-                        desc=f"{prefix}{info}",
-                        disable=self.no_progress_bar,
-                        bar_format=self.colors[self.state]["event"],
-                    ):
-                        store.put("INPUT:name", i_name, "TRAN")
-                        store.put("INPUT:config", self.inputs[i_name], "TRAN")
-                        store.put("EVENT:idx", self._in.get_idx())
+            alg = self.node(obj_name).algorithm
 
-                        self.loop(store, targets)
+            if alg is not None:
 
-                        store.clear("TRAN")
+                for condition, dependencies in alg.input.items():
 
-                        self._in.set_next_event()
-                
-                # Printing average time taken to execute an alg for a single event
-                if self.alg_timing:
-                    for alg in sorted(self.algorithms):
-                        if self.alg_timing == True:
-                            self.logger.info(f"{self.algorithms[alg].name:<40}{self.alg_times[alg]/erange:>20.2f} ns")
-                        elif self.alg_timing == "print" or self.alg_timing == "p":
-                            print(f"{self.algorithms[alg].name:<40}{self.alg_times[alg]/erange:>20.2f} ns")
+                    for d in dependencies:
+                        self.call(d)
 
+                    passed = getattr(alg, self.state)(condition)
 
-                self._in.offload()
+                    if not passed:
+                        break
 
-        if self.state == "finalise":
-            # ---------------------------------------------------------------
-            # Write outputs after finalise input loop
-            # ---------------------------------------------------------------
+                # the block below is work in progress.
+                # checking that the object is complete.
+                # if not self.is_complete(obj_name, alg):
+                #    sys.exit(
+                #        f"ERROR: object {obj_name} is on the store but additional output is missing !!!"
+                #    )
 
-            for t in targets:
-
-                if not store.check(t["name"], "PERM"):
-                    msg = f"finalise has been run for {t['name']} but object has not been put on PERM store!!!"
-
-                    sys.exit(f"ERROR: {msg}")
-                    self.logger.error(msg)
-
-                else:
-                    if store.get(t["name"], "PERM") is not enums.Pyrate.SKIP_WRITE:
-                        self._out.write(t["name"])
-
-        return store
-
-    def loop(self, store, targets):
-        """Loop over required targets to resolve them. Skips completed ones."""
-        for t in targets:
-
-            self._history[t["name"]] = []
-
-            self._target_history = self._history[t["name"]]
-
-            self._history["CURRENT TARGET"] = t["name"]
-
-            self.call(t["object"], target_name=t["name"])
-
-    def call(self, obj_name, target_name=""):
-        """Calls an algorithm."""
-
-        # print(f"calling {obj_name} is target: ({is_target})")
-
-        alg = None
-
-        # Assign the name attribute in the config dictionary here.
-        # This might be done best in the Job class though...
-        if target_name:
-            alg = self.algorithms[target_name]
-
-        else:
-            alg = self.algorithms[obj_name]
-
-        entry = f"{obj_name}:{alg.name}:TARGET({target_name})"
-
-        if entry in self._target_history:
-
-            self.get_history(show=True)
-
-            FN.pretty(self._config[obj_name])
-
-            sys.exit(f"ERROR:{entry} already executed")
-
-        else:
-
-            self._target_history.append(entry)
-
-            # preparing input variables
-            getattr(alg, f"_{self.state}")()
-            # Timing the algorithm if timing is flagged
-            if self.alg_timing:
-                t1 = time.time_ns()
-                # executing main algorithm state
-                getattr(alg, self.state)()
-                t2 = time.time_ns()
-                self.alg_times[alg.name] += t2-t1
             else:
-                # executing main algorithm state
-                getattr(alg, self.state)()
+                self._current_input.read(obj_name)
 
-    def add(self, obj_name, alg_name, store):
-        """Adds instances of algorithms dynamically.
-        obj_name can be the name of a target."""
+        # for o_name in self.node(obj_name).job_outputs:
+        #
+        #    if self.store.status(obj_name) is EN.Pyrate.READY:
+        #
+        #        self._current_output = self.loaded_io["outputs"][o_name]
+        #
+        #        self._current_output.write(obj_name)
 
-        obj_config = self._config[obj_name.split(":", 1)[0]]
+        return
 
-        if not obj_name in self.algorithms:
-            self.algorithms.update(
-                {
-                    obj_name: getattr(importlib.import_module(m), m.split(".")[-1])(
-                        obj_name, obj_config, store, self.logger
-                    )
-                    for m in sys.modules
-                    if alg_name == m.split(".")[-1]
-                }
+    def is_complete(self, obj_name, alg):
+        """If the main object is on the store with a valid value,
+        additional output is checked to be on the store."""
+
+        if self.store.get(obj_name) is not EN.Pyrate.NONE:
+
+            return all(
+                [self.store.get(o) is not EN.Pyrate.NONE for o in alg.output[obj_name]]
             )
 
-    def update_inputs_vs_targets(self, state, store, inputs_vs_targets):
-        """Updates the dictionary containing all the targets relative to an input."""
-
-        new_inputs_vs_targets = dict.fromkeys(inputs_vs_targets.keys(), [])
-
-        for i_name, targets in inputs_vs_targets.items():
-            for t in targets:
-
-                if not ":" + i_name in t["name"] or "," + i_name in t["name"]:
-                    continue
-
-                # we cannot immediately "get" the target value, as this might trigger
-                # the update_store function and we don't want to do that at this stage.
-                if store.check(t["name"], "PERM"):
-
-                    if store.get(t["name"], "PERM") is enums.Pyrate.SKIP_NEXT_STATE:
-                        continue
-
-                if not FN.check_dict_in_list(new_inputs_vs_targets[i_name], t):
-                    new_inputs_vs_targets[i_name].append(t)
-
-        return new_inputs_vs_targets
-
-    def update_store(self, obj_name, store):
-        """Updates value of object on the store.
-        N.B. obj_name here is never the name of a target.
-        This method is never called for targets as they are called explicitly in the loop."""
-
-        if not obj_name in self._config:
-            self._in.read(obj_name)
-            return
-
         else:
-            alg_name = self._config[obj_name]["algorithm"]["name"]
-
-            try:
-                alg_instance = self.algorithms[obj_name]
-
-            except KeyError:
-                self.add(obj_name, alg_name, store)
-
-            self.call(obj_name)
-            return
-
-    def get_history(self, show=False):
-        """Returns the algorithm history."""
-        if show:
-            FN.pretty(self._history)
-        return self._history
+            return True
 
     def get_events_slices(self, tot):
         """Updates emin and emax attributes for running on valid slice."""
@@ -395,22 +447,25 @@ class Run:
         # ---------------------------------------------------------------
         # Reading input events
         # ---------------------------------------------------------------
-        if hasattr(self._in, "eslices"):
+        if hasattr(self._current_input, "eslices"):
 
-            if isinstance(self._in.eslices, dict):
+            if isinstance(self._current_input.eslices, dict):
                 emin, emax = 0, tot - 1
 
-                if "emin" in self._in.eslices:
-                    emin = self._in.eslices["emin"]
+                if "emin" in self._current_input.eslices:
+                    emin = self._current_input.eslices["emin"]
 
-                if "emax" in self._in.eslices and self._in.eslices["emax"] > -1:
-                    emax = self._in.eslices["emax"]
+                if (
+                    "emax" in self._current_input.eslices
+                    and self._current_input.eslices["emax"] > -1
+                ):
+                    emax = self._current_input.eslices["emax"]
 
                 eslices.append((emin, emax))
 
-            elif isinstance(self._in.eslices, list):
+            elif isinstance(self._current_input.eslices, list):
 
-                for s in self._in.eslices:
+                for s in self._current_input.eslices:
 
                     if "slice" in s:
 
@@ -458,7 +513,7 @@ class Run:
                         eslices.append((emin, emax))
 
             else:
-                emin, emax = 0, self._in.eslices - 1
+                emin, emax = 0, self._current_input.eslices - 1
 
                 eslices.append((emin, emax))
 

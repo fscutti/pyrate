@@ -6,12 +6,20 @@ import mmap
 
 
 def modus_ponens(p, q):
-    """Implements the modus ponens logic table: p -> q"""
+    """Implements the modus ponens logic table: p -> q."""
     if p:
         return q
     else:
         return not p
 
+def is_float(v):
+    """Checks if value string is a number."""
+    try:
+        float(v)
+        return True
+
+    except ValueError:
+        return False
 
 def find_env(path, env):
     """Checks existence of environment variable in path and eventually replaces it."""
@@ -44,6 +52,35 @@ def find_files(paths, env=None):
     files.sort()
 
     return files
+
+
+def get_nested_values(d):
+    """Returns a generator over all values of a nested dictionary."""
+    for v in d.values():
+        if isinstance(v, dict):
+            yield from get_nested_values(v)
+        else:
+            yield v
+
+def expand_nested_values(d):
+    """ Returns a generator like get_nested_values, but handles all iterables 
+        instead of just dictionaries. Stops when the last interable contains
+        not more iterables
+    """
+    if iterable(d) and not isinstance(d, str):
+        # Ok still dealing with an indexable object (but not a string)
+        if isinstance(d, dict):
+            # Dictionary case
+            for v in d.values():
+                yield from expand_nested_values(v)
+
+        else:
+            # List, tuple, array case...
+            for v in d:
+                yield from expand_nested_values(v)
+    else:
+        # Not iterable / is a string
+        yield d
 
 
 def flatten(l):
@@ -225,14 +262,6 @@ def iterable(obj):
         return False
     else:
         return True
-
-def is_float(var):
-    """Checks if a string can be converted to a float"""
-    try:
-        float(var)
-        return True
-    except:
-        return False
 
 
 def is_wc_ascii(filepath):

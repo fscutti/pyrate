@@ -13,21 +13,15 @@
                        Otherwise accepts floats for the appropriate conversion
                        for non-physical waveforms (ADC).
     
-    Required states:
-        initialise:
-            output:
-    
     Example config:
     
     ChargeConstant_CHX:
-        algorithm:
-            name: ChargeConstant
-            impedance: 50
-            rate: 500e6
-            unit: pC
-            waveform_unit: mV
-        initialise:
-            output:
+        algorithm: ChargeConstant
+        impedance: 50
+        rate: 500e6
+        unit: pC
+        waveform_unit: mV
+
 """
 
 import sys
@@ -43,12 +37,12 @@ class ChargeConstant(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """Prepare the constant for calculating charge"""
         # Deal with charge constants
-        impedance = self.config["algorithm"]["impedance"]
-        sample_rate = float(self.config["algorithm"]["rate"])
-        charge_units = self.config["algorithm"]["unit"]
+        impedance = self.config["impedance"]
+        sample_rate = float(self.config["rate"])
+        charge_units = self.config["unit"]
         if charge_units in q_units:
             charge_units = q_units[charge_units]
         else:
@@ -59,7 +53,7 @@ class ChargeConstant(Algorithm):
                     "ERROR: In algorithm ChargeConstant, unit parameter could not be converted to a float."
                 )
 
-        waveform_units = self.config["algorithm"]["waveform_unit"]
+        waveform_units = self.config["waveform_unit"]
         if waveform_units in wf_units:
             waveform_units = wf_units[waveform_units]
         else:
@@ -71,7 +65,7 @@ class ChargeConstant(Algorithm):
                 )
 
         charge_constant = waveform_units * charge_units / (impedance * sample_rate)
-        self.store.put(f"{self.name}", charge_constant)
+        self.store.save(f"{self.name}", charge_constant)
 
 
 # EOF
