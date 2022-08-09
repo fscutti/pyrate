@@ -43,7 +43,6 @@ class PeakHeight(Algorithm):
         
 
         if window is Pyrate.NONE or waveform is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
             return
 
         PeakHeight = np.max(waveform[window[0] : window[1]])

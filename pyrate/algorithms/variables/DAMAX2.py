@@ -56,7 +56,6 @@ class DAMAX2(Algorithm):
         pulse_start = self.store.get(self.config["input"]["pulse_start"])
         waveform = self.store.get(self.config["input"]["waveform"])
         if pulse_start is Pyrate.NONE or waveform is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
             return
 
         pulse_start -= self.delay
@@ -68,7 +67,6 @@ class DAMAX2(Algorithm):
         charge2 = np.sum(waveform[window2[0] : window2[1]])
 
         if (charge1<=0 or charge2<=0):
-            self.store.put(self.name, Pyrate.NONE)
             return
 
         X2_ChargeRatio = charge1/charge2
