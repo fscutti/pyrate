@@ -80,7 +80,6 @@ class ReaderCAEN1730_ZLE(Reader):
                 head1 = int.from_bytes(head1, "little")
                 if (head1 & 0xFFFF0000) == 0xa0000000:
                     break
-
             else:
                 self._mmf.seek(0, 0)
                 return
@@ -141,7 +140,6 @@ class ReaderCAEN1730_ZLE(Reader):
             head1 = int.from_bytes(head1, "little")
             if (head1 & 0xFFFF0000) == 0xa0000000:
                 break
-
         else:
             self._mmf.seek(0, 0)
             return
