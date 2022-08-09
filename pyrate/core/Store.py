@@ -13,7 +13,6 @@ class Store:
         self.name = name
         self._transient = {}
         self._permanent = {}
-        self._written = set()
 
     def put(self, name, obj):
         """Puts an object on the store."""
@@ -48,20 +47,5 @@ class Store:
 
         else:
             self._permanent[name] = obj
-
-    def status(self, name, is_written=None):
-        """Returns status of an object."""
-        if is_written is not None:
-
-            if is_written:
-                self._written.add(name)
-
-        else:
-            if name in self._written:
-                return EN.Pyrate.WRITTEN
-
-            else:
-                return EN.Pyrate.NONE
-
 
 # EOF
