@@ -100,13 +100,17 @@ class ReaderCAEN1730_PSD(Reader):
 
             # Read in the event info from the header
             self._eventPos.append(self._mmf.tell())
-            head1 = self._mmf.read(4)
-            if head1 == bytes():
-                break
+            
+            while head1 := self._mmf.read(4):
+                head1 = int.from_bytes(head1, "little")
+                if (head1 & 0xFFFF0000) == 0xa0000000:
+                    break
 
-            # If we read something, increment the event counter and skip to the next event
+            else:
+                self._mmf.seek(0, 0)
+                return
+                # If we read something, increment the event counter and skip to the next event
             self._n_events += 1
-            head1 = int.from_bytes(head1, "little")
             eventSize = head1 & 0b00001111111111111111111111111111
 
             seekSize = 4 * (eventSize - 1)  # How far we need to jump
@@ -208,11 +212,15 @@ class ReaderCAEN1730_PSD(Reader):
         # self._mmf.seek(self._eventPos[self._idx],0)
         self._hasSubEvent = True
         # Read in the event info from the header
-        head1 = self._mmf.read(4)
-        if head1 == bytes():
-            return False
+        while head1 := self._mmf.read(4):
+            head1 = int.from_bytes(head1, "little")
+            if (head1 & 0xFFFF0000) == 0xa0000000:
+                break
 
-        head1 = int.from_bytes(head1, "little")
+        else:
+            self._mmf.seek(0, 0)
+            return
+
         head2 = self._mmf.read(4)
         head2 = int.from_bytes(head2, "little")
         head3 = self._mmf.read(4)

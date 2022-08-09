@@ -76,13 +76,16 @@ class ReaderCAEN1730_ZLE(Reader):
         while True:
             # Read in the event info from the header
             self._eventPos.append(self._mmf.tell())
-            head1 = self._mmf.read(4)
-            if head1 == bytes():
-                break
+            while head1 := self._mmf.read(4):
+                head1 = int.from_bytes(head1, "little")
+                if (head1 & 0xFFFF0000) == 0xa0000000:
+                    break
 
+            else:
+                self._mmf.seek(0, 0)
+                return
             # If we read something, increment the event counter and skip to the next event
             self._n_events += 1
-            head1 = int.from_bytes(head1, "little")
             eventSize = head1 & 0b00001111111111111111111111111111
 
             seekSize = 4 * (eventSize - 1)  # How far we need to jump
@@ -134,8 +137,14 @@ class ReaderCAEN1730_ZLE(Reader):
         self._mmf.seek(self._eventPos[self._idx], 0)
         # Read in the event info from the header
 
-        head1 = self._mmf.read(4)
-        head1 = int.from_bytes(head1, "little")
+        while head1 := self._mmf.read(4):
+            head1 = int.from_bytes(head1, "little")
+            if (head1 & 0xFFFF0000) == 0xa0000000:
+                break
+
+        else:
+            self._mmf.seek(0, 0)
+            return
         eventSize = head1 & 0b00001111111111111111111111111111
 
         head2 = self._mmf.read(4)
