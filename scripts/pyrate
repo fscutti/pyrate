@@ -5,7 +5,6 @@ import yaml
 import cProfile
 import pstats
 from datetime import datetime
-from pyinstrument import Profiler
 
 from pyrate.core.Job import Job
 
@@ -92,13 +91,6 @@ if __name__ == "__main__":
 
             # Save the profiling to file
             time_stats.dump_stats(filename=f"{j_name}{datetime.now():.%Y-%m-%d-%Hh%M}.prof")
-
-            # profiler = Profiler()
-            # profiler.start()
-            # job.setup()
-            # job.launch()
-            # profiler.stop()
-            # profiler.print()
 
         else:
             job.setup()
