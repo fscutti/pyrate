@@ -462,6 +462,8 @@ class TreeMaker(Algorithm):
                 if type(entry) == str:
                     var_names = list(filter(None, ST.get_items(entry)))
                     retlist += list(zip(var_names, var_names))
+                elif type(entry) == list:
+                    retlist += list(zip(entry, entry))
                 elif type(entry) == dict:
                     retlist += list(entry.items())
                 else:

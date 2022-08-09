@@ -121,7 +121,7 @@ class Job:
             # Add all remaining attributes.
             self.job["inputs"][i_name].update(i_attr)
 
-        self.job["configs"]["global"] = {"objects": {}}
+        self.job["configs"]["global"] = {"objects": {}, "keys":{}}
         for c_name, c_attr in self.config["configs"].items():
 
             self.job["configs"][c_name] = {"files": []}
@@ -147,6 +147,17 @@ class Job:
             self.job["configs"]["global"]["objects"].update(
                 self.job["configs"][c_name]["objects"]
             )
+
+            # for k in self.job["configs"][c_name]:
+            #     if '<' in k and '>' in k:
+            #         # found a key:
+            #         self.job["configs"]["global"]["keys"][k] = self.job["configs"][c_name][k]
+
+
+        # # Deal with object duplication
+        # from code import interact
+        # interact(local=locals())
+
 
         for o_name, o_attr in self.config["outputs"].items():
 
