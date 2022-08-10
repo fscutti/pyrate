@@ -1,5 +1,6 @@
-<Channels>: [0, 1, 2, 3, 4, 5]
-
+<channels>: [0, 1]
+<a>: [10,11,12,13,14,15,16,17]
+$hello$: [1,2,3,4,5]
 # -----------------------------------------------------------
 # Objects computed by algorithms
 # -----------------------------------------------------------
@@ -9,65 +10,33 @@ objects:
         # Waveform and Baseline algorithms
         # -----------------------------------------------------------
 
-    BaselineDynamic_CH0:
+    BaselineDynamic_CH<channels>:
         algorithm: BaselineDynamic
         samples: 40
         threshold: 20
         input:
-            waveform: EVENT:board_0:ch_0:waveform
+            waveform: EVENT:board_0:ch_<channels>:waveform
 
-
-    BaselineDynamic_CH1:
-        algorithm: BaselineDynamic
-        samples: 40
-        threshold: 20
-        input:
-            waveform: EVENT:board_0:ch_1:waveform
-
-    BaselineNaive_CH0:
+    BaselineNaive_CH<channels>:
         algorithm: BaselineNaive
         samples: 40
         input:
-            waveform: EVENT:board_0:ch_0:waveform
+            waveform: EVENT:board_0:ch_<channels>:waveform
 
-
-    BaselineNaive_CH1:
-        algorithm: BaselineNaive
-        samples: 40
-        input:
-            waveform: EVENT:board_0:ch_1:waveform
-
-
-    CorrectedWaveform_CH0:
+    CorrectedWaveform_CH<channels>:
         algorithm: CorrectedWaveform
         vpp: 2.5
         adcrange: 16384
         polarity: neg
         units: mV
         input:
-            waveform: EVENT:board_0:ch_0:waveform
-            baseline: BaselineNaive_CH0
+            waveform: EVENT:board_0:ch_<channels>:waveform
+            baseline: BaselineNaive_CH<channels>
 
-
-    CorrectedWaveform_CH1:
-        algorithm: CorrectedWaveform
-        vpp: 2.5
-        adcrange: 16384
-        polarity: neg
-        units: mV
-        input:
-            waveform: EVENT:board_0:ch_1:waveform
-            baseline: BaselineNaive_CH1
-
-    AverageWaveform_CH0:
+    AverageWaveform_CH<channels>:
         algorithm: AverageWaveform
         input:
-            waveform: CorrectedWaveform_CH0
-
-    AverageWaveform_CH1:
-        algorithm: AverageWaveform
-        input:
-            waveform: CorrectedWaveform_CH1
+            waveform: CorrectedWaveform_CH<channels>
 
 
         # -----------------------------------------------------------
@@ -78,82 +47,44 @@ objects:
         algorithm: Window
         window: full
 
-    PulseWindow_CH0:
+    PulseWindow_CH<channels>:
         algorithm: Window
         left: -50
         right: 0
         input:
-            pivot: PulseStart_CH0
-    
-    PulseWindow_CH1:
-        algorithm: Window
-        left: -50
-        right: 0
-        input:
-            pivot: PulseStart_CH1
+            pivot: PulseStart_CH<channels>
 
-
-    PromptWindow_CH0:
+    PromptWindow_CH<channels>:
         algorithm: Window
         left: -10
         right: 0
         input:
-            pivot: PeakLocation_CH0
-    
-    PromptWindow_CH1:
-        algorithm: Window
-        left: -10
-        right: 0
-        input:
-            pivot: PeakLocation_CH1
+            pivot: PeakLocation_CH<channels>
 
-
-    DelayedWindow_CH0:
+    DelayedWindow_CH<channels>:
         algorithm: Window
         left: 0
         right: 20
         pivot index: end
         input:
-            pivot: PromptWindow_CH0
-
-    DelayedWindow_CH1:
-        algorithm: Window
-        left: 0
-        right: 20
-        pivot index: end
-        input:
-            pivot: PromptWindow_CH1
+            pivot: PromptWindow_CH<channels>
 
         # -----------------------------------------------------------
         # Variables
         # -----------------------------------------------------------
 
-    PeakHeight_CH0:
+    PeakHeight_CH<channels>:
         algorithm: PeakHeight
         window: true
         input:
-            waveform: CorrectedWaveform_CH0
+            waveform: CorrectedWaveform_CH<channels>
             window: TotalWindow
 
-    PeakHeight_CH1:
-        algorithm: PeakHeight
-        window: true
-        input:
-            waveform: CorrectedWaveform_CH1
-            window: TotalWindow
-
-    PeakLocation_CH0:
+    PeakLocation_CH<channels>:
         algorithm: PeakLocation
         window: true
         input:
-            waveform: CorrectedWaveform_CH0
-            window: TotalWindow
-    
-    PeakLocation_CH1:
-        algorithm: PeakLocation
-        window: true
-        input:
-            waveform: CorrectedWaveform_CH1
+            waveform: CorrectedWaveform_CH<channels>
             window: TotalWindow
     
     ChargeConstant:
@@ -163,123 +94,64 @@ objects:
         unit: pC
         waveform_unit: mV
     
-    PulseSum_CH0:
+    PulseSum_CH<channels>:
         algorithm: Sum
         input:
-            waveform: CorrectedWaveform_CH0
-            window: PulseWindow_CH0
-    
-    PulseSum_CH1:
-        algorithm: Sum
-        input:
-            waveform: CorrectedWaveform_CH1
-            window: PulseWindow_CH1
+            waveform: CorrectedWaveform_CH<channels>
+            window: PulseWindow_CH<channels>
 
-    PromptCharge_CH0:
+    PromptCharge_CH<channels>:
         algorithm: Charge
         impedance: 50
         rate: 500e6
         unit: pC
         waveform_unit: mV
         input:
-            waveform: CorrectedWaveform_CH0
-            window: PromptWindow_CH0
-    
-    PromptCharge_CH1:
-        algorithm: Charge
-        impedance: 50
-        rate: 500e6
-        unit: pC
-        waveform_unit: mV
-        input:
-            waveform: CorrectedWaveform_CH1
-            window: PromptWindow_CH1
+            waveform: CorrectedWaveform_CH<channels>
+            window: PromptWindow_CH<channels>
 
-    DelayedCharge_CH0:
+    DelayedCharge_CH<channels>:
         algorithm: Charge
         impedance: 50
         rate: 500e6
         unit: pC
         waveform_unit: mV
         input:
-            waveform: CorrectedWaveform_CH0
-            window: DelayedWindow_CH0
-    
-    DelayedCharge_CH1:
-        algorithm: Charge
-        impedance: 50
-        rate: 500e6
-        unit: pC
-        waveform_unit: mV
-        input:
-            waveform: CorrectedWaveform_CH1
-            window: DelayedWindow_CH1
+            waveform: CorrectedWaveform_CH<channels>
+            window: DelayedWindow_CH<channels>
 
-    TotalCharge_CH0:
+    TotalCharge_CH<channels>:
         algorithm: Charge
         impedance: 50
         rate: 500e6
         unit: pC
         waveform_unit: mV
         input:
-            waveform: CorrectedWaveform_CH0
-            window: TotalWindow
-    
-    TotalCharge_CH1:
-        algorithm: Charge
-        impedance: 50
-        rate: 500e6
-        unit: pC
-        waveform_unit: mV
-        input:
-            waveform: CorrectedWaveform_CH1
+            waveform: CorrectedWaveform_CH<channels>
             window: TotalWindow
 
-    PulseCharge_CH0:
+    PulseCharge_CH<channels>:
         algorithm: Charge
         impedance: 50
         rate: 500e6
         unit: pC
         waveform_unit: mV
         input:
-            waveform: CorrectedWaveform_CH0
-            window: PulseWindow_CH0
-    
-    PulseCharge_CH1:
-        algorithm: Charge
-        impedance: 50
-        rate: 500e6
-        unit: pC
-        waveform_unit: mV
-        input:
-            waveform: CorrectedWaveform_CH1
-            window: PulseWindow_CH1
+            waveform: CorrectedWaveform_CH<channels>
+            window: PulseWindow_CH<channels>
 
-
-    PulseStart_CH0:
+    PulseStart_CH<channels>:
         algorithm:  CFD
         delay: 5
         scale: 1
         cfd_threshold: 15
         input:
-            waveform: CorrectedWaveform_CH0
+            waveform: CorrectedWaveform_CH<channels>
         output:
-            times: PulseCFDTimes_CH0
-            trace: PulseCFDTrace_CH0
+            times: PulseCFDTimes_CH<channels>
+            trace: PulseCFDTrace_CH<channels>
 
-
-    PulseStart_CH1:
-        algorithm: CFD
-        delay: 5
-        scale: 1
-        cfd_threshold: 15
-        input:
-            waveform: CorrectedWaveform_CH1
-        output:
-            times: PulseCFDTimes_CH1
-            trace: PulseCFDTrace_CH1
-
-    TrapezoidWaveform_CH0:
+    TrapezoidWaveform_CH<channels>:
         algorithm: TrapezoidFilter
         rise: 10
         gap: 10
@@ -287,101 +159,50 @@ objects:
         tau: 2e-6
         zeropole: true
         input:
-            waveform: CorrectedWaveform_CH0
+            waveform: CorrectedWaveform_CH<channels>
 
-    TrapezoidWaveform_CH1:
-        algorithm: TrapezoidFilter
-        rise: 10
-        gap: 10
-        rate: 500e6
-        tau: 2e-6
-        zeropole: true
-        input:
-            waveform: CorrectedWaveform_CH1
-
-    CFD_CH0:
+    CFD_CH<channels>:
         algorithm: CFD
         delay: 5
         scale: 1
         cfd_threshold: 10
         savecfd: True
         input:
-            waveform: TrapezoidWaveform_CH0
+            waveform: TrapezoidWaveform_CH<channels>
         output:
-            times: CFDTimes_CH0
-            trace: CFDTrace_CH0
-    
-    CFD_CH1:
-        algorithm: CFD
-        delay: 5
-        scale: 1
-        cfd_threshold: 10
-        savecfd: True
-        input:
-            waveform: TrapezoidWaveform_CH1
-        output:
-            times: CFDTimes_CH1
-            trace: CFDTrace_CH1
+            times: CFDTimes_CH<channels>
+            trace: CFDTrace_CH<channels>
 
-    PromptDelayChargeRatio_CH0:
+    PromptDelayChargeRatio_CH<channels>:
         algorithm: Ratio
         input:
-            numerator: PromptCharge_CH0
-            denominator: DelayedCharge_CH0
+            numerator: PromptCharge_CH<channels>
+            denominator: DelayedCharge_CH<channels>
 
-    PromptDelayChargeRatio_CH1:
-        algorithm: Ratio
-        input:
-            numerator: PromptCharge_CH1
-            denominator: DelayedCharge_CH1
-
-    MeanTime_CH0:
+    MeanTime_CH<channels>:
         algorithm: MeanTime
         rate: 500e6
         input:
-            waveform: CorrectedWaveform_CH0
-            window: PulseWindow_CH0
-    
-    MeanTime_CH1:
-        algorithm: MeanTime
-        rate: 500e6
-        input:
-            waveform: CorrectedWaveform_CH1
-            window: PulseWindow_CH1
+            waveform: CorrectedWaveform_CH<channels>
+            window: PulseWindow_CH<channels>
 
-
-    PromptDelayChargeRatioCalculator_CH0:
+    PromptDelayChargeRatioCalculator_CH<channels>:
         algorithm: Calculator
         equation: A+(A+B)*(C+D)
         input:
             variables:
                 # A: 1
                 # B: 11.5
-                # C: PromptCharge_CH0
+                # C: PromptCharge_CH<channels>
                 # D: 3e-1
-                - "A = 1; B = 11.5; C = PromptCharge_CH0; D = 3e-1"
-    
-    PromptDelayChargeRatioCalculator_CH1:
-        algorithm: Calculator
-        equation: A+(A+B)*(C+D)
-        input:
-             variables:
-                - "A = 1; B = 11.5; C = PromptCharge_CH0; D = 3e-1"
+                - "A = 1; B = 11.5; C = PromptCharge_CH<channels>; D = 3e-1"
 
-    PulseTime_CH0:
+    PulseTime_CH<channels>:
         algorithm: TimeConverter
         rate: 500e6
         unit: ns
         input:
-            sample_number: PulseStart_CH0
-
-
-    PulseTime_CH1:
-        algorithm: TimeConverter
-        rate: 500e6
-        unit: ns
-        input:
-            sample_number: PulseStart_CH1
+            sample_number: PulseStart_CH<channels>
 
     TimeDifference_CH01:
         algorithm: Difference
@@ -389,148 +210,78 @@ objects:
             x1: PulseTime_CH0
             x2: PulseTime_CH1
 
-    Moments_CH0:
+    Moments_CH<channels>:
         algorithm: Moment
         rate: 500e6
         input:
-            waveform: CorrectedWaveform_CH0
+            waveform: CorrectedWaveform_CH<channels>
             window: TotalWindow
         output:
-            mean: Mean_CH0
-            stddev: Stddev_CH0
-            skew: Skew_CH0
-            kurtosis: Kurtosis_CH0
-    
-    Moments_CH1:
-        algorithm: Moment
-        rate: 500e6
-        input:
-            waveform: CorrectedWaveform_CH1
-            window: TotalWindow
-        output:
-            mean: Mean_CH1
-            stddev: Stddev_CH1
-            skew: Skew_CH1
-            kurtosis: Kurtosis_CH1
+            mean: Mean_CH<channels>
+            stddev: Stddev_CH<channels>
+            skew: Skew_CH<channels>
+            kurtosis: Kurtosis_CH<channels>
 
-
-    DAMAX1_CH0:
+    DAMAX1_CH<channels>:
         algorithm: DAMAX1
         rate: 500e6
         cfd_delay: 10
         input:
-            waveform: CorrectedWaveform_CH0
-            pulse_start: PulseStart_CH0
-    
-    DAMAX1_CH1:
-        algorithm: DAMAX1
-        rate: 500e6
-        cfd_delay: 10
-        input:
-            waveform: CorrectedWaveform_CH1
-            pulse_start: PulseStart_CH1
+            waveform: CorrectedWaveform_CH<channels>
+            pulse_start: PulseStart_CH<channels>
 
-    DAMAX2_CH0:
+    DAMAX2_CH<channels>:
         algorithm: DAMAX2
         rate: 500e6
         cfd_delay: 10
         input:
-            waveform: CorrectedWaveform_CH0
-            pulse_start: PulseStart_CH0
-    
-    DAMAX2_CH1:
-        algorithm: DAMAX2
-        rate: 500e6
-        cfd_delay: 10
-        input:
-            waveform: CorrectedWaveform_CH1
-            pulse_start: PulseStart_CH1
+            waveform: CorrectedWaveform_CH<channels>
+            pulse_start: PulseStart_CH<channels>
         
-    FFT_CH0:
+    FFT_CH<channels>:
         algorithm: FFT
         rate: 500e6
         bins: 100
         input:
-            waveform: CorrectedWaveform_CH0
-            window: PulseWindow_CH0
-    
-    FFT_CH1:
-        algorithm: FFT
-        rate: 500e6
-        bins: 100
-        input:
-            waveform: CorrectedWaveform_CH1
-            window: PulseWindow_CH1
+            waveform: CorrectedWaveform_CH<channels>
+            window: PulseWindow_CH<channels>
 
-    LeadingEdge_CH0:
+    LeadingEdge_CH<channels>:
         algorithm: LeadingEdgeThreshold
         offset: 5
         threshold: 5
         input:
-            waveform: CorrectedWaveform_CH0
-    
-    LeadingEdge_CH1:
-        algorithm: LeadingEdgeThreshold
-        offset: 5
-        threshold: 5
-        input:
-            waveform: CorrectedWaveform_CH1
-
+            waveform: CorrectedWaveform_CH<channels>
 
         # -----------------------------------------------------------
         # Trees
         # -----------------------------------------------------------
         #
-    Channel_0:
+    Channel_<channels>:
         algorithm: TreeMaker
         filltype: event
         input:
-            vector<int>: {RawWaveform: EVENT:board_0:ch_0:waveform}
-            vector<float>: {CorrectedWaveform: CorrectedWaveform_CH0}
-            long: {Timestamp: EVENT:board_0:ch_0:ch_timestamp}
+            vector<int>: {RawWaveform: EVENT:board_0:ch_<channels>:waveform}
+            vector<float>: {CorrectedWaveform: CorrectedWaveform_CH<channels>}
+            long: {Timestamp: EVENT:board_0:ch_<channels>:ch_timestamp}
             vector<double>:
-                        - FFT_CH0, Moments_CH0
-                        - {CFDTrace: CFDTrace_CH0,
-                            CFDTimes: CFDTimes_CH0}
+                        - FFT_CH<channels>, Moments_CH<channels>
+                        - {CFDTrace: CFDTrace_CH<channels>,
+                            CFDTimes: CFDTimes_CH<channels>}
             float:
-                -   BaselineDynamic_CH0, BaselineNaive_CH0,
-                    PromptDelayChargeRatioCalculator_CH0, CFD_CH0,
-                    PulseCharge_CH0, TotalCharge_CH0
-                -   {DAMAX1: DAMAX1_CH0, DAMAX2: DAMAX2_CH0}
-                -   LeadingEdge_CH0, MeanTime_CH0
-                -   {Mean: Mean_CH0,
-                        Stddev: Stddev_CH0,
-                        Skew: Skew_CH0,
-                        Kurtosis: Kurtosis_CH0}
-                -   PeakHeight_CH0, PeakLocation_CH0, PulseStart_CH0,
-                    PulseTime_CH0, PromptDelayChargeRatio_CH0,
-                    PulseSum_CH0
+                -   BaselineDynamic_CH<channels>, BaselineNaive_CH<channels>,
+                    PromptDelayChargeRatioCalculator_CH<channels>, CFD_CH<channels>,
+                    PulseCharge_CH<channels>, TotalCharge_CH<channels>
+                -   {DAMAX1: DAMAX1_CH<channels>, DAMAX2: DAMAX2_CH<channels>}
+                -   LeadingEdge_CH<channels>, MeanTime_CH<channels>
+                -   {Mean: Mean_CH<channels>,
+                        Stddev: Stddev_CH<channels>,
+                        Skew: Skew_CH<channels>,
+                        Kurtosis: Kurtosis_CH<channels>}
+                -   PeakHeight_CH<channels>, PeakLocation_CH<channels>, PulseStart_CH<channels>,
+                    PulseTime_CH<channels>, PromptDelayChargeRatio_CH<channels>,
+                    PulseSum_CH<channels>
 
-    Channel_1:
-        algorithm: TreeMaker
-        filltype: event
-        input:
-            vector<int>: {RawWaveform: EVENT:board_0:ch_1:waveform}
-            vector<float>: {CorrectedWaveform: CorrectedWaveform_CH1}
-            long: {Timestamp: EVENT:board_0:ch_1:ch_timestamp}
-            vector<double>:
-                        - FFT_CH1, Moments_CH1
-                        - {CFDTrace: CFDTrace_CH1,
-                            CFDTimes: CFDTimes_CH1}
-            float:
-                -   BaselineDynamic_CH1, BaselineNaive_CH1,
-                    PromptDelayChargeRatioCalculator_CH1, CFD_CH1,
-                    PulseCharge_CH1, TotalCharge_CH1
-                -   {DAMAX1: DAMAX1_CH1, DAMAX2: DAMAX2_CH1}
-                -   LeadingEdge_CH1, MeanTime_CH1
-                -   {Mean: Mean_CH1,
-                        Stddev: Stddev_CH1,
-                        Skew: Skew_CH1,
-                        Kurtosis: Kurtosis_CH1}
-                -   PeakHeight_CH1, PeakLocation_CH1, PulseStart_CH1,
-                    PulseTime_CH1, PromptDelayChargeRatio_CH1,
-                    PulseSum_CH1
-    
     MultiChannels:
         algorithm: TreeMaker
         filltype: event
@@ -541,5 +292,5 @@ objects:
         algorithm: TreeMaker
         filltype: single
         input:
-            vector<double>: AverageWaveform_CH0, AverageWaveform_CH1
+            vector<double>: [AverageWaveform_CH0, AverageWaveform_CH1]
             double: ChargeConstant

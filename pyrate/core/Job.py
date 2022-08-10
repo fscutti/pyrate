@@ -3,15 +3,19 @@ instances of a Run homogeneous in purpose and structure.
 """
 
 import os
+import re
 import sys
 import yaml
+import json
 import pyclbr
 import logging
+from copy import deepcopy
 
 from itertools import groupby
 
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
+from pyrate.utils.ROOT_classes import _Type
 
 from pyrate.core.Run import Run
 
@@ -121,7 +125,10 @@ class Job:
             # Add all remaining attributes.
             self.job["inputs"][i_name].update(i_attr)
 
-        self.job["configs"]["global"] = {"objects": {}, "keys":{}}
+        self.job["configs"]["global"] = {"objects": {}}
+        tags = {}
+        forbidden_tags = [f"<{t}>" for t in _Type]
+
         for c_name, c_attr in self.config["configs"].items():
 
             self.job["configs"][c_name] = {"files": []}
@@ -148,16 +155,60 @@ class Job:
                 self.job["configs"][c_name]["objects"]
             )
 
-            # for k in self.job["configs"][c_name]:
-            #     if '<' in k and '>' in k:
-            #         # found a key:
-            #         self.job["configs"]["global"]["keys"][k] = self.job["configs"][c_name][k]
+            for k in self.job["configs"][c_name]:
+                if re.findall("<.*>", k) or re.findall("\$.*\$", k):
+                    # found a tag:
+                    if k in forbidden_tags:
+                        sys.exit(f"ERROR: tag {k} is a forbidden tag.")
+                    tags[k] = self.job["configs"][c_name][k]
 
+        # Deal with object duplication
+        # Loop through all objects and find any that need duplicating
+        # For now, they must have a tag in their name, as object names must be
+        # unique.
+        objects_to_dup = {}
+        for obj_name, obj in self.job["configs"]["global"]["objects"].items():
+            for tag in tags:
+                if tag in obj_name:
+                    objects_to_dup[obj_name] = obj
+        # clear out the found objects
+        for obj_name in objects_to_dup:
+            del self.job["configs"]["global"]["objects"][obj_name]
 
-        # # Deal with object duplication
-        # from code import interact
-        # interact(local=locals())
+        # Duplicate the object
+        for obj_name, obj in objects_to_dup.items():
+            # First find all the relevant tags
+            obj_str = json.dumps(obj)
+            used_tags = {tag for tag in tags if tag in obj_str or tag in obj_name}
 
+            # Categories all the tags, as we want to do different things
+            tag_type = {"<>":[], "$$":[]}
+            for tag in used_tags:
+                tag_type["<>"] += re.findall("<.*>", tag)
+                tag_type["$$"] += re.findall("\$.*\$", tag)
+
+            # Let's do all the direct drop find/replaces now
+            for tag in tag_type["$$"]:
+                obj_str = obj_str.replace(f'"{tag}"', str(tags[tag]))
+                obj_name = obj_name.replace(f'"{tag}"', str(tags[tag]))
+            
+            # Now we'll do handle the in-parallel tags
+            # The name *must* be updated, if there is no tag in the name we exit
+            if not any([tag in obj_name for tag in tag_type["<>"]]):
+                sys.exit(f"No valid tag found in object {obj_name}. Must contain a <tag> style tag.")
+            tag_list_lengths = [len(tags[tag]) for tag in used_tags]
+            if not tag_list_lengths[:-1]==tag_list_lengths[1:]:
+                print(f"WARNING: <tag> type lists are not equal length for object {obj_name}")
+            shortest = min(tag_list_lengths)
+            for i in range(shortest):
+                new_name = obj_name
+                new_obj = obj_str
+                for tag in tag_type["<>"]:
+                    new_name = new_name.replace(tag, str(tags[tag][i]))
+                    new_obj = new_obj.replace(tag, str(tags[tag][i]))
+                
+                # Insert the new object back into the global config
+                self.job["configs"]["global"]["objects"][new_name] = json.loads(new_obj)
 
         for o_name, o_attr in self.config["outputs"].items():
 
