@@ -162,6 +162,12 @@ class Job:
                         sys.exit(f"ERROR: tag {k} is a forbidden tag.")
                     tags[k] = self.job["configs"][c_name][k]
 
+        # First we should deal with the $tag$
+        config_str = json.dumps(self.job["configs"]["global"]["objects"])
+        for tag in tags:
+            config_str = config_str.replace(f'"{tag}"', str(tags[tag]))
+        self.job["configs"]["global"]["objects"] = json.loads(config_str)
+
         # Deal with object duplication
         # Loop through all objects and find any that need duplicating
         # For now, they must have a tag in their name, as object names must be
@@ -176,25 +182,15 @@ class Job:
             del self.job["configs"]["global"]["objects"][obj_name]
 
         # Duplicate the object
+        # should only be left with the <tag> types
         for obj_name, obj in objects_to_dup.items():
             # First find all the relevant tags
             obj_str = json.dumps(obj)
             used_tags = {tag for tag in tags if tag in obj_str or tag in obj_name}
-
-            # Categories all the tags, as we want to do different things
-            tag_type = {"<>":[], "$$":[]}
-            for tag in used_tags:
-                tag_type["<>"] += re.findall("<.*>", tag)
-                tag_type["$$"] += re.findall("\$.*\$", tag)
-
-            # Let's do all the direct drop find/replaces now
-            for tag in tag_type["$$"]:
-                obj_str = obj_str.replace(f'"{tag}"', str(tags[tag]))
-                obj_name = obj_name.replace(f'"{tag}"', str(tags[tag]))
             
             # Now we'll do handle the in-parallel tags
             # The name *must* be updated, if there is no tag in the name we exit
-            if not any([tag in obj_name for tag in tag_type["<>"]]):
+            if not any([tag in obj_name for tag in used_tags]):
                 sys.exit(f"No valid tag found in object {obj_name}. Must contain a <tag> style tag.")
             tag_list_lengths = [len(tags[tag]) for tag in used_tags]
             if not tag_list_lengths[:-1]==tag_list_lengths[1:]:
@@ -203,7 +199,7 @@ class Job:
             for i in range(shortest):
                 new_name = obj_name
                 new_obj = obj_str
-                for tag in tag_type["<>"]:
+                for tag in used_tags:
                     new_name = new_name.replace(tag, str(tags[tag][i]))
                     new_obj = new_obj.replace(tag, str(tags[tag][i]))
                 

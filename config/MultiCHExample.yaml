@@ -11,6 +11,7 @@ objects:
         # -----------------------------------------------------------
 
     BaselineDynamic_CH<channels>:
+        test: $hello$
         algorithm: BaselineDynamic
         samples: 40
         threshold: 20
