@@ -68,6 +68,7 @@ from pyrate.core.Algorithm import Algorithm
 
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
+from pyrate.utils import enums as EN
 from pyrate.utils import enums
 
 GB = 1e9
@@ -422,7 +423,7 @@ class TreeMaker(Algorithm):
 
             # some line like that to indicate that the writer has to
             # call write on the object.
-            self.store.status(self.name, is_written=True)
+            self.store.save(self.name, EN.Pyrate.WRITTEN)
 
     def finalise(self, condition=None):
         """Fill in the single/run-based variables"""
@@ -447,7 +448,7 @@ class TreeMaker(Algorithm):
 
         # Store itself on the store with SKIP_WRITE code to show we have nothing
         # to return.
-        self.store.status(self.name, is_written=True)
+        self.store.save(self.name, EN.Pyrate.WRITTEN)
 
     def _parse_tree_vars(self, variables):
         """Dedicated function to just parse the tree lists/dicts/strings"""

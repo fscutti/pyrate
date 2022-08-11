@@ -31,7 +31,6 @@ class Sum(Algorithm):
 
         # check for invalid windows
         if window is Pyrate.NONE or waveform is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
             return
 
         # Sum the waveform

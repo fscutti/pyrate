@@ -21,11 +21,6 @@ from pyrate.utils.enums import Pyrate
 import pyrate.utils.functions as FN
 import pyrate.utils.strings as ST
 
-import sys
-import math
-import numpy
-import scipy
-
 
 class Calculator(Algorithm):
     def __init__(self, name, config, store, logger):
@@ -58,36 +53,33 @@ class Calculator(Algorithm):
 
         self.variables = {var: val for var, val in zip(variables, values)}
 
-        constantVars = {}
-        self.storeVariables = {}
+        self.constantVars = {}
+        self.storeVars = {}
 
         for var, val in self.variables.items():
 
             if FN.is_float(val):
-                self.storeVariables[var] = val
-
+                self.constantVars[var] = float(val)
             else:
-                constantVars[var] = val
+                self.storeVars[var] = val
 
         # capture some of the local variables and add the constant input variables
         self.locals = {}
         self.locals["self"] = locals()["self"]
-        self.locals.update(constantVars)
+        self.locals.update(self.constantVars)
 
         # capture the globals
         self.globals = globals()
 
     def execute(self, condition=None):
         # update variables from the store
-        for storeVariable in self.storeVariables:
+        for storeVariable in self.storeVars:
 
             self.locals[storeVariable] = self.store.get(
-                self.storeVariables[storeVariable]
+                self.storeVars[storeVariable]
             )
 
             if self.locals[storeVariable] is Pyrate.NONE:
-                self.store.put(self.name, Pyrate.NONE)
-
                 return
 
         result = eval(self.executeMe, self.globals, self.locals)

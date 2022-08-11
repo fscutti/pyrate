@@ -99,5 +99,4 @@ class Algorithm:
         if self._output == {}:
             self._output = config_output
 
-
 # EOF

@@ -61,7 +61,6 @@ class BaselineDynamic(Algorithm):
         nsamples = self.config["samples"]
 
         if waveform is Pyrate.NONE or waveform.size < nsamples:
-            self.store.put(self.name, Pyrate.NONE)
             return
 
         averages = self.moving_average(waveform=waveform[:nsamples], n=4)

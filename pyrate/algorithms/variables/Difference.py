@@ -30,7 +30,6 @@ class Difference(Algorithm):
         x1 = self.store.get(self.config["input"]["x1"])
         x2 = self.store.get(self.config["input"]["x2"])
         if x1 is Pyrate.NONE or x2 is Pyrate.NONE:
-            self.store.put(self.name, Pyrate.NONE)
             return
         Diff = x2 - x1
         self.store.put(self.name, Diff)
