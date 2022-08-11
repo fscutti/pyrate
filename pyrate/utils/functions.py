@@ -1,9 +1,9 @@
 """ Logic functions.
 """
-import os
-from copy import copy
-import mmap
 
+import os
+import mmap
+import pyrate
 
 def modus_ponens(p, q):
     """Implements the modus ponens logic table: p -> q."""
@@ -23,8 +23,12 @@ def is_float(v):
 
 def find_env(path, env):
     """Checks existence of environment variable in path and eventually replaces it."""
-    if env in path:
-        path = path.replace(env, os.environ.get(env))
+    if env and env in path:
+        env_path = os.environ.get(env)
+        if not env_path:
+            # env hasn't been set, let's get it internally
+            env_path = os.path.abspath(os.path.join(pyrate.__file__ ,"../.."))
+        path = path.replace(env, env_path)
     return path
 
 
@@ -36,9 +40,7 @@ def find_files(paths, env=None):
         paths = [paths]
 
     for p in paths:
-
-        if env and env in p:
-            p = p.replace(env, os.environ.get(env))
+        p = find_env(p, env)
 
         if not os.path.isfile(p):
             files.extend(
