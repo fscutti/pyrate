@@ -9,9 +9,11 @@ import yaml
 import json
 import pyclbr
 import logging
-from copy import deepcopy
+import pyparsing as pp
 
-from itertools import groupby
+from itertools import groupby, product
+from functools import reduce
+from operator import mul
 
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
@@ -156,7 +158,7 @@ class Job:
             )
 
             for k in self.job["configs"][c_name]:
-                if re.findall("<.*>", k) or re.findall("\$.*\$", k):
+                if re.findall("<.*?>", k) or re.findall("\$.*?\$", k):
                     # found a tag:
                     if k in forbidden_tags:
                         sys.exit(f"ERROR: tag {k} is a forbidden tag.")
@@ -165,13 +167,13 @@ class Job:
         # First we should deal with the $tag$
         config_str = json.dumps(self.job["configs"]["global"]["objects"])
         for tag in tags:
-            config_str = config_str.replace(f'"{tag}"', str(tags[tag]))
+            if re.findall("\$.*?\$", tag):
+                config_str = ST.replace_clean(config_str, tag, tags[tag])
         self.job["configs"]["global"]["objects"] = json.loads(config_str)
 
         # Deal with object duplication
         # Loop through all objects and find any that need duplicating
-        # For now, they must have a tag in their name, as object names must be
-        # unique.
+        # They must have a tag in their name, as object names must be unique.
         objects_to_dup = {}
         for obj_name, obj in self.job["configs"]["global"]["objects"].items():
             for tag in tags:
@@ -186,20 +188,60 @@ class Job:
         for obj_name, obj in objects_to_dup.items():
             # First find all the relevant tags
             obj_str = json.dumps(obj)
-            used_tags = {tag for tag in tags if tag in obj_str or tag in obj_name}
-            
+            obj_tags = {tag for tag in tags if tag in obj_str or tag in obj_name}
+            obj_name_tags = re.findall("<.*?>", obj_name)
+            # The name *must* be updated, if there is no tag in the name we exit
+            if not obj_name_tags:
+                sys.exit(f"No valid tag found in object {obj_name}. Must contain a <tag> style tag.")
+
+            # Find parallel tags if they exist
+            # Check they're not shorter than the first name tag
+            parallel_tags = {t:[] for t in obj_tags if t not in obj_name_tags}
+            for ptag in parallel_tags:
+                if len(tags[ptag]) < len(tags[obj_name_tags[0]]):
+                    sys.exit(f"ERROR: in object {obj_name} - parallel tag {ptag} shorter than the first object name tag {obj_name_tags[0]}"\
+                                "\nAll parallel tags must be at least as long as the primary name tag")
+
+            # Get the number each parallel tag needs to be repeated
+            # i.e. the number required to keep it paralell with the first object name tag
+            ptag_len = reduce(mul, [len(tags[t]) for t in obj_name_tags[1:]]) if len(obj_name_tags) > 1 else 1
+            for t in parallel_tags:
+                for v in tags[t]:
+                    # Store n * tag[t] in the appropriate parallel tag
+                    parallel_tags[t] += [v]*ptag_len
+
+            # List of all the products of the tag values in the name
+            tag_value_product = product(*[tags[t] for t in obj_name_tags])
+
+            # Loop over each product
+            for i, values in enumerate(tag_value_product):
+                new_name = obj_name
+                new_obj = obj_str
+
+                # Fix all the parallel tags
+                for t in parallel_tags:
+                    new_obj = ST.replace_clean(new_obj, t, parallel_tags[t][i])
+
+                # Loop over each tag in the product
+                for j in range(len(values)):
+                    new_name = ST.replace_clean(new_name, obj_name_tags[j], values[j])
+                    new_obj = ST.replace_clean(new_obj, obj_name_tags[j], values[j])
+                
+                # Insert the new object back into the global config
+                self.job["configs"]["global"]["objects"][new_name] = json.loads(new_obj)
+
             # Now we'll do handle the in-parallel tags
             # The name *must* be updated, if there is no tag in the name we exit
-            if not any([tag in obj_name for tag in used_tags]):
+            if not any([tag in obj_name for tag in obj_tags]):
                 sys.exit(f"No valid tag found in object {obj_name}. Must contain a <tag> style tag.")
-            tag_list_lengths = [len(tags[tag]) for tag in used_tags]
+            tag_list_lengths = [len(tags[tag]) for tag in obj_tags]
             if not tag_list_lengths[:-1]==tag_list_lengths[1:]:
                 print(f"WARNING: <tag> type lists are not equal length for object {obj_name}")
             shortest = min(tag_list_lengths)
             for i in range(shortest):
                 new_name = obj_name
                 new_obj = obj_str
-                for tag in used_tags:
+                for tag in obj_tags:
                     new_name = new_name.replace(tag, str(tags[tag][i]))
                     new_obj = new_obj.replace(tag, str(tags[tag][i]))
                 
