@@ -31,7 +31,6 @@ __pycache__
 # Logs and databases #
 ######################
 *.log
-*.lprof
 *.prof
 *.sql
 *.sqlite

@@ -71,10 +71,10 @@ class TrapezoidFilter(Algorithm):
         if (waveform_len + self.traplen) > self.dn0.size:
             # Our waveform is larger than the storage
             # we need to grow our arrays
-            self.dn0.resize(waveform_len + self.traplen)
-            self.dn1.resize(waveform_len + self.traplen)
-            self.dn2.resize(waveform_len + self.traplen)
-            self.dn3.resize(waveform_len + self.traplen)
+            self.dn0 = np.resize(self.dn0, waveform_len + self.traplen)
+            self.dn1 = np.resize(self.dn1, waveform_len + self.traplen)
+            self.dn2 = np.resize(self.dn2, waveform_len + self.traplen)
+            self.dn3 = np.resize(self.dn3, waveform_len + self.traplen)
 
         # Parameters and formula from Digital techniques for real-time pulse shaping in radiation measurements
         # https://doi.org/10.1016/0168-9002(94)91652-7
