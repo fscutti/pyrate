@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
         j_config.update({"no_progress_bar": args.no_progress_bar})
 
-        j_config.update({"alg_timing": args.print_objects})
+        j_config.update({"alg_timing": args.alg_timing})
 
         j_log = args.logging_level
 
