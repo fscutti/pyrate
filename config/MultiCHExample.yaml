@@ -1,8 +1,4 @@
 <channels>: [0, 1]
-<test>: [2, 3]
-<a>: [10,11,12,13,14,15,16,17]
-<b>: [20, 21, 22, 23, 24]
-<hello>: [1,2,3,4,5]
 # -----------------------------------------------------------
 # Objects computed by algorithms
 # -----------------------------------------------------------
@@ -12,10 +8,8 @@ objects:
         # Waveform and Baseline algorithms
         # -----------------------------------------------------------
 
-    BaselineDynamic_CH<channels>,<<test>>:
+    BaselineDynamic_CH<channels>:
         algorithm: BaselineDynamic
-        key1: $hello$
-        key2: <a>
         samples: 40
         threshold: 20
         input:
@@ -240,7 +234,7 @@ objects:
         input:
             waveform: CorrectedWaveform_CH<channels>
             pulse_start: PulseStart_CH<channels>
-        
+
     FFT_CH<channels>:
         algorithm: FFT
         rate: 500e6
@@ -248,6 +242,9 @@ objects:
         input:
             waveform: CorrectedWaveform_CH<channels>
             window: PulseWindow_CH<channels>
+        output:
+            frequencies: FFT_CH<channels>_Frequencies
+            amplitudes: FFT_CH<channels>_Amplitudes
 
     LeadingEdge_CH<channels>:
         algorithm: LeadingEdgeThreshold
@@ -271,6 +268,8 @@ objects:
                         - FFT_CH<channels>, Moments_CH<channels>
                         - {CFDTrace: CFDTrace_CH<channels>,
                             CFDTimes: CFDTimes_CH<channels>}
+                        - {FFT_Amplitudes: FFT_CH<channels>_Amplitudes,
+                            FFT_Frequencies: FFT_CH<channels>_Frequencies}
             float:
                 -   BaselineDynamic_CH<channels>, BaselineNaive_CH<channels>,
                     PromptDelayChargeRatioCalculator_CH<channels>, CFD_CH<channels>,

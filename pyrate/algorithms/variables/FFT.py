@@ -78,6 +78,8 @@ class FFT(Algorithm):
         # Storing fft amplitudes and frequencies as 2D array
         fft = np.array([fft_amps, fft_freq])
 
+        self.store.put(f"{self.output['amplitudes']}", fft_amps)
+        self.store.put(f"{self.output['frequencies']}", fft_freq)
         self.store.put(self.name, fft)
         
 

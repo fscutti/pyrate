@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
-import os
+
 import argparse
 import yaml
+import cProfile
+import pstats
+from datetime import datetime
 
 from pyrate.core.Job import Job
 
@@ -38,17 +41,36 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--alg_timing",
+    "--timing",
     "-t",
+    help="Profiles the all the jobs in pyrate. Output to screen with argument 'print'.",
+    required=False,
+    default=False,  # If not passed in
+    action="store", # store internally
+    nargs="?",      # allows for some args or None
+    const=True      # if -t there but no string pass in True
+)
+
+parser.add_argument(
+    "--print_objects",
+    help="Prints all the full object list right before the job starts.s",
+    required=False,
+    default=False,  # If not passed in
+    action="store", # store internally
+)
+
+parser.add_argument(
+    "--alg_timing",
+    "-a",
     help="Print out to a log file the average timing for algs in config",
     required=False,
     default=False,
     action="store",
     nargs="?",
+    const=True
 )
 
 args = parser.parse_args()
-if args.alg_timing is None: args.alg_timing = True # deal with empty arg for alg_timing
 
 if __name__ == "__main__":
     for j_file in args.job_config:
@@ -59,14 +81,29 @@ if __name__ == "__main__":
 
         j_config.update({"no_progress_bar": args.no_progress_bar})
 
-        j_config.update({"alg_timing": args.alg_timing})
+        j_config.update({"alg_timing": args.print_objects})
+
+        j_config.update({"print_object": args.alg_timing})
 
         j_log = args.logging_level
 
         job = Job(j_name, j_config, j_log)
 
-        job.setup()
+        if args.timing:
+            with cProfile.Profile() as pr:
+                job.setup()
+                job.launch()
+            time_stats = pstats.Stats(pr)
+            time_stats.sort_stats(pstats.SortKey.TIME)
+            # printing would be insane don't do that 
+            if type(args.timing) == str and (args.timing.lower() == "print"):
+                time_stats.print_stats()
 
-        job.launch()
+            # Save the profiling to file
+            time_stats.dump_stats(filename=f"{j_name}{datetime.now():.%Y-%m-%d-%Hh%M}.prof")
+
+        else:
+            job.setup()
+            job.launch()
 
 # EOF

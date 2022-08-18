@@ -196,7 +196,8 @@ class Job:
         # ----------------------------------
         self.job["configs"] = expand_tags(self.job["configs"])
 
-        if 
+        if self.config["print_object"]:
+            self.print_objects()
 
         # -----------------------
         # Instantiate Run object
