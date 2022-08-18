@@ -47,6 +47,7 @@ class Job:
         # ----------------------------
         self.job["logger"] = logging.getLogger("pyrate")
         if self.log_level is None and self.job["alg_timing"] != True:
+            self.job["logger"].setLevel(logging.CRITICAL)
             logging.disable(logging.CRITICAL)
         else:
             if self.job["alg_timing"]:
@@ -196,7 +197,7 @@ class Job:
         # ----------------------------------
         self.job["configs"] = expand_tags(self.job["configs"])
 
-        if self.job["logger"].getEffectiveLevel() > logging.DEBUG:
+        if self.job["logger"].getEffectiveLevel() <= logging.DEBUG:
             self.print_objects()
 
         # -----------------------
