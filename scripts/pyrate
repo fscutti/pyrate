@@ -52,14 +52,6 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--print_objects",
-    help="Prints all the full object list right before the job starts.s",
-    required=False,
-    default=False,  # If not passed in
-    action="store", # store internally
-)
-
-parser.add_argument(
     "--alg_timing",
     "-a",
     help="Print out to a log file the average timing for algs in config",
@@ -82,8 +74,6 @@ if __name__ == "__main__":
         j_config.update({"no_progress_bar": args.no_progress_bar})
 
         j_config.update({"alg_timing": args.print_objects})
-
-        j_config.update({"print_object": args.alg_timing})
 
         j_log = args.logging_level
 

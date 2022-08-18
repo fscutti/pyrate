@@ -196,7 +196,7 @@ class Job:
         # ----------------------------------
         self.job["configs"] = expand_tags(self.job["configs"])
 
-        if self.config["print_object"]:
+        if self.job["logger"].getEffectiveLevel() > logging.DEBUG:
             self.print_objects()
 
         # -----------------------
