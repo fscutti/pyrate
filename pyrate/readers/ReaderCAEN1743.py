@@ -1,8 +1,7 @@
-""" Reader of binary files from CAEN1730 digitizers using the raw firmware.
-This version of the reader uses memory mapping to read the file:
-https://docs.python.org/3.0/library/mmap.html.
+""" Reader of binary files from CAEN1743 digitizers
 
-Binary data is written according to the scheme given in the CAEN1730 manual
+Binary data is written according to the scheme given in the CAEN1743 manual
+Note: This manual is slightly incorrect, there are some additional words in the data structure that currently being skipper
 """
 import os
 import mmap
@@ -70,10 +69,6 @@ class ReaderCAEN1743(Reader):
         # Seek to the start of the file
         self._f.seek(0, 0)
         self._n_events = 0
-        self._n_events = 17071111;
-        self._n_events = 170711;
-        return;
-    
         # Scan through the entire file
         while True:
             # Read in the event info from the header
@@ -84,16 +79,17 @@ class ReaderCAEN1743(Reader):
             else:
                 self._f.seek(0, 0)
                 return
+            
             # If we read something, increment the event counter and skip to the next event
             self._n_events += 1
             eventSize = head1 & 0b00001111111111111111111111111111
-
             seekSize = 4 * (eventSize - 1)  # How far we need to jump
             # Make sure we're not seeking beyond the EOF
             if (self._f.tell() + seekSize) > self._fSize:
                 break
 
             self._f.seek(seekSize, 1)
+            
         self._f.seek(0, 0)
 
     def _break_path(self, path):
@@ -180,6 +176,7 @@ class ReaderCAEN1743(Reader):
                     sample0 = (sample & 0b00000000000000000000111111111111)
                     sample1 = (sample & 0b00000000111111111111000000000000) >> 12
                     other   = (sample & 0b11111111000000000000000000000000) >> 24
+                    # Note: Every 17th word is not a waveform sample
                     if(j % 17 != 0):                    
                         self._evtWaveforms[2*i + 0].append(sample0 + 2048);
                         self._evtWaveforms[2*i + 1].append(sample1 + 2048);
