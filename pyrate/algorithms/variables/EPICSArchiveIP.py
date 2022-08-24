@@ -1,31 +1,21 @@
-""" Calculates the mean, stddev, skew and excess kurtosis of a waveform,
-    treating the waveform as a over the passed in window range.
-    The moments heavily depend on the window passed in. For best results, ensure
-    that your windows are tuned for your expected pulse lengths.
-    Momrnt = sum(x_i - mu)^n/N / stddev^n
-
+""" Reads SC data from the EPICS Archiver (through ip socket)
     
     Required parameters:
-        rate: (float) The digitisation rate
+        ip: (str) The ip of the Archiver data retrieval server (including port number)
+        epochtime: (int) The epoch time corresponding to the start of the run
+        pv: Name of the EPICS process variable to read
     
     Required inputs:
-        waveform: (array-like) A waveform-like object
-        window: (tuple-like) A window object
-
-    Optional parameters:
-        mode: (str) Let's the user change to algebraic moments instead of
-                    central, normalised moments. To get the algebraic moments
-                    pass in the flag "algebraic"
+        timestamp: (int_like) The variable to used to timestamp the data
     
-
     Example config:
-    
-    Skew_CHX:
-        algorithm: Moment
-        rate: 500e6
+    ElapsedTime:
+        algorithm: EPICSArchiveIP
+        ip: 10.100.13.78:17668
+        epochtime: 1644991273
+        pv: HILDAQ:elapsedTime
         input:
-            waveform: CorrectedWaveform_CHX
-            window: Window_CHX
+          timestamp: EVENT:board_0:ch_0:ch_timestamp
 """
 
 import numpy as np
@@ -69,20 +59,25 @@ class EPICSArchiveIP(Algorithm):
                 # TODO: Check for a valid response
                             
             # If the last event comes before our event and the next event comes after we're in the right spot and can break
-            if(self._data[self._idx]['secs'] < evtTime and self._data[self._idx + 1]['secs'] > evtTime):
-                success = 1
-                value = self._data[self._idx]['val'] #TODO: Interpolate values?
-                break
+            if(len(self._data) - self._idx > 1):
+                lastTime = self._data[self._idx]['secs']
+                nextTime = self._data[self._idx + 1]['secs']
+                if(lastTime <= evtTime and nextTime > evtTime):                
+                    success = 1
+                    value = self._data[self._idx]['val'] #TODO: Interpolate values?
+                    break
             
-            # If not update the index
-            self._idx += 1
+                # If not update the index
+                self._idx += 1
+            else:
+                break
 
         return (success,value)
     
     def getBuffer(self, startTime):
         # Get 1 hour of data
-        startTime = datetime.datetime.fromtimestamp(startTime - 10*60*60)
-        endTime = startTime + datetime.timedelta(hours = 1)
+        startTime = datetime.datetime.utcfromtimestamp(startTime)
+        endTime = startTime + datetime.timedelta(days = 1)
 
         # Convert start/end times into strings
         pvStr = self.config['pv'].replace(":","%3A")

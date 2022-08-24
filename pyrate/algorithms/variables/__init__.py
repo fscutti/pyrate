@@ -25,3 +25,4 @@ from pyrate.algorithms.variables.FFT import FFT
 from pyrate.algorithms.variables.LeadingEdgeThreshold import LeadingEdgeThreshold
 from pyrate.algorithms.variables.SwinburneSC import SwinburneSC
 from pyrate.algorithms.variables.EPICSArchiveIP import EPICSArchiveIP
+from pyrate.algorithms.variables.EPICSArchivePB import EPICSArchivePB

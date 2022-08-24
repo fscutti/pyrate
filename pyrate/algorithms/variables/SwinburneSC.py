@@ -102,7 +102,6 @@ class SwinburneSC(Algorithm):
         while(True):
             # If we don't have a next line, open the next file
             if(not self._nextLine):
-                #print(evtTime, self._lastLine)
                 self.getBuffer(evtTime)
                 self._headers = self._currentFile.readline().split(",")
                 self._nextLine = self._currentFile.readline().split(",")
@@ -127,12 +126,11 @@ class SwinburneSC(Algorithm):
         files.sort()
         
         # Find/open the file that corresponds to our timestamp
-        for i in range(len(files) - 1):
+        for i in range(len(files)):
             time1 = files[i].split("/")[-1].split("-Slow")[0]
             time2 = files[i + 1].split("/")[-1].split("-Slow")[0]
             time1 = datetime.datetime.strptime(time1,"%Y-%m-%d %H_%M_%S")
             time2 = datetime.datetime.strptime(time2,"%Y-%m-%d %H_%M_%S")
-            print(time1,startTime,time2)
             if(time1 <= startTime and time2 > startTime):
                 if(self._currentFile):
                     self._currentFile.close()
