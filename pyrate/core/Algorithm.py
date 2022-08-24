@@ -34,11 +34,12 @@ class Algorithm:
         self.logger = logger
 
         self._input = {}
+        if "input" in config:
+            self.input = config["input"]
+        
         self._output = {}
-
-        for io in ["input", "output"]:
-            if io in config:
-                setattr(self, io, config[io])
+        if "output" in config:
+            self.input = config["output"]
 
     def initialise(self, condition=None):
         """At this stage the method knows the current input."""
@@ -57,6 +58,7 @@ class Algorithm:
         """Getter method for input objects."""
         if self._input == {}:
             return {None: ""}
+
         return self._input
 
     @input.setter
