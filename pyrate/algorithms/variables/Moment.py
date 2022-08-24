@@ -124,5 +124,70 @@ class Moment(Algorithm):
         #         else:
         #             moments[i] = np.sum(np.power(x, i) * fx) / fsum
 
+    @staticmethod
+    @numba.jit(nopython=True, cache=True)
+    def MomentsCalc(waveform, window, time_period, mode, times):
+
+        mean = -999.0
+        stddev = -999.0
+        skew = -999.0
+        kurtosis = -999.0
+        x = np.array([1], dtype=np.float64)
+        fx = np.array([1], dtype=np.float64)
+        fsum = -999.0
+        inner = np.array([1], dtype=np.float64)
+        mean = -999.0
+        m2 = -999.0
+        m3 = -999.0
+        m4 = -999.0
+        M2 = -999.0
+        M3 = -999.0
+        M4 = -999.0
+        excess_kurtosis = -999.0
+        moments = np.array([1], dtype=np.float64)
+
+        waveform_len = waveform.size
+        # Check if the times array matches the data
+        if times.size < waveform_len:
+            # Times array not big enough, growing to the size of the waveform
+            times = (np.arange(waveform_len) * time_period + time_period / 2) * 1e9 # in ns
+
+        # The waveform over the region of interest
+        x = times[window[0]:window[1]]
+        fx = waveform[window[0]:window[1]]
+        fsum = np.sum(fx)
+        if fsum == 0:
+            moments = [mean, stddev, skew, kurtosis]
+            return moments
+
+        inner = fx * x
+        mean = np.sum(inner) / fsum
+        inner *= x
+        m2 = np.sum(inner) / fsum
+        inner *= x
+        m3 = np.sum(inner) / fsum #/ np.power(variance, 1.5)
+        inner *= x
+        m4 = np.sum(inner) / fsum #/ np.power(variance, 2) - 3
+
+        # Convert to central moments
+        M2 = m2 - np.power(mean,2) # AKA Variance
+        if M2 < 0:
+            # Can't really go any further, skew and kurtosis aren't real
+            moments = [mean, np.nan, np.nan, np.nan]
+        else:
+            # Get the rest of the central moments
+            M4 = m4 - 3*np.power(mean,4) + 6*np.power(mean,2)*m2 - 4*mean*m3
+            M3 = m3 + 2*np.power(mean,3) - 3*mean*m2
+
+            # Convert the central moments to useful variables
+            stddev = np.sqrt(M2)
+            skew = M3 / np.power(stddev, 3)
+            excess_kurtosis = M4 / np.power(stddev, 4) - 3
+            kurtosis = excess_kurtosis
+
+            moments = [mean, stddev, skew, kurtosis]
+        
+        return moments
+
 
 # EOF

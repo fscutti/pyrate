@@ -61,5 +61,33 @@ class MeanTime(Algorithm):
 
         self.store.put(self.name, MeanTime)
 
+    @staticmethod
+    @numba.jit(nopython=True, cache=True)
+    def MeanTimeCalc(waveform, window, arange, sample_period):
+
+        window_range = -999
+        weighted_waveform = np.array([1], dtype=np.float64)
+        num = -999.0
+        denom = -999.0
+        MeanTime = -999.0
+
+        window_range = waveform[window[0]:window[1]].size # Number of indexes to sum over, just in case it goes over the end
+        assert(window_range>=0)
+        if arange.size < window_range:
+            # Need to resize the range
+            arange = np.arange(window_range)
+        # Sum(waveform[i] * i)/ Sum()
+        weighted_waveform = np.multiply(waveform[window[0]:window[1]], arange[:window_range])
+        num = np.sum(weighted_waveform)
+        denom = np.sum(waveform[window[0]:window[1]])
+
+        if denom == 0:
+            # Can't divide by zero
+            MeanTime = -999.0 # FIX ME
+        else:
+            MeanTime = sample_period * (num / denom)
+
+        return MeanTime
+
 # EOF
 

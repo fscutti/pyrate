@@ -115,4 +115,39 @@ class CFD(Algorithm):
         self.waveform.fill(0)
         self.waveform_delayed.fill(0)
 
+    # Remove numpy dependence for speed and cross-check with more up to date code above
+    @staticmethod
+    @numba.jit(nopython=True, cache=True)
+    def CFDCalc(selfwaveform, waveform, cfd, delay, scale, cfd_threshold, waveform_delay_scaled):
+
+        # Parameters and formula from Digital techniques for real-time pulse shaping in radiation measurements
+        # https://doi.org/10.1016/0168-9002(94)91652-7
+
+        zero_cross = -999.0
+        cross_threshold = -999.0
+        CFDTimes = np.array([1], dtype=np.float64)
+
+        selfwaveform[:-1*delay] = waveform
+        waveform_delay_scaled[delay:] = scale * waveform
+        cfd = selfwaveform - waveform_delay_scaled
+
+        # Possible numpy way to do it quickly
+        # https://stackoverflow.com/questions/3843017/efficiently-detect-sign-changes-in-python
+        zero_cross = np.where(np.diff(np.sign(cfd)))[0]
+        cross_threshold = np.where(cfd > cfd_threshold)[0]
+
+        if cross_threshold.size == 0:
+            CFDTimes[0] = -999.0
+            return CFDTimes, cfd
+        
+        zero_cross = zero_cross[zero_cross>cross_threshold[0]]
+        if zero_cross.size == 0:
+            CFDTimes[0] = -999.0
+            return CFDTimes, cfd
+
+        f = cfd[zero_cross]/(cfd[zero_cross] - cfd[zero_cross+1])
+        CFDTimes = zero_cross + f
+
+        return CFDTimes, cfd
+
 # EOF

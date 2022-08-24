@@ -107,4 +107,33 @@ class TrapezoidFilter(Algorithm):
         self.dn2.fill(0)
         self.dn3.fill(0)
 
+    @staticmethod
+    @numba.jit(nopython=True, cache=True)
+    def TrapCalc(waveform, dn0, dn1, dn2, dn3, rise, gap, period, tau, traplen, M, waveform_len):
+        
+        dn = np.array([1], dtype=np.float64)
+        p = -999.0
+        r = np.array([1], dtype=np.float64)
+        trap = np.array([1], dtype=np.float64)
+
+        # Parameters and formula from Digital techniques for real-time pulse shaping in radiation measurements
+        # https://doi.org/10.1016/0168-9002(94)91652-7
+        dn0[:waveform_len] = waveform
+        dn1[rise:waveform_len + rise] = waveform
+        dn2[gap+rise:gap+rise + waveform_len] = waveform
+        dn3[2*rise+gap: 2*rise+gap + waveform_len] = waveform
+
+        dn = dn0 - dn1 - dn2 + dn3
+
+        p = np.cumsum(dn) # Thanks to Marcel Hohmann for recommending this function
+        r = np.add(p, M*dn)
+        trap = np.cumsum(r/(M*rise))
+
+        # We can't chop off the front otherwise the times will be funky
+        trap[:traplen] = trap[traplen + 1] # Back propagate the first useful value
+        # Chop off the end
+        trap = trap[:traplen+waveform_len]
+
+        return trap
+
 # EOF
