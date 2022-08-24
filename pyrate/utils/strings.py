@@ -47,6 +47,12 @@ def remove_tag_from_name(name, tag):
     else:
         return name.replace(tag, "")
 
+def replace_clean(s, t, v):
+    """ Replaces tag t in string s with value v cleanly
+        (if there's quotes around it, clears them)
+    """
+    return s.replace(f' "{t}"', f" {str(v)}").replace(str(t), str(v))
+
 
 def get_tags(f):
     """Breaks down a file name into its tags and returns them as a list."""

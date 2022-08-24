@@ -130,7 +130,6 @@ class ReaderCAEN1730_RAW(Reader):
         self._inEvt = {}
         self._evtWaveforms = {}
 
-
         while head1 := self._mmf.read(4):
             head1 = int.from_bytes(head1, "little")
             if (head1 & 0xFFFF0000) == 0xa0000000:
