@@ -36,6 +36,10 @@ class Algorithm:
         self._input = {}
         self._output = {}
 
+        for io in ["input", "output"]:
+            if io in config:
+                setattr(self, io, config[io])
+
     def initialise(self, condition=None):
         """At this stage the method knows the current input."""
         pass

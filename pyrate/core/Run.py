@@ -265,15 +265,9 @@ class Run:
                             obj_name, obj_config, self.store, self.logger
                         )
 
-                        # initialisation of inputs and outputs.
-                        for io in ["input", "output"]:
+                        for _, output in self.algorithms[obj_name].output.items():
 
-                            if io in obj_config:
-                                setattr(self.algorithms[obj_name], io, obj_config[io])
-
-                            for _, output in self.algorithms[obj_name].output.items():
-
-                                self.algorithms[output] = self.algorithms[obj_name]
+                            self.algorithms[output] = self.algorithms[obj_name]
 
                         return self.algorithms[obj_name]
 
