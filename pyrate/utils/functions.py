@@ -3,6 +3,7 @@
 
 import os
 import mmap
+import yaml
 import pyrate
 
 def modus_ponens(p, q):
@@ -265,6 +266,13 @@ def iterable(obj):
     else:
         return True
 
+def dump_objects_to_yaml(config, filepath):
+    """ Dumps the objects config to a yaml file
+        Typicall takes in the global objects config dictionary
+    """
+    with open(filepath, 'w') as f:
+        yaml.dump(config, f, 
+        default_flow_style=False, indent=4, explicit_start=True)
 
 def is_wc_ascii(filepath):
     """Determines if a file is a text wavecatcher file"""
