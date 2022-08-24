@@ -62,71 +62,16 @@ https://root.cern/manual/trees/
 import sys
 import ROOT as R
 from array import array
-import ctypes
 
 from pyrate.core.Algorithm import Algorithm
 
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
-from pyrate.utils import enums as EN
+from pyrate.utils.ROOT_classes import _Type
 from pyrate.utils import enums
 
 GB = 1e9
 MB = 1e6
-
-
-def maxint(t, signed=False):
-    """Calculates the max integer value for ctype integers
-    Takes in a ctypes.c_<type>() e.g. ctypes.c_int()
-    """
-    if signed:
-        return 2 ** (8 * ctypes.sizeof(t) - 1) - 1
-    return 2 ** (8 * ctypes.sizeof(t)) - 1
-
-
-_Type = {
-    "int": {"python": "i", "root": "I", "vector": "int", "invalid": -999},
-    "uint": {
-        "python": "I",
-        "root": "i",
-        "vector": "unsigned int",
-        "invalid": maxint(ctypes.c_uint()),
-    },
-    "short": {"python": "h", "root": "S", "vector": "short", "invalid": -999},
-    "ushort": {
-        "python": "H",
-        "root": "s",
-        "vector": "unsigned short",
-        "invalid": maxint(ctypes.c_ushort()),
-    },
-    "long": {"python": "l", "root": "L", "vector": "long", "invalid": -999},
-    "ulong": {
-        "python": "L",
-        "root": "l",
-        "vector": "unsigned long",
-        "invalid": maxint(ctypes.c_ulong()),
-    },
-    "float": {
-        "python": "d",
-        "root": "D",
-        "vector": "double",  # Python arrays don't have float32's
-        "invalid": -999.0,
-    },
-    "double": {
-        "python": "d",
-        "root": "D",
-        "vector": "double",
-        "invalid": -999.0,
-    },
-    "bool": {"python": "H", "root": "O", "vector": "bool", "invalid": 0},
-    "string": {
-        "python": "u",
-        "root": "C",
-        "vector": "string",  # Strings should be stored in vectors
-        "invalid": "",
-    },
-}
-
 
 class Branch:
     """Class to store branch information
@@ -423,7 +368,7 @@ class TreeMaker(Algorithm):
 
             # some line like that to indicate that the writer has to
             # call write on the object.
-            self.store.save(self.name, EN.Pyrate.WRITTEN)
+            self.store.save(self.name, enums.Pyrate.WRITTEN)
 
     def finalise(self, condition=None):
         """Fill in the single/run-based variables"""
@@ -448,7 +393,7 @@ class TreeMaker(Algorithm):
 
         # Store itself on the store with SKIP_WRITE code to show we have nothing
         # to return.
-        self.store.save(self.name, EN.Pyrate.WRITTEN)
+        self.store.save(self.name, enums.Pyrate.WRITTEN)
 
     def _parse_tree_vars(self, variables):
         """Dedicated function to just parse the tree lists/dicts/strings"""
@@ -462,6 +407,8 @@ class TreeMaker(Algorithm):
                 if type(entry) == str:
                     var_names = list(filter(None, ST.get_items(entry)))
                     retlist += list(zip(var_names, var_names))
+                elif type(entry) == list:
+                    retlist += list(zip(entry, entry))
                 elif type(entry) == dict:
                     retlist += list(entry.items())
                 else:
