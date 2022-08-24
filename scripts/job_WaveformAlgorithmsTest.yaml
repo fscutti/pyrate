@@ -1,5 +1,5 @@
 inputs:
-    Data:
+    Data1:
         eslices:
             emin: 0
             emax: -1
@@ -60,9 +60,9 @@ outputs:
             path: PYRATE/test
             format: .root
         targets:
-            - Channel_0: Data, Data2, Data3
-            - Channel_1: Data, Data2, Data3
-            - Single_data: Data, Data2, Data3
-            - MultiChannels: Data, Data2, Data3
+            - Channel_0: Data1, Data2, Data3
+            - Channel_1: Data1, Data2, Data3
+            - Single_data: Data1, Data2, Data3
+            - MultiChannels: Data1, Data2, Data3
 
 # EOF
