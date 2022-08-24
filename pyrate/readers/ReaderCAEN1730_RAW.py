@@ -133,7 +133,7 @@ class ReaderCAEN1730_RAW(Reader):
         self._inEvt = {}
         self._evtWaveforms = {}
 
-        self._mmf.seek(self._eventPos[self._idx], 0)
+        # self._mmf.seek(self._eventPos[self._idx], 0)
         # Read in the event info from the header
 
         while head1 := self._mmf.read(4):
