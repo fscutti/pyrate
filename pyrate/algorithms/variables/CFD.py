@@ -118,21 +118,42 @@ class CFD(Algorithm):
     # Remove numpy dependence for speed and cross-check with more up to date code above
     @staticmethod
     @numba.jit(nopython=True, cache=True)
-    def CFDCalc(selfwaveform, waveform, cfd, delay, scale, cfd_threshold, waveform_delay_scaled):
+    def CFDCalc(selfwaveform, waveform, cfd, delay, scale, cfd_threshold, selfwaveform_delayed):
 
         # Parameters and formula from Digital techniques for real-time pulse shaping in radiation measurements
         # https://doi.org/10.1016/0168-9002(94)91652-7
 
-        zero_cross = -999.0
-        cross_threshold = -999.0
-        CFDTimes = np.array([1], dtype=np.float64)
+        zero_cross = np.zeros(len(selfwaveform))
+        cross_threshold = np.zeros(len(selfwaveform))
+        CFDTimes = np.zeros(len(selfwaveform))
 
-        selfwaveform[:-1*delay] = waveform
-        waveform_delay_scaled[delay:] = scale * waveform
-        cfd = selfwaveform - waveform_delay_scaled
+        # C-like replacement of numpy-based code block below loops
+        for i in range(len(selfwaveform-delay),len(selfwaveform)):
+            selfwaveform[i] = waveform[i-len(selfwaveform-delay)]
+        for i in range(delay, len(selfwaveform_delayed)):
+            selfwaveform_delayed = waveform[i-delay]
+        for i in range(len(selfwaveform)):
+            cfd[i] = (scale*selfwaveform[i]) - selfwaveform_delayed[i]
+
+        # selfwaveform[:-delay] = waveform
+        # selfwaveform_delayed[delay:] = waveform
+        # cfd = (scale * selfwaveform) - selfwaveform_delayed
 
         # Possible numpy way to do it quickly
         # https://stackoverflow.com/questions/3843017/efficiently-detect-sign-changes-in-python
+        
+        crossed = False
+        zero_cros_idx = 0
+        cross_threshold_idx = 0
+        for i in range(len(cfd)):
+            if cfd[i] > cfd_threshold and crossed == False:
+                crossed = True
+                cross_threshold = cfd[i]
+            if cfd[i]<0 and crossed == True:
+                zero_cross = i
+        
+
+
         zero_cross = np.where(np.diff(np.sign(cfd)))[0]
         cross_threshold = np.where(cfd > cfd_threshold)[0]
 
