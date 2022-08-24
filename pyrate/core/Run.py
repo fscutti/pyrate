@@ -89,13 +89,12 @@ class Run:
         self.targets, self.nodes, self.algorithms = {}, {}, {}
         self.loaded_io = {"inputs": {}, "outputs": {}}
 
-        self.translation = {}
-        self.translate()
+        # instantiate all algorithms even those not needed.
+        self._reset_algorithms_instance()
 
-        # Loading input / output and initialising algorithms.
+        # Loading input / output and initialising nodes.
         # Not all inputs are loaded. Only those relevant for
         # requested targets.
-
         t_io = {}
 
         for o_name in self.outputs:
@@ -103,11 +102,14 @@ class Run:
 
             for t_name, t_job_inputs in o.targets.items():
 
+                self.alg(t_name)
+
                 if not t_name in self.targets:
 
                     # Where the magic happens!
                     # Dependecies for this target are all
-                    # resolved recursively here 
+                    # resolved recursively here
+
                     self.targets[t_name] = self.node(t_name)
 
                     t_io[t_name] = {"job_inputs": t_job_inputs, "job_outputs": [o_name]}
@@ -126,34 +128,6 @@ class Run:
 
             if self.node(t_name).job_outputs == []:
                 self.node(t_name).job_outputs = t_io[t_name]["job_outputs"]
-
-    def translate(self, obj_name=None):
-        """This function constructs a dictionary to translate
-        the name of any object to the name of the main object
-        which computes them. This is just translating the name."""
-
-        if obj_name is not None:
-
-            # simply returns the object name.
-            try:
-                return self.translation[obj_name]
-
-            except KeyError:
-
-                self.translation[obj_name] = obj_name
-
-                return self.translation[obj_name]
-
-        else:
-
-            # build global dictionary.
-            for primary_name, primary_config in self.objects.items():
-
-                if "output" in primary_config:
-
-                    for out_name in FN.get_nested_values(primary_config["output"]):
-
-                        self.translation[out_name] = primary_name
 
     def io(self, io_name):
         """Returns a specific input/output instance."""
@@ -195,14 +169,13 @@ class Run:
 
         # this call is necessary to find the correct algorithm for secondary outputs.
         # N.B.: all object calls first pass through the node function.
-        obj_name = self.translate(obj_name)
 
         # Node already exists, just return it
         if obj_name in self.nodes:
             return self.nodes[obj_name]
 
         # Create a new node
-        self.nodes[obj_name] = Node(
+        new_node = Node(
             obj_name,
             was_called=False,
             algorithm=None,
@@ -211,28 +184,37 @@ class Run:
         )
 
         # Create a new algorithm
-        self.nodes[obj_name].algorithm = self.alg(obj_name)
+        new_node.algorithm = self.alg(obj_name)
 
         # Check if it's an input type or alg type
-        if self.nodes[obj_name].algorithm is None:
-            return self.nodes[obj_name]
+        if new_node.algorithm is not None:
 
-        # Check for children
-        if not self.nodes[obj_name].children:
+            for _, node in self.nodes.items():
 
-            for _, dependencies in self.nodes[obj_name].algorithm.input.items():
+                if new_node.algorithm == node.algorithm:
 
-                for d in dependencies:
+                    self.nodes[obj_name] = node
+                    return self.nodes[obj_name]
 
-                    try:
-                        # Set this current node as the parent to the dependency
-                        # being created in self.node(d)
-                        self.node(d).parent = self.nodes[obj_name]
+            # Check for children
+            if not new_node.children:
 
-                    except anytreeExceptions.LoopError:
-                        sys.exit(
-                            f"ERROR: circular node detected between {d} and {obj_name}"
-                        )
+                for _, dependencies in new_node.algorithm.input.items():
+
+                    for d in dependencies:
+
+                        try:
+                            # Set this current node as the parent to the dependency
+                            # being created in self.node(d)
+                            self.node(d).parent = new_node
+
+                        except anytreeExceptions.LoopError:
+                            sys.exit(
+                                f"ERROR: circular node detected between {d} and {obj_name}"
+                            )
+
+        self.nodes[obj_name] = new_node
+
         # Return our finished node
         return self.nodes[obj_name]
 
@@ -244,11 +226,16 @@ class Run:
 
     def _reset_algorithms_instance(self):
         """Clears all algorithm instances."""
-        for obj_name in list(self.algorithms.keys()):
+        for obj_name in self.nodes:
 
-            del self.algorithms[obj_name]
+            if self.nodes[obj_name].algorithm is not None:
 
-            self.nodes[obj_name].algorithm = None
+                del self.algorithms[obj_name]
+
+                self.nodes[obj_name].algorithm = None
+
+        for obj_name in self.objects:
+            self.alg(obj_name)
 
     def alg(self, obj_name):
         """Instantiates an algorithm/object according to the
@@ -289,6 +276,11 @@ class Run:
                                 setattr(self.algorithms[obj_name], io, obj_config[io])
 
                             setattr(self.algorithms[obj_name], io, {None: ""})
+
+                            for _, output in self.algorithms[obj_name].output.items():
+
+                                if output:
+                                    self.algorithms[output] = self.algorithms[obj_name]
 
                         return self.algorithms[obj_name]
 
@@ -421,22 +413,22 @@ class Run:
             if alg is not None:
 
                 for condition, dependencies in alg.input.items():
-            
+
                     for d in dependencies:
                         self.call(d)
-            
+
                     passed = getattr(alg, self.state)(condition)
-            
+
                     if not passed:
                         break
-            
+
                 # the block below is work in progress.
                 # checking that the object is complete.
                 # if not self.is_complete(obj_name, alg):
                 #    sys.exit(
                 #        f"ERROR: object {obj_name} is on the store but additional output is missing !!!"
                 #    )
-            
+
             else:
                 self._current_input.read(obj_name)
 
@@ -450,10 +442,10 @@ class Run:
     #
     #        self._current_output.write(obj_name)
 
-    #def is_complete(self, obj_name, alg):
+    # def is_complete(self, obj_name, alg):
     #    """If the main object is on the store with a valid value,
     #    additional output is checked to be on the store."""
-    # 
+    #
     #    if self.store.get(obj_name) is not EN.Pyrate.NONE:
     #
     #        return all(
