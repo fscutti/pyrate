@@ -102,8 +102,6 @@ class Run:
 
             for t_name, t_job_inputs in o.targets.items():
 
-                self.alg(t_name)
-
                 if not t_name in self.targets:
 
                     # Where the magic happens!
@@ -267,20 +265,15 @@ class Run:
                             obj_name, obj_config, self.store, self.logger
                         )
 
-                        # initialisation of inputs and outputs. If no explicit
-                        # initialisation is found in the config default to the
-                        # empty dictionary {None: ""}.
+                        # initialisation of inputs and outputs.
                         for io in ["input", "output"]:
 
                             if io in obj_config:
                                 setattr(self.algorithms[obj_name], io, obj_config[io])
 
-                            setattr(self.algorithms[obj_name], io, {None: ""})
-
                             for _, output in self.algorithms[obj_name].output.items():
 
-                                if output:
-                                    self.algorithms[output] = self.algorithms[obj_name]
+                                self.algorithms[output] = self.algorithms[obj_name]
 
                         return self.algorithms[obj_name]
 
