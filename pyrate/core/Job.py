@@ -220,7 +220,95 @@ class Job:
 
 def expand_tags(configs):
     """ Searches all configs, finds all valid <tags> and replaces and expands
-        based on the pyrate tag rules
+        based on the following tag rules
+        
+        <tag> = [x1, x2, x3, ...]
+
+        For an object to be duplicated it must contain at least one <tag> type tag
+        in the object name
+
+        --- Single object name tags ---
+        Single <tag> in the object name will create len(<tag>) objects, where
+        each instance of the <tag> key will be replaced with a single element
+        in the <tag> list. All instances of the <tag> key will be replaced, in both
+        the object name, and the object config
+
+        E.g.
+        MyObj_<tag>:
+            key1: Variable_<tag>
+        
+        Will create n objects like the following
+        MyObj_x1:
+            key1: Varialbe_x1
+        ...
+        MyObj_xn:
+            key1: Varialbe_xn
+        
+        Other tags can be used in the object config itsefl, so long as they are 
+        at least as long as <tag>. They will be iterated over in parallel
+
+        MyObj_<tag>:
+            key1: Variable_<tag>
+            key1: Varialbe_<tag2>
+
+        --- Multiple object name tags ---
+        With mulitple tags <a>, <b> in the object name, len(<a>) * len(<b>) objects
+        will be created, where the <a> and <b> tags follow a generic outer product
+        of all combinations of the pairings.
+
+        <tag1>: [1,2]
+        <tag2>: [3,4]
+
+        MyObj_<tag1><tag2>:
+            key1: Variable_<tag1>
+            key2: Variable_<tag2>
+        
+        will generate 4 objects like the where the tags are equal to:
+        [ (1,3), (1, 4), (2, 3), (2, 4) ]
+
+        MyObj_13:
+            key1: Variable_1
+            key2: Variable_3
+        ...
+        MyObj_24:
+            key1: Variable_2
+            key2: Variable_4
+        
+        Lastly, other tags can be used in parallel with the product tags. These
+        tags can be added with the following syntax <<tag>>, and will be ignored 
+        when generating the product. Their index will follow the first listed 
+        tag in the product, i.e. they will follow the index of <tag1> in the 
+        example. <tag3> must be at least as long as <tag1>
+
+        <tag3>: [8, 9]
+
+        MyObj_<tag1><tag2><<tag3>>:
+            key1: Variable_<tag1>
+            key2: Variable_<tag2>
+            key3: Variable_<<tag3>>
+        
+        becomes
+
+        MyObj_138:
+            key1: Variable_1
+            key2: Variable_3
+            key3: Variable_8
+        
+        MyObj_148:
+            key1: Variable_1
+            key2: Variable_4
+            key3: Variable_8
+        
+        MyObj_239:
+            key1: Variable_2
+            key2: Variable_3
+            key3: Variable_9
+        
+        MyObj_249:
+            key1: Variable_2
+            key2: Variable_4
+            key3: Variable_9
+
     """
     configs = deepcopy(configs)
     # Search all the configs and find all the valid tags
