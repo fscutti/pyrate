@@ -51,6 +51,8 @@ class Algorithm:
     @property
     def input(self):
         """Getter method for input objects."""
+        if self._input == {}:
+            return {None: ""}
         return self._input
 
     @input.setter
@@ -98,5 +100,6 @@ class Algorithm:
         """Setter method for output objects."""
         if self._output == {}:
             self._output = config_output
+
 
 # EOF
