@@ -39,7 +39,7 @@ class Algorithm:
         
         self._output = {}
         if "output" in config:
-            self.input = config["output"]
+            self.output = config["output"]
 
     def initialise(self, condition=None):
         """At this stage the method knows the current input."""
