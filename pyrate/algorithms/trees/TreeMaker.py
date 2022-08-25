@@ -309,16 +309,11 @@ class TreeMaker(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    @property
-    def input(self):
-        """Getter method for input objects."""
-        return self._input
-
-    @input.setter
-    def input(self, config_input):
+    def set_input(self):
         """Sets the input approrpriately for TreeMaker"""
-        if self._input == {}:
-            for dependency in FN.expand_nested_values(config_input):
+        self.input = {}
+        if "input" in self.config:
+            for dependency in FN.expand_nested_values(self.config["input"]):
                 variables = set(ST.get_items(str(dependency)))
                 self._update_input(None, variables)
 
