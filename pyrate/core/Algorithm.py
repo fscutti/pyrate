@@ -34,7 +34,12 @@ class Algorithm:
         self.logger = logger
 
         self._input = {}
+        if "input" in config:
+            self.input = config["input"]
+        
         self._output = {}
+        if "output" in config:
+            self.output = config["output"]
 
     def initialise(self, condition=None):
         """At this stage the method knows the current input."""
@@ -51,6 +56,9 @@ class Algorithm:
     @property
     def input(self):
         """Getter method for input objects."""
+        if self._input == {}:
+            return {None: ""}
+
         return self._input
 
     @input.setter
@@ -98,5 +106,6 @@ class Algorithm:
         """Setter method for output objects."""
         if self._output == {}:
             self._output = config_output
+
 
 # EOF
