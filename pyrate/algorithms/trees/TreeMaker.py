@@ -312,15 +312,21 @@ class TreeMaker(Algorithm):
     @property
     def input(self):
         """Getter method for input objects."""
+        if self._input == {}:
+            return {None: ""}
         return self._input
 
     @input.setter
     def input(self, config_input):
         """Sets the input approrpriately for TreeMaker"""
-        if self._input == {}:
-            for dependency in FN.expand_nested_values(config_input):
-                variables = set(ST.get_items(str(dependency)))
-                self._update_input(None, variables)
+        if hasattr(self, "_input"):
+            # input has already been set
+            return
+
+        self._input = {}
+        for dependency in FN.expand_nested_values(config_input):
+            variables = set(ST.get_items(str(dependency)))
+            self._update_input(None, variables)
 
     def initialise(self, condition=None):
         """Defines a tree dictionary."""

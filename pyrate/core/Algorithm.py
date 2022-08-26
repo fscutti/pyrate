@@ -34,8 +34,6 @@ class Algorithm:
         self.logger = logger
 
         # Set the inputs and outputs
-        self._input = {}
-        self._output = {}
         if "input" in self.config:
             self.input = self.config["input"]
         else:
@@ -69,16 +67,20 @@ class Algorithm:
     @input.setter
     def input(self, inputs):
         """Setter method for input objects."""
-        if self._input == {}:
-            for dependency in FN.get_nested_values(inputs):
-                if not isinstance(dependency, list):
-                    variables = set(ST.get_items(str(dependency)))
-                    self._update_input(None, variables)
+        if hasattr(self, "_input"):
+            # input has already been set
+            return
 
-                else:
-                    for string in dependency:
-                        for condition, variables in self.parse_input(string).items():
-                            self._update_input(condition, variables)            
+        self._input = {}
+        for dependency in FN.get_nested_values(inputs):
+            if not isinstance(dependency, list):
+                variables = set(ST.get_items(str(dependency)))
+                self._update_input(None, variables)
+
+            else:
+                for string in dependency:
+                    for condition, variables in self.parse_input(string).items():
+                        self._update_input(condition, variables)            
 
     def _update_input(self, condition, variables):
         """Add condition and variables to the _input dictionary."""
@@ -104,6 +106,9 @@ class Algorithm:
     @output.setter
     def output(self, outputs):
         """Setter method for output objects."""
+        if hasattr(self, "_output"):
+            # Already has output set
+            return
         self._output = outputs
 
 
