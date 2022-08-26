@@ -25,7 +25,7 @@ from pyrate.utils import enums
 
 
 class Algorithm:
-    __slots__ = ["name", "config", "store", "logger", "input", "output"]
+    __slots__ = ["name", "config", "store", "logger", "_input", "_output"]
 
     def __init__(self, name, config, store, logger):
         self.name = name
@@ -34,8 +34,17 @@ class Algorithm:
         self.logger = logger
 
         # Set the inputs and outputs
-        self.set_input()
-        self.set_output()
+        self._input = {}
+        self._output = {}
+        if "input" in self.config:
+            self.input = self.config["input"]
+        else:
+            self.input = {}
+        
+        if "output" in self.config:
+            self.output = self.config["output"]
+        else:
+            self.output = {}
 
     def initialise(self, condition=None):
         """At this stage the method knows the current input."""
@@ -49,11 +58,19 @@ class Algorithm:
         """At this stage the method knows the current input."""
         pass
 
-    def set_input(self):
+    @property
+    def input(self):
+        """ Getter method for input objects
+        """
+        if self._input == {}:
+            return {None: ""}
+        return self._input
+
+    @input.setter
+    def input(self, inputs):
         """Setter method for input objects."""
-        self.input = {}
-        if "input" in self.config:
-            for dependency in FN.get_nested_values(self.config["input"]):
+        if self._input == {}:
+            for dependency in FN.get_nested_values(inputs):
                 if not isinstance(dependency, list):
                     variables = set(ST.get_items(str(dependency)))
                     self._update_input(None, variables)
@@ -68,21 +85,26 @@ class Algorithm:
         if "" in variables:
             variables.remove("")
 
-        if not condition in self.input:
-            self.input[condition] = variables
+        if not condition in self._input:
+            self._input[condition] = variables
         else:
-            self.input[condition].update(variables)
+            self._input[condition].update(variables)
 
     def parse_input(self, s):
         """Returns a dictionary where keys are dependency conditions and values
         are the variables associated to them."""
         return {None: set()}
 
-    def set_output(self):
+    @property
+    def output(self):
+        """ Getter method for the output objects
+        """
+        return self._output
+
+    @output.setter
+    def output(self, outputs):
         """Setter method for output objects."""
-        self.output = {}
-        if "output" in self.config:
-            self.output = self.config["output"]
+        self._output = outputs
 
 
 # EOF
