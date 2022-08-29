@@ -22,6 +22,7 @@
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
 from pyrate.utils.enums import Pyrate
+import numba
 
 
 class MeanTime(Algorithm):

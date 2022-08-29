@@ -28,6 +28,7 @@
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
 from pyrate.utils.enums import Pyrate
+import numba
 
 class TrapezoidFilter(Algorithm):
     __slots__ = ("rise", "gap", "period", "tau", "zeropole", "traplen", "M", "dn0", "dn1", "dn2", "dn3")

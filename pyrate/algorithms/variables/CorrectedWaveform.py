@@ -36,6 +36,7 @@ import sys
 from pyrate.core.Algorithm import Algorithm
 from pyrate.utils.enums import Pyrate
 import numpy as np
+import numba
 
 wf_units = {"V": 1.0, "mV": 1e3, "uV": 1e6}
 
