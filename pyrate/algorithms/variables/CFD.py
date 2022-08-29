@@ -130,6 +130,8 @@ class CFD(Algorithm):
         # Parameters and formula from Digital techniques for real-time pulse shaping in radiation measurements
         # https://doi.org/10.1016/0168-9002(94)91652-7
 
+        CFDTimes = np.zeros(len(waveform))
+
         crossed = False
         max_cfd_len = len(waveform) - delay
         num_zero_crossing = 0
