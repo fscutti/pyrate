@@ -40,7 +40,7 @@ from pyrate.utils.enums import Pyrate
 import numba
 
 class CFD(Algorithm):
-    __slots__ = ("delay", "scale", "cfd_threshold", "cfd", "waveform", "waveform_delayed")
+    __slots__ = ("delay", "scale", "cfd_threshold", "cfd", "waveform", "waveform_delayed", "CFDTimes")
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
@@ -55,46 +55,52 @@ class CFD(Algorithm):
         self.cfd = np.zeros(0)
         self.waveform = np.zeros(0)
         self.waveform_delayed = np.zeros(0)
+        self.CFDTimes = np.zeros(1)
 
     def execute(self, condition=None):
         """Caclulates the waveform CFD"""
         # Reset all the waveforms, safer to do at the start
-        self.clear_arrays()
+        # self.clear_arrays()
 
         waveform = self.store.get(self.config["input"]["waveform"])
         if waveform is Pyrate.NONE:
             return
+
+        self.CFDTimes, cfd = self.CFDCalc(waveform=waveform, cfd = self.cfd, delay = self.delay, scale = self.scale, cfd_threshold = self.cfd_threshold)
         
-        waveform_len = waveform.size
-        if (waveform_len + self.delay) > self.waveform.size:
-            # Our waveform is larger than the storage
-            # we need to grow our arrays
-            self.waveform = np.resize(self.waveform, waveform_len + self.delay)
-            self.waveform_delayed = np.resize(self.waveform_delayed, waveform_len + self.delay)
+        # waveform_len = waveform.size
+        # if (waveform_len + self.delay) > self.waveform.size:
+        #     # Our waveform is larger than the storage
+        #     # we need to grow our arrays
+        #     self.waveform = np.resize(self.waveform, waveform_len + self.delay)
+        #     self.waveform_delayed = np.resize(self.waveform_delayed, waveform_len + self.delay)
 
-        # Parameters and formula from Digital techniques for real-time pulse shaping in radiation measurements
-        # https://doi.org/10.1016/0168-9002(94)91652-7
+        # # Parameters and formula from Digital techniques for real-time pulse shaping in radiation measurements
+        # # https://doi.org/10.1016/0168-9002(94)91652-7
 
-        self.waveform[:-self.delay] = waveform
-        self.waveform_delayed[self.delay:] = waveform
-        self.cfd = (self.scale * self.waveform) - self.waveform_delayed
+        # self.waveform[:-self.delay] = waveform
+        # self.waveform_delayed[self.delay:] = waveform
+        # self.cfd = (self.scale * self.waveform) - self.waveform_delayed
 
-        # Possible numpy way to do it quickly
-        # https://stackoverflow.com/questions/3843017/efficiently-detect-sign-changes-in-python
-        zero_cross = np.where(np.diff(np.sign(self.cfd)))[0]
-        cross_threshold = np.where(self.cfd > self.cfd_threshold)[0]
+        # # Possible numpy way to do it quickly
+        # # https://stackoverflow.com/questions/3843017/efficiently-detect-sign-changes-in-python
+        # zero_cross = np.where(np.diff(np.sign(self.cfd)))[0]
+        # cross_threshold = np.where(self.cfd > self.cfd_threshold)[0]
 
-        if cross_threshold.size == 0:
-            return
+        # if cross_threshold.size == 0:
+        #     return
         
-        zero_cross = zero_cross[zero_cross>cross_threshold[0]]
-        if zero_cross.size == 0:
+        # zero_cross = zero_cross[zero_cross>cross_threshold[0]]
+        # if zero_cross.size == 0:
+        #     return
+
+        # f = self.cfd[zero_cross]/(self.cfd[zero_cross] - self.cfd[zero_cross+1])
+        # CFDTimes = zero_cross + f
+        if self.CFDTimes[0] == -999.0:
             return
 
-        f = self.cfd[zero_cross]/(self.cfd[zero_cross] - self.cfd[zero_cross+1])
-        CFDTimes = zero_cross + f
-        self.store.put(self.name, CFDTimes[0])
-        self.store.put(f"{self.output['times']}", CFDTimes)
+        self.store.put(self.name, self.CFDTimes[0])
+        self.store.put(f"{self.output['times']}", self.CFDTimes)
         self.store.put(f"{self.output['trace']}", self.cfd)
             # if cross_threshold.size:
             #     # Only look at the zero crosses after the threshold cross
@@ -119,22 +125,45 @@ class CFD(Algorithm):
     # Remove numpy dependence for speed and cross-check with more up to date code above
     @staticmethod
     @numba.jit(nopython=True, cache=True)
-    def CFDCalc(selfwaveform, waveform, cfd, delay, scale, cfd_threshold, selfwaveform_delayed):
+    def CFDCalc(waveform, cfd, delay, scale, cfd_threshold):
 
         # Parameters and formula from Digital techniques for real-time pulse shaping in radiation measurements
         # https://doi.org/10.1016/0168-9002(94)91652-7
 
-        zero_cross = np.zeros(len(selfwaveform))
-        cross_threshold = np.zeros(len(selfwaveform))
-        CFDTimes = np.zeros(len(selfwaveform))
+        crossed = False
+        max_cfd_len = len(waveform) - delay
+        num_zero_crossing = 0
+        f = 0
+        cfd = np.zeros(max_cfd_len)
 
         # C-like replacement of numpy-based code block below loops
-        for i in range(len(selfwaveform-delay),len(selfwaveform)):
-            selfwaveform[i] = waveform[i-len(selfwaveform-delay)]
-        for i in range(delay, len(selfwaveform_delayed)):
-            selfwaveform_delayed = waveform[i-delay]
-        for i in range(len(selfwaveform)):
-            cfd[i] = (scale*selfwaveform[i]) - selfwaveform_delayed[i]
+        for i in range(0, max_cfd_len):
+            cfd[i] = (scale*waveform[i-delay]) - waveform[i]
+
+            if cfd[i] > cfd_threshold and not crossed:
+                crossed = True
+                if i == max_cfd_len:
+                    break
+            
+            if crossed and cfd[i]<=0 and cfd[i-1]>0:
+                if (cfd[i] - cfd[i+1]) == 0:
+                    crossed = False
+                    CFDTimes[num_zero_crossing] = i
+                    num_zero_crossing += 1
+                else:
+                    crossed = False
+                    f = cfd[i]/(cfd[i] - cfd[i+1])
+                    CFDTimes[num_zero_crossing] = i+f
+                    num_zero_crossing += 1
+
+        if num_zero_crossing==0:
+            CFDTimes[0] = -999.0
+            return CFDTimes, cfd
+        
+        CFDTimes = CFDTimes[:num_zero_crossing]
+
+        return CFDTimes, cfd
+
 
         # selfwaveform[:-delay] = waveform
         # selfwaveform_delayed[delay:] = waveform
@@ -142,34 +171,21 @@ class CFD(Algorithm):
 
         # Possible numpy way to do it quickly
         # https://stackoverflow.com/questions/3843017/efficiently-detect-sign-changes-in-python
+
+
+        # zero_cross = np.where(np.diff(np.sign(cfd)))[0]
+        # cross_threshold = np.where(cfd > cfd_threshold)[0]
+
+        # if cross_threshold.size == 0:
+        #     CFDTimes[0] = -999.0
+        #     return CFDTimes, cfd
         
-        crossed = False
-        zero_cros_idx = 0
-        cross_threshold_idx = 0
-        for i in range(len(cfd)):
-            if cfd[i] > cfd_threshold and crossed == False:
-                crossed = True
-                cross_threshold = cfd[i]
-            if cfd[i]<0 and crossed == True:
-                zero_cross = i
-        
+        # zero_cross = zero_cross[zero_cross>cross_threshold[0]]
+        # if zero_cross.size == 0:
+        #     CFDTimes[0] = -999.0
+        #     return CFDTimes, cfd
 
-
-        zero_cross = np.where(np.diff(np.sign(cfd)))[0]
-        cross_threshold = np.where(cfd > cfd_threshold)[0]
-
-        if cross_threshold.size == 0:
-            CFDTimes[0] = -999.0
-            return CFDTimes, cfd
-        
-        zero_cross = zero_cross[zero_cross>cross_threshold[0]]
-        if zero_cross.size == 0:
-            CFDTimes[0] = -999.0
-            return CFDTimes, cfd
-
-        f = cfd[zero_cross]/(cfd[zero_cross] - cfd[zero_cross+1])
-        CFDTimes = zero_cross + f
-
-        return CFDTimes, cfd
+        # f = cfd[zero_cross]/(cfd[zero_cross] - cfd[zero_cross+1])
+        # CFDTimes = zero_cross + f
 
 # EOF
