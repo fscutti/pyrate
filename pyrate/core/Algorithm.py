@@ -33,8 +33,16 @@ class Algorithm:
         self.store = store
         self.logger = logger
 
-        self._input = {}
-        self._output = {}
+        # Set the inputs and outputs
+        if "input" in self.config:
+            self.input = self.config["input"]
+        else:
+            self.input = {}
+        
+        if "output" in self.config:
+            self.output = self.config["output"]
+        else:
+            self.output = {}
 
     def initialise(self, condition=None):
         """At this stage the method knows the current input."""
@@ -50,28 +58,29 @@ class Algorithm:
 
     @property
     def input(self):
-        """Getter method for input objects."""
+        """ Getter method for input objects
+        """
+        if self._input == {}:
+            return {None: ""}
         return self._input
 
     @input.setter
-    def input(self, config_input):
+    def input(self, inputs):
         """Setter method for input objects."""
-        if self._input == {}:
+        if hasattr(self, "_input"):
+            # input has already been set
+            return
 
-            for dependency in FN.get_nested_values(config_input):
+        self._input = {}
+        for dependency in FN.get_nested_values(inputs):
+            if not isinstance(dependency, list):
+                variables = set(ST.get_items(str(dependency)))
+                self._update_input(None, variables)
 
-                if not isinstance(dependency, list):
-
-                    variables = set(ST.get_items(str(dependency)))
-
-                    self._update_input(None, variables)
-
-                else:
-                    for string in dependency:
-
-                        for condition, variables in self.parse_input(string).items():
-
-                            self._update_input(condition, variables)
+            else:
+                for string in dependency:
+                    for condition, variables in self.parse_input(string).items():
+                        self._update_input(condition, variables)            
 
     def _update_input(self, condition, variables):
         """Add condition and variables to the _input dictionary."""
@@ -90,13 +99,17 @@ class Algorithm:
 
     @property
     def output(self):
-        """Getter method for output objects."""
+        """ Getter method for the output objects
+        """
         return self._output
 
     @output.setter
-    def output(self, config_output):
+    def output(self, outputs):
         """Setter method for output objects."""
-        if self._output == {}:
-            self._output = config_output
+        if hasattr(self, "_output"):
+            # Already has output set
+            return
+        self._output = outputs
+
 
 # EOF
