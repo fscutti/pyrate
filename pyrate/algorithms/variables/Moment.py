@@ -127,7 +127,7 @@ class Moment(Algorithm):
 
     @staticmethod
     @numba.jit(nopython=True, cache=True)
-    def MomentsCalc(waveform, window, time_period, mode, times):
+    def MomentsCalc(waveform, window, time_period, times):
 
         mean = -999.0
         stddev = -999.0
@@ -145,16 +145,12 @@ class Moment(Algorithm):
         excess_kurtosis = -999.0
         moments = np.array([1], dtype=np.float64)
         window_size = window[1]-window[0]
-        x = np.zeros(window_size)
-        fx = np.zeros(window_size)
         inner = np.zeros(window_size)
 
         # Waveform over region of interest
         for i in range(window_size):
-            x[i] = times[i]
-            fx[i] = waveform[i]
-            fsum += fx[i]
-            inner[i] = fx[i]*x[i]
+            fsum += waveform[i]
+            inner[i] = waveform[i]*times[i]
             inner_sum += inner[i]
             inner_square_sum += inner[i]**2
             inner_cube_sum += inner[i]**3
@@ -175,11 +171,14 @@ class Moment(Algorithm):
             M3 = m3 + 2*(mean**3) - 3*mean*m2
 
             # Conversion to useful variables
-            stddev = np.sqrt(M2)
-            skew = M3 / np.power(stddev, 3)
-            excess_kurtosis = M4 / np.power(stddev, 4) - 3
+            stddev = math.sqrt(M2) # Numba maps math.sqrt to sqrtf in libc, not sure about numpy
+            skew = M3 / (stddev**3)
+            excess_kurtosis = M4 / (stddev**4) - 3
             kurtosis = excess_kurtosis
 
+            moments = [mean, stddev, skew, kurtosis]
+
+        return moments
 
 
         # mean = -999.0
@@ -241,7 +240,7 @@ class Moment(Algorithm):
 
         #     moments = [mean, stddev, skew, kurtosis]
         
-        return moments
+        # return moments
 
 
 # EOF
