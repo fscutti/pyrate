@@ -68,53 +68,12 @@ class CFD(Algorithm):
 
         self.CFDTimes, cfd = self.CFDCalc(waveform=waveform, cfd = self.cfd, delay = self.delay, scale = self.scale, cfd_threshold = self.cfd_threshold)
         
-        # waveform_len = waveform.size
-        # if (waveform_len + self.delay) > self.waveform.size:
-        #     # Our waveform is larger than the storage
-        #     # we need to grow our arrays
-        #     self.waveform = np.resize(self.waveform, waveform_len + self.delay)
-        #     self.waveform_delayed = np.resize(self.waveform_delayed, waveform_len + self.delay)
-
-        # # Parameters and formula from Digital techniques for real-time pulse shaping in radiation measurements
-        # # https://doi.org/10.1016/0168-9002(94)91652-7
-
-        # self.waveform[:-self.delay] = waveform
-        # self.waveform_delayed[self.delay:] = waveform
-        # self.cfd = (self.scale * self.waveform) - self.waveform_delayed
-
-        # # Possible numpy way to do it quickly
-        # # https://stackoverflow.com/questions/3843017/efficiently-detect-sign-changes-in-python
-        # zero_cross = np.where(np.diff(np.sign(self.cfd)))[0]
-        # cross_threshold = np.where(self.cfd > self.cfd_threshold)[0]
-
-        # if cross_threshold.size == 0:
-        #     return
-        
-        # zero_cross = zero_cross[zero_cross>cross_threshold[0]]
-        # if zero_cross.size == 0:
-        #     return
-
-        # f = self.cfd[zero_cross]/(self.cfd[zero_cross] - self.cfd[zero_cross+1])
-        # CFDTimes = zero_cross + f
         if self.CFDTimes[0] == -999.0:
             return
 
         self.store.put(self.name, self.CFDTimes[0])
         self.store.put(f"{self.output['times']}", self.CFDTimes)
         self.store.put(f"{self.output['trace']}", self.cfd)
-            # if cross_threshold.size:
-            #     # Only look at the zero crosses after the threshold cross
-            #     zero_cross = zero_cross[zero_cross>cross_threshold[0]]
-            #     if zero_cross.size:
-            #         # Ok, now we check the first valid zero cross
-            #         fc = zero_cross[0] # First crossing (left side)
-            #         f = self.cfd[fc]/(self.cfd[fc] - self.cfd[fc+1]) # CFD fraction
-            #         CFDTime = zero_cross[0] + f
-        
-
-        # self.store.put(self.name, CFDTime)
-        # if self.savecfd:
-        #     self.store.put(f"{self.name}Trace", self.cfd)
 
     def clear_arrays(self):
         """ Fills all the internal arrays with 0
@@ -124,7 +83,7 @@ class CFD(Algorithm):
 
     # Remove numpy dependence for speed and cross-check with more up to date code above
     @staticmethod
-    @numba.jit(nopython=True, cache=True)
+    @numba.njit(cache=True)
     def CFDCalc(waveform, cfd, delay, scale, cfd_threshold):
 
         # Parameters and formula from Digital techniques for real-time pulse shaping in radiation measurements
@@ -165,29 +124,5 @@ class CFD(Algorithm):
         CFDTimes = CFDTimes[:num_zero_crossing]
 
         return CFDTimes, cfd
-
-
-        # selfwaveform[:-delay] = waveform
-        # selfwaveform_delayed[delay:] = waveform
-        # cfd = (scale * selfwaveform) - selfwaveform_delayed
-
-        # Possible numpy way to do it quickly
-        # https://stackoverflow.com/questions/3843017/efficiently-detect-sign-changes-in-python
-
-
-        # zero_cross = np.where(np.diff(np.sign(cfd)))[0]
-        # cross_threshold = np.where(cfd > cfd_threshold)[0]
-
-        # if cross_threshold.size == 0:
-        #     CFDTimes[0] = -999.0
-        #     return CFDTimes, cfd
-        
-        # zero_cross = zero_cross[zero_cross>cross_threshold[0]]
-        # if zero_cross.size == 0:
-        #     CFDTimes[0] = -999.0
-        #     return CFDTimes, cfd
-
-        # f = cfd[zero_cross]/(cfd[zero_cross] - cfd[zero_cross+1])
-        # CFDTimes = zero_cross + f
 
 # EOF
