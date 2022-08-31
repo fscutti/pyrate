@@ -10,6 +10,7 @@
         x: (str/) Array-like object For all Y's to be plotted against
     
     Optional parameters:
+        path: (str) Default = "". The folder name/structure to store the TGraph
         x_step: (int/float) Default=1. If x is not provided and x_step is, 
                 X will be defined as an array of length len(Y) with step size
                 equal to x_step
@@ -101,6 +102,8 @@ class TGraphMaker(Algorithm):
             if type(Y) != np.ndarray:
                 Y = np.array(Y)
 
+            from code import interact
+            interact(local=locals())
             if "x" in self.config["input"]:
                 X = self.store.get(self.config["input"]["x"])
             elif "x_step" in self.config:

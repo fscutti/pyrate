@@ -31,5 +31,5 @@ outputs:
             - Channel_1: Data1
             - Constants: Data1
             - MultiChannels: Data1
-            - MyTGraph: Data1
+            - AverageWaveforms: Data1
 # EOF
