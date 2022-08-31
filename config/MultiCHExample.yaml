@@ -290,9 +290,13 @@ objects:
         input:
             float: TimeDifference_CH01
 
-    Single_data:
+    Constants:
         algorithm: TreeMaker
         filltype: single
         input:
-            vector<double>: [AverageWaveform_CH0, AverageWaveform_CH1]
             double: ChargeConstant
+
+    MyTGraph:
+        algorithm: TGraphMaker
+        input:
+            y: [AverageWaveform_CH0, AverageWaveform_CH1]

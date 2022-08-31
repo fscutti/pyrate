@@ -38,6 +38,14 @@ def get_items_from_list(l):
         items.extend(i for i in get_items(s))
     return items
 
+def pyrate_yaml_to_list(input):
+    """ Parses a pyrate yaml config list
+    """
+    if type(input) == str:
+        return get_items(input)
+    elif type(input) != list:
+        return [input]
+    return input
 
 def remove_tag_from_name(name, tag):
     """Removes a tag from a name given as a string."""

@@ -2,58 +2,6 @@
 
 import ROOT as R
 import numpy as np
-import ctypes
-
-def maxint(t, signed=False):
-    """Calculates the max integer value for ctype integers
-    Takes in a ctypes.c_<type>() e.g. ctypes.c_int()
-    """
-    if signed:
-        return 2 ** (8 * ctypes.sizeof(t) - 1) - 1
-    return 2 ** (8 * ctypes.sizeof(t)) - 1
-
-_Type = {
-    "int": {"python": "i", "root": "I", "vector": "int", "invalid": -999},
-    "uint": {
-        "python": "I",
-        "root": "i",
-        "vector": "unsigned int",
-        "invalid": maxint(ctypes.c_uint()),
-    },
-    "short": {"python": "h", "root": "S", "vector": "short", "invalid": -999},
-    "ushort": {
-        "python": "H",
-        "root": "s",
-        "vector": "unsigned short",
-        "invalid": maxint(ctypes.c_ushort()),
-    },
-    "long": {"python": "l", "root": "L", "vector": "long", "invalid": -999},
-    "ulong": {
-        "python": "L",
-        "root": "l",
-        "vector": "unsigned long",
-        "invalid": maxint(ctypes.c_ulong()),
-    },
-    "float": {
-        "python": "d",
-        "root": "D",
-        "vector": "double",  # Python arrays don't have float32's
-        "invalid": -999.0,
-    },
-    "double": {
-        "python": "d",
-        "root": "D",
-        "vector": "double",
-        "invalid": -999.0,
-    },
-    "bool": {"python": "H", "root": "O", "vector": "bool", "invalid": 0},
-    "string": {
-        "python": "u",
-        "root": "C",
-        "vector": "string",  # Strings should be stored in vectors
-        "invalid": "",
-    },
-}
 
 class Color(int):
     """Create a new R.TColor object with an associated index.
