@@ -96,6 +96,13 @@ class Moment(Algorithm):
             inner_cube_sum += inner**3
             inner_quart_sum += inner**4
 
+        if fsum==0:
+            mean = np.nan
+            stddev = np.nan
+            skew = np.nan
+            kurtosis = np.nan
+            return mean, stddev, skew, kurtosis
+            
         mean = inner_sum/fsum
         m2 = inner_square_sum/fsum
         m3 = inner_cube_sum/fsum
