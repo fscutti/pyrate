@@ -67,7 +67,7 @@ class CFD(Algorithm):
             return
 
         self.CFDTimes, cfd = self.CFDCalc(waveform=waveform, cfd = self.cfd, delay = self.delay, scale = self.scale, cfd_threshold = self.cfd_threshold)
-        
+
         if self.CFDTimes[0] == -999.0:
             return
 
@@ -113,7 +113,7 @@ class CFD(Algorithm):
                     CFDTimes[num_zero_crossing] = i+f
                     num_zero_crossing += 1
 
-        if num_zero_crossing==0 and num_thresh_crossing==0:
+        if num_zero_crossing==0 or num_thresh_crossing==0:
             CFDTimes[0] = -999.0
             return CFDTimes, cfd
         

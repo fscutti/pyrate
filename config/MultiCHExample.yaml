@@ -141,7 +141,7 @@ objects:
         algorithm:  CFD
         delay: 5
         scale: 1
-        cfd_threshold: 1
+        cfd_threshold: 2
         input:
             waveform: CorrectedWaveform_CH<channels>
         output:
