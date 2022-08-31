@@ -59,7 +59,8 @@ def replace_clean(s, t, v):
     """ Replaces tag t in string s with value v cleanly
         (if there's quotes around it, clears them)
     """
-    return s.replace(f' "{t}"', f" {str(v)}").replace(str(t), str(v))
+    v = str(v).replace('\'', "\"")
+    return s.replace(f' "{t}"', f" {v}").replace(str(t), v)
 
 
 def get_tags(f):

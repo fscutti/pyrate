@@ -121,8 +121,6 @@ class TGraphMaker(Algorithm):
             if type(Y) != np.ndarray:
                 Y = np.array(Y)
 
-            from code import interact
-            interact(local=locals())
             if "x" in self.config["input"]:
                 X = self.store.get(self.config["input"]["x"])
             elif "x_step" in self.config:
