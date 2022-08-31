@@ -117,17 +117,19 @@ class CorrectedWaveform(Algorithm):
             return
         
         # Flip the waveform if needed, and subtract baseline
-        corrected_waveform = self.conversion * self.polarity * (waveform - baseline)
+        # corrected_waveform = self.conversion * self.polarity * (waveform - baseline)
+        corrected_waveform = self.CorrectedWaveformCalc(waveform=waveform, polarity=self.polarity, conversion=self.conversion, baseline=baseline)
         self.store.put(self.name, corrected_waveform)
 
     @staticmethod
-    @numba.jit(nopython=True, cache=True)
+    @numba.njit(cache=True)
     def CorrectedWaveformCalc(waveform, polarity, conversion, baseline):
 
-        corrected_waveform = np.array([1], dtype=np.float64)
+        corrected_waveform = np.zeros(len(waveform))
 
         # Flip the waveform if needed, and subtract baseline
-        corrected_waveform = conversion * polarity * (waveform - baseline)
+        for i in range(len(waveform)):
+            corrected_waveform[i] = conversion * polarity * (waveform[i] - baseline)
 
         return corrected_waveform
 

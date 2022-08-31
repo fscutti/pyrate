@@ -47,7 +47,7 @@ class BaselineReco(Algorithm):
 
         nsamples = self.config["samples"]
         
-        Baseline, StdDev, Delta = self.BaselinePyJIT(waveform, nsamples)
+        Baseline, StdDev, Delta = self.BaselineCalc(waveform, nsamples)
 
         #BaselineReco = [Baseline, StdDev, Delta]
 
@@ -57,12 +57,12 @@ class BaselineReco(Algorithm):
 
     @staticmethod
     @numba.njit(cache=True)
-    def BaselinePyJIT(waveform, nsamples):
-        Baseline = -999.0
+    def BaselineCalc(waveform, nsamples):
+        Baseline = Pyrate.NONE
         StdDev = 0.0
         Min = 999999.0
         Max = -999999.0
-        Delta = -999.0
+        Delta = Pyrate.NONE
         Sum = 0.0
 
         for i in range(nsamples):
