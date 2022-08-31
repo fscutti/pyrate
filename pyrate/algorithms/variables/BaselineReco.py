@@ -46,19 +46,8 @@ class BaselineReco(Algorithm):
             sys.exit("ERROR in Baseline, 'samples' not found in the config")
 
         nsamples = self.config["samples"]
-        method = self.config["method"]
-
-        if method == "NP":
-            # Get the baseline.
-            Baseline, StdDev, Delta = self.BaselineNP(waveform, nsamples)
-
-        elif method == "JITNP":
-            # Get the baseline.
-            Baseline, StdDev, Delta = self.BaselineJITNP(waveform, nsamples)
-
-        elif method == "PyJIT":
-            # Get the baseline.
-            Baseline, StdDev, Delta = self.BaselinePyJIT(waveform, nsamples)
+        
+        Baseline, StdDev, Delta = self.BaselinePyJIT(waveform, nsamples)
 
         #BaselineReco = [Baseline, StdDev, Delta]
 
@@ -67,33 +56,7 @@ class BaselineReco(Algorithm):
         self.store.put(f"{self.config['Delta']}", Delta)
 
     @staticmethod
-    def BaselineNP(waveform, nsamples):
-        
-        Baseline = np.sum(waveform[:nsamples]) / nsamples
-
-        StdDev = np.std(waveform[:nsamples])
-
-        Delta = np.max(waveform[:nsamples]) - np.min(waveform[:nsamples])
-
-        return Baseline, StdDev, Delta
-
-    @staticmethod
-    @numba.jit(nopython=True, cache=True)
-    def BaselineJITNP(waveform, nsamples):
-        Baseline = -999.0
-        StdDev = -999.0
-        Delta = -999.0
-
-        Baseline = np.sum(waveform[:nsamples]) / nsamples
-
-        StdDev = np.std(waveform[:nsamples])
-
-        Delta = np.max(waveform[:nsamples]) - np.min(waveform[:nsamples])
-
-        return Baseline, StdDev, Delta
-
-    @staticmethod
-    @numba.jit(nopython=True, cache=True)
+    @numba.njit(cache=True)
     def BaselinePyJIT(waveform, nsamples):
         Baseline = -999.0
         StdDev = 0.0
