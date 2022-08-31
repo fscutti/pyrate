@@ -64,51 +64,13 @@ class TrapezoidFilter(Algorithm):
         """Caclulates the trap filtered waveform"""
         waveform = self.store.get(self.config["input"]["waveform"])
         if waveform is Pyrate.NONE:
-            self.clear_arrays() # just in case
             return
 
         waveform_len = waveform.size
 
         trap = self.TrapCalc(waveform = waveform, rise = self.rise, gap = self.gap, M = self.M, waveform_len = waveform_len)
 
-        # if (waveform_len + self.traplen) > self.dn0.size:
-        #     # Our waveform is larger than the storage
-        #     # we need to grow our arrays
-        #     self.dn0 = np.resize(self.dn0, waveform_len + self.traplen)
-        #     self.dn1 = np.resize(self.dn1, waveform_len + self.traplen)
-        #     self.dn2 = np.resize(self.dn2, waveform_len + self.traplen)
-        #     self.dn3 = np.resize(self.dn3, waveform_len + self.traplen)
-
-        # # Parameters and formula from Digital techniques for real-time pulse shaping in radiation measurements
-        # # https://doi.org/10.1016/0168-9002(94)91652-7
-        # self.dn0[:waveform_len] = waveform
-        # self.dn1[self.rise:waveform_len + self.rise] = waveform
-        # self.dn2[self.gap+self.rise:self.gap+self.rise + waveform_len] = waveform
-        # self.dn3[2*self.rise+self.gap: 2*self.rise+self.gap + waveform_len] = waveform
-
-        # dn = self.dn0 - self.dn1 - self.dn2 + self.dn3
-
-        # p = np.cumsum(dn) # Thanks to Marcel Hohmann for recommending this function
-        # r = np.add(p, self.M*dn)
-        # trap = np.cumsum(r/(self.M*self.rise))
-
-        # # We can't chop off the front otherwise the times will be funky
-        # trap[:self.traplen] = trap[self.traplen + 1] # Back propagate the first useful value
-        # # Chop off the end
-        # trap = trap[:self.traplen+waveform_len]
-
         self.store.put(f"{self.name}", trap)
-
-        # Reset all the arrays we use
-        # self.clear_arrays()
-
-    def clear_arrays(self):
-        """ Fills all the internal arrays with 0
-        """
-        self.dn0.fill(0)
-        self.dn1.fill(0)
-        self.dn2.fill(0)
-        self.dn3.fill(0)
 
     @staticmethod
     @numba.njit(cache=True)
@@ -126,26 +88,6 @@ class TrapezoidFilter(Algorithm):
             trap[i] = get(trap,i-1) + get(r,i)/(M*rise)
 
         return trap
-
-        # # Parameters and formula from Digital techniques for real-time pulse shaping in radiation measurements
-        # # https://doi.org/10.1016/0168-9002(94)91652-7
-        # dn0[:waveform_len] = waveform
-        # dn1[rise:waveform_len + rise] = waveform
-        # dn2[gap+rise:gap+rise + waveform_len] = waveform
-        # dn3[2*rise+gap: 2*rise+gap + waveform_len] = waveform
-
-        # dn = dn0 - dn1 - dn2 + dn3
-
-        # p = np.cumsum(dn) # Thanks to Marcel Hohmann for recommending this function
-        # r = np.add(p, M*dn)
-        # trap = np.cumsum(r/(M*rise))
-
-        # # We can't chop off the front otherwise the times will be funky
-        # trap[:traplen] = trap[traplen + 1] # Back propagate the first useful value
-        # # Chop off the end
-        # trap = trap[:traplen+waveform_len]
-
-        # return trap
 
 @numba.njit(cache=True)
 def get(array, i):
