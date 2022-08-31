@@ -41,7 +41,6 @@
 
 import sys
 import numpy as np
-from array import array
 
 import ROOT as R
 
@@ -56,6 +55,26 @@ class TGraphMaker(Algorithm):
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
+    
+    @property
+    def input(self):
+        """ Getter method for input objects
+        """
+        if self._input == {}:
+            return {None: ""}
+        return self._input
+
+    @input.setter
+    def input(self, inputs):
+        """Setter method for input objects."""
+        if hasattr(self, "_input"):
+            # input has already been set
+            return
+
+        self._input = {None: set()}
+        for input in inputs.values():
+            for dependency in ST.pyrate_yaml_to_list(input):
+                self._input[None].add(dependency)
 
     def initialise(self, condition=None):
         """ Initialise the TGraph information
