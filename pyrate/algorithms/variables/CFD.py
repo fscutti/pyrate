@@ -75,12 +75,6 @@ class CFD(Algorithm):
         self.store.put(f"{self.output['times']}", self.CFDTimes)
         self.store.put(f"{self.output['trace']}", self.cfd)
 
-    def clear_arrays(self):
-        """ Fills all the internal arrays with 0
-        """
-        self.waveform.fill(0)
-        self.waveform_delayed.fill(0)
-
     # Remove numpy dependence for speed and cross-check with more up to date code above
     @staticmethod
     @numba.njit(cache=True)
@@ -94,6 +88,7 @@ class CFD(Algorithm):
         crossed = False
         max_cfd_len = len(waveform) - delay
         num_zero_crossing = 0
+        num_thresh_crossing = 0
         f = 0
         cfd = np.zeros(max_cfd_len)
 
@@ -103,6 +98,7 @@ class CFD(Algorithm):
 
             if cfd[i] > cfd_threshold and not crossed:
                 crossed = True
+                num_thresh_crossing += 1
                 if i == max_cfd_len:
                     break
             
@@ -117,7 +113,7 @@ class CFD(Algorithm):
                     CFDTimes[num_zero_crossing] = i+f
                     num_zero_crossing += 1
 
-        if num_zero_crossing==0:
+        if num_zero_crossing==0 and num_thresh_crossing==0:
             CFDTimes[0] = -999.0
             return CFDTimes, cfd
         
