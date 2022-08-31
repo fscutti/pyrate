@@ -265,7 +265,7 @@ objects:
             vector<float>: {CorrectedWaveform: CorrectedWaveform_CH<channels>}
             long: {Timestamp: EVENT:board_0:ch_<channels>:ch_timestamp}
             vector<double>:
-                        - FFT_CH<channels>, Moments_CH<channels>
+                        - FFT_CH<channels>, Moments_CH<channels>, TrapezoidWaveform_CH<channels>
                         - {CFDTrace: CFDTrace_CH<channels>,
                             CFDTimes: CFDTimes_CH<channels>}
                         - {FFT_Amplitudes: FFT_CH<channels>_Amplitudes,

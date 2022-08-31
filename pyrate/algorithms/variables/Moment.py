@@ -92,9 +92,12 @@ class Moment(Algorithm):
             fsum += waveform[i]
             inner = waveform[i]*time
             inner_sum += inner
-            inner_square_sum += inner**2
-            inner_cube_sum += inner**3
-            inner_quart_sum += inner**4
+            inner *= time
+            inner_square_sum += inner
+            inner *= time
+            inner_cube_sum += inner
+            inner *= time
+            inner_quart_sum += inner
 
         if fsum==0:
             mean = np.nan
