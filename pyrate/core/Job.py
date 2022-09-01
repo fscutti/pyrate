@@ -42,6 +42,19 @@ class Job:
             "outputs": {},
         }
 
+
+        # build a run object here ...
+
+
+
+
+
+
+
+
+
+
+
         # ----------------------------
         # Setup the logger if required
         # ----------------------------
@@ -210,104 +223,103 @@ class Job:
     def launch(self):
         """Launch Run objects. """
         self.run.launch()
-    
+
     def print_objects(self):
-        """ Prints out all objects
-        """
+        """Prints out all objects"""
         pp = pprint.PrettyPrinter()
         pp.pprint(self.job["configs"]["global"]["objects"])
 
 
 def expand_tags(configs):
-    """ Searches all configs, finds all valid <tags> and replaces and expands
-        based on the following tag rules
-        
-        <tag> = [x1, x2, x3, ...]
+    """Searches all configs, finds all valid <tags> and replaces and expands
+    based on the following tag rules
 
-        For an object to be duplicated it must contain at least one <tag> type tag
-        in the object name
+    <tag> = [x1, x2, x3, ...]
 
-        --- Single object name tags ---
-        Single <tag> in the object name will create len(<tag>) objects, where
-        each instance of the <tag> key will be replaced with a single element
-        in the <tag> list. All instances of the <tag> key will be replaced, in both
-        the object name, and the object config
+    For an object to be duplicated it must contain at least one <tag> type tag
+    in the object name
 
-        E.g.
-        MyObj_<tag>:
-            key1: Variable_<tag>
-        
-        Will create n objects like the following
-        MyObj_x1:
-            key1: Varialbe_x1
-        ...
-        MyObj_xn:
-            key1: Varialbe_xn
-        
-        Other tags can be used in the object config itsefl, so long as they are 
-        at least as long as <tag>. They will be iterated over in parallel
+    --- Single object name tags ---
+    Single <tag> in the object name will create len(<tag>) objects, where
+    each instance of the <tag> key will be replaced with a single element
+    in the <tag> list. All instances of the <tag> key will be replaced, in both
+    the object name, and the object config
 
-        MyObj_<tag>:
-            key1: Variable_<tag>
-            key1: Varialbe_<tag2>
+    E.g.
+    MyObj_<tag>:
+        key1: Variable_<tag>
 
-        --- Multiple object name tags ---
-        With mulitple tags <a>, <b> in the object name, len(<a>) * len(<b>) objects
-        will be created, where the <a> and <b> tags follow a generic outer product
-        of all combinations of the pairings.
+    Will create n objects like the following
+    MyObj_x1:
+        key1: Varialbe_x1
+    ...
+    MyObj_xn:
+        key1: Varialbe_xn
 
-        <tag1>: [1,2]
-        <tag2>: [3,4]
+    Other tags can be used in the object config itsefl, so long as they are
+    at least as long as <tag>. They will be iterated over in parallel
 
-        MyObj_<tag1><tag2>:
-            key1: Variable_<tag1>
-            key2: Variable_<tag2>
-        
-        will generate 4 objects like the where the tags are equal to:
-        [ (1,3), (1, 4), (2, 3), (2, 4) ]
+    MyObj_<tag>:
+        key1: Variable_<tag>
+        key1: Varialbe_<tag2>
 
-        MyObj_13:
-            key1: Variable_1
-            key2: Variable_3
-        ...
-        MyObj_24:
-            key1: Variable_2
-            key2: Variable_4
-        
-        Lastly, other tags can be used in parallel with the product tags. These
-        tags can be added with the following syntax <<tag>>, and will be ignored 
-        when generating the product. Their index will follow the first listed 
-        tag in the product, i.e. they will follow the index of <tag1> in the 
-        example. <tag3> must be at least as long as <tag1>
+    --- Multiple object name tags ---
+    With mulitple tags <a>, <b> in the object name, len(<a>) * len(<b>) objects
+    will be created, where the <a> and <b> tags follow a generic outer product
+    of all combinations of the pairings.
 
-        <tag3>: [8, 9]
+    <tag1>: [1,2]
+    <tag2>: [3,4]
 
-        MyObj_<tag1><tag2><<tag3>>:
-            key1: Variable_<tag1>
-            key2: Variable_<tag2>
-            key3: Variable_<<tag3>>
-        
-        becomes
+    MyObj_<tag1><tag2>:
+        key1: Variable_<tag1>
+        key2: Variable_<tag2>
 
-        MyObj_138:
-            key1: Variable_1
-            key2: Variable_3
-            key3: Variable_8
-        
-        MyObj_148:
-            key1: Variable_1
-            key2: Variable_4
-            key3: Variable_8
-        
-        MyObj_239:
-            key1: Variable_2
-            key2: Variable_3
-            key3: Variable_9
-        
-        MyObj_249:
-            key1: Variable_2
-            key2: Variable_4
-            key3: Variable_9
+    will generate 4 objects like the where the tags are equal to:
+    [ (1,3), (1, 4), (2, 3), (2, 4) ]
+
+    MyObj_13:
+        key1: Variable_1
+        key2: Variable_3
+    ...
+    MyObj_24:
+        key1: Variable_2
+        key2: Variable_4
+
+    Lastly, other tags can be used in parallel with the product tags. These
+    tags can be added with the following syntax <<tag>>, and will be ignored
+    when generating the product. Their index will follow the first listed
+    tag in the product, i.e. they will follow the index of <tag1> in the
+    example. <tag3> must be at least as long as <tag1>
+
+    <tag3>: [8, 9]
+
+    MyObj_<tag1><tag2><<tag3>>:
+        key1: Variable_<tag1>
+        key2: Variable_<tag2>
+        key3: Variable_<<tag3>>
+
+    becomes
+
+    MyObj_138:
+        key1: Variable_1
+        key2: Variable_3
+        key3: Variable_8
+
+    MyObj_148:
+        key1: Variable_1
+        key2: Variable_4
+        key3: Variable_8
+
+    MyObj_239:
+        key1: Variable_2
+        key2: Variable_3
+        key3: Variable_9
+
+    MyObj_249:
+        key1: Variable_2
+        key2: Variable_4
+        key3: Variable_9
 
     """
     configs = deepcopy(configs)
@@ -354,7 +366,9 @@ def expand_tags(configs):
         stripped_obj_name_tags = strip_all_tags(obj_name_tags)
         # The name *must* be updated, if there is no tag in the name we exit
         if not obj_name_tags:
-            sys.exit(f"No valid tag found in object {obj_name}. Must contain a <tag> style tag.")
+            sys.exit(
+                f"No valid tag found in object {obj_name}. Must contain a <tag> style tag."
+            )
 
         obj_tags = [t for t in find_all_tags(obj_str) if strip_tag(t) in tags]
         stripped_obj_tags = strip_all_tags(obj_tags)
@@ -366,7 +380,7 @@ def expand_tags(configs):
             if "<<" in tag or ">>" in tag:
                 parallel_tags[tag] = []
         # parallel tags are also any obj_tag not in the obj_name_tags
-        parallel_tags.update({t:[] for t in obj_tags if t not in obj_name_tags})
+        parallel_tags.update({t: [] for t in obj_tags if t not in obj_name_tags})
 
         # Finally, let's separate our parallel_tags from our non-parallel tags
         product_tags = [t for t in obj_name_tags if t not in parallel_tags]
@@ -378,15 +392,21 @@ def expand_tags(configs):
         # Check all the parallel tags can actually follow the first product tag
         for tag in strip_all_tags(parallel_tags):
             if len(tags[tag]) < len(tags[stripped_product_tags[0]]):
-                sys.exit(f"ERROR: in object {obj_name} - parallel tag {tag} shorter than the first object name tag {obj_name_tags[0]}"\
-                            "\nAll parallel tags must be at least as long as the primary name tag")
+                sys.exit(
+                    f"ERROR: in object {obj_name} - parallel tag {tag} shorter than the first object name tag {obj_name_tags[0]}"
+                    "\nAll parallel tags must be at least as long as the primary name tag"
+                )
         # Calculate the length required for each parallel tag
         # i.e. the number required to keep it paralell with the first object name tag
-        parallel_tag_len = reduce(mul, [len(tags[t]) for t in stripped_product_tags[1:]]) if len(product_tags) > 1 else 1
+        parallel_tag_len = (
+            reduce(mul, [len(tags[t]) for t in stripped_product_tags[1:]])
+            if len(product_tags) > 1
+            else 1
+        )
         for t in parallel_tags:
             for v in tags[strip_tag(t)]:
                 # Store n * tag[t] in the appropriate parallel tag
-                parallel_tags[t] += [v]*parallel_tag_len
+                parallel_tags[t] += [v] * parallel_tag_len
 
         # Loop over each product
         for i, values in enumerate(product_tag_values):
@@ -402,25 +422,27 @@ def expand_tags(configs):
             for j in range(len(values)):
                 new_name = ST.replace_clean(new_name, obj_name_tags[j], values[j])
                 new_obj = ST.replace_clean(new_obj, obj_name_tags[j], values[j])
-            
+
             # Insert the new object back into the global config
             configs["global"]["objects"][new_name] = json.loads(new_obj)
-    
+
     # Return the expanded configs
     return configs
 
+
 def find_all_tags(s):
-    """ Finds all valid tags in the <> <<>> and $$ forms
-    """
+    """Finds all valid tags in the <> <<>> and $$ forms"""
     return re.findall("<.*?>(?!>)", s) + re.findall("\$.*?\$", s)
 
+
 def strip_tag(tag):
-    """ strips a tag of its tag chars < > and $
-    """
-    return tag.replace('<','').replace('>','').replace('$', '')
+    """strips a tag of its tag chars < > and $"""
+    return tag.replace("<", "").replace(">", "").replace("$", "")
+
 
 def strip_all_tags(tags):
-    """ strips all tags in a list
-    """
+    """strips all tags in a list"""
     return [strip_tag(t) for t in tags]
+
+
 # EOF
