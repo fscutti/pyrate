@@ -69,8 +69,7 @@ class MeanTime(Algorithm):
             denom += waveform[i]
 
         if denom == 0:
-            MeanTime = np.nan
-            return MeanTime
+            return np.nan
         else:
             MeanTime = sample_period * (num/denom)
 
