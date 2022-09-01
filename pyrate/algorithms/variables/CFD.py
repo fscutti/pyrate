@@ -66,9 +66,9 @@ class CFD(Algorithm):
         if waveform is Pyrate.NONE:
             return
 
-        self.CFDTimes, cfd = self.CFDCalc(waveform=waveform, cfd = self.cfd, delay = self.delay, scale = self.scale, cfd_threshold = self.cfd_threshold)
+        self.CFDTimes, self.cfd = self.CFDCalc(waveform=waveform, cfd = self.cfd, delay = self.delay, scale = self.scale, cfd_threshold = self.cfd_threshold)
 
-        if self.CFDTimes[0] == -999.0:
+        if self.CFDTimes[0] == -99999.0:
             return
 
         self.store.put(self.name, self.CFDTimes[0])
@@ -96,7 +96,7 @@ class CFD(Algorithm):
         for i in range(0, max_cfd_len):
             cfd[i] = (scale*waveform[i-delay]) - waveform[i]
 
-            if cfd[i] > cfd_threshold and not crossed:
+            if cfd[i] >= cfd_threshold and not crossed:
                 crossed = True
                 num_thresh_crossing += 1
                 if i == max_cfd_len:
@@ -114,7 +114,7 @@ class CFD(Algorithm):
                     num_zero_crossing += 1
 
         if num_zero_crossing==0 or num_thresh_crossing==0:
-            CFDTimes[0] = -999.0
+            CFDTimes[0] = -99999.0
             return CFDTimes, cfd
         
         CFDTimes = CFDTimes[:num_zero_crossing]
