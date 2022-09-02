@@ -2,7 +2,7 @@ inputs:
     Data1:
         eslices:
             emin: 0
-            emax: 1000
+            emax: -1
         reader: ReaderCAEN1730_RAW
         path:
         - /home/msmg/data/spartan/ostanley/coincident_testings/HILDAQ_Coincidence/22-02-16_17-01-13_HILDAQ_R11065-16hrs_Coincidence/R11065-16hrs_Coincidence-Board_0-001.dat

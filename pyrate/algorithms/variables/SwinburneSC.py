@@ -40,33 +40,35 @@ class SwinburneSC(Algorithm):
     @output.setter
     def output(self, config_output):
         """Setter method for output objects."""
-        self._output = {
-            'Pressure':'Pressure',
-            'Humidity':'Humidity',
-            'cRIO_RTD_1':'cRIO_RTD_1',
-            'cRIO_RTD_2':'cRIO_RTD_2',
-            'cRIO_RTD_3':'cRIO_RTD_3',
-            'cRIO_RTD_4':'cRIO_RTD_4',
-            'Remote_RTD1':'Remote_RTD1',
-            'Remote_RTD2':'Remote_RTD2',
-            'Remote_RTD3':'Remote_RTD3',
-            'Remote_RTD4':'Remote_RTD4',
-            'L1_Volts':'L1_Volts',
-            'L1_W':'L1_W',
-            'L1_VA':'L1_VA',
-            'L1_Hz':'L1_Hz',
-            'HVPS_CH1_Status':'HVPS_CH1_Status',
-            'HVPS_CH2_Status':'HVPS_CH2_Status',
-            'HVPS_CH3_Status':'HVPS_CH3_Status',
-            'HVPS_CH4_Status':'HVPS_CH4_Status',
-            'HVPS_CH1_Volts':'HVPS_CH1_Volts',
-            'HVPS_CH2_Volts':'HVPS_CH2_Volts',
-            'HVPS_CH3_Volts':'HVPS_CH3_Volts',
-            'HVPS_CH4_Volts':'HVPS_CH4_Volts',
-            'HVPS_CH1_Current':'HVPS_CH1_Current',
-            'HVPS_CH2_Current':'HVPS_CH2_Current',
-            'HVPS_CH3_Current':'HVPS_CH3_Current',
-            'HVPS_CH4_Current':'HVPS_CH4_Current'}
+        #print(config_output)
+        self._output = {"Pressure":"Pressure",
+                        "Humidity":"Humidity",
+                        "cRIO_RTD_1":"cRIO_RTD_1",
+                        "cRIO_RTD_2":"cRIO_RTD_2",
+                        "cRIO_RTD_3":"cRIO_RTD_3",
+                        "cRIO_RTD_4":"cRIO_RTD_4",
+                        "Remote_RTD1":"Remote_RTD1",
+                        "Remote_RTD2":"Remote_RTD2",
+                        "Remote_RTD3":"Remote_RTD3",
+                        "Remote_RTD4":"Remote_RTD4",
+                        "L1_Volts":"L1_Volts",
+                        "L1_W":"L1_W",
+                        "L1_VA":"L1_VA",
+                        "L1_Hz":"L1_Hz",
+                        "HVPS_CH1_Status":"HVPS_CH1_Status",
+                        "HVPS_CH2_Status":"HVPS_CH2_Status",
+                        "HVPS_CH3_Status":"HVPS_CH3_Status",
+                        "HVPS_CH4_Status":"HVPS_CH4_Status",
+                        "HVPS_CH1_Volts":"HVPS_CH1_Volts",
+                        "HVPS_CH2_Volts":"HVPS_CH2_Volts",
+                        "HVPS_CH3_Volts":"HVPS_CH3_Volts",
+                        "HVPS_CH4_Volts":"HVPS_CH4_Volts",
+                        "HVPS_CH1_Current":"HVPS_CH1_Current",
+                        "HVPS_CH2_Current":"HVPS_CH2_Current",
+                        "HVPS_CH3_Current":"HVPS_CH3_Current",
+                        "HVPS_CH4_Current":"HVPS_CH4_Current"}
+        #print(self._output)
+        #exit()
         
     def initialise(self, condition=None):
         """"""

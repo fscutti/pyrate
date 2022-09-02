@@ -13,24 +13,33 @@ objects:
         epochtime: 1644991273
         input:
           timestamp: EVENT:board_0:ch_0:ch_timestamp
-        output:
-          temp: cRIO_RTD_1
 
-    TEMP1:
+
+    HILDAQTimeIP:
         algorithm: EPICSArchiveIP
-        ip: 10.100.13.78:17668
-        epochtime: 1644991273
-        pv: HILDAQ:elapsedTime
+        ip: sabre-stor:17668
+#        epochtime: 1644991273
+        epochtime: 1661176800
+        pv: TEMP1:INPUT1:VALUE
         input:
           timestamp: EVENT:board_0:ch_0:ch_timestamp
 
-    TEMP2:
-        algorithm: EPICSArchivePB
-        dir: /home/msmg/data/arch
-        epochtime: 1644991273        
-        pv: HILDAQ:elapsedTime
+    HILDAQTimePB:
+        algorithm: EPICSArchiveIP
+        ip: sabre-stor:17668
+#        epochtime: 1644991273
+        epochtime: 1661176800
+        pv: TEMP2:INPUT1:VALUE
         input:
           timestamp: EVENT:board_0:ch_0:ch_timestamp
+
+#    HILDAQTimePB:
+#        algorithm: EPICSArchivePB
+#        dir: /home/msmg/data/arch
+#        epochtime: 1644991273        
+#        pv: HILDAQ:elapsedTime
+#        input:
+#          timestamp: EVENT:board_0:ch_0:ch_timestamp
 
     BaselineDynamic_CH<channels>:
         algorithm: BaselineDynamic
@@ -295,6 +304,7 @@ objects:
                         - {FFT_Amplitudes: FFT_CH<channels>_Amplitudes,
                             FFT_Frequencies: FFT_CH<channels>_Frequencies}
             float:
+                -   HILDAQTimeIP, HILDAQTimePB, cRIO_RTD_1, cRIO_RTD_2
                 -   BaselineDynamic_CH<channels>, BaselineNaive_CH<channels>,
                     PromptDelayChargeRatioCalculator_CH<channels>, CFD_CH<channels>,
                     PulseCharge_CH<channels>, TotalCharge_CH<channels>
