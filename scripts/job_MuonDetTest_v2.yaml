@@ -1,0 +1,63 @@
+runs:
+  
+  NeutronHists:
+    build_event: false
+    events_range: [0, -1]
+
+    inputs:
+      Neutron:
+        reader: ReaderROOT
+        files: 
+          - PYRATE/test/data/neutron_pos5_test.root
+        event: nT
+        metadata:
+          color: R:1.| G:0.| B:1.
+
+    configs:
+      - PYRATE/config/muondet/objects.yaml
+      - PYRATE/config/muondet/analysis.yaml
+
+    outputs:
+      - muonDetPlot1D
+
+  GammaHists:
+    build_event: false
+    events_range: [0, -1]
+
+    inputs:
+      Gamma:
+        reader: ReaderROOT
+        files: 
+          - PYRATE/test/data/gamma_pos5_test.root
+        event: nT
+        metadata:
+          color: R:1.| G:0.| B:1.
+
+    configs:
+      - PYRATE/config/muondet/objects.yaml
+      - PYRATE/config/muondet/analysis.yaml
+
+    outputs:
+      - muonDetPlot1D
+
+  PhotonsHists:
+    build_event: false
+    events_range: [0, -1]
+    inputs:
+      Photons:
+        reader: ReaderROOT
+        files: 
+          - PYRATE/test/data/gamma_pos5_test.root
+        event: nT
+        metadata:
+          color: R:0.| G:0.| B:1.
+
+    configs:
+      - PYRATE/config/muondet/objects.yaml
+      - PYRATE/config/muondet/analysis.yaml
+
+    outputs:
+      - muonDetPlot1D
+
+
+# EOF

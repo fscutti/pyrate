@@ -3,6 +3,7 @@
 """
 import os
 import sys
+import yaml
 import importlib
 import timeit
 import time
@@ -37,8 +38,18 @@ class Run:
 
     def setup(self):
         """First instance of 'private' members."""
+        
+        print(self.configs)
+        print(self.inputs)
+        print(self.outputs)
 
-        self.objects = self.configs["global"]["objects"]
+        
+        self.objects = {}
+        for c_file in self.configs:
+            f = FN.find_env(c_file, "PYRATE")
+            self.objects.update(yaml.full_load(open(f, "r"))["objects"])
+        
+
         # -----------------------------------------------------------------------
         # At this point the Run object should have self.inputs/objects/outputs
         # defined after being read from the configuration yaml file.
@@ -64,7 +75,9 @@ class Run:
         fileHandler.setFormatter(
             logging.Formatter("[%(asctime)s %(name)-16s %(levelname)-7s]  %(message)s")
         )
-
+        
+        # the following two lines are temporary.
+        self.logger = logging.getLogger("pyrate")
         self.logger.addHandler(fileHandler)
 
         blue = "{l_bar}%s{bar}%s{r_bar}"
@@ -86,15 +99,25 @@ class Run:
 
         self.store = Store(self.name)
 
-        self.targets, self.nodes, self.algorithms = {}, {}, {}
+        self.targets, self.nodes, self.algorithms, self.readers = {}, {}, {}, {}
         self.loaded_io = {"inputs": {}, "outputs": {}}
 
         # instantiate all algorithms even those not needed.
         self._reset_algorithms_instance()
 
+        sys.exit()
         # Loading input / output and initialising nodes.
         # Not all inputs are loaded. Only those relevant for
         # requested targets.
+
+
+
+
+        # from this line on there will be major restructurings
+        # one can eliminate targets.
+
+
+
         t_io = {}
 
         for o_name in self.outputs:
@@ -127,8 +150,10 @@ class Run:
             if self.node(t_name).job_outputs == []:
                 self.node(t_name).job_outputs = t_io[t_name]["job_outputs"]
 
+
+    """
+    this will die.
     def io(self, io_name):
-        """Returns a specific input/output instance."""
 
         for category in ["inputs", "outputs"]:
             if io_name in self.loaded_io[category]:
@@ -159,6 +184,7 @@ class Run:
         self.loaded_io[category][io_name].load()
 
         return self.loaded_io[category][io_name]
+    """
 
     def node(self, obj_name, job_inputs=[], job_outputs=[]):
         """Instantiates a node for an object, including the corresponding algorithm instance
