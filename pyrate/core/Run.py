@@ -27,9 +27,14 @@ from pyrate.utils import enums as EN
 
 
 class Run:
-    def __init__(self, name, iterable=(), **kwargs):
-        self.__dict__.update(iterable, **kwargs)
+    def __init__(self, name, config, inputs, outputs, objects):
         self.name = name
+        self.config = config
+        self.inputs = inputs
+        self.outputs = outputs
+        self.objects = objects
+
+        self.event_range = config["event_range"]
 
         # will handle this within the algorithm.
         # self.alg_times = defaultdict(
@@ -37,18 +42,7 @@ class Run:
         # )  # Initialising the alg_times dictionary which stores the average run times of each alg
 
     def setup(self):
-        """First instance of 'private' members."""
-        
-        print(self.configs)
-        print(self.inputs)
-        print(self.outputs)
-
-        
-        self.objects = {}
-        for c_file in self.configs:
-            f = FN.find_env(c_file, "PYRATE")
-            self.objects.update(yaml.full_load(open(f, "r"))["objects"])
-        
+        """First instance of 'private' members."""        
 
         # -----------------------------------------------------------------------
         # At this point the Run object should have self.inputs/objects/outputs
@@ -105,18 +99,12 @@ class Run:
         # instantiate all algorithms even those not needed.
         self._reset_algorithms_instance()
 
-        sys.exit()
         # Loading input / output and initialising nodes.
         # Not all inputs are loaded. Only those relevant for
         # requested targets.
 
-
-
-
         # from this line on there will be major restructurings
         # one can eliminate targets.
-
-
 
         t_io = {}
 
