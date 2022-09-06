@@ -73,8 +73,8 @@ class EventBuilder(Input):
         success = False
         for reader in self.readers.values():
             # Get the latest reader time stamp!
-            if (readerTime := reader.timestamp) < self._evtTime:
-                self._evtTime = readerTime
+            if (readerTime := reader.timestamp) < self._eventTime:
+                self._eventTime = readerTime
                 success = True                
 
         if success == False:
