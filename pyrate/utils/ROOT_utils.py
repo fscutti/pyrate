@@ -59,13 +59,13 @@ _Type = {
         "python": "d",
         "root": "D",
         "vector": "double",  # Python arrays don't have float32's
-        "invalid": -999.0,
+        "invalid": float("nan"),
     },
     "double": {
         "python": "d",
         "root": "D",
         "vector": "double",
-        "invalid": -999.0,
+        "invalid": float("nan"),
     },
     "bool": {"python": "H", "root": "O", "vector": "bool", "invalid": 0},
     "string": {
