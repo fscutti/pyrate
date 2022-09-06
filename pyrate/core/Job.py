@@ -17,7 +17,7 @@ import pprint
 
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
-from pyrate.utils.ROOT_classes import _Type
+from pyrate.utils.ROOT_utils import _Type
 
 from pyrate.core.Run import Run
 
