@@ -18,7 +18,9 @@ from tqdm import tqdm
 
 from pyrate.core.Store import Store
 from pyrate.core.EventBuilder import EventBuilder
+from pyrate.readers.ReaderCAEN1730_RAW import ReaderCAEN1730_RAW
 from pyrate.readers.ReaderCAEN1730_PSD import ReaderCAEN1730_PSD
+from pyrate.readers.ReaderCAEN1730_ZLE import ReaderCAEN1730_ZLE
 from pyrate.core.Output import Output
 
 from pyrate.utils import strings as ST
@@ -244,10 +246,10 @@ class Run:
 
                         return self.algorithms[obj_name]
 
-                sys.exit(f"ERROR: object {obj} has requested a non-existing algorithm.")
+                # sys.exit(f"ERROR: object {obj} has requested a non-existing algorithm.")
 
-            else:
-                sys.exit(f"ERROR: object {obj} not defined in the configuration.")
+            # else:
+            #     sys.exit(f"ERROR: object {obj} not defined in the configuration.")
 
     def launch(self):
         """Launches loops over inputs and outputs."""

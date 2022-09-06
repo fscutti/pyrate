@@ -26,7 +26,7 @@ class ReaderCAEN1730_PSD(Input):
         # Set the outputs manually
         self._output = {}
         for i in range(self.channels):
-            self._output.update({f"ch_{i}:Timestamp": f"EVENT:board_0:ch_{i}:Timestamp", f"ch_{i}:waveform": f"EVENT:board_0:ch_{i}:waveform"})
+            self._output.update({f"ch_{i}_timestamp": f"{self.name}_ch_{i}_timestamp", f"ch_{i}_waveform": f"{self.name}_ch_{i}_waveform"})
 
     def load(self):
         self.is_loaded = True
@@ -49,22 +49,22 @@ class ReaderCAEN1730_PSD(Input):
         self.offload()
 
     def get_event(self, skip=False):
-        if(self._eventTime == 2**64):
+        if self._eventTime == 2**64:
             return False
         
         #Put the event on the store
         if not skip:
             for ch in range(self.channels):
                 if ch in self._inEvent:
-                    self.store.put(f"{self.output[f'ch_{ch}:Timestamp']}", self._eventChTimes[ch])
-                    self.store.put(f"{self.output[f'ch_{ch}:waveform']}", np.array(self._eventWaveforms[ch], dtype="int32"))
+                    self.store.put(f"{self.output[f'ch_{ch}_timestamp']}", self._eventChTimes[ch])
+                    self.store.put(f"{self.output[f'ch_{ch}_waveform']}", np.array(self._eventWaveforms[ch], dtype="int32"))
 
         # Get the next event
         self.read_next_event()
         return True
     
     def read_next_event(self):
-        #Reset event
+        # Reset event
         self._eventTime = 2**64
         self._inEvent = {}
         self._eventChTimes = {}
@@ -93,7 +93,7 @@ class ReaderCAEN1730_PSD(Input):
         head4 = self._mmf.read(4)
         if(head4 == bytes()):
             return False
-        head4 = int.from_bytes(head4,"little")        
+        head4 = int.from_bytes(head4,"little")
 
         eventSize = head1 & 0b00001111111111111111111111111111
         dualChannelMask =  (head2 & 0b11111111)

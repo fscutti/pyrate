@@ -10,10 +10,10 @@ import struct
 from pyrate.utils.enums import Pyrate
 import numpy as np
 
-from pyrate.core.Reader import Reader
+from pyrate.core.Input import Input
 
 
-class ReaderCAEN1730_RAW(Reader):
+class ReaderCAEN1730_RAW(Input):
     __slots__ = [
         "f",
         "_mmf",
