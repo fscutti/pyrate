@@ -28,7 +28,7 @@ import datetime
 import pytz
 
 class EPICSArchiveIP(Algorithm):
-    __slots__ = ("_ip", "_pv", "_startTime","_data","_idx")
+    __slots__ = ("_data","_idx")
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
