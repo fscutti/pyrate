@@ -51,17 +51,6 @@ parser.add_argument(
     const=True      # if -t there but no string pass in True
 )
 
-parser.add_argument(
-    "--alg_timing",
-    "-a",
-    help="Print out to a log file the average timing for algs in config",
-    required=False,
-    default=False,
-    action="store",
-    nargs="?",
-    const=True
-)
-
 args = parser.parse_args()
 
 if __name__ == "__main__":
@@ -72,8 +61,6 @@ if __name__ == "__main__":
         j_config = yaml.full_load(open(j_file, "r"))
 
         j_config.update({"no_progress_bar": args.no_progress_bar})
-
-        j_config.update({"alg_timing": args.alg_timing})
 
         j_log = args.logging_level
 

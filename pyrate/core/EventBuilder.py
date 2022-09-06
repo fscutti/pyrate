@@ -8,18 +8,23 @@ import importlib
 from pyrate.core.Input import Input
 
 class EventBuilder(Input):
-    __slots__ = ["readers"]
+    __slots__ = ["readers", "window"]
     
-    def __init__(self, name, base, config, store, logger):
-        super().__init__(name, base, config, store, logger)
+    def __init__(self, name, config, store, logger):
+        super().__init__(name, config, store, logger)
         self.is_loaded = False
         self.readers = {}
+        self.window = self.config["window"]
         
-        for name, conf in config["input"].items():
+        # Clean out the un-used parameters
+        del self.config["algorithm"]
+        del self.config["window"]
+
+        for name, conf in self.config.items():
             reader_module = "pyrate.readers." + conf["reader"]
             try:
                 ReaderModule = importlib.import_module(reader_module)
-                ReaderClass = ReaderModule.__getattribute__(self.reader)
+                ReaderClass = ReaderModule.__getattribute__(conf["reader"])
                 self.readers[name] = ReaderClass(name, conf, self.store, self.logger)
             except ImportError as err:
                 sys.exit(
@@ -27,13 +32,13 @@ class EventBuilder(Input):
                     "Check that the reader is in pyrate/readers, that the class and module have the same name, and is added the nearest __init__.py"
                 )
 
-        output_variables = {}
+        # Set the event builder's outputs
+        variables = {}
         for reader in self.readers.values():
-            for key, var in reader.output:
-                output_variables[key] = var
+            for key, var in reader.output.items():
+                variables[key] = var
 
-        self.output = output_variables
-
+        self.output = variables
 
     def initialise(self):
         """ Initialises all the inputs
@@ -52,7 +57,14 @@ class EventBuilder(Input):
             for reader in self.readers.values():
                 reader.finalise()
 
-    def execute(self):
+    def skip_events(self, n):
+        """ Skips forward by n events
+        """
+        for i in range(n):
+            if not self.get_event():
+                break
+
+    def get_event(self):
         """ Builds the event
             The default case is to build using Timestamp-based events
             if parallel is True in the config, will just read all events from
@@ -68,8 +80,8 @@ class EventBuilder(Input):
             return success
 
         # Timestamp-based event building
-        self._eventTime = 2**64
-        deltaT = self.config["window"] # How far to look forwards
+        self._eventTime = 2**64 # largest possible event time (uint64)
+        deltaT = self.window # How far to look forwards
         success = False
         for reader in self.readers.values():
             # Get the latest reader time stamp!

@@ -22,24 +22,33 @@ class Job:
 
     def setup(self):
         """Instantiate Run objects."""
-        for run_name, run_config in self.config["runs"].items():
-            
-            # Sort out the configs
-            configs = []
-            # Find all the config files
-            for config in ST.read_list(run_config["configs"]):
-                config = FN.find_env(config, env="PYRATE")
-                configs += sorted(glob.glob(config))
-            
-            # load all the config objects
-            objects = {}
-            for config in configs:
-                config = yaml.full_load(open(config, "r"))
-                objects.update(FN.expand_tags(config))
-            run_config["configs"] = configs
+        # Input stuff
+        # Pull out the event range
+        input = self.config["input"]
+        run_name = [s for s in list(self.config["input"].keys()) if s != "event_range"][0]
 
-            self.runs.append(Run(run_name, config=run_config, inputs=run_config["inputs"], 
-                                 outputs=run_config["outputs"], objects=objects["objects"]))
+        # Sort out the configs
+        configs = []
+        # Find all the config files
+        for config in ST.read_list(self.config["configs"]):
+            config = FN.find_env(config, env="PYRATE")
+            configs += sorted(glob.glob(config))
+        
+        # Load all the config objects
+        objects = {}
+        for config in configs:
+            config = yaml.full_load(open(config, "r"))
+            objects.update(FN.expand_tags(config))
+        objects = objects["objects"]
+
+        # Outputs
+        outputs = self.config["outputs"]
+        for output_name in outputs:
+            path = FN.find_env(outputs[output_name]["path"])
+            outputs[output_name]["path"] = path
+
+        self.runs.append(Run(run_name, input=input, outputs=outputs, objects=objects, 
+                             config=self.config))
 
     def launch(self):
         """Launch Run objects. """

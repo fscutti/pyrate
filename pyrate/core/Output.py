@@ -28,7 +28,7 @@ class Output(Writer):
 
         if self._writer is None:
 
-            if ".root" in file_format:
+            if "root" in file_format:
                 self._writer = WriterROOT(
                     self.name,
                     self.config,
@@ -40,17 +40,13 @@ class Output(Writer):
                 pass
 
     @property
-    def file(self):
-        return self.writer.file
-
-    @property
     def targets(self):
         return self.writer.targets
 
     def load(self):
 
         # this calls the setter method above.
-        self.writer = self.config["file"]["format"]
+        self.writer = self.config["format"]
 
         self.writer.load()
 

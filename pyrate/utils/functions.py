@@ -33,7 +33,7 @@ def is_float(v):
     except ValueError:
         return False
 
-def find_env(path, env):
+def find_env(path, env="PYRATE"):
     """Checks existence of environment variable in path and eventually replaces it."""
     if env and env in path:
         env_path = os.environ.get(env)

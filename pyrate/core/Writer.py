@@ -14,7 +14,7 @@ class Writer:
         "logger",
         "is_loaded",
         "_targets",
-        "_file",
+        "file",
     ]
 
     def __init__(self, name, config, store, logger):
@@ -26,7 +26,7 @@ class Writer:
         self.is_loaded = False
 
         self._targets = {}
-        self._file = None
+        self.file = None
 
     def load(self):
         """Initialises the targets."""
@@ -37,17 +37,6 @@ class Writer:
         pass
 
     @property
-    def file(self):
-        """Getter method for targets."""
-        return self._file
-
-    @file.setter
-    def file(self, file_path):
-        """Setter method for targets."""
-        if self._file is None:
-            self._file = file_path
-
-    @property
     def targets(self):
         """Getter method for targets."""
         return self._targets
@@ -56,12 +45,7 @@ class Writer:
     def targets(self, target_list):
         """Setter method for targets."""
         if not any(self._targets):
-
-            for t in target_list:
-
-                for t_name, t_inputs in t.items():
-                    t_name = t_name.replace(" ", "")
-                    self._targets[t_name] = t_inputs
+            self._targets = target_list
 
 
 # EOF

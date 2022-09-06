@@ -8,7 +8,7 @@ from pyrate.utils import enums as EN
 
 
 class WriterROOT(Writer):
-    __slots__ = ["f"]
+    __slots__ = ["f", "path"]
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
@@ -18,14 +18,14 @@ class WriterROOT(Writer):
 
         self.is_loaded = True
 
-        self.file = self.config["files"]
-
+        self.path = self.config["path"]
+        self.file = self.path + "/" + self.name + ".root"
         self.targets = self.config["targets"]
 
         self.f = R.TFile(self.file, "RECREATE")
 
         # Set the file compression
-        compression = 1 if "compression" not in self.config["file"] else int(self.config["file"]["compression"])
+        compression = 1 if "compression" not in self.config else int(self.config["compression"])
         self.f.SetCompressionSettings(compression)
 
         # WARNING: if the file pointer needs to be retrieved from the store

@@ -4,21 +4,21 @@
 import os
 import sys
 import yaml
+import pkgutil
 import importlib
 import timeit
 import time
 import logging
 import anytree.node.exceptions as anytreeExceptions
 
-from cmath import log
-from collections import defaultdict
-from anytree import Node, RenderTree
+from anytree import Node
 
 from colorama import Fore
 from tqdm import tqdm
 
 from pyrate.core.Store import Store
-from pyrate.core.Input import Input
+from pyrate.core.EventBuilder import EventBuilder
+from pyrate.readers.ReaderCAEN1730_PSD import ReaderCAEN1730_PSD
 from pyrate.core.Output import Output
 
 from pyrate.utils import strings as ST
@@ -27,19 +27,16 @@ from pyrate.utils import enums as EN
 
 
 class Run:
-    def __init__(self, name, config, inputs, outputs, objects):
+    def __init__(self, name, input, outputs, objects, config):
         self.name = name
         self.config = config
-        self.inputs = inputs
-        self.outputs = outputs
+        self.event_range = input["event_range"]
+        del input["event_range"]
+        self.input_config = input
+        self.input = None
+        self.output_configs = outputs
+        self.outputs = []
         self.objects = objects
-
-        self.event_range = config["event_range"]
-
-        # will handle this within the algorithm.
-        # self.alg_times = defaultdict(
-        #    float
-        # )  # Initialising the alg_times dictionary which stores the average run times of each alg
 
     def setup(self):
         """First instance of 'private' members."""        
@@ -83,98 +80,61 @@ class Run:
         yellow = yellow % (Fore.YELLOW, Fore.RESET)
         green = green % (Fore.GREEN, Fore.RESET)
         white = white % (Fore.WHITE, Fore.RESET)
-
         self.colors = {"blue": blue, "yellow": yellow, "green": green, "white": white}
-
+        
+        # Set the run state and create the store
         self.state = None
-
-        self._current_input = None
-        self._current_output = None
-
         self.store = Store(self.name)
 
+        # Loading the input for this run
+        input_name, input_config = list(self.input_config.items())[0]
+        for r in sys.modules:
+            if input_config["algorithm"] == r.split(".")[-1]:
+                self.input = getattr(importlib.import_module(r), input_config["algorithm"])(
+                    input_name, input_config, self.store, self.logger)
+                break
+        # input_name, input_config = list(self.input_config.items())[0]
+        # input_modules = {}
+        # core_modules = {name: f"pyrate.core.{name}" for _, name, _ in pkgutil.iter_modules(["pyrate/core"])}
+        # reader_modules = {name: f"pyrate.readers.{name}" for _, name, _ in pkgutil.iter_modules(["pyrate/readers"])}
+        # input_modules.update(core_modules)
+        # input_modules.update(reader_modules)
+        # for module_name, module_path in input_modules.items():
+        #     if module_name == input_config["algorithm"]:
+        #         print("Hi")
+        #         try:
+        #             InputModule = importlib.import_module(module_path)
+        #             InputClass = InputModule.__getattribute__(module_name)
+        #             self.input = InputClass(input_name, input_config, self.store, self.logger)
+        #             break
+        #         except ImportError as err:
+        #             sys.exit(
+        #                 f"ERROR: {err}\n Unable to import input '{input_name}' from module '{module_name}'\n"
+        #                 "Check that the reader is in pyrate/readers, that the class and module have the same name, and is added the nearest __init__.py"
+        #             )
+        
         self.targets, self.nodes, self.algorithms, self.readers = {}, {}, {}, {}
-        self.loaded_io = {"inputs": {}, "outputs": {}}
-
-        # instantiate all algorithms even those not needed.
+        # instantiate all algorithms - even those not needed.
         self._reset_algorithms_instance()
-
-        # Loading input / output and initialising nodes.
-        # Not all inputs are loaded. Only those relevant for
-        # requested targets.
 
         # from this line on there will be major restructurings
         # one can eliminate targets.
 
-        t_io = {}
+        for output_name, output_config in self.output_configs.items():
+            output = Output(output_name, output_config, self.store, self.logger)
+            output.load()
 
-        for o_name in self.outputs:
-            o = self.io(o_name)
-
-            for t_name, t_job_inputs in o.targets.items():
-
-                if not t_name in self.targets:
-
-                    # Where the magic happens!
-                    # Dependecies for this target are all
-                    # resolved recursively here
-
-                    self.targets[t_name] = self.node(t_name)
-
-                    t_io[t_name] = {"job_inputs": t_job_inputs, "job_outputs": [o_name]}
-
-                else:
-                    t_io[t_name]["job_outputs"].append(o_name)
-
-                for i_name in t_job_inputs:
-                    i = self.io(i_name)
+            for target in output.targets:
+                if target not in self.targets:
+                    self.targets[target] = self.node(target)
 
         # initialising job inputs / outputs for the targets.
-        for t_name in self.targets:
+        # REMOVE ME
+        for target in self.targets:
+            if self.node(target).job_inputs == []:
+                self.node(target).job_inputs = self.input
 
-            if self.node(t_name).job_inputs == []:
-                self.node(t_name).job_inputs = t_io[t_name]["job_inputs"]
-
-            if self.node(t_name).job_outputs == []:
-                self.node(t_name).job_outputs = t_io[t_name]["job_outputs"]
-
-
-    """
-    this will die.
-    def io(self, io_name):
-
-        for category in ["inputs", "outputs"]:
-            if io_name in self.loaded_io[category]:
-
-                return self.loaded_io[category][io_name]
-
-        if io_name in self.inputs:
-
-            io_config, category = self.inputs[io_name], "inputs"
-
-            self.loaded_io[category][io_name] = Input(
-                io_name, io_config, self.store, self.logger
-            )
-
-        elif io_name in self.outputs:
-
-            io_config, category = self.outputs[io_name], "outputs"
-
-            self.loaded_io[category][io_name] = Output(
-                io_name, io_config, self.store, self.logger
-            )
-
-        else:
-            sys.exit(
-                f"ERROR: input / ouput {io_name} not defined in the configuration."
-            )
-
-        self.loaded_io[category][io_name].load()
-
-        return self.loaded_io[category][io_name]
-    """
-
-    def node(self, obj_name, job_inputs=[], job_outputs=[]):
+    def node(self, obj_name, job_inputs=[]):
         """Instantiates a node for an object, including the corresponding algorithm instance
         and the list of relevant samples. This function checks for circular dependencies.
         The node instance is returned. This is a recursive function."""
@@ -192,10 +152,9 @@ class Run:
             was_called=False,
             algorithm=None,
             job_inputs=job_inputs,
-            job_outputs=job_outputs,
         )
 
-        # Create a new algorithm
+        # Get the algorithm
         new_node.algorithm = self.alg(obj_name)
 
         # Check if it's an input type or alg type
@@ -297,48 +256,35 @@ class Run:
         msg = f"Launching pyrate run {self.name}"
         print("\n", "*" * len(msg), msg, "*" * len(msg))
 
-        # -----------------------------------------------------------------------
+        # ----------------------------------------------------------------------
         # Input loop.
-        # -----------------------------------------------------------------------
-        for i_name in tqdm(
-            self.loaded_io["inputs"],
-            desc="Input loop".ljust(70, "."),
-            disable=self.no_progress_bar,
-            bar_format=self.colors["blue"],
-        ):
+        # ----------------------------------------------------------------------
+        for self.state in ["initialise", "execute", "finalise"]:
 
-            self._current_input = self.loaded_io["inputs"][i_name]
+            self.run()
 
-            for self.state in ["initialise", "execute", "finalise"]:
+        self._reset_algorithms_instance()
 
-                self.run()
-
-            self._reset_algorithms_instance()
-
-        # -----------------------------------------------------------------------
+        # ----------------------------------------------------------------------
         # Output loop.
-        # -----------------------------------------------------------------------
-        for o_name in tqdm(
-            self.loaded_io["outputs"],
+        # ----------------------------------------------------------------------
+
+        for output in tqdm(
+            self.outputs,
             desc="Output loop".ljust(70, "."),
-            disable=self.no_progress_bar,
+            disable=self.config["no_progress_bar"],
             bar_format=self.colors["green"],
         ):
 
-            self._current_output = self.loaded_io["outputs"][o_name]
-
-            for t_name in self._current_output.targets:
-
-                if not self.store.get(t_name) is EN.Pyrate.WRITTEN:
-
-                    self._current_output.write(t_name)
+            for target in output.targets:
+                if not self.store.get(target) is EN.Pyrate.WRITTEN:
+                    output.write(target)
 
         stop = timeit.default_timer()
 
-        if self.no_progress_bar:
+        if self.config["no_progress_bar"]:
             print("Execution time: ", str(stop - start))
 
-        # self.logger.info("Execution time: ", str(stop - start))
         return
 
     def run(self):
@@ -346,59 +292,54 @@ class Run:
 
         if self.state in ["initialise", "finalise"]:
 
-            self.store.put("INPUT:name", self._current_input.name)
+            self.store.put("INPUT:name", self.input.name)
 
-            self.store.put("INPUT:config", self._current_input.config)
+            self.store.put("INPUT:config", self.input.config)
+
+            getattr(self.input, self.state)()
 
             self.loop()
 
         elif self.state == "execute":
 
-            tot_n_events = self._current_input.get_n_events()
-
-            eslices = self.get_events_slices(tot_n_events)
+            # est_nevents = self._current_input.get_n_events()
+            emin = self.event_range[0]
+            if emin > 0:
+                # Skip the first emin events
+                self.input.skip_events(emin)
+            emax = self.event_range[1]
 
             # ---------------------------------------------------------------
             # Event loop.
             # ---------------------------------------------------------------
-            for emin, emax in eslices:
+            event_n = emin
+            while self.input.get_event():
+                if emax > 0 and event_n > emax:
+                    break
 
-                info = (
-                    "Event loop"
-                    + f"({self._current_input.name},  emin: {emin},  emax: {emax})".rjust(
-                        60, "."
-                    )
-                )
+                # Put the input info on the store
+                self.store.put("INPUT:name", self.input.name)
+                self.store.put("INPUT:config", self.input.config)
+                self.store.put("EVENT:idx", event_n)
 
-                self._current_input.set_idx(emin)
+                # Run all the algorithms
+                self.loop()
 
-                erange = emax - emin + 1
-
-                for idx in tqdm(
-                    range(erange),
-                    desc=f"{info}",
-                    disable=self.no_progress_bar,
-                    bar_format=self.colors["white"],
-                ):
-                    self.store.put("INPUT:name", self._current_input.name)
-
-                    self.store.put("INPUT:config", self._current_input.config)
-
-                    self.store.put("EVENT:idx", self._current_input.get_idx())
-
-                    self.loop()
-
-                    self._current_input.set_next_event()
+                event_n += 1
+                
+                # info = (
+                #     "Event loop"
+                #     + f"({self._current_input.name},  emin: {emin},  emax: {emax})".rjust(
+                #         60, "."
+                #     )
+                # )         
 
     def loop(self):
         """Loop over targets and calls them."""
         self._reset_nodes_status()
 
-        for t_name, t_instance in self.targets.items():
-
-            if self._current_input.name in t_instance.job_inputs:
-
-                self.call(t_name)
+        for target in self.targets:
+            self.call(target)
 
         self.store.clear()
 
@@ -423,132 +364,10 @@ class Run:
                     if not passed:
                         break
 
-                # the block below is work in progress.
-                # checking that the object is complete.
-                # if not self.is_complete(obj_name, alg):
-                #    sys.exit(
-                #        f"ERROR: object {obj_name} is on the store but additional output is missing !!!"
-                #    )
-
             else:
-                self._current_input.read(obj_name)
+                pass
+                # self.input.get_event(obj_name)
 
             node.was_called = True
-
-    # for o_name in self.node(obj_name).job_outputs:
-    #
-    #    if self.store.status(obj_name) is EN.Pyrate.READY:
-    #
-    #        self._current_output = self.loaded_io["outputs"][o_name]
-    #
-    #        self._current_output.write(obj_name)
-
-    # def is_complete(self, obj_name, alg):
-    #    """If the main object is on the store with a valid value,
-    #    additional output is checked to be on the store."""
-    #
-    #    if self.store.get(obj_name) is not EN.Pyrate.NONE:
-    #
-    #        return all(
-    #            [
-    #                self.store.get(o) is not EN.Pyrate.NONE
-    #                for o in alg.output[obj_name]
-    #            ]
-    #        )
-    #
-    #    else:
-    #        return True
-
-    def get_events_slices(self, tot):
-        """Updates emin and emax attributes for running on valid slice."""
-
-        eslices = []
-
-        # ---------------------------------------------------------------
-        # Reading input events
-        # ---------------------------------------------------------------
-        if hasattr(self._current_input, "eslices"):
-
-            if isinstance(self._current_input.eslices, dict):
-                emin, emax = 0, tot - 1
-
-                if "emin" in self._current_input.eslices:
-                    emin = self._current_input.eslices["emin"]
-
-                if (
-                    "emax" in self._current_input.eslices
-                    and self._current_input.eslices["emax"] > -1
-                ):
-                    emax = self._current_input.eslices["emax"]
-
-                eslices.append((emin, emax))
-
-            elif isinstance(self._current_input.eslices, list):
-
-                for s in self._current_input.eslices:
-
-                    if "slice" in s:
-
-                        s_nparts = int(s["nparts"])
-                        s_slice = "all"
-
-                        if not s["slice"] == "all":
-                            s_slice = int(s["slice"])
-
-                        part = int(tot / s_nparts)
-
-                        emin, emax = 0, part - 1
-
-                        for s_idx in range(s_nparts):
-
-                            if not s_slice == "all":
-                                if s_idx == s_slice - 1:
-
-                                    if s_idx == s_nparts - 1:
-                                        eslices.append((emin, tot - 1))
-                                        break
-
-                                    else:
-                                        eslices.append((emin, emax))
-                                        break
-
-                            else:
-                                if s_idx == s_nparts - 1:
-                                    eslices.append((emin, tot - 1))
-                                else:
-                                    eslices.append((emin, emax))
-
-                            emin += part
-                            emax += part
-
-                    else:
-                        emin, emax = 0, tot - 1
-
-                        if "emin" in s:
-                            emin = s["emin"]
-
-                        if "emax" in s and s["emax"] > -1:
-                            emax = s["emax"]
-
-                        eslices.append((emin, emax))
-
-            else:
-                emin, emax = 0, self._current_input.eslices - 1
-
-                eslices.append((emin, emax))
-
-        for emin, emax in eslices:
-            self.check_events_slices(emin, emax, tot)
-
-        return eslices
-
-    def check_events_slices(self, emin, emax, tot):
-        """Validate events slice."""
-
-        if not emin <= emax <= tot - 1:
-            sys.exit(
-                f"ERROR: required input range not valid. emin:{emin} <= emax:{emax} <= {tot - 1}"
-            )
-
 
 # EOF
