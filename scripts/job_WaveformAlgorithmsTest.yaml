@@ -1,5 +1,6 @@
 input:
-    event_range: [0, -1]
+    event_start: 0
+    event_num: -1
 
     EventBuiltInput:
         algorithm: EventBuilder

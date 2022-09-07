@@ -27,5 +27,11 @@ class Input(Algorithm):
         """ Returns the current event time
         """
         return self._eventTime
+    
+    @Algorithm.output.setter
+    def output(self, outputs):
+        """ Re-usable setter for inputs
+        """
+        self._output = outputs
 
 # EOF

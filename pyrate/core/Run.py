@@ -1,10 +1,8 @@
 """ This class controls the execution of algorithms
     as a single local instance. 
 """
-import os
+
 import sys
-import yaml
-import pkgutil
 import importlib
 import timeit
 import time
@@ -17,28 +15,19 @@ from colorama import Fore
 from tqdm import tqdm
 
 from pyrate.core.Store import Store
-from pyrate.core.EventBuilder import EventBuilder
-from pyrate.readers.ReaderCAEN1730_RAW import ReaderCAEN1730_RAW
-from pyrate.readers.ReaderCAEN1730_PSD import ReaderCAEN1730_PSD
-from pyrate.readers.ReaderCAEN1730_ZLE import ReaderCAEN1730_ZLE
 from pyrate.core.Output import Output
 
-from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
 from pyrate.utils import enums as EN
 
 
 class Run:
-    def __init__(self, name, input, outputs, objects, config):
+    def __init__(self, name, config):
         self.name = name
         self.config = config
-        self.event_range = input["event_range"]
-        del input["event_range"]
-        self.input_config = input
         self.input = None
-        self.output_configs = outputs
         self.outputs = []
-        self.objects = objects
+        self.objects = None
 
     def setup(self):
         """First instance of 'private' members."""        
@@ -88,41 +77,31 @@ class Run:
         self.state = None
         self.store = Store(self.name)
 
-        # Loading the input for this run
-        input_name, input_config = list(self.input_config.items())[0]
-        for r in sys.modules:
-            if input_config["algorithm"] == r.split(".")[-1]:
-                self.input = getattr(importlib.import_module(r), input_config["algorithm"])(
-                    input_name, input_config, self.store, self.logger)
-                break
-        # input_name, input_config = list(self.input_config.items())[0]
-        # input_modules = {}
-        # core_modules = {name: f"pyrate.core.{name}" for _, name, _ in pkgutil.iter_modules(["pyrate/core"])}
-        # reader_modules = {name: f"pyrate.readers.{name}" for _, name, _ in pkgutil.iter_modules(["pyrate/readers"])}
-        # input_modules.update(core_modules)
-        # input_modules.update(reader_modules)
-        # for module_name, module_path in input_modules.items():
-        #     if module_name == input_config["algorithm"]:
-        #         print("Hi")
-        #         try:
-        #             InputModule = importlib.import_module(module_path)
-        #             InputClass = InputModule.__getattribute__(module_name)
-        #             self.input = InputClass(input_name, input_config, self.store, self.logger)
-        #             break
-        #         except ImportError as err:
-        #             sys.exit(
-        #                 f"ERROR: {err}\n Unable to import input '{input_name}' from module '{module_name}'\n"
-        #                 "Check that the reader is in pyrate/readers, that the class and module have the same name, and is added the nearest __init__.py"
-        #             )
+        # ---------------
+        # Load the inputs
+        # ---------------
+        self.input = [s for s in self.config["input"] if s != "event_start" and s != "event_num"][0]
+        # input_name = [s for s in self.config["input"] if s != "event_start" and s != "event_num"][0]
+        # input_config = self.config["input"][input_name]
+
+        # InputClass = FN.get_class(input_config["algorithm"])
+        # self.input = InputClass(input_name, input_config, self.store, self.logger)
         
+        # -----------------------------
+        # Load the objects / algorithms
+        # -----------------------------
+        self.objects = self.config["objects"]
+        # Add the input to the objects list
+        self.objects.update({self.input: self.config["input"][self.input]})
         self.targets, self.nodes, self.algorithms, self.readers = {}, {}, {}, {}
         # instantiate all algorithms - even those not needed.
-        self._reset_algorithms_instance()
+        for obj_name in self.objects:
+            self.alg(obj_name)
 
-        # from this line on there will be major restructurings
-        # one can eliminate targets.
-
-        for output_name, output_config in self.output_configs.items():
+        # ----------------
+        # Load the outputs
+        # ----------------
+        for output_name, output_config in self.config["outputs"].items():
             output = Output(output_name, output_config, self.store, self.logger)
             output.load()
 
@@ -130,13 +109,7 @@ class Run:
                 if target not in self.targets:
                     self.targets[target] = self.node(target)
 
-        # initialising job inputs / outputs for the targets.
-        # REMOVE ME
-        for target in self.targets:
-            if self.node(target).job_inputs == []:
-                self.node(target).job_inputs = self.input
-
-    def node(self, obj_name, job_inputs=[]):
+    def node(self, obj_name):
         """Instantiates a node for an object, including the corresponding algorithm instance
         and the list of relevant samples. This function checks for circular dependencies.
         The node instance is returned. This is a recursive function."""
@@ -149,12 +122,7 @@ class Run:
             return self.nodes[obj_name]
 
         # Create a new node
-        new_node = Node(
-            obj_name,
-            was_called=False,
-            algorithm=None,
-            job_inputs=job_inputs,
-        )
+        new_node = Node(obj_name, algorithm=None, was_called=False)
 
         # Get the algorithm
         new_node.algorithm = self.alg(obj_name)
@@ -191,184 +159,114 @@ class Run:
         # Return our finished node
         return self.nodes[obj_name]
 
-    def _reset_nodes_status(self):
+    def _reset_node_called_status(self):
         """Resets all node's was_called flag"""
         for obj_name in self.nodes:
 
             self.nodes[obj_name].was_called = False
 
-    def _reset_algorithms_instance(self):
-        """Clears all algorithm instances."""
-        for obj_name in self.nodes:
-
-            if self.nodes[obj_name].algorithm is not None:
-
-                del self.algorithms[obj_name]
-
-                self.nodes[obj_name].algorithm = None
-
-        for obj_name in self.objects:
-            self.alg(obj_name)
-
     def alg(self, obj_name):
         """Instantiates an algorithm/object according to the
         global configuration and returns its instance."""
-
         if obj_name in self.algorithms:
+            # Found it already, just return it
             return self.algorithms[obj_name]
 
-        else:
-            obj = obj_name.split(":")[0]
+        if obj_name in self.objects:
+            # Have to make the algorithm instance
+            obj_config = self.objects[obj_name]
+            algorithm_name = obj_config["algorithm"]
+            AlgorithmClass = FN.get_class(algorithm_name)
+            self.algorithms[obj_name] = AlgorithmClass(obj_name, obj_config, self.store, self.logger)
+            
+            # Point all the alg outputs to the parent
+            for _, output in self.algorithms[obj_name].output.items():
+                self.algorithms[output] = self.algorithms[obj_name]
+            
+            return self.algorithms[obj_name]
 
-            if obj in ["EVENT", "INPUT"]:
-                return None
+        # sys.exit(f"ERROR: object '{obj_name}' not found in the configurations.")
 
-            elif obj in self.objects:
-
-                obj_config = self.objects[obj]
-
-                for m in sys.modules:
-
-                    alg_name = m.split(".")[-1]
-
-                    if obj_config["algorithm"] == alg_name:
-
-                        module = importlib.import_module(m)
-
-                        # algorithm instance.
-                        self.algorithms[obj_name] = getattr(module, alg_name)(
-                            obj_name, obj_config, self.store, self.logger
-                        )
-
-                        for _, output in self.algorithms[obj_name].output.items():
-
-                            self.algorithms[output] = self.algorithms[obj_name]
-
-                        return self.algorithms[obj_name]
-
-                # sys.exit(f"ERROR: object {obj} has requested a non-existing algorithm.")
-
-            # else:
-            #     sys.exit(f"ERROR: object {obj} not defined in the configuration.")
-
-    def launch(self):
+    def run(self):
         """Launches loops over inputs and outputs."""
         start = timeit.default_timer()
-
-        msg = f"Launching pyrate run {self.name}"
-        print("\n", "*" * len(msg), msg, "*" * len(msg))
+        # msg = f"Launching pyrate run {self.name}"
+        # print("\n", "*" * len(msg), msg, "*" * len(msg))
 
         # ----------------------------------------------------------------------
         # Input loop.
         # ----------------------------------------------------------------------
-        for self.state in ["initialise", "execute", "finalise"]:
+        self.state = "initialise"
+        self.store.put("INPUT:name", self.algorithms[self.input].name)
+        self.store.put("INPUT:config", self.algorithms[self.input].config)
+        self.loop()
 
-            self.run()
+        # est_nevents = self._current_input.get_n_events()
+        emin = self.config["input"]["event_start"]
+        enum = self.config["input"]["event_num"]
+        if emin > 0:
+            # Skip the first emin events
+            self.input.skip_events(emin)
 
-        self._reset_algorithms_instance()
+        # ---------------------------------------------------------------
+        # Event loop.
+        # ---------------------------------------------------------------
+        self.state = "execute"
+        event_count = 0
+        while self.algorithms[self.input].get_event():
+            if enum > 0 and event_count > enum:
+                break
+
+            # Put the input info on the store
+            self.store.put("INPUT:name", self.algorithms[self.input].name)
+            self.store.put("INPUT:config", self.algorithms[self.input].config)
+            self.store.put("EVENT:idx", event_count + emin)
+
+            # Run all the algorithms
+            self.loop()
+
+            event_count += 1
 
         # ----------------------------------------------------------------------
         # Output loop.
         # ----------------------------------------------------------------------
+        self.state = "finalise"
+        self.store.put("INPUT:name", self.algorithms[self.input].name)
+        self.store.put("INPUT:config", self.algorithms[self.input].config)
+        # getattr(self.input, self.state)()
+        self.loop()
 
-        for output in tqdm(
-            self.outputs,
-            desc="Output loop".ljust(70, "."),
-            disable=self.config["no_progress_bar"],
-            bar_format=self.colors["green"],
-        ):
-
+        for output in self.outputs:
             for target in output.targets:
                 if not self.store.get(target) is EN.Pyrate.WRITTEN:
                     output.write(target)
 
         stop = timeit.default_timer()
-
-        if self.config["no_progress_bar"]:
-            print("Execution time: ", str(stop - start))
+        print(f"Execution time: {stop - start:.2f}s")
 
         return
 
-    def run(self):
-        """Run the loop function for the current state."""
-
-        if self.state in ["initialise", "finalise"]:
-
-            self.store.put("INPUT:name", self.input.name)
-
-            self.store.put("INPUT:config", self.input.config)
-
-            getattr(self.input, self.state)()
-
-            self.loop()
-
-        elif self.state == "execute":
-
-            # est_nevents = self._current_input.get_n_events()
-            emin = self.event_range[0]
-            if emin > 0:
-                # Skip the first emin events
-                self.input.skip_events(emin)
-            emax = self.event_range[1]
-
-            # ---------------------------------------------------------------
-            # Event loop.
-            # ---------------------------------------------------------------
-            event_n = emin
-            while self.input.get_event():
-                if emax > 0 and event_n > emax:
-                    break
-
-                # Put the input info on the store
-                self.store.put("INPUT:name", self.input.name)
-                self.store.put("INPUT:config", self.input.config)
-                self.store.put("EVENT:idx", event_n)
-
-                # Run all the algorithms
-                self.loop()
-
-                event_n += 1
-                
-                # info = (
-                #     "Event loop"
-                #     + f"({self._current_input.name},  emin: {emin},  emax: {emax})".rjust(
-                #         60, "."
-                #     )
-                # )         
-
     def loop(self):
         """Loop over targets and calls them."""
-        self._reset_nodes_status()
-
+        self._reset_node_called_status()
         for target in self.targets:
-            self.call(target)
-
+            self.call(target, state=self.state)
         self.store.clear()
 
-    def call(self, obj_name):
+    def call(self, obj_name, state):
         """Calls an algorithm for the current state."""
-
         node = self.node(obj_name)
-
         if not node.was_called:
-
             alg = node.algorithm
 
             if alg is not None:
-
                 for condition, dependencies in alg.input.items():
-
                     for d in dependencies:
-                        self.call(d)
-
+                        self.call(d, state)
                     passed = getattr(alg, self.state)(condition)
 
                     if not passed:
                         break
-
-            else:
-                pass
-                # self.input.get_event(obj_name)
 
             node.was_called = True
 

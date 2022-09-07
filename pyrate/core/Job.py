@@ -25,7 +25,6 @@ class Job:
         # Input stuff
         # Pull out the event range
         input = self.config["input"]
-        run_name = [s for s in list(self.config["input"].keys()) if s != "event_range"][0]
 
         # Sort out the configs
         configs = []
@@ -46,15 +45,15 @@ class Job:
         for output_name in outputs:
             path = FN.find_env(outputs[output_name]["path"])
             outputs[output_name]["path"] = path
-
-        self.runs.append(Run(run_name, input=input, outputs=outputs, objects=objects, 
-                             config=self.config))
+    
+        run_config = {"input": input, "outputs": outputs, "objects": objects}
+        self.runs.append(Run(self.name, run_config))
 
     def launch(self):
         """Launch Run objects. """
-        for r in self.runs:
-            r.setup()
-            r.launch()
+        for run in self.runs:
+            run.setup()
+            run.run()
 
     def print_objects(self):
         """Prints out all objects"""

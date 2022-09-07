@@ -309,14 +309,7 @@ class TreeMaker(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    @property
-    def input(self):
-        """Getter method for input objects."""
-        if self._input == {}:
-            return {None: ""}
-        return self._input
-
-    @input.setter
+    @Algorithm.input.setter
     def input(self, config_input):
         """Sets the input approrpriately for TreeMaker"""
         if hasattr(self, "_input"):

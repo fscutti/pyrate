@@ -24,9 +24,11 @@ class ReaderCAEN1730_PSD(Input):
 
         self.channels = 8
         # Set the outputs manually
-        self._output = {}
+        outputs = {}
         for i in range(self.channels):
-            self._output.update({f"ch_{i}_timestamp": f"{self.name}_ch_{i}_timestamp", f"ch_{i}_waveform": f"{self.name}_ch_{i}_waveform"})
+            outputs.update({f"ch_{i}_timestamp": f"{self.name}_ch_{i}_timestamp", f"ch_{i}_waveform": f"{self.name}_ch_{i}_waveform"})
+
+        self.output = outputs
 
     def load(self):
         self.is_loaded = True

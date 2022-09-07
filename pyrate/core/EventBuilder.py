@@ -5,6 +5,8 @@
 import sys
 import importlib
 
+import pyrate.utils.functions as FN
+
 from pyrate.core.Input import Input
 
 class EventBuilder(Input):
@@ -20,17 +22,10 @@ class EventBuilder(Input):
         del self.config["algorithm"]
         del self.config["window"]
 
-        for name, conf in self.config.items():
-            reader_module = "pyrate.readers." + conf["reader"]
-            try:
-                ReaderModule = importlib.import_module(reader_module)
-                ReaderClass = ReaderModule.__getattribute__(conf["reader"])
-                self.readers[name] = ReaderClass(name, conf, self.store, self.logger)
-            except ImportError as err:
-                sys.exit(
-                    f"ERROR: {err}\n Unable to import reader '{conf['reader']}' from module '{reader_module}'\n"
-                    "Check that the reader is in pyrate/readers, that the class and module have the same name, and is added the nearest __init__.py"
-                )
+        # Load the readers
+        for name, reader_config in self.config.items():
+            ReaderClass = FN.get_class(reader_config["reader"])
+            self.readers[name] = ReaderClass(name, reader_config, self.store, self.logger)
 
         # Set the event builder's outputs
         variables = {}
@@ -40,7 +35,7 @@ class EventBuilder(Input):
 
         self.output = variables
 
-    def initialise(self):
+    def initialise(self, condition=None):
         """ Initialises all the inputs
         """
         if self.is_loaded == False:
@@ -49,7 +44,7 @@ class EventBuilder(Input):
             for reader in self.readers.values():
                 reader.initialise()
                         
-    def finalise(self):
+    def finalise(self, condition=None):
         """ Cleans up all the inputs
         """
         if self.is_loaded == True:

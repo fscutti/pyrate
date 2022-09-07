@@ -6,8 +6,9 @@ import sys
 import re
 import json
 import yaml
-import pyrate
+import importlib
 
+import pyrate
 
 from itertools import product
 from functools import reduce
@@ -276,6 +277,23 @@ def iterable(obj):
         return False
     else:
         return True
+
+def get_class(class_name):
+    """ Gets a pyrate class, assumes that the class has the same name as
+        the module
+    """
+    for module in sys.modules:
+        if class_name == module.split(".")[-1]:
+            try:
+                Module = importlib.import_module(module)
+                return Module.__getattribute__(class_name)
+            except ImportError as err:
+                sys.exit(
+                    f"ERROR: {err}\n Unable to import input '{class_name}' from module '{module}'\n"
+                    "Check that the class and module have the same name, and is added the nearest __init__.py"
+                )
+    print(f"ERROR: {err}\n Unable to import input '{class_name}' from pyrate'\n"
+                    "Check that the class and module have the same name, and is in sys.modules")
 
 def expand_tags(configs):
     """Searches all configs, finds all valid <tags> and replaces and expands
