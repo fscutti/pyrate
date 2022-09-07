@@ -67,7 +67,7 @@ from pyrate.core.Algorithm import Algorithm
 
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
-from pyrate.utils.ROOT_classes import _Type
+from pyrate.utils.ROOT_utils import _Type
 from pyrate.utils import enums
 
 GB = 1e9

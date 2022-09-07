@@ -30,8 +30,7 @@ outputs:
             - Tree_B1
             - Tree_B2
             - MultiBoard
-            # - Channel_1
-            # - Single_data
-            # - MultiChannels
+            # - AverageWaveforms
+            # - Constants
 
 # EOF

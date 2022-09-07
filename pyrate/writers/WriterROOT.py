@@ -42,7 +42,7 @@ class WriterROOT(Writer):
         obj = self.store.get(name)
 
         if obj is EN.Pyrate.NONE:
-            msg = f"ERROR: trying to write {name} but object has not been saved."
+            msg = f"ERROR: Cannot write the object '{name}' to file as it as not been saved to the store."
             sys.exit(msg)
             self.logger.error(msg)
 
