@@ -94,6 +94,6 @@ def get(array, i):
     if i < 0:
         return 0
     else: 
-        return array[0]
+        return array[i]
 
 # EOF

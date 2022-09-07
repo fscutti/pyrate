@@ -5,12 +5,12 @@ inputs:
             emax: -1
         reader: ReaderCAEN1730_PSD
         path:
-        - /home/lmilligan/data/22-08-23_17-21-20_HILDAQ_PMT_grid_angle_45_0.0,0.0/PMT_grid_angle_45_0.0,0.0-Board_0-001.dat
+        - PYRATE/test/data/1730_PSDTest-Board_0-001.dat
         
         # Redundant stuff
         samples:
             tags:
-                any: "PMT"
+                any: "1730"
         structure:
             tree: hi
         color: b
@@ -55,7 +55,7 @@ configs:
             any: MultiCHExample
 
 outputs:
-    AlgorithmTestmaster:
+    AlgorithmTest:
         file:
             path: PYRATE/test
             format: .root
