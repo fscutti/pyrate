@@ -6,7 +6,7 @@
 from pyrate.core.Algorithm import Algorithm
 
 class Input(Algorithm):
-    __slots__ = ["_idx", "_eventTime", "is_loaded"]
+    __slots__ = ["_idx", "_eventTime", "is_loaded", "_progress"]
 
     @property
     def idx(self):
@@ -33,5 +33,12 @@ class Input(Algorithm):
         """ Re-usable setter for inputs
         """
         self._output = outputs
+
+    @property
+    def progress(self):
+        """ Get an esimate of the progress as a value between 0 and 1
+            where 0 is starting and 1 is complete
+        """
+        return self._progress
 
 # EOF

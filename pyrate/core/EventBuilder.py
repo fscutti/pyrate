@@ -2,9 +2,6 @@
     run flow, but has extra run determining features
 """
 
-import sys
-import importlib
-
 import pyrate.utils.functions as FN
 
 from pyrate.core.Input import Input
@@ -65,6 +62,10 @@ class EventBuilder(Input):
             if parallel is True in the config, will just read all events from
             all readers in order
         """
+        # Set internal progress checker to the max and find the lowest
+        current_progress = 1
+
+        # ----------------------------------------------------------
         # Parallel event building (just read everything as it comes)
         if "parallel" in self.config and self.config["parallel"] == True:
             success = False
@@ -72,8 +73,16 @@ class EventBuilder(Input):
             for reader in self.readers.values():
                 success |= reader.get_event()
 
+                # Check the progress
+                if reader.progress < current_progress:
+                    current_progress = reader.progress
+            
+            # Update the EventBuilder's progress
+            self._progress = current_progress
+
             return success
 
+        # ------------------------------
         # Timestamp-based event building
         self._eventTime = 2**64 # largest possible event time (uint64)
         deltaT = self.window # How far to look forwards
@@ -93,7 +102,7 @@ class EventBuilder(Input):
         # Search for more event data in the valid block
         success = True
         while success:
-            success = False        
+            success = False
             for reader in self.readers.values():
                 if reader.timestamp <= maxTime:
                     # Ok, we found a reader with data within the maxTime
@@ -106,6 +115,13 @@ class EventBuilder(Input):
                     # Now get the data from the reader
                     reader.get_event()
                     success = True
+
+                # Check the progress
+                if reader.progress < current_progress:
+                    current_progress = reader.progress
+            
+            # Update the EventBuilder's progress
+            self._progress = current_progress
 
         return True
 

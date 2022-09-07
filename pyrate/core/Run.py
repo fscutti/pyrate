@@ -3,7 +3,6 @@
 """
 
 import sys
-import importlib
 import timeit
 import time
 import logging
@@ -33,7 +32,7 @@ class Run:
         """First instance of 'private' members."""        
 
         # -----------------------------------------------------------------------
-        # At this point the Run object should have self.inputs/objects/outputs
+        # At this point the Run object should have inputs/objects/outputs
         # defined after being read from the configuration yaml file.
         # -----------------------------------------------------------------------
 
@@ -77,34 +76,31 @@ class Run:
         self.state = None
         self.store = Store(self.name)
 
-        # ---------------
-        # Load the inputs
-        # ---------------
+        # -------------------
+        # Load the input name
+        # -------------------
         self.input = [s for s in self.config["input"] if s != "event_start" and s != "event_num"][0]
-        # input_name = [s for s in self.config["input"] if s != "event_start" and s != "event_num"][0]
-        # input_config = self.config["input"][input_name]
-
-        # InputClass = FN.get_class(input_config["algorithm"])
-        # self.input = InputClass(input_name, input_config, self.store, self.logger)
         
-        # -----------------------------
-        # Load the objects / algorithms
-        # -----------------------------
+        # -------------------------------------
+        # Load the objects / algorithms / input
+        # -------------------------------------
         self.objects = self.config["objects"]
         # Add the input to the objects list
         self.objects.update({self.input: self.config["input"][self.input]})
         self.targets, self.nodes, self.algorithms, self.readers = {}, {}, {}, {}
-        # instantiate all algorithms - even those not needed.
+        
+        # instantiate all algorithms - even those not needed
         for obj_name in self.objects:
             self.alg(obj_name)
 
-        # ----------------
-        # Load the outputs
-        # ----------------
+        # -----------------------------------------
+        # Load the outputs and sort out dependecies
+        # -----------------------------------------
         for output_name, output_config in self.config["outputs"].items():
             output = Output(output_name, output_config, self.store, self.logger)
             output.load()
 
+            # Resolve all the dependecies
             for target in output.targets:
                 if target not in self.targets:
                     self.targets[target] = self.node(target)
@@ -211,21 +207,40 @@ class Run:
         # ---------------------------------------------------------------
         # Event loop.
         # ---------------------------------------------------------------
+        def generator():
+            """ Custom dummy generator function for the execute loop to allow
+                progress bar functionality
+            """
+            event_count = 0
+            while self.algorithms[self.input].get_event():
+                # print(f"{self.algorithms[self.input].progress=}")
+                if enum > 0 and event_count > enum:
+                    break
+
+                # Put the input info on the store
+                self.store.put("INPUT:name", self.algorithms[self.input].name)
+                self.store.put("INPUT:config", self.algorithms[self.input].config)
+                self.store.put("EVENT:idx", event_count + emin)
+
+                # Run all the algorithms
+                self.loop()
+
+                event_count += 1
+                yield
+
         self.state = "execute"
-        event_count = 0
-        while self.algorithms[self.input].get_event():
-            if enum > 0 and event_count > enum:
-                break
-
-            # Put the input info on the store
-            self.store.put("INPUT:name", self.algorithms[self.input].name)
-            self.store.put("INPUT:config", self.algorithms[self.input].config)
-            self.store.put("EVENT:idx", event_count + emin)
-
-            # Run all the algorithms
-            self.loop()
-
-            event_count += 1
+        # with tqdm() as pbar:
+        #     count = 0
+        #     for _ in generator():
+        #         if (count % 1000) == 0:
+        #             progress = self.algorithms[self.input].progress
+        #             pbar.n = round(progress * 100)
+        #             pbar.refresh()
+        #         count += 1
+        #     pbar.n = 100
+        #     pbar.refresh()
+        
+        for _ in tqdm(generator()): pass
 
         # ----------------------------------------------------------------------
         # Output loop.

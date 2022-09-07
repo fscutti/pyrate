@@ -15,7 +15,7 @@ from functools import reduce
 from operator import mul
 from copy import deepcopy
 
-from pyrate.utils.ROOT_classes import _Type
+from pyrate.utils.ROOT_utils import _Type
 import pyrate.utils.strings as ST
 
 def modus_ponens(p, q):
