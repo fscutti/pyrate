@@ -16,11 +16,10 @@ class EventBuilder(Input):
         self.window = self.config["window"]
         
         # Clean out the un-used parameters
-        del self.config["algorithm"]
-        del self.config["window"]
+        reader_configs = {k:v for k, v in self.config.items() if k != "algorithm" and k != "window"}
 
         # Load the readers
-        for name, reader_config in self.config.items():
+        for name, reader_config in reader_configs.items():
             ReaderClass = FN.get_class(reader_config["reader"])
             self.readers[name] = ReaderClass(name, reader_config, self.store, self.logger)
 

@@ -229,7 +229,7 @@ class Run:
                 yield
 
         self.state = "execute"
-        # with tqdm() as pbar:
+        # with tqdm(total=100) as pbar:
         #     count = 0
         #     for _ in generator():
         #         if (count % 1000) == 0:
@@ -239,7 +239,7 @@ class Run:
         #         count += 1
         #     pbar.n = 100
         #     pbar.refresh()
-        
+
         for _ in tqdm(generator()): pass
 
         # ----------------------------------------------------------------------
@@ -248,7 +248,6 @@ class Run:
         self.state = "finalise"
         self.store.put("INPUT:name", self.algorithms[self.input].name)
         self.store.put("INPUT:config", self.algorithms[self.input].config)
-        # getattr(self.input, self.state)()
         self.loop()
 
         for output in self.outputs:

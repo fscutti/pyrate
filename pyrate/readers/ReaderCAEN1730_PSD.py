@@ -20,9 +20,6 @@ class ReaderCAEN1730_PSD(Input):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-        # Load the first file
-        self.load()
-
         self.channels = 8
         # Set the outputs manually
         outputs = {}
@@ -32,6 +29,9 @@ class ReaderCAEN1730_PSD(Input):
                             f"ch_{i}_charge": f"{self.name}_ch_{i}_charge"})
 
         self.output = outputs
+        
+        # Load the first file
+        self.load()
 
     def load(self):
         self.is_loaded = True
@@ -40,6 +40,9 @@ class ReaderCAEN1730_PSD(Input):
         self._sizes = [os.path.getsize(f) for f in self._files]
         self.size = sum(self._sizes)
         self._bytes_read = 0
+
+        # Pull in the first event information, ready to go
+        self.read_next_event()
         # self._mmf = mmap.mmap(self._f.fileno(), length=0, access=mmap.ACCESS_READ)
         # self._f.close()
 
@@ -50,11 +53,8 @@ class ReaderCAEN1730_PSD(Input):
         self.is_loaded = False
         self._f.close()
 
-    def initialise(self, condition=None):
-        self.read_next_event()
-    
     def finalise(self, condition=None):
-        self.offload()        
+        self.offload()
 
     def get_event(self, skip=False):
         if self._eventTime == 2**64:
@@ -71,9 +71,16 @@ class ReaderCAEN1730_PSD(Input):
         self.read_next_event()
         return True
     
+    def skip_events(self, n):
+        """ Skips over n events
+        """
+        for i in range(n):
+            if not self.get_event():
+                break
+
     def read_next_event(self):
         # Reset event
-        self._eventTime = 2**64
+        self._eventTime = 2**64 # Largest possible number, invalid value
         self._inEvent = {}
         self._eventChTimes = {}
         self._eventWaveforms = {}
@@ -159,7 +166,7 @@ class ReaderCAEN1730_PSD(Input):
                     # Is this necessary???
                     self._eventChTimes[ch] = 2*self._eventChTimes[ch]
                     self._eventTime = self._eventChTimes[ch]
-        
+
         # Update the number of bytes read by the eventSize
         self._bytes_read += 4*eventSize
         # Update the progress

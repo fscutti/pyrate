@@ -18,9 +18,6 @@ class ReaderCAEN1730_RAW(Input):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-        # Load the first file
-        self.load()
-
         self.channels = 8
         # Set the outputs manually
         outputs = {}
@@ -30,6 +27,9 @@ class ReaderCAEN1730_RAW(Input):
 
         self.output = outputs
 
+        # Load the first file
+        self.load()
+
     def load(self):
         self.is_loaded = True
         self._files = [FN.find_env(f) for f in self.config["files"]]
@@ -37,6 +37,9 @@ class ReaderCAEN1730_RAW(Input):
         self._sizes = [os.path.getsize(f) for f in self._files]
         self.size = sum(self._sizes)
         self._bytes_read = 0
+
+        # Pull in the first event information, ready to go
+        self.read_next_event()
         # self._mmf = mmap.mmap(self._f.fileno(), length=0, access=mmap.ACCESS_READ)
         # self._f.close()
 
@@ -46,9 +49,6 @@ class ReaderCAEN1730_RAW(Input):
     def offload(self):
         self.is_loaded = False
         self._f.close()
-
-    def initialise(self, condition=None):
-        self.read_next_event()
     
     def finalise(self, condition=None):
         self.offload()
@@ -67,6 +67,13 @@ class ReaderCAEN1730_RAW(Input):
         # Get the next event
         self.read_next_event()
         return True
+    
+    def skip_events(self, n):
+        """ Skips over n events
+        """
+        for i in range(n):
+            if not self.get_event():
+                break
 
     def read_next_event(self):
         # Reset event

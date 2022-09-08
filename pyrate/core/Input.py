@@ -8,10 +8,6 @@ from pyrate.core.Algorithm import Algorithm
 class Input(Algorithm):
     __slots__ = ["_idx", "_eventTime", "is_loaded", "_progress"]
 
-    @property
-    def idx(self):
-        return self._idx
-
     def skip_events(self, n):
         """ Skips an event - implemented however the author wants
         """
