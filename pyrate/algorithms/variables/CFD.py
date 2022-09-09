@@ -68,7 +68,7 @@ class CFD(Algorithm):
 
         self.CFDTimes, self.cfd = self.CFDCalc(waveform=waveform, cfd = self.cfd, delay = self.delay, scale = self.scale, cfd_threshold = self.cfd_threshold)
 
-        if self.CFDTimes[0] == -99999.0:
+        if self.CFDTimes.size == 0:
             return
 
         self.store.put(self.name, self.CFDTimes[0])
@@ -114,7 +114,7 @@ class CFD(Algorithm):
                     num_zero_crossing += 1
 
         if num_zero_crossing==0 or num_thresh_crossing==0:
-            CFDTimes[0] = -99999.0
+            CFDTimes = np.array([np.float64(x) for x in range(0)])
             return CFDTimes, cfd
         
         CFDTimes = CFDTimes[:num_zero_crossing]
