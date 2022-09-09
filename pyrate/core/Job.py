@@ -2,6 +2,7 @@
 instances of a Run homogeneous in purpose and structure.
 """
 
+import os
 import yaml
 import glob
 
@@ -30,9 +31,9 @@ class Job:
         configs = []
         # Find all the config files
         for config in ST.read_list(self.config["configs"]):
-            config = FN.find_env(config, env="PYRATE")
+            config = os.path.expandvars(config)
             configs += sorted(glob.glob(config))
-        
+
         # Load all the config objects
         objects = {}
         for config in configs:
@@ -43,7 +44,7 @@ class Job:
         # Outputs
         outputs = self.config["outputs"]
         for output_name in outputs:
-            path = FN.find_env(outputs[output_name]["path"])
+            path = os.path.expandvars(outputs[output_name]["path"])
             outputs[output_name]["path"] = path
     
         run_config = {"input": input, "outputs": outputs, "objects": objects}

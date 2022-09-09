@@ -34,6 +34,9 @@ def is_float(v):
     except ValueError:
         return False
 
+def add_pyrate_to_env():
+    os.environ["PYRATE"] = os.path.abspath(os.path.join(pyrate.__file__ ,"../.."))
+
 def find_env(path, env="PYRATE"):
     """Checks existence of environment variable in path and eventually replaces it."""
     if env and env in path:

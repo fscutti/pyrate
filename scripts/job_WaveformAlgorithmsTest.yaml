@@ -8,22 +8,22 @@ input:
         B0:
             reader: ReaderCAEN1730_PSD
             files:
-                - PYRATE/test/data/22-03-28_13-38-36_MUON_1730Test/1730Test-Board_0-001.dat
+                - $PYRATE/test/data/22-03-28_13-38-36_MUON_1730Test/1730Test-Board_0-001.dat
         B1:
             reader: ReaderCAEN1730_PSD
             files:
-                - PYRATE/test/data/22-03-28_13-38-36_MUON_1730Test/1730Test-Board_1-001.dat
+                - $PYRATE/test/data/22-03-28_13-38-36_MUON_1730Test/1730Test-Board_1-001.dat
         B2:
             reader: ReaderCAEN1730_ZLE
             files:
-                - PYRATE/test/data/22-03-28_13-38-36_MUON_1730Test/1730Test-Board_2-001.dat
+                - $PYRATE/test/data/22-03-28_13-38-36_MUON_1730Test/1730Test-Board_2-001.dat
 
 configs:
-    - PYRATE/config/MultiCHExample.yaml
+    - $PYRATE/config/MultiCHExample.yaml
 
 outputs:
     AlgorithmTest:
-        path: PYRATE/test
+        path: $PYRATE/test
         format: root
         targets:
             - Tree_B0

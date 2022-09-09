@@ -36,7 +36,6 @@ class EventBuilder(Input):
         """
         if self.is_loaded == False:
             self.is_loaded = True
-            self._idx = 0
             for reader in self.readers.values():
                 reader.initialise()
                         
@@ -68,7 +67,6 @@ class EventBuilder(Input):
         # Parallel event building (just read everything as it comes)
         if "parallel" in self.config and self.config["parallel"] == True:
             success = False
-            self._idx += 1
             for reader in self.readers.values():
                 success |= reader.get_event()
 
@@ -88,14 +86,13 @@ class EventBuilder(Input):
         success = False
         for reader in self.readers.values():
             # Get the latest reader time stamp!
-            if (readerTime := reader.timestamp) < self._eventTime:
+            if reader.hasEvent and (readerTime := reader.timestamp) < self._eventTime:
                 self._eventTime = readerTime
                 success = True                
 
         if success == False:
             return False
 
-        self._idx += 1
         maxTime = self._eventTime + deltaT
         
         # Search for more event data in the valid block
@@ -103,7 +100,7 @@ class EventBuilder(Input):
         while success:
             success = False
             for reader in self.readers.values():
-                if reader.timestamp <= maxTime:
+                if reader.hasEvent and reader.timestamp <= maxTime:
                     # Ok, we found a reader with data within the maxTime
                     
                     # Check if we need to expand the maxTime based on this

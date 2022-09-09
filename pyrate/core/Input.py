@@ -1,12 +1,15 @@
 """ Input template class. The general structure needed for an Input type object
     e.g. a Reader. Inherits from Algrithm, and adds an index _idx, an event time
     _eventTime and if the input is loaded is_loaded.
+
+    This should be treated as an abstract class, and should be used as a
+    template for the real inputs/readers
 """
 
 from pyrate.core.Algorithm import Algorithm
 
 class Input(Algorithm):
-    __slots__ = ["_idx", "_eventTime", "is_loaded", "_progress"]
+    __slots__ = ["_idx", "_eventTime", "is_loaded", "_progress", "_hasEvent"]
 
     def skip_events(self, n):
         """ Skips an event - implemented however the author wants
@@ -23,6 +26,12 @@ class Input(Algorithm):
         """ Returns the current event time
         """
         return self._eventTime
+    
+    @property
+    def hasEvent(self):
+        """ Returns 
+        """
+        return self._hasEvent
     
     @Algorithm.output.setter
     def output(self, outputs):

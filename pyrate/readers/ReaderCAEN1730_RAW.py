@@ -4,7 +4,7 @@ Binary data is written according to the scheme given in the RAW manual
 """
 
 import os
-import mmap
+import glob
 import numpy as np
 
 from pyrate.core.Input import Input
@@ -12,8 +12,8 @@ import pyrate.utils.functions as FN
 
 
 class ReaderCAEN1730_RAW(Input):
-    __slots__ = ["_files", "_f", "_sizes", "size", "_bytes_read", "_mmf", "_inEvent",
-                 "_eventChTimes", "_eventWaveforms", "channels"]
+    __slots__ = ["_files", "_f", "_files_index", "_sizes", "size", "_bytes_read", 
+                 "_inEvent", "_eventChTimes", "_eventWaveforms", "channels"]
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
@@ -27,24 +27,38 @@ class ReaderCAEN1730_RAW(Input):
 
         self.output = outputs
 
-        # Load the first file
-        self.load()
+        # Prepare all the files
+        self.is_loaded = False
+        self._files = []
+        for f in self.config["files"]:
+            f = os.path.expandvars(f)
+            self._files += sorted(glob.glob(f))
 
-    def load(self):
-        self.is_loaded = True
-        self._files = [FN.find_env(f) for f in self.config["files"]]
-        self._f = open(self._files[0], "rb")
+        self._files_index = 0
         self._sizes = [os.path.getsize(f) for f in self._files]
-        self.size = sum(self._sizes)
         self._bytes_read = 0
+        self.size = sum(self._sizes)
+
+        # Load the first file
+        self._load_next_file()
+
+    def _load_next_file(self):
+        if self.is_loaded:
+            self.offload()
+
+        # Check if there are more files
+        if self._files_index >= len(self._files):
+            return
+        
+        # Load the next file
+        self._f = open(self._files[self._files_index], "rb")
+
+        if not self._f: return
+        self.is_loaded = True
+        self._files_index += 1
 
         # Pull in the first event information, ready to go
         self.read_next_event()
-        # self._mmf = mmap.mmap(self._f.fileno(), length=0, access=mmap.ACCESS_READ)
-        # self._f.close()
-
-        # self._eventPos = []
-        # self._mmfSize = self._mmf.size()
 
     def offload(self):
         self.is_loaded = False
@@ -54,7 +68,7 @@ class ReaderCAEN1730_RAW(Input):
         self.offload()
 
     def get_event(self, skip=False):
-        if self._eventTime == 2**64:
+        if not self._hasEvent:
             return False
         
         #Put the event on the store
@@ -65,7 +79,9 @@ class ReaderCAEN1730_RAW(Input):
                     self.store.put(f"{self.output[f'ch_{ch}_waveform']}", np.array(self._eventWaveforms[ch], dtype="int32"))
 
         # Get the next event
-        self.read_next_event()
+        if not self.read_next_event():
+            self._load_next_file()
+
         return True
     
     def skip_events(self, n):
@@ -78,6 +94,7 @@ class ReaderCAEN1730_RAW(Input):
     def read_next_event(self):
         # Reset event
         self._eventTime = 2**64
+        self._hasEvent = False
         self._inEvent = {}
         self._eventChTimes = {}
         self._eventWaveforms = {}
@@ -144,6 +161,7 @@ class ReaderCAEN1730_RAW(Input):
         self._bytes_read += 4*eventSize
         # Update the progress
         self._progress = self._bytes_read / self.size
+        self._hasEvent = False
 
         return True
 
