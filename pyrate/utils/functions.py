@@ -281,7 +281,7 @@ def iterable(obj):
     else:
         return True
 
-def get_class(class_name):
+def class_factory(class_name):
     """ Gets a pyrate class, assumes that the class has the same name as
         the module
     """
@@ -295,8 +295,8 @@ def get_class(class_name):
                     f"ERROR: {err}\n Unable to import input '{class_name}' from module '{module}'\n"
                     "Check that the class and module have the same name, and is added the nearest __init__.py"
                 )
-    print(f"ERROR: {err}\n Unable to import input '{class_name}' from pyrate'\n"
-                    "Check that the class and module have the same name, and is in sys.modules")
+    sys.exit(f"ERROR: Unable to import input '{class_name}' from pyrate\n"
+              "Check that the class and module have the same name, and is added the nearest __init__.py")
 
 def expand_tags(configs):
     """Searches all configs, finds all valid <tags> and replaces and expands

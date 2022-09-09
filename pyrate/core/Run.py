@@ -3,7 +3,6 @@
 """
 
 import sys
-import timeit
 import time
 import logging
 import anytree.node.exceptions as anytreeExceptions
@@ -40,17 +39,6 @@ class Run:
 
         # Will need to change handling of log files.
 
-        """
-        while os.path.exists(log_file_name):
-            base_name = log_file_name.split(".log")[0]
-
-            if base_name[-2] == "_":
-                log_file_name = base_name[:-1] + str(int(base_name[-1]) + 1) + ".log"
-
-            else:
-                log_file_name = base_name + "_1.log"
-        """
-
         fileHandler = logging.FileHandler(log_file_name, delay=True)
 
         fileHandler.setFormatter(
@@ -79,6 +67,7 @@ class Run:
         # -------------------
         # Load the input name
         # -------------------
+        # Only allow for one input - take the first input if given two
         self.input = [s for s in self.config["input"] if s != "event_start" and s != "event_num"][0]
         
         # -------------------------------------
@@ -87,25 +76,41 @@ class Run:
         self.objects = self.config["objects"]
         # Add the input to the objects list
         self.objects.update({self.input: self.config["input"][self.input]})
-        self.targets, self.nodes, self.algorithms, self.readers = {}, {}, {}, {}
+        self.targets = set()
+        self.nodes = {}
+        self.variables = {}
         
         # instantiate all algorithms - even those not needed
         for obj_name in self.objects:
-            self.alg(obj_name)
+            self.create_node(obj_name)
 
         # -----------------------------------------
         # Load the outputs and sort out dependecies
         # -----------------------------------------
+        # Explicitly declare what variables the run will put on the store
+        self.variables["EventNumber"] = self.name
+        self.variables["EventTimestamp"] = self.name
+
         for output_name, output_config in self.config["outputs"].items():
+            # Resolve all the dependecies
+            for target in output_config["targets"]:
+                # Search all the objects
+                success = False
+                for object_name, object_config in self.objects.items():
+                    # Add all targets that match this algorithm name
+                    if target == object_name or target == object_config["algorithm"]:
+                        self.targets.add(object_name)
+                        self.connect_node(obj_name)
+                        success = True
+                if not success:
+                    # This target couldn't be added
+                    sys.exit(f"ERROR: in run {self.name}, target '{target}' doesn't match any of the objects in the loaded configs.")
+
+            output_config["targets"] = list(self.targets)
             output = Output(output_name, output_config, self.store, self.logger)
             output.load()
 
-            # Resolve all the dependecies
-            for target in output.targets:
-                if target not in self.targets:
-                    self.targets[target] = self.node(target)
-
-    def node(self, obj_name):
+    def connect_node(self, obj_name):
         """Instantiates a node for an object, including the corresponding algorithm instance
         and the list of relevant samples. This function checks for circular dependencies.
         The node instance is returned. This is a recursive function."""
@@ -113,44 +118,27 @@ class Run:
         # this call is necessary to find the correct algorithm for secondary outputs.
         # N.B.: all object calls first pass through the node function.
 
-        # Node already exists, just return it
-        if obj_name in self.nodes:
-            return self.nodes[obj_name]
-
-        # Create a new node
-        new_node = Node(obj_name, algorithm=None, was_called=False)
-
-        # Get the algorithm
-        new_node.algorithm = self.alg(obj_name)
-
         # Check if it's an input type or alg type
-        if new_node.algorithm is not None:
+        if self.nodes[obj_name].algorithm is not None:
 
             for _, node in self.nodes.items():
 
-                if new_node.algorithm == node.algorithm:
+                if self.nodes[obj_name].algorithm == node.algorithm:
 
                     self.nodes[obj_name] = node
                     return self.nodes[obj_name]
 
             # Check for children
-            if not new_node.children:
-
-                for _, dependencies in new_node.algorithm.input.items():
-
+            if not self.node[obj_name].children:
+                for _, dependencies in self.node[obj_name].algorithm.input.items():
                     for d in dependencies:
-
                         try:
                             # Set this current node as the parent to the dependency
-                            # being created in self.node(d)
-                            self.node(d).parent = new_node
-
+                            self.connect_node(self.variables[d]).parent = self.node[obj_name]
                         except anytreeExceptions.LoopError:
                             sys.exit(
                                 f"ERROR: circular node detected between {d} and {obj_name}"
                             )
-
-        self.nodes[obj_name] = new_node
 
         # Return our finished node
         return self.nodes[obj_name]
@@ -158,46 +146,53 @@ class Run:
     def _reset_node_called_status(self):
         """Resets all node's was_called flag"""
         for obj_name in self.nodes:
-
             self.nodes[obj_name].was_called = False
 
-    def alg(self, obj_name):
+    def create_node(self, obj_name):
         """Instantiates an algorithm/object according to the
         global configuration and returns its instance."""
-        if obj_name in self.algorithms:
-            # Found it already, just return it
-            return self.algorithms[obj_name]
+        # Node already exists, just return it
+        if obj_name in self.nodes:
+            return self.nodes[obj_name]
+
+        # Create a new node
+        new_node = Node(obj_name, algorithm=None, was_called=False)
+        
+        # Ignore things that get variables from the run itself
+        if obj_name == self.name:
+            self.nodes[obj_name] = new_node
+            return
 
         if obj_name in self.objects:
             # Have to make the algorithm instance
             obj_config = self.objects[obj_name]
             algorithm_name = obj_config["algorithm"]
-            AlgorithmClass = FN.get_class(algorithm_name)
-            self.algorithms[obj_name] = AlgorithmClass(obj_name, obj_config, self.store, self.logger)
+            AlgorithmClass = FN.class_factory(algorithm_name)
+            new_node.algorithm = AlgorithmClass(obj_name, obj_config, self.store, self.logger)
             
             # Point all the alg outputs to the parent
-            for _, output in self.algorithms[obj_name].output.items():
-                self.algorithms[output] = self.algorithms[obj_name]
+            self.variables[obj_name] = obj_name
+            for _, output in new_node.algorithm.output.items():
+                self.variables[output] = obj_name
             
-            return self.algorithms[obj_name]
+            self.nodes[obj_name] = new_node
+            return
 
-        # sys.exit(f"ERROR: object '{obj_name}' not found in the configurations.")
+        sys.exit(f"ERROR: object '{obj_name}' not found in the configurations.")
 
     def run(self):
         """Launches loops over inputs and outputs."""
-        start = timeit.default_timer()
-        # msg = f"Launching pyrate run {self.name}"
-        # print("\n", "*" * len(msg), msg, "*" * len(msg))
+        msg = f"Launching pyrate run {self.name}"
+        print("*" * len(msg), msg, "*" * len(msg))
 
         # ----------------------------------------------------------------------
         # Input loop.
         # ----------------------------------------------------------------------
         self.state = "initialise"
-        self.store.put("INPUT:name", self.algorithms[self.input].name)
-        self.store.put("INPUT:config", self.algorithms[self.input].config)
+        self.store.put("INPUT:name", self.nodes[self.input].algorithm.name)
+        self.store.put("INPUT:config", self.nodes[self.input].algorithm.config)
         self.loop()
 
-        # est_nevents = self._current_input.get_n_events()
         emin = self.config["input"]["event_start"]
         enum = self.config["input"]["event_num"]
         if emin > 0:
@@ -207,56 +202,61 @@ class Run:
         # ---------------------------------------------------------------
         # Event loop.
         # ---------------------------------------------------------------
-        def generator():
+        def gen_execute():
             """ Custom dummy generator function for the execute loop to allow
                 progress bar functionality
             """
             event_count = 0
-            while self.algorithms[self.input].get_event():
-                # print(f"{self.algorithms[self.input].progress=}")
+            while self.nodes[self.input].algorithm.get_event():
                 if enum > 0 and event_count > enum:
                     break
 
                 # Put the input info on the store
-                self.store.put("INPUT:name", self.algorithms[self.input].name)
-                self.store.put("INPUT:config", self.algorithms[self.input].config)
-                self.store.put("EVENT:idx", event_count + emin)
+                self.store.put("INPUT:name", self.nodes[self.input].algorithm.name)
+                self.store.put("INPUT:config", self.nodes[self.input].algorithm.config)
+                self.store.put("EventNumber", event_count + emin)
+                self.store.put("EventTimestamp", self.nodes[self.input].algorithm.timestamp)
 
                 # Run all the algorithms
                 self.loop()
 
                 event_count += 1
-                yield
+                yield 1
 
         self.state = "execute"
-        # with tqdm(total=100) as pbar:
-        #     count = 0
-        #     for _ in generator():
-        #         if (count % 1000) == 0:
-        #             progress = self.algorithms[self.input].progress
-        #             pbar.n = round(progress * 100)
-        #             pbar.refresh()
-        #         count += 1
-        #     pbar.n = 100
-        #     pbar.refresh()
-
-        for _ in tqdm(generator()): pass
+        
+        # tqdm iterator for the rate and timing
+        sbar = tqdm(gen_execute(), position=0, leave=True)
+        # tqdm progress bar
+        pbar = tqdm(total=100, position=1, leave=True, bar_format=self.colors["white"])
+        count = 0
+        prev_time = 0 # allows us to update with time
+        for _ in sbar:
+            # Update the bar every second
+            if ((now:=time.time()) - prev_time) > 1:
+                if enum < 0:
+                    progress = self.nodes[self.input].algorithm.progress
+                else:
+                    progress = count / enum 
+                pbar.n = round(progress * 100)
+                pbar.refresh()
+                prev_time = now
+            count += 1
+        pbar.n = 100    # set the bar to 100% complete
+        pbar.refresh()
 
         # ----------------------------------------------------------------------
         # Output loop.
         # ----------------------------------------------------------------------
         self.state = "finalise"
-        self.store.put("INPUT:name", self.algorithms[self.input].name)
-        self.store.put("INPUT:config", self.algorithms[self.input].config)
+        self.store.put("INPUT:name", self.nodes[self.input].algorithm.name)
+        self.store.put("INPUT:config", self.nodes[self.input].algorithm.config)
         self.loop()
 
         for output in self.outputs:
             for target in output.targets:
                 if not self.store.get(target) is EN.Pyrate.WRITTEN:
                     output.write(target)
-
-        stop = timeit.default_timer()
-        print(f"Execution time: {stop - start:.2f}s")
 
         return
 
@@ -269,14 +269,16 @@ class Run:
 
     def call(self, obj_name, state):
         """Calls an algorithm for the current state."""
-        node = self.node(obj_name)
+        if obj_name == self.name:
+            return
+        node = self.nodes[obj_name]
         if not node.was_called:
             alg = node.algorithm
 
             if alg is not None:
                 for condition, dependencies in alg.input.items():
                     for d in dependencies:
-                        self.call(d, state)
+                        self.call(self.variables[d], state)
                     passed = getattr(alg, self.state)(condition)
 
                     if not passed:

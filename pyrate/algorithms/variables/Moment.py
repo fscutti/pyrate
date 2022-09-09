@@ -57,7 +57,7 @@ class Moment(Algorithm):
 
         waveform_len = waveform.size
         # Check if the times array matches the data
-        if self.times.size < waveform_len:
+        if self.times.size != waveform_len:
             # Times array not big enough, growing to the size of the waveform
             self.times = (np.arange(waveform_len) * self.time_period + self.time_period / 2) * 1e9 # in ns
 

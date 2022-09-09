@@ -19,7 +19,7 @@ class Job:
         self.name = name
         self.config = config
         self.log_level = log_level
-        self.runs = []
+        self.run = None
 
     def setup(self):
         """Instantiate Run objects."""
@@ -46,15 +46,14 @@ class Job:
         for output_name in outputs:
             path = os.path.expandvars(outputs[output_name]["path"])
             outputs[output_name]["path"] = path
-    
+
         run_config = {"input": input, "outputs": outputs, "objects": objects}
-        self.runs.append(Run(self.name, run_config))
+        self.run = Run(self.name, run_config)
 
     def launch(self):
         """Launch Run objects. """
-        for run in self.runs:
-            run.setup()
-            run.run()
+        self.run.setup()
+        self.run.run()
 
     def print_objects(self):
         """Prints out all objects"""

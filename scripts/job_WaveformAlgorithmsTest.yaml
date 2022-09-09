@@ -26,11 +26,7 @@ outputs:
         path: $PYRATE/test
         format: root
         targets:
-            - Tree_B0
-            - Tree_B1
-            - Tree_B2
-            - MultiBoard
-            # - AverageWaveforms
-            # - Constants
+            - TreeMaker
+            - TGraphMaker
 
 # EOF

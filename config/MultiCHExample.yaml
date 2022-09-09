@@ -1,14 +1,11 @@
 # <channels>: [0, 1]
 <boards>: [B0, B1, B2]
-<AverageWaveforms>: [AverageWaveform_CH0, AverageWaveform_CH1]
+<AverageWaveforms>: [AverageWaveform_B0_0, AverageWaveform_B1_0, AverageWaveform_B2_0]
 # -----------------------------------------------------------
 # Objects computed by algorithms
 # -----------------------------------------------------------
 
 objects:
-        # -----------------------------------------------------------
-        # Waveform and Baseline algorithms
-        # -----------------------------------------------------------
 
     BaselineDynamic_<boards>_0:
         algorithm: BaselineDynamic
@@ -27,7 +24,7 @@ objects:
         algorithm: CorrectedWaveform
         vpp: 2.5
         adcrange: 16384
-        polarity: neg
+        polarity: pos
         units: mV
         input:
             waveform: <boards>_ch_0_waveform
@@ -196,7 +193,7 @@ objects:
                 # D: 3e-1
                 - "A = 1; B = 11.5; C = PromptCharge_<boards>_0; D = 3e-1"
 
-    PulseTime_<boards>_0:
+    PulseTime_ns_<boards>_0:
         algorithm: TimeConverter
         rate: 500e6
         unit: ns
@@ -206,20 +203,20 @@ objects:
     TimeDifference_B01:
         algorithm: Difference
         input:
-            x1: LeadingEdge_PSDReader_B0_0
-            x2: LeadingEdge_PSDReader_B1_0
+            x1: LeadingEdge_B0_0
+            x2: LeadingEdge_B1_0
+    
+    TimeDifference_B02:
+        algorithm: Difference
+        input:
+            x1: LeadingEdge_B0_0
+            x2: LeadingEdge_B2_0
     
     TimeDifference_B12:
         algorithm: Difference
         input:
-            x1: LeadingEdge_PSDReader_B1_0
-            x2: LeadingEdge_ZLEReader_B2_0
-
-    TimeDifference_B02:
-        algorithm: Difference
-        input:
-            x1: LeadingEdge_PSDReader_B0_0
-            x2: LeadingEdge_ZLEReader_B2_0
+            x1: LeadingEdge_B1_0
+            x2: LeadingEdge_B2_0
 
     Moments_<boards>_0:
         algorithm: Moment
@@ -271,13 +268,14 @@ objects:
         # Trees
         # -----------------------------------------------------------
         #
-    Tree_<boards>:
+    Tree_<boards>_0:
         algorithm: TreeMaker
         filltype: event
         input:
             vector<int>: {RawWaveform: <boards>_ch_0_waveform}
             vector<float>: {CorrectedWaveform: CorrectedWaveform_<boards>_0}
-            long: {Timestamp: <boards>_ch_0_timestamp}
+            long: {Timestamp: <boards>_ch_0_timestamp,
+                   EventTimestamp: EventTimestamp}
             vector<double>:
                         - FFT_<boards>_0, Moments_<boards>_0
                         - {CFDTrace: CFDTrace_<boards>_0,
@@ -295,7 +293,7 @@ objects:
                         Skew: Skew_<boards>_0,
                         Kurtosis: Kurtosis_<boards>_0}
                 -   PeakHeight_<boards>_0, PeakLocation_<boards>_0, PulseStart_<boards>_0,
-                    PulseTime_<boards>_0, PromptDelayChargeRatio_<boards>_0,
+                    PulseTime_ns_<boards>_0, PromptDelayChargeRatio_<boards>_0,
                     PulseSum_<boards>_0
 
     MultiBoard:

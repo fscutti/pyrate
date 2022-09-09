@@ -138,7 +138,7 @@ class TGraphMaker(Algorithm):
                 graph.SetTitle(var_name)
                 graph.SetName(name)
                 graph.SetLineColor(self.colour[i%len(self.colour)])
-            else:
+            elif Y is not enums.Pyrate.NONE and len(Y) > 0:
                 tgraph = R.TGraph(len(Y), X, Y)
                 tgraph.SetTitle(var_name)
                 tgraph.SetLineColor(self.colour[i%len(self.colour)])

@@ -65,7 +65,7 @@ class CFD(Algorithm):
             return
         
         waveform_len = waveform.size
-        if (waveform_len + self.delay) > self.waveform.size:
+        if (waveform_len + self.delay) != self.waveform.size:
             # Our waveform is larger than the storage
             # we need to grow our arrays
             self.waveform = np.resize(self.waveform, waveform_len + self.delay)

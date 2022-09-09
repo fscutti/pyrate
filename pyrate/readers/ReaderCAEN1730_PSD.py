@@ -10,18 +10,21 @@ import glob
 import numpy as np
 
 from pyrate.core.Input import Input
-import pyrate.utils.functions as FN
 
+# Maximum length of the trace without a warning
+MAX_TRACE_LENGTH = 50000
+LONG_MAX = 2**64
 
 class ReaderCAEN1730_PSD(Input):
     __slots__ = ["_files", "_f", "_files_index", "_sizes", "size", "_bytes_read", 
                  "_inEvent", "_eventChTimes", "_eventWaveforms", "_charge",
-                 "channels"]
+                 "channels", "timeshift", "_large_waveform_warning"]
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
         self.channels = 8
+        self.timeshift = 0 if "timeshift" not in config else config["timeshift"]
         # Set the outputs manually
         outputs = {}
         for i in range(self.channels):
@@ -42,6 +45,11 @@ class ReaderCAEN1730_PSD(Input):
         self._sizes = [os.path.getsize(f) for f in self._files]
         self._bytes_read = 0
         self.size = sum(self._sizes)
+        # Set the progress to 0, unless the files are empty
+        self._progress = 0 if self.size !=0 else 1
+
+        # Set the large waveform warning flag to false
+        self._large_waveform_warning = False
 
         # Load the first file
         self._load_next_file()
@@ -53,7 +61,7 @@ class ReaderCAEN1730_PSD(Input):
         # Check if there are more files
         if self._files_index >= len(self._files):
             return
-        
+
         # Load the next file
         self._f = open(self._files[self._files_index], "rb")
 
@@ -92,12 +100,12 @@ class ReaderCAEN1730_PSD(Input):
         """ Skips over n events
         """
         for i in range(n):
-            if not self.get_event():
+            if not self.get_event(skip=True):
                 break
 
     def read_next_event(self):
         # Reset event
-        self._eventTime = 2**64 # Largest possible number, invalid value
+        self._eventTime = LONG_MAX # Largest possible number, invalid value
         self._hasEvent = False
         self._inEvent = {}
         self._eventChTimes = {}
@@ -110,7 +118,6 @@ class ReaderCAEN1730_PSD(Input):
             if (head1 & 0xFFFF0000) == 0xa0000000:
                 break
         else:
-            self._f.seek(0)
             return False
 
         head2 = self._f.read(4)
@@ -127,6 +134,8 @@ class ReaderCAEN1730_PSD(Input):
         if(head4 == bytes()):
             return False
         head4 = int.from_bytes(head4,"little")
+
+        # print(head1, head2, head3, head4)
 
         # The event size as a longword, x4 for in bytes
         eventSize = head1 & 0b00001111111111111111111111111111
@@ -146,6 +155,7 @@ class ReaderCAEN1730_PSD(Input):
                     return False              
                 chHead2 = int.from_bytes(chHead2, "little")
 
+                # print(chHead1, chHead2)
                 aggregateSize = chHead1 & 0b00000000001111111111111111111111
                 recordSize = chHead2 & 0b00000000000000001111111111111111
 
@@ -180,10 +190,19 @@ class ReaderCAEN1730_PSD(Input):
                 timeLo = chTime & 0b01111111111111111111111111111111
                 self._eventChTimes[ch] = timeHi + timeLo
 
+                # Convert to ns
+                self._eventChTimes[ch] = 2*self._eventChTimes[ch]
+                
+                # Find the smallest event channel time, and set it to the 
+                # reader's event time
                 if self._eventChTimes[ch] < self._eventTime:
-                    # Is this necessary???
-                    self._eventChTimes[ch] = 2*self._eventChTimes[ch]
-                    self._eventTime = self._eventChTimes[ch]
+                    self._eventTime = self._eventChTimes[ch] + self.timeshift
+            
+                # Check for extra large waveforms
+                if not self._large_waveform_warning and len(self._eventWaveforms[ch]) > MAX_TRACE_LENGTH:
+                    print(f"WARNING: Extra large waveform detected in {self.name}, channel {i} has length {len(self._eventWaveforms[ch])}."
+                        "Double check the reader matches the firmware")
+                    self._large_waveform_warning = True
 
         # Update the number of bytes read by the eventSize
         self._bytes_read += 4*eventSize
