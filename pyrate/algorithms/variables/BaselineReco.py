@@ -60,8 +60,8 @@ class BaselineReco(Algorithm):
     def BaselineCalc(waveform, nsamples):
         Baseline = Pyrate.NONE
         StdDev = 0.0
-        Min = 999999.0
-        Max = -999999.0
+        Min = waveform[0]
+        Max = waveform[0]
         Delta = Pyrate.NONE
         Sum = 0.0
 
