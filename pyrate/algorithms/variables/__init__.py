@@ -23,3 +23,4 @@ from pyrate.algorithms.variables.DAMAX1 import DAMAX1
 from pyrate.algorithms.variables.DAMAX2 import DAMAX2
 from pyrate.algorithms.variables.FFT import FFT
 from pyrate.algorithms.variables.LeadingEdgeThreshold import LeadingEdgeThreshold
+from pyrate.algorithms.variables.PulseChargeAsymmetry import PulseChargeAsymmetry
