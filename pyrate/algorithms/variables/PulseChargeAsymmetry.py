@@ -34,10 +34,13 @@ class PulseChargeAsymmetry(Algorithm):
         charge2 = self.store.get(self.config["input"]["charge2"])
         if charge1 is Pyrate.NONE or charge2 is Pyrate.NONE:
             return
-        
-        asymmetry = (charge1 - charge2)/(charge1 + charge2)
 
-        self.store.put(self.name, asymettry)
+        if charge1+charge2==0:
+            asymmetry = np.nan
+        else:
+            asymmetry = (charge1 - charge2)/(charge1 + charge2)
+
+        self.store.put(self.name, asymmetry)
 
 
 # EOF
