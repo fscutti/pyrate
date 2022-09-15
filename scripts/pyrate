@@ -53,6 +53,24 @@ parser.add_argument(
     const=True      # if -t there but no string pass in True
 )
 
+parser.add_argument(
+    "--event_num",
+    "-n",
+    help="Specify how many events to process (optional).",
+    required=False,
+    default=None,   # If not passed in
+    action="store", # store internally
+)
+
+parser.add_argument(
+    "--event_start",
+    "-s",
+    help="Specify the first event number (optional).",
+    required=False,
+    default=None,   # If not passed in
+    action="store", # store internally
+)
+
 args = parser.parse_args()
 
 if __name__ == "__main__":
@@ -70,7 +88,7 @@ if __name__ == "__main__":
 
         j_log = args.logging_level
 
-        job = Job(j_name, j_config, j_log)
+        job = Job(j_name, j_config, j_log, args)
 
         if args.timing:
             with cProfile.Profile() as pr:

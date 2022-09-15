@@ -12,13 +12,13 @@ objects:
         samples: 40
         threshold: 20
         input:
-            waveform: <boards>_ch_0_waveform
+            waveform: <boards>_ch0_waveform
 
     BaselineNaive_<boards>_0:
         algorithm: BaselineNaive
         samples: 40
         input:
-            waveform: <boards>_ch_0_waveform
+            waveform: <boards>_ch0_waveform
 
     CorrectedWaveform_<boards>_0:
         algorithm: CorrectedWaveform
@@ -27,7 +27,7 @@ objects:
         polarity: pos
         units: mV
         input:
-            waveform: <boards>_ch_0_waveform
+            waveform: <boards>_ch0_waveform
             baseline: BaselineNaive_<boards>_0
 
     AverageWaveform_<boards>_0:
@@ -272,9 +272,9 @@ objects:
         algorithm: TreeMaker
         filltype: event
         input:
-            vector<int>: {RawWaveform: <boards>_ch_0_waveform}
+            vector<int>: {RawWaveform: <boards>_ch0_waveform}
             vector<float>: {CorrectedWaveform: CorrectedWaveform_<boards>_0}
-            long: {Timestamp: <boards>_ch_0_timestamp,
+            long: {Timestamp: <boards>_ch0_timestamp,
                    EventTimestamp: EventTimestamp}
             vector<double>:
                         - FFT_<boards>_0, Moments_<boards>_0

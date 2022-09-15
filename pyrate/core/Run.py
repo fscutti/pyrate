@@ -197,7 +197,7 @@ class Run:
         enum = self.config["input"]["event_num"]
         if emin > 0:
             # Skip the first emin events
-            self.input.skip_events(emin)
+            self.nodes[self.input].algorithm.skip_events(emin)
 
         # ---------------------------------------------------------------
         # Event loop.

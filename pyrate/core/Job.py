@@ -15,17 +15,33 @@ from pyrate.core.Run import Run
 
 
 class Job:
-    def __init__(self, name, config, log_level):
+    def __init__(self, name, config, log_level, args):
         self.name = name
         self.config = config
         self.log_level = log_level
+        self.args = args
         self.run = None
 
     def setup(self):
         """Instantiate Run objects."""
+
         # Input stuff
-        # Pull out the event range
         input = self.config["input"]
+        # Check if we have an event number in the CL args
+        if self.args.event_num:
+            # A CL event number has been passed in, let's override the input one
+            input["event_num"] = int(self.args.event_num)
+        if self.args.event_start:
+            # A CL event start has been passed in, let's override the input one
+            input["event_start"] = int(self.args.event_start)
+        
+        # Finally check the input has an event number and event start. 
+        # If it's missing, add the defaults
+        if "event_start" not in input:
+            input["event_start"] = 0
+        if "event_num" not in input:
+            input["event_num"] = -1
+
 
         # Sort out the configs
         configs = []

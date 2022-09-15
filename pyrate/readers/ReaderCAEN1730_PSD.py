@@ -10,6 +10,7 @@ import glob
 import numpy as np
 
 from pyrate.core.Input import Input
+from pyrate.utils.enums import Pyrate
 
 # Maximum length of the trace without a warning
 MAX_TRACE_LENGTH = 50000
@@ -17,8 +18,9 @@ LONG_MAX = 2**64
 
 class ReaderCAEN1730_PSD(Input):
     __slots__ = ["_files", "_f", "_files_index", "_sizes", "size", "_bytes_read", 
-                 "_inEvent", "_eventChTimes", "_eventWaveforms", "_charge",
-                 "channels", "timeshift", "_large_waveform_warning"]
+                 "_inEvent", "_eventChTimes", "_eventWaveforms", "_baseline",
+                 "_qLong", "_qShort", "channels", "timeshift", 
+                 "_large_waveform_warning"]
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
@@ -27,10 +29,16 @@ class ReaderCAEN1730_PSD(Input):
         self.timeshift = 0 if "timeshift" not in config else config["timeshift"]
         # Set the outputs manually
         outputs = {}
-        for i in range(self.channels):
-            outputs.update({f"ch_{i}_timestamp": f"{self.name}_ch_{i}_timestamp", 
-                            f"ch_{i}_waveform": f"{self.name}_ch_{i}_waveform",
-                            f"ch_{i}_charge": f"{self.name}_ch_{i}_charge"})
+        for ch in range(self.channels):
+            output_format = "{name}_ch{ch}_{variable}" # Default formatting
+            if "output" in config:
+                # The user has provided a custom output formatting
+                output_format = config["output"]
+            outputs.update({f"{ch}_timestamp": output_format.format(name=self.name, ch=ch, variable="timestamp"), 
+                            f"{ch}_waveform": output_format.format(name=self.name, ch=ch, variable="waveform"),
+                            f"{ch}_baseline": output_format.format(name=self.name, ch=ch, variable="baseline"),
+                            f"{ch}_qLong": output_format.format(name=self.name, ch=ch, variable="qLong"),
+                            f"{ch}_qShort": output_format.format(name=self.name, ch=ch, variable="qShort")})
 
         self.output = outputs
         
@@ -87,8 +95,11 @@ class ReaderCAEN1730_PSD(Input):
         if not skip:
             for ch in range(self.channels):
                 if ch in self._inEvent:
-                    self.store.put(f"{self.output[f'ch_{ch}_timestamp']}", self._eventChTimes[ch])
-                    self.store.put(f"{self.output[f'ch_{ch}_waveform']}", np.array(self._eventWaveforms[ch], dtype="int32"))
+                    self.store.put(f"{self.output[f'{ch}_timestamp']}", self._eventChTimes[ch])
+                    self.store.put(f"{self.output[f'{ch}_waveform']}", np.array(self._eventWaveforms[ch], dtype="int32"))
+                    self.store.put(f"{self.output[f'{ch}_baseline']}", self._baseline[ch])
+                    self.store.put(f"{self.output[f'{ch}_qLong']}", self._qLong[ch])
+                    self.store.put(f"{self.output[f'{ch}_qShort']}", self._qShort[ch])
 
         # Get the next event
         if not self.read_next_event():
@@ -105,11 +116,15 @@ class ReaderCAEN1730_PSD(Input):
 
     def read_next_event(self):
         # Reset event
+        # Declare all the variables
         self._eventTime = LONG_MAX # Largest possible number, invalid value
         self._hasEvent = False
         self._inEvent = {}
         self._eventChTimes = {}
         self._eventWaveforms = {}
+        self._baseline = {}
+        self._qShort = {}
+        self._qLong = {}
 
         # Read in the event information
         # Need to keep reading till we get head1
@@ -155,7 +170,14 @@ class ReaderCAEN1730_PSD(Input):
                     return False              
                 chHead2 = int.from_bytes(chHead2, "little")
 
-                # print(chHead1, chHead2)
+                dualTrace =       (chHead2 & 0b10000000000000000000000000000000) >> 31
+                chargeEnabled =   (chHead2 & 0b01000000000000000000000000000000) >> 30
+                timeEnabled =     (chHead2 & 0b00100000000000000000000000000000) >> 29
+                extrasEnabled =   (chHead2 & 0b00010000000000000000000000000000) >> 28
+                samplesEnabled =  (chHead2 & 0b00001000000000000000000000000000) >> 27
+                extrasOpEnabled = (chHead2 & 0b00000100000000000000000000000000) >> 26
+                extrasWord =      (chHead2 & 0b00000011100000000000000000000000) >> 23
+
                 aggregateSize = chHead1 & 0b00000000001111111111111111111111
                 recordSize = chHead2 & 0b00000000000000001111111111111111
 
@@ -185,7 +207,15 @@ class ReaderCAEN1730_PSD(Input):
                 charge = int.from_bytes(charge, "little")
 
                 qLong = (charge & 0b11111111111111110000000000000000) >> 16
-                qShrt = charge & 0b00000000000000000111111111111111
+                qShort = charge & 0b00000000000000000111111111111111
+                self._qLong[ch] = qLong
+                self._qShort[ch] = qShort
+
+                if extrasWord == 0b000:
+                    self._baseline[ch] = (extras & 0b00000000000000001111111111111111) / 4 # divide by 4 as per manual
+                else:
+                    self._baseline[ch] = Pyrate.NONE
+
                 timeHi = (extras & 0b11111111111111110000000000000000) << 15
                 timeLo = chTime & 0b01111111111111111111111111111111
                 self._eventChTimes[ch] = timeHi + timeLo
@@ -197,7 +227,7 @@ class ReaderCAEN1730_PSD(Input):
                 # reader's event time
                 if self._eventChTimes[ch] < self._eventTime:
                     self._eventTime = self._eventChTimes[ch] + self.timeshift
-            
+
                 # Check for extra large waveforms
                 if not self._large_waveform_warning and len(self._eventWaveforms[ch]) > MAX_TRACE_LENGTH:
                     print(f"WARNING: Extra large waveform detected in {self.name}, channel {i} has length {len(self._eventWaveforms[ch])}."
