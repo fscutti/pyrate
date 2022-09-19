@@ -46,19 +46,8 @@ class BaselineReco(Algorithm):
             sys.exit("ERROR in Baseline, 'samples' not found in the config")
 
         nsamples = self.config["samples"]
-        method = self.config["method"]
-
-        if method == "NP":
-            # Get the baseline.
-            Baseline, StdDev, Delta = self.BaselineNP(waveform, nsamples)
-
-        elif method == "JITNP":
-            # Get the baseline.
-            Baseline, StdDev, Delta = self.BaselineJITNP(waveform, nsamples)
-
-        elif method == "PyJIT":
-            # Get the baseline.
-            Baseline, StdDev, Delta = self.BaselinePyJIT(waveform, nsamples)
+        
+        Baseline, StdDev, Delta = self.BaselineCalc(waveform, nsamples)
 
         #BaselineReco = [Baseline, StdDev, Delta]
 
@@ -67,39 +56,13 @@ class BaselineReco(Algorithm):
         self.store.put(f"{self.config['Delta']}", Delta)
 
     @staticmethod
-    def BaselineNP(waveform, nsamples):
-        
-        Baseline = np.sum(waveform[:nsamples]) / nsamples
-
-        StdDev = np.std(waveform[:nsamples])
-
-        Delta = np.max(waveform[:nsamples]) - np.min(waveform[:nsamples])
-
-        return Baseline, StdDev, Delta
-
-    @staticmethod
-    @numba.jit(nopython=True, cache=True)
-    def BaselineJITNP(waveform, nsamples):
-        Baseline = -999.0
-        StdDev = -999.0
-        Delta = -999.0
-
-        Baseline = np.sum(waveform[:nsamples]) / nsamples
-
-        StdDev = np.std(waveform[:nsamples])
-
-        Delta = np.max(waveform[:nsamples]) - np.min(waveform[:nsamples])
-
-        return Baseline, StdDev, Delta
-
-    @staticmethod
-    @numba.jit(nopython=True, cache=True)
-    def BaselinePyJIT(waveform, nsamples):
-        Baseline = -999.0
+    @numba.njit(cache=True)
+    def BaselineCalc(waveform, nsamples):
+        Baseline = Pyrate.NONE
         StdDev = 0.0
-        Min = 999999.0
-        Max = -999999.0
-        Delta = -999.0
+        Min = waveform[0]
+        Max = waveform[0]
+        Delta = Pyrate.NONE
         Sum = 0.0
 
         for i in range(nsamples):
