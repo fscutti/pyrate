@@ -113,7 +113,7 @@ class Moment(Algorithm):
 
         # Convert to central moments
         M2 = m2 - mean**2
-        if M2<0:
+        if M2<=0:
             # Negative SD means skew and kurt aren't real
             stddev = np.nan
             skew = np.nan
