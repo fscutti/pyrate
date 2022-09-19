@@ -18,7 +18,6 @@ class ReaderCAEN1730_RAW(Reader):
         "f",
         "_mmf",
         "_mmfSize",
-        "_eventPos",
         "_readIdx",
         "_inEvt",
         "_evtTime",
@@ -36,7 +35,6 @@ class ReaderCAEN1730_RAW(Reader):
         self._mmf = mmap.mmap(self.f.fileno(), length=0, access=mmap.ACCESS_READ)
         self.f.close()
 
-        self._eventPos = []
         self._mmfSize = self._mmf.size()
         self._readIdx = -1
 
@@ -75,7 +73,6 @@ class ReaderCAEN1730_RAW(Reader):
         # Scan through the entire file
         while True:
             # Read in the event info from the header
-            self._eventPos.append(self._mmf.tell())
             while head1 := self._mmf.read(4):
                 head1 = int.from_bytes(head1, "little")
                 if (head1 & 0xFFFF0000) == 0xa0000000:
@@ -132,9 +129,6 @@ class ReaderCAEN1730_RAW(Reader):
         self._evtTime = 2 ** 64
         self._inEvt = {}
         self._evtWaveforms = {}
-
-        # self._mmf.seek(self._eventPos[self._idx], 0)
-        # Read in the event info from the header
 
         while head1 := self._mmf.read(4):
             head1 = int.from_bytes(head1, "little")

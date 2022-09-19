@@ -8,6 +8,30 @@ objects:
         # -----------------------------------------------------------
         # Waveform and Baseline algorithms
         # -----------------------------------------------------------
+#    SwinburneSC:
+#        algorithm: SwinburneSC
+#        dir: /home/msmg/data/spartan/ostanley/slow_control/
+#        epochtime: 1644991273
+#        input:
+#          timestamp: EVENT:board_0:ch_0:ch_timestamp
+
+
+#    HILDAQTimeIP:
+#        algorithm: EPICSArchiveIP
+#        ip: sabre-stor:17668
+#        epochtime: 1644991273
+#        epochtime: 1661176800
+#        pv: TEMP1:INPUT1:VALUE
+#        input:
+#          timestamp: EVENT:board_0:ch_0:ch_timestamp
+
+#    HILDAQTimePB:
+#        algorithm: EPICSArchivePB
+#        dir: /home/msmg/data/arch
+#        epochtime: 1644991273        
+#        pv: HILDAQ:elapsedTime
+#        input:
+#          timestamp: EVENT:board_0:ch_0:ch_timestamp
 
     BaselineDynamic_CH<channels>:
         algorithm: BaselineDynamic
@@ -272,12 +296,13 @@ objects:
             vector<float>: {CorrectedWaveform: CorrectedWaveform_CH<channels>}
             long: {Timestamp: EVENT:board_0:ch_<channels>:ch_timestamp}
             vector<double>:
-                        - FFT_CH<channels>, Moments_CH<channels>
+                        - FFT_CH<channels>, Moments_CH<channels>, TrapezoidWaveform_CH<channels>
                         - {CFDTrace: CFDTrace_CH<channels>,
                             CFDTimes: CFDTimes_CH<channels>}
                         - {FFT_Amplitudes: FFT_CH<channels>_Amplitudes,
                             FFT_Frequencies: FFT_CH<channels>_Frequencies}
             float:
+               #-   HILDAQTimeIP, HILDAQTimePB, cRIO_RTD_1, cRIO_RTD_2
                 -   BaselineDynamic_CH<channels>, BaselineNaive_CH<channels>,
                     PromptDelayChargeRatioCalculator_CH<channels>, CFD_CH<channels>,
                     PulseCharge_CH<channels>, TotalCharge_CH<channels>

@@ -10,13 +10,7 @@
     
     Required inputs:
         waveform: (array-like) A waveform-like object
-        window: (tuple-like) A window object
-
-    Optional parameters:
-        mode: (str) Let's the user change to algebraic moments instead of
-                    central, normalised moments. To get the algebraic moments
-                    pass in the flag "algebraic"
-    
+        window: (tuple-like) A window object    
 
     Example config:
     
@@ -31,6 +25,8 @@
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
 from pyrate.utils.enums import Pyrate
+import numba
+import math
 
 class Moment(Algorithm):
     __slots__ = ("mode", "time_period", "times")
@@ -40,11 +36,6 @@ class Moment(Algorithm):
 
     def initialise(self, condition=None):
         """Prepares the config order of the moment"""
-        self.mode = 0
-        if "mode" in self.config:
-            if self.mode.lower() == "algebraic":
-                self.mode = 1
-
         self.time_period = 1 / float(self.config["rate"])
         self.times = np.arange(0)
 
@@ -54,75 +45,90 @@ class Moment(Algorithm):
         window = self.store.get(self.config["input"]["window"])
         if waveform is Pyrate.NONE or window is Pyrate.NONE:
             return
+        
+        if window[0]==None and window[1]==None:
+            window_size = len(waveform)
+            window_start = 0
+            window_end = len(waveform)
+        else:
+            window_size = window[1]-window[0]
+            window_start = window[0]
+            window_end = window[1]
 
-        waveform_len = waveform.size
-        # Check if the times array matches the data
-        if self.times.size < waveform_len:
-            # Times array not big enough, growing to the size of the waveform
-            self.times = (np.arange(waveform_len) * self.time_period + self.time_period / 2) * 1e9 # in ns
+        mean, stddev, skew, kurtosis = self.MomentsCalc(waveform = waveform, window_start = window_start, window_end = window_end, window_size=window_size, time_period=self.time_period)
 
-        # The waveform over the region of interest
-        x = self.times[window[0]:window[1]]
-        fx = waveform[window[0]:window[1]]
-        fsum = np.sum(fx)
-        if fsum == 0:
-            return
+        # self.store.put(self.name, moments)
+        self.store.put(f"{self.output['mean']}", mean)
+        self.store.put(f"{self.output['stddev']}", stddev)
+        self.store.put(f"{self.output['skew']}", skew)
+        self.store.put(f"{self.output['kurtosis']}", kurtosis)
 
-        inner = fx * x
-        mean = np.sum(inner) / fsum
-        inner *= x
-        m2 = np.sum(inner) / fsum
-        inner *= x
-        m3 = np.sum(inner) / fsum #/ np.power(variance, 1.5)
-        inner *= x
-        m4 = np.sum(inner) / fsum #/ np.power(variance, 2) - 3
+    @staticmethod
+    @numba.njit(cache=True)
+    def MomentsCalc(waveform, window_start, window_end, window_size, time_period):
+
+        mean = Pyrate.NONE
+        stddev = Pyrate.NONE
+        skew = Pyrate.NONE
+        kurtosis = Pyrate.NONE
+        fsum = 0.0
+        m2 = Pyrate.NONE
+        m3 = Pyrate.NONE
+        m4 = Pyrate.NONE
+        M2 = Pyrate.NONE
+        M3 = Pyrate.NONE
+        M4 = Pyrate.NONE
+        excess_kurtosis = Pyrate.NONE
+        inner_sum = 0.0
+        inner_square_sum = 0.0
+        inner_cube_sum = 0.0
+        inner_quart_sum = 0.0
+        inner = 0.0
+        time = 0.0
+
+        # Waveform over region of interest
+        for i in range(window_start, window_end):
+            time = (i*time_period + time_period/2)*1e9
+            fsum += waveform[i]
+            inner = waveform[i]*time
+            inner_sum += inner
+            inner *= time
+            inner_square_sum += inner
+            inner *= time
+            inner_cube_sum += inner
+            inner *= time
+            inner_quart_sum += inner
+
+        if fsum==0:
+            mean = np.nan
+            stddev = np.nan
+            skew = np.nan
+            kurtosis = np.nan
+            return mean, stddev, skew, kurtosis
+
+        mean = inner_sum/fsum
+        m2 = inner_square_sum/fsum
+        m3 = inner_cube_sum/fsum
+        m4 = inner_quart_sum/fsum
 
         # Convert to central moments
-        M2 = m2 - np.power(mean,2) # AKA Variance
-        if M2 < 0:
-            # Can't really go any further, skew and kurtosis aren't real
-            moments = [mean, np.nan, np.nan, np.nan]
+        M2 = m2 - mean**2
+        if M2<0:
+            # Negative SD means skew and kurt aren't real
+            stddev = np.nan
+            skew = np.nan
+            kurtosis = np.nan
         else:
-            # Get the rest of the central moments
-            M4 = m4 - 3*np.power(mean,4) + 6*np.power(mean,2)*m2 - 4*mean*m3
-            M3 = m3 + 2*np.power(mean,3) - 3*mean*m2
+            M4 = m4 - 3*(mean**4) + 6*(mean**2)*m2 - 4*mean*m3
+            M3 = m3 + 2*(mean**3) - 3*mean*m2
 
-            # Convert the central moments to useful variables
-            stddev = np.sqrt(M2)
-            skew = M3 / np.power(stddev, 3)
-            excess_kurtosis = M4 / np.power(stddev, 4) - 3
+            # Conversion to useful variables
+            stddev = math.sqrt(M2) # Numba maps math.sqrt to sqrtf in libc, not sure about numpy
+            skew = M3 / (stddev**3)
+            excess_kurtosis = M4 / (stddev**4) - 3
+            kurtosis = excess_kurtosis
 
-            moments = [mean, stddev, skew, excess_kurtosis]
-
-        self.store.put(self.name, moments)
-        self.store.put(f"{self.output['mean']}", moments[0])
-        self.store.put(f"{self.output['stddev']}", moments[1])
-        self.store.put(f"{self.output['skew']}", moments[2])
-        self.store.put(f"{self.output['kurtosis']}", moments[3])
-
-        # Old version
-        # if self.mode == 0:
-        #     inner = np.power(x - mu, 2) * fx
-        #     variance = np.sum(inner) / fsum
-        #     if variance < 0:
-        #         moments = [1, mu, variance, np.nan, np.nan]
-        #     else:
-        #         inner *= x - mu
-        #         skew = (np.sum(inner) / fsum) / np.power(variance, 1.5)
-        #         # skew = (np.sum(np.power(x - mu, 3) * fx) / fsum) / np.power(variance, 1.5)
-        #         inner *= x - mu
-        #         excess_kurtosis = (np.sum(inner) / fsum) / np.power(variance, 2) - 3
-        #         # excess_kurtosis = (np.sum(np.power(x - mu, 4) * fx) / fsum) / np.power(variance, 1.5) - 3
-        #         moments = [1, mu, variance, skew, excess_kurtosis]
-
-        # else:
-        #     # Algebraic moments
-        #     moments = []
-        #     for i in range(self.order + 1):
-        #         if i == 0:
-        #             moments[i] = 1 # definitionally
-        #         else:
-        #             moments[i] = np.sum(np.power(x, i) * fx) / fsum
+        return mean, stddev, skew, kurtosis
 
 
 # EOF
