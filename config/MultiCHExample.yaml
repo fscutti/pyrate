@@ -278,6 +278,12 @@ objects:
         input:
             waveform: CorrectedWaveform_CH<channels>
 
+    PulseChargeAsymmetry_CH01:
+        algorithm: PulseChargeAsymmetry
+        input:
+            charge1: PulseCharge_CH0
+            charge2: PulseCharge_CH1
+
         # -----------------------------------------------------------
         # Trees
         # -----------------------------------------------------------
@@ -314,7 +320,7 @@ objects:
         algorithm: TreeMaker
         filltype: event
         input:
-            float: TimeDifference_CH01
+            float: TimeDifference_CH01, PulseChargeAsymmetry_CH01
 
     Constants:
         algorithm: TreeMaker
