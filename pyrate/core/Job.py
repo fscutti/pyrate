@@ -54,8 +54,7 @@ class Job:
         objects = {}
         for config in configs:
             config = yaml.full_load(open(config, "r"))
-            objects.update(FN.expand_tags(config))
-        objects = objects["objects"]
+            objects.update(FN.expand_tags(config)["objects"])
 
         # Outputs
         outputs = self.config["outputs"]

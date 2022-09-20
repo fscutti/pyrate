@@ -1,65 +1,28 @@
-inputs:
+input:
+    event_start: 0
+    event_num: -1
 
-  Neutron:
-    samples:
-      tags:
-        any: neutron
-        all: pos5
-    eslices:
-      emin: 0
-      emax: -1
-    path:
-    - PYRATE/test/data
-    structure:
-      tree: nT
-    color: R:1.| G:0.| B:1.
-  Gamma:
-    samples:
-      tags:
-        any: gamma
-    eslices:
-      emin: 0
-      emax: -1
-    path:
-    - PYRATE/test/data
-    structure:
-      tree: nT
-    color: R:1.| G:0.| B:0.
-
-  Photons:
-    samples:
-      tags:
-        any: gamma
-    eslices:
-      emin: 0
-      emax: -1
-    path:
-    - PYRATE/test/data
-    structure:
-      tree: nT
-    color: R:0.| G:0.| B:1.
+    # EventBuiltROOTData:
+    #     algorithm: EventBuilder
+    #     parallel: True
+    Neutron:
+        algorithm: ReaderROOT
+        files:
+            - $PYRATE/test/data/gamma_pos5_test.root
+        trees:
+            - nT
+            - TotT
+            # - eventnumber: nT/eventnumber
 
 configs:
-  muondetobjs:
-    path: PYRATE/config/muondet
-    tags:
-      any: objects
-  muondetregions:
-    path: PYRATE/config/muondet
-    tags:
-      any: analysis
-
+    - $PYRATE/config/muondet/objects.yaml
+    - $PYRATE/config/muondet/analysis.yaml
 
 outputs:
-  TestFile:
-    file:
-      path: PYRATE/test
-      format: .root
-    targets:
-      - muonDetPlot1D: Photons, Gamma, Neutron
-      #- muonDetPlot2D: all
-      #- muonDetPlot2D: Neutron
-
-
+    TestROOTFile:
+        path: $PYRATE/test
+        format: root
+        targets:
+            - muonDetPlot1D
 
 # EOF

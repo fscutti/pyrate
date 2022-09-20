@@ -81,8 +81,10 @@ class Run:
         self.variables = {}
         
         # instantiate all algorithms - even those not needed
-        for obj_name in self.objects:
-            self.create_node(obj_name)
+        # Create a run node
+        self.create_node(self.name)
+        for object_name in self.objects:
+            self.create_node(object_name)
 
         # -----------------------------------------
         # Load the outputs and sort out dependecies
@@ -100,7 +102,7 @@ class Run:
                     # Add all targets that match this algorithm name
                     if target == object_name or target == object_config["algorithm"]:
                         self.targets.add(object_name)
-                        self.connect_node(obj_name)
+                        self.connect_node(object_name)
                         success = True
                 if not success:
                     # This target couldn't be added
@@ -111,30 +113,20 @@ class Run:
             output.load()
 
     def connect_node(self, obj_name):
-        """Instantiates a node for an object, including the corresponding algorithm instance
-        and the list of relevant samples. This function checks for circular dependencies.
-        The node instance is returned. This is a recursive function."""
-
-        # this call is necessary to find the correct algorithm for secondary outputs.
-        # N.B.: all object calls first pass through the node function.
-
+        """Connects the already created nodes in the dependency chain
+            Runs recursively
+        """
         # Check if it's an input type or alg type
         if self.nodes[obj_name].algorithm is not None:
-
-            for _, node in self.nodes.items():
-
-                if self.nodes[obj_name].algorithm == node.algorithm:
-
-                    self.nodes[obj_name] = node
-                    return self.nodes[obj_name]
-
             # Check for children
-            if not self.node[obj_name].children:
-                for _, dependencies in self.node[obj_name].algorithm.input.items():
+            if not self.nodes[obj_name].children:
+                for _, dependencies in self.nodes[obj_name].algorithm.input.items():
                     for d in dependencies:
                         try:
                             # Set this current node as the parent to the dependency
-                            self.connect_node(self.variables[d]).parent = self.node[obj_name]
+                            if d not in self.variables:
+                                sys.exit(f"ERROR: object '{d}' not found in the configurations or input variables.")
+                            self.connect_node(self.variables[d]).parent = self.nodes[obj_name]
                         except anytreeExceptions.LoopError:
                             sys.exit(
                                 f"ERROR: circular node detected between {d} and {obj_name}"

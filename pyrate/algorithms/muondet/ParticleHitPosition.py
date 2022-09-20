@@ -19,13 +19,13 @@ class ParticleHitPosition(Algorithm):
         pos = None
 
         if coor == "x":
-            pos = self.store.get("EVENT:TotT:XPosTot")[0]
+            pos = self.store.get(self.config["input"]["xpos"])[0]
 
         if coor == "y":
-            pos = self.store.get("EVENT:TotT:YPosTot")[0]
+            pos = self.store.get(self.config["input"]["ypos"])[0]
 
         if coor == "z":
-            pos = self.store.get("EVENT:TotT:ZPosTot")[0]
+            pos = self.store.get(self.config["input"]["zpos"])[0]
 
         self.store.put(self.name, pos)
 
