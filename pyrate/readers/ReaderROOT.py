@@ -154,7 +154,6 @@ class ReaderROOT(Input):
                 else:
                     for b in self._trees[deeper_path].branches:
                         store_name = self._output_format.format(name=self.name, variable=f"{variable_name}_{b}")
-                        print(store_name)
                         self._tree_variables[store_name] = {"branch":b, "tree":split_path[-1]}
                 return True
 

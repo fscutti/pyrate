@@ -230,8 +230,8 @@ class ReaderCAEN1730_PSD(Input):
 
                 # Check for extra large waveforms
                 if not self._large_waveform_warning and len(self._eventWaveforms[ch]) > MAX_TRACE_LENGTH:
-                    print(f"WARNING: Extra large waveform detected in {self.name}, channel {i} has length {len(self._eventWaveforms[ch])}."
-                        "Double check the reader matches the firmware")
+                    print(f"WARNING: Extra large waveform detected in {self.name}, channel {i} has length {len(self._eventWaveforms[ch])}.\n"
+                           "Double check the reader matches the firmware")
                     self._large_waveform_warning = True
 
         # Update the number of bytes read by the eventSize

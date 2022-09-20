@@ -81,8 +81,7 @@ class Run:
         self.variables = {}
         
         # instantiate all algorithms - even those not needed
-        # Create a run node
-        self.create_node(self.name)
+        self.create_node(self.name)     # Create a run node
         for object_name in self.objects:
             self.create_node(object_name)
 
@@ -125,7 +124,7 @@ class Run:
                         try:
                             # Set this current node as the parent to the dependency
                             if d not in self.variables:
-                                sys.exit(f"ERROR: object '{d}' not found in the configurations or input variables.")
+                                sys.exit(f"ERROR: variable '{d}' not found in the configurations or input variables.")
                             self.connect_node(self.variables[d]).parent = self.nodes[obj_name]
                         except anytreeExceptions.LoopError:
                             sys.exit(
