@@ -51,7 +51,7 @@ from pyrate.utils import ROOT_utils
 from pyrate.utils import enums
 
 class TGraphMaker(Algorithm):
-    __slots__ = ("file", "colour", "canvas")
+    __slots__ = ("file", "colour", "canvas", "graph")
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
@@ -103,6 +103,7 @@ class TGraphMaker(Algorithm):
     def finalise(self, condition=None):
         """ Makes and fills the TGrahp
         """
+        self.file.cd()
         name = self.name.replace(':', '.')
 
         Ys = ST.pyrate_yaml_to_list(self.config["input"]["y"])
@@ -114,7 +115,7 @@ class TGraphMaker(Algorithm):
             self.canvas.cd()
 
         if len(Ys) > 1:
-            graph = R.TMultiGraph()
+            self.graph = R.TMultiGraph()
 
         for i, var_name in enumerate(Ys):
             Y = self.store.get(var_name)
@@ -134,29 +135,29 @@ class TGraphMaker(Algorithm):
             X = X.astype(Y.dtype) # Crucial to convert X to the same type as Y
 
             if len(Ys) == 1:
-                graph = R.TGraph(len(Y), X, Y)
-                graph.SetTitle(var_name)
-                graph.SetName(name)
-                graph.SetLineColor(self.colour[i%len(self.colour)])
+                self.graph = R.TGraph(len(Y), X, Y)
+                self.graph.SetTitle(var_name)
+                self.graph.SetName(name)
+                self.graph.SetLineColor(self.colour[i%len(self.colour)])
             elif Y is not enums.Pyrate.NONE and len(Y) > 0:
                 tgraph = R.TGraph(len(Y), X, Y)
                 tgraph.SetTitle(var_name)
                 tgraph.SetLineColor(self.colour[i%len(self.colour)])
-                graph.Add(tgraph)
-                graph.SetName(name)
+                self.graph.Add(tgraph)
+                self.graph.SetName(name)
 
         path = ""
         if "path" in self.config:
             path = self.config["path"]
 
         if self.canvas:
-            graph.Draw("AL")
+            self.graph.Draw("AL")
             self.canvas.Modified()
             self.canvas.Update()
             self.canvas.BuildLegend(0.7,0.7,0.9,0.9)
             ROOT_utils.write(self.file, path, self.canvas)
 
-        ROOT_utils.write(self.file, path, graph)
+        ROOT_utils.write(self.file, path, self.graph)
         self.store.save(self.name, enums.Pyrate.WRITTEN)
 
 # EOF

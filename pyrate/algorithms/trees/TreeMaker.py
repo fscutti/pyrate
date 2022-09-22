@@ -387,12 +387,8 @@ class TreeMaker(Algorithm):
             # Save all the values into the Tree
             self.tree.fill()
 
-        # Write the objects to the file - this is the most important step
-        self.file.Write("", R.TObject.kOverwrite)
-
-        # Store itself on the store with SKIP_WRITE code to show we have nothing
-        # to return.
-        self.store.save(self.name, enums.Pyrate.WRITTEN)
+        # Write the objects to the file
+        self.tree.TTree.Write("", R.TObject.kOverwrite)
 
     def _parse_tree_vars(self, variables):
         """Dedicated function to just parse the tree lists/dicts/strings"""

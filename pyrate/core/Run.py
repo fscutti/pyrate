@@ -13,7 +13,6 @@ from colorama import Fore
 from tqdm import tqdm
 
 from pyrate.core.Store import Store
-from pyrate.core.Output import Output
 
 from pyrate.utils import functions as FN
 from pyrate.utils import enums as EN
@@ -24,8 +23,8 @@ class Run:
         self.name = name
         self.config = config
         self.input = None
-        self.outputs = []
         self.objects = None
+        self.outputs = None
 
     def setup(self):
         """First instance of 'private' members."""        
@@ -69,14 +68,13 @@ class Run:
         # -------------------
         # Only allow for one input - take the first input if given two
         self.input = [s for s in self.config["input"] if s != "event_start" and s != "event_num"][0]
-        
-        # -------------------------------------
-        # Load the objects / algorithms / input
-        # -------------------------------------
+
+        # ------------------------------------
+        # Load the objects: algorithms / input
+        # ------------------------------------
         self.objects = self.config["objects"]
         # Add the input to the objects list
         self.objects.update({self.input: self.config["input"][self.input]})
-        self.targets = set()
         self.nodes = {}
         self.variables = {}
         
@@ -92,24 +90,26 @@ class Run:
         self.variables["EventNumber"] = self.name
         self.variables["EventTimestamp"] = self.name
 
+        self.outputs = {}
         for output_name, output_config in self.config["outputs"].items():
             # Resolve all the dependecies
+            targets = []
             for target in output_config["targets"]:
                 # Search all the objects
                 success = False
                 for object_name, object_config in self.objects.items():
                     # Add all targets that match this algorithm name
                     if target == object_name or target == object_config["algorithm"]:
-                        self.targets.add(object_name)
                         self.connect_node(object_name)
                         success = True
+                        targets.append(object_name)
                 if not success:
                     # This target couldn't be added
                     sys.exit(f"ERROR: in run {self.name}, target '{target}' doesn't match any of the objects in the loaded configs.")
 
-            output_config["targets"] = list(self.targets)
-            output = Output(output_name, output_config, self.store, self.logger)
-            output.load()
+            output_config["targets"] = targets
+            OutputClass = FN.class_factory(output_config["algorithm"])
+            self.outputs[output_name] = OutputClass(output_name, output_config, self.store, self.logger)
 
     def connect_node(self, obj_name):
         """Connects the already created nodes in the dependency chain
@@ -219,7 +219,8 @@ class Run:
         # tqdm iterator for the rate and timing
         sbar = tqdm(gen_execute(), position=0, leave=True)
         # tqdm progress bar
-        pbar = tqdm(total=100, position=1, leave=True, bar_format=self.colors["white"])
+        bar_format = bar_format="{l_bar}{bar}|{n}/{total_fmt}% [{elapsed}<{remaining}]"
+        pbar = tqdm(total=100, position=1, leave=True, bar_format=bar_format)
         count = 0
         prev_time = 0 # allows us to update with time
         for _ in sbar:
@@ -244,18 +245,14 @@ class Run:
         self.store.put("INPUT:config", self.nodes[self.input].algorithm.config)
         self.loop()
 
-        for output in self.outputs:
-            for target in output.targets:
-                if not self.store.get(target) is EN.Pyrate.WRITTEN:
-                    output.write(target)
-
         return
 
     def loop(self):
         """Loop over targets and calls them."""
         self._reset_node_called_status()
-        for target in self.targets:
-            self.call(target, state=self.state)
+        for output in self.outputs:
+            for target in self.outputs[output].targets:
+                self.call(target, state=self.state)
         self.store.clear()
 
     def call(self, obj_name, state):

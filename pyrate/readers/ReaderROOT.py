@@ -26,6 +26,7 @@ class Tree:
         """ Sets up the tree for the first time
             Takes in the file the tree lives in
         """
+        f.cd()
         self.TTree = f.Get(self.name)
         self.branches = [i.GetName() for i in self.TTree.GetListOfBranches()]
         self.attached = True
@@ -179,8 +180,7 @@ class ReaderROOT(Input):
             self.store.save(store_name, obj)        
 
     def finalise(self, condition=None):
-        # self.offload()
-        pass
+        self.offload()
 
     def _set_next_event(self):
         """ Loads the trees and gets the timestamp
