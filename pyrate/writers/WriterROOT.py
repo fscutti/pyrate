@@ -22,11 +22,12 @@ class WriterROOT(Writer):
         self.file = self.path + "/" + self.name + ".root"
         self.targets = self.config["targets"]
 
-        self.f = R.TFile(self.file, "RECREATE")
+        self.f = R.TFile(self.file, "RECREATE", self.file)
 
         # Set the file compression
-        compression = 1 if "compression" not in self.config else int(self.config["compression"])
-        self.f.SetCompressionSettings(compression)
+        # compression = 1 if "compression" not in self.config else int(self.config["compression"])
+        # self.f.SetCompressionAlgorithm(R.kLZ4)
+        # self.f.SetCompressionLevel(3)
 
         # WARNING: if the file pointer needs to be retrieved from the store
         # by accessing the OUTPUT keys like follows, then is better for the

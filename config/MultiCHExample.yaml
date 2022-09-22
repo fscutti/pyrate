@@ -273,7 +273,7 @@ objects:
         filltype: event
         input:
             vector<int>: {RawWaveform: <boards>_ch0_waveform}
-            vector<float>: {CorrectedWaveform: CorrectedWaveform_<boards>_0}
+            vector<double>: {CorrectedWaveform: CorrectedWaveform_<boards>_0}
             long: {Timestamp: <boards>_ch0_timestamp,
                    EventTimestamp: EventTimestamp}
             vector<double>:
@@ -282,7 +282,7 @@ objects:
                             CFDTimes: CFDTimes_<boards>_0}
                         - {FFT_Amplitudes: FFT_<boards>_0_Amplitudes,
                             FFT_Frequencies: FFT_<boards>_0_Frequencies}
-            float:
+            double:
                 -   BaselineDynamic_<boards>_0, BaselineNaive_<boards>_0,
                     PromptDelayChargeRatioCalculator_<boards>_0, CFD_<boards>_0,
                     PulseCharge_<boards>_0, TotalCharge_<boards>_0

@@ -71,6 +71,7 @@ class EventBuilder(Input):
         # Parallel event building (just read everything as it comes)
         if "parallel" in self.config and self.config["parallel"] == True:
             success = False
+            self._eventTime = 0
             for reader in self.readers.values():
                 success |= reader.get_event()
 
