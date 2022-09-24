@@ -28,7 +28,6 @@ ToDo: better adjust the style of the plots. Introduce ratio plots.
 
 """
 import os
-import sys
 from copy import copy
 
 from pyrate.core.Algorithm import Algorithm
@@ -124,14 +123,8 @@ class Make1DHistPlot(Algorithm):
 
                             variable = self.store.get(v_name)
 
-                            self.store.get(obj_name).Fill(
-                                variable, region["r_weight"]
-                            )
-
-                            # Save the counter on the transient store with some value.
-                            # Which value is arbitrary as the "check" method only checks for
-                            # the presence of an object, not its value.
-                            self.store.put(obj_counter, "done")
+                            if variable is not EN.Pyrate.NONE:
+                                self.store.get(obj_name).Fill(variable, region["r_weight"])
 
     def finalise(self, condition=None):
         """Makes the plot."""

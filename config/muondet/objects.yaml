@@ -10,11 +10,11 @@ objects:
     simWaveforms:
         algorithm: SimulatedWaveformsBuilder
         input:
-            time: Neutron_nT_timePMT_hits
-            energy: Neutron_nT_photonEnPMT_hits
-            hits_x_positions: Neutron_nT_xPMT_hits
-            hits_y_positions: Neutron_nT_yPMT_hits
-            hits_z_positions: Neutron_nT_zPMT_hits
+            time: nT_timePMT_hits
+            energy: nT_photonEnPMT_hits
+            hits_x_positions: nT_xPMT_hits
+            hits_y_positions: nT_yPMT_hits
+            hits_z_positions: nT_zPMT_hits
 
 
     # Waveforms
@@ -94,29 +94,29 @@ objects:
         algorithm: MuonDetCharge
         format: ROOT
         input:
-            edep: Neutron_edepScint
+            edep: nT_edepScint
 
 
     trueParticleEnergy:
         algorithm: TrueEnergy
         input:
-            etrue: Neutron_ekin_particle
+            etrue: nTekin_particle
         
     xParticleHitPos:
         algorithm: ParticleHitPosition
         coordinate: x
         input:
-            xpos: Neutron_TotT_XPosTot
-            ypos: Neutron_TotT_YPosTot
-            zpos: Neutron_TotT_ZPosTot
+            xpos: TotT_XPosTot
+            ypos: TotT_YPosTot
+            zpos: TotT_ZPosTot
 
     yParticleHitPos:
         algorithm: ParticleHitPosition
         coordinate: y
         input:
-            xpos: Neutron_TotT_XPosTot
-            ypos: Neutron_TotT_YPosTot
-            zpos: Neutron_TotT_ZPosTot
+            xpos: TotT_XPosTot
+            ypos: TotT_YPosTot
+            zpos: TotT_ZPosTot
 
     # -----------------------------------------------------------
     # Histograms

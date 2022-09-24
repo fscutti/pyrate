@@ -169,10 +169,11 @@ class ReaderROOT(Input):
             self._nevents.append(n)
 
     def offload(self):
-        self.is_loaded = False
-        del self._tree
-        self._f.Close()
-        del self._f
+        if self.is_loaded:
+            self.is_loaded = False
+            del self._tree
+            self._f.Close()
+            del self._f
     
     def initialise(self, condition=None):
         """ Pull out the objects if needed

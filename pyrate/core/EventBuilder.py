@@ -15,7 +15,10 @@ class EventBuilder(Input):
         super().__init__(name, config, store, logger)
         self.is_loaded = False
         self.readers = {}
-        self.window = self.config["window"]
+        if "parallel" not in config or ("parallel" in config and config["parallel"] != True):
+            self.window = self.config["window"]
+        else:
+            self.window = None
 
         # Clean out the un-used parameters
         reader_configs = {k:v for k, v in self.config.items() 

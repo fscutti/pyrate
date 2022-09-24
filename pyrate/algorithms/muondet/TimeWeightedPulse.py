@@ -1,14 +1,11 @@
 """ Compute average energy in input bins.
 """
-import sys
 from copy import copy
 
 import ROOT as R
 
-# import numpy as np
-
 from pyrate.core.Algorithm import Algorithm
-
+from pyrate.utils.enums import Pyrate
 
 class TimeWeightedPulse(Algorithm):
     # __slots__ = ("quantum_efficiency")
@@ -30,6 +27,9 @@ class TimeWeightedPulse(Algorithm):
     def execute(self, condition=None):
 
         wf = self.store.get(self.config["input"]["waveform"])
+
+        if wf is Pyrate.NONE:
+            return
 
         measured_energy = 0.0
         e_num, e_den = 0.0, 0.0

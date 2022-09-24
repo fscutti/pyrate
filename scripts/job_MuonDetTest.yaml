@@ -2,17 +2,20 @@ input:
     event_start: 0
     event_num: -1
 
-    # EventBuiltROOTData:
-    #     algorithm: EventBuilder
-    #     parallel: True
     Neutron:
-        algorithm: ReaderROOT
-        files:
-            - $PYRATE/test/data/gamma_pos5_test.root
-        trees:
-            - nT
-            - TotT
-            # - eventnumber: nT/eventnumber
+        algorithm: EventBuilder
+        parallel: True
+        window: 0
+        nT:
+            reader: ReaderROOT
+            files:
+                - $PYRATE/test/data/gamma_pos5_test.root
+            tree: nT
+        TotT:
+            reader: ReaderROOT
+            files:
+                - $PYRATE/test/data/gamma_pos5_test.root
+            tree: TotT
 
 configs:
     - $PYRATE/config/muondet/objects.yaml
@@ -20,6 +23,7 @@ configs:
 
 outputs:
     TestROOTFile:
+        algorithm: OutputROOT
         path: $PYRATE/test
         format: root
         targets:
