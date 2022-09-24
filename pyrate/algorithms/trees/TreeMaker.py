@@ -60,7 +60,7 @@ https://root.cern/manual/trees/
 """
 
 import sys
-import ROOT as R
+import ROOT
 from array import array
 
 from pyrate.core.Algorithm import Algorithm
@@ -114,7 +114,7 @@ class Branch:
         # else:
         #     self.datatype, self.nptype = python_to_root_type(data)
         if self.vector:
-            self.data = R.vector(_Type[self.datatype]["vector"])()
+            self.data = ROOT.vector(_Type[self.datatype]["vector"])()
             self.invalid_value = array(_Type[self.datatype]["python"])
         else:
             self.data = array(_Type[self.datatype]["python"], [0])
@@ -223,7 +223,7 @@ class Tree:
         """
         # Make sure we're linked to the correct file
         self.outfile.cd()
-        self.TTree = R.TTree(self.name, self.name)
+        self.TTree = ROOT.TTree(self.name, self.name)
         # self.TTree.SetMaxTreeSize((int(1 * MB)))
         self.created = True
 
@@ -323,16 +323,14 @@ class TreeMaker(Algorithm):
 
     def initialise(self, condition=None):
         """Defines a tree dictionary."""
-        out_file = self.store.get(f"OUTPUT:{self.name}")
-        self.file = out_file
+        self.file = self.store.get(f"OUTPUT:{self.name}")
 
         name = self.name.split(":")[0]
         t_path = self.config["path"] if "path" in self.config else ""
         event_based = False if self.config["filltype"] == "single" else True
 
-        self.tree = Tree(
-            name, out_file, path=t_path, event=event_based, create_now=True
-        )
+        self.tree = Tree(name, self.file, path=t_path, event=event_based, 
+                         create_now=True)
 
         for datatype, variables in self.config["input"].items():
             # New check to handle lists of vars
@@ -365,10 +363,6 @@ class TreeMaker(Algorithm):
             # Save all the values into the Tree
             self.tree.fill()
 
-            # some line like that to indicate that the writer has to
-            # call write on the object.
-            self.store.save(self.name, enums.Pyrate.WRITTEN)
-
     def finalise(self, condition=None):
         """Fill in the single/run-based variables"""
         # Fill all the branches in the trees if they're run-based
@@ -388,7 +382,10 @@ class TreeMaker(Algorithm):
             self.tree.fill()
 
         # Write the objects to the file
-        self.tree.TTree.Write("", R.TObject.kOverwrite)
+        self.tree.TTree.Write("", ROOT.TObject.kOverwrite)
+        # self.tree.TTree.Write()
+
+        del self.tree.TTree
 
     def _parse_tree_vars(self, variables):
         """Dedicated function to just parse the tree lists/dicts/strings"""

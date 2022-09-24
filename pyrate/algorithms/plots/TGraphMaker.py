@@ -42,7 +42,7 @@
 import sys
 import numpy as np
 
-import ROOT as R
+import ROOT
 
 from pyrate.core.Algorithm import Algorithm
 
@@ -103,19 +103,18 @@ class TGraphMaker(Algorithm):
     def finalise(self, condition=None):
         """ Makes and fills the TGrahp
         """
-        self.file.cd()
         name = self.name.replace(':', '.')
 
         Ys = ST.pyrate_yaml_to_list(self.config["input"]["y"])
 
         if self.canvas:
-            self.canvas = R.TCanvas(f"{name}.canvas", name, 600, 400)
+            self.canvas = ROOT.TCanvas(f"{name}.canvas", name, 600, 400)
             self.canvas.SetTickx()
             self.canvas.SetTicky()
             self.canvas.cd()
 
         if len(Ys) > 1:
-            self.graph = R.TMultiGraph()
+            self.graph = ROOT.TMultiGraph()
 
         for i, var_name in enumerate(Ys):
             Y = self.store.get(var_name)
@@ -135,12 +134,12 @@ class TGraphMaker(Algorithm):
             X = X.astype(Y.dtype) # Crucial to convert X to the same type as Y
 
             if len(Ys) == 1:
-                self.graph = R.TGraph(len(Y), X, Y)
+                self.graph = ROOT.TGraph(len(Y), X, Y)
                 self.graph.SetTitle(var_name)
                 self.graph.SetName(name)
                 self.graph.SetLineColor(self.colour[i%len(self.colour)])
             elif Y is not enums.Pyrate.NONE and len(Y) > 0:
-                tgraph = R.TGraph(len(Y), X, Y)
+                tgraph = ROOT.TGraph(len(Y), X, Y)
                 tgraph.SetTitle(var_name)
                 tgraph.SetLineColor(self.colour[i%len(self.colour)])
                 self.graph.Add(tgraph)
@@ -158,6 +157,7 @@ class TGraphMaker(Algorithm):
             ROOT_utils.write(self.file, path, self.canvas)
 
         ROOT_utils.write(self.file, path, self.graph)
-        self.store.save(self.name, enums.Pyrate.WRITTEN)
+        del self.graph
+        del self.canvas
 
 # EOF

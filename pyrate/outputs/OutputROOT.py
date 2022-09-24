@@ -29,5 +29,10 @@ class OutputROOT(Algorithm):
 
         for t in self.targets:
             self.store.put(f"OUTPUT:{t}", self.file)
+    
+    def offload(self):
+        self.is_loaded = False
+        self.file.Close()
+        del self.file
 
 # EOF

@@ -17,6 +17,8 @@ from pyrate.core.Store import Store
 from pyrate.utils import functions as FN
 from pyrate.utils import enums as EN
 
+import ROOT
+
 
 class Run:
     def __init__(self, name, config):
@@ -215,7 +217,6 @@ class Run:
                 yield 1
 
         self.state = "execute"
-        
         # tqdm iterator for the rate and timing
         sbar = tqdm(gen_execute(), position=0, leave=True)
         # tqdm progress bar
@@ -240,12 +241,17 @@ class Run:
         # ----------------------------------------------------------------------
         # Output loop.
         # ----------------------------------------------------------------------
+
+        # REMOVE!
+        self.store.put("RUN", self)
+        
         self.state = "finalise"
         self.store.put("INPUT:name", self.nodes[self.input].algorithm.name)
         self.store.put("INPUT:config", self.nodes[self.input].algorithm.config)
         self.loop()
 
-        return
+        for output in self.outputs:
+            self.outputs[output].offload()
 
     def loop(self):
         """Loop over targets and calls them."""

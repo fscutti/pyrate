@@ -170,7 +170,9 @@ class ReaderROOT(Input):
 
     def offload(self):
         self.is_loaded = False
+        del self._tree
         self._f.Close()
+        del self._f
     
     def initialise(self, condition=None):
         """ Pull out the objects if needed
@@ -207,7 +209,6 @@ class ReaderROOT(Input):
             self._set_next_event()
 
         for store_name, branch_name in self._variables.items():
-            # print(f"Putting {store_name}/{branch_name} on the store")
             # The actual variables the govern the run
             TBranch = self._tree.TTree.GetBranch(branch_name)
             TBranch.GetEntry(self._idx) # Get the right entry
@@ -219,6 +220,9 @@ class ReaderROOT(Input):
                 # I suspect there's an issue with the __array_interface,
                 # particularly the GetSizeOfType() helper method. 
                 value = np.array(list(value), copy=False) # copy=False? might cause seg fault?
+                # Annoying conversion but necessary for now
+                if value.dtype == np.int64:
+                    value = value.astype(np.int32)
                 if not value.size:
                     continue
             self.store.put(store_name, value)
@@ -229,6 +233,11 @@ class ReaderROOT(Input):
         self._set_next_event()
         return True
     
+    def skip_events(self, n):
+        """ Doesn't do anything except increment the index
+        """
+        self._idx += n
+
     @property
     def timestamp(self):
         """ Returns the current event timestamp
