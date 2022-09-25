@@ -22,7 +22,7 @@ configs:
     - $PYRATE/config/example.yaml
 
 outputs:
-    Trash:
+    AlgorithmTest:
         algorithm: OutputROOT
         path: $PYRATE/test
         format: root

@@ -28,10 +28,8 @@
 
 """
 import sys
-import numpy as np
+import numba
 from pyrate.core.Algorithm import Algorithm
-import sys
-from scipy.ndimage.filters import uniform_filter1d
 from pyrate.utils.enums import Pyrate
 
 
@@ -54,10 +52,23 @@ class BaselineNaive(Algorithm):
             return
 
         # Get the baseline from the front of the waveform.
-        Baseline = np.sum(waveform[:nsamples]) / nsamples
+        Baseline = self.BaselineCalc(waveform=waveform, nsamples=nsamples)
 
         self.store.put(self.name, Baseline)
 
+    @staticmethod
+    @numba.njit(cache=True)
+    def BaselineCalc(waveform, nsamples):
+        
+        Sum = 0.0
+        Baseline = Pyrate.NONE
+        
+        # Get the baseline from the front of the waveform.
+        for i in range(nsamples):
+            Sum += waveform[i]
+        
+        Baseline = Sum / nsamples
+
+        return Baseline
 
 # EOF
-

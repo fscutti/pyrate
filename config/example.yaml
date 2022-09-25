@@ -29,7 +29,7 @@ objects:
         algorithm: CorrectedWaveform
         vpp: 2.5
         adcrange: 16384
-        polarity: pos
+        polarity: neg
         units: mV
         input:
             waveform: <boards>_ch0_waveform
