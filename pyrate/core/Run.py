@@ -17,9 +17,6 @@ from pyrate.core.Store import Store
 from pyrate.utils import functions as FN
 from pyrate.utils import enums as EN
 
-import ROOT
-
-
 class Run:
     def __init__(self, name, config):
         self.name = name
@@ -79,7 +76,7 @@ class Run:
         self.objects.update({self.input: self.config["input"][self.input]})
         self.nodes = {}
         self.variables = {}
-        
+
         # instantiate all algorithms - even those not needed
         self.create_node(self.name)     # Create a run node
         for object_name in self.objects:
@@ -201,7 +198,7 @@ class Run:
             """
             event_count = 0
             while self.nodes[self.input].algorithm.get_event():
-                if enum > 0 and event_count > enum:
+                if enum > 0 and event_count >= enum:
                     break
 
                 # Put the input info on the store

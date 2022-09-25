@@ -26,7 +26,6 @@ class Tree:
         """ Sets up the tree for the first time
             Takes in the file the tree lives in
         """
-        f.cd()
         self.TTree = f.Get(self.name)
         self.branches = [i.GetName() for i in self.TTree.GetListOfBranches()]
         self.attached = True

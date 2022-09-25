@@ -1,22 +1,14 @@
 input:
     event_start: 0
-    event_num: 55
+    event_num: -1
 
     EventBuiltInput:
         algorithm: EventBuilder
         window: 2000
-        parallel: True
-        # B0:
-        #     reader: ReaderROOT
-        #     files:
-        #         - $PYRATE/test/AlgorithmTest.root
-        #     timestamp: ch0_timestamp
-        #     tree: Tree_B0_0
-        #     variables:
-        #         - {ch0_waveform: RawWaveform}
-        #         - {ch0_timestamp: Timestamp}
-        #     objects:
-        #         -  MyTGraphs
+        B0:
+            reader: ReaderCAEN1730_PSD
+            files:
+                - $PYRATE/test/data/22-03-28_13-38-36_MUON_1730Test/1730Test-Board_0-001.dat
         B1:
             reader: ReaderCAEN1730_PSD
             files:
@@ -25,18 +17,6 @@ input:
             reader: ReaderCAEN1730_ZLE
             files:
                 - $PYRATE/test/data/22-03-28_13-38-36_MUON_1730Test/1730Test-Board_2-001.dat
-        B0:
-            reader: ReaderCAEN1730_PSD
-            files:
-                - $PYRATE/test/data/22-03-28_13-38-36_MUON_1730Test/1730Test-Board_0-001.dat
-        # B1:
-        #     reader: ReaderCAEN1730_PSD
-        #     files:
-        #         - $PYRATE/test/data/22-03-28_13-38-36_MUON_1730Test/1730Test-Board_1-001.dat
-        # B2:
-        #     reader: ReaderCAEN1730_ZLE
-        #     files:
-        #         - $PYRATE/test/data/22-03-28_13-38-36_MUON_1730Test/1730Test-Board_2-001.dat
 
 configs:
     - $PYRATE/config/MultiCHExample.yaml
@@ -47,8 +27,7 @@ outputs:
         path: $PYRATE/test
         format: root
         targets:
-            # - TreeMaker
-            - Tree_B0_0
+            - TreeMaker
             - TGraphMaker
 
 # EOF

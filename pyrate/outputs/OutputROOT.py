@@ -28,7 +28,7 @@ class OutputROOT(Algorithm):
         self.file.SetCompressionLevel(3)
 
         for t in self.targets:
-            self.store.put(f"OUTPUT:{t}", self.file)
+            self.store.save(f"OUTPUT:{t}", self.file, save_copy=False)
     
     def offload(self):
         self.is_loaded = False
