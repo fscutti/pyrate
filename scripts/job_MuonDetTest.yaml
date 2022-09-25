@@ -5,7 +5,6 @@ input:
     Neutron:
         algorithm: EventBuilder
         parallel: True
-        window: 0
         nT:
             reader: ReaderROOT
             files:
@@ -22,11 +21,11 @@ configs:
     - $PYRATE/config/muondet/analysis.yaml
 
 outputs:
-    TestROOTFile:
+    MuonDetTest:
         algorithm: OutputROOT
         path: $PYRATE/test
         format: root
         targets:
-            - muonDetPlot1D
+            - muonDetTest
 
 # EOF

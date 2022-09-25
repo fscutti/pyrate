@@ -24,24 +24,36 @@ objects:
         pmt_name: PMT8
         input:
             waveform_map: simWaveforms
+        output:
+            energy: wfPMT8_energy
+            time: wfPMT8_time
 
     wfPMT9:
         algorithm: SimulatedWaveformsGetter
         pmt_name: PMT9
         input:
             waveform_map: simWaveforms
+        output:
+            energy: wfPMT9_energy
+            time: wfPMT9_time
 
     wfPMT12:
         algorithm: SimulatedWaveformsGetter
         pmt_name: PMT12
         input:
             waveform_map: simWaveforms
+        output:
+            energy: wfPMT12_energy
+            time: wfPMT12_time
 
     wfPMT13:
         algorithm: SimulatedWaveformsGetter
         pmt_name: PMT13
         input:
             waveform_map: simWaveforms
+        output:
+            energy: wfPMT13_energy
+            time: wfPMT13_time
 
 
     # Energies
@@ -100,7 +112,7 @@ objects:
     trueParticleEnergy:
         algorithm: TrueEnergy
         input:
-            etrue: nTekin_particle
+            etrue: nT_ekin_particle
         
     xParticleHitPos:
         algorithm: ParticleHitPosition
@@ -117,6 +129,21 @@ objects:
             xpos: TotT_XPosTot
             ypos: TotT_YPosTot
             zpos: TotT_ZPosTot
+
+    # -----
+    # Trees
+    # -----
+    muonDetTest:
+        algorithm: TreeMaker
+        filltype: event
+        input:
+            vector<double>: [wfPMT8_energy, wfPMT9_energy, wfPMT12_energy, wfPMT13_energy]
+            double: [numPhotonsPMT8, numPhotonsPMT9, numPhotonsPMT12, numPhotonsPMT13,
+                     measEnergyPMT8, measEnergyPMT9, measEnergyPMT12, measEnergyPMT13,
+                     muonDetEnergy, trueParticleEnergy, xParticleHitPos, yParticleHitPos]
+
+
+
 
     # -----------------------------------------------------------
     # Histograms

@@ -5,5 +5,3 @@ import pyrate.readers
 import pyrate.outputs
 
 from pyrate.core.EventBuilder import EventBuilder
-# import pyrate.readers
-# import pyrate.writers

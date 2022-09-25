@@ -42,8 +42,6 @@
 import sys
 import numpy as np
 
-import ROOT
-
 from pyrate.core.Algorithm import Algorithm
 
 import pyrate.utils.strings as ST
@@ -103,6 +101,8 @@ class TGraphMaker(Algorithm):
     def finalise(self, condition=None):
         """ Makes and fills the TGrahp
         """
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
         name = self.name.replace(':', '.')
 
         Ys = ST.pyrate_yaml_to_list(self.config["input"]["y"])

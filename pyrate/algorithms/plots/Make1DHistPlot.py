@@ -35,19 +35,19 @@ from pyrate.core.Algorithm import Algorithm
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
 from pyrate.utils import ROOT_classes as CL
+from pyrate.utils import ROOT_utils
 from pyrate.utils import enums as EN
-
-import ROOT as R
-
-R.gStyle.SetOptStat(0)
-R.gROOT.SetBatch()
 
 
 class Make1DHistPlot(Algorithm):
-    __slots__ = "histograms"
+    __slots__ = ["histograms", "file"]
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
+        ROOT.gStyle.SetOptStat(0)
+        ROOT.gROOT.SetBatch()
 
         self.histograms = {}
 
@@ -59,6 +59,7 @@ class Make1DHistPlot(Algorithm):
         If not found in the input already it will create new ones."""
 
         i_name = self.store.get("INPUT:name")
+        self.file = self.store.get(f"OUTPUT:{self.name}")
 
         for f_name, f_attr in self.config["input"]["folders"].items():
             for v_string in f_attr["variables"]:
@@ -128,6 +129,8 @@ class Make1DHistPlot(Algorithm):
 
     def finalise(self, condition=None):
         """Makes the plot."""
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
 
         plot_collection = {}
 
@@ -182,10 +185,10 @@ class Make1DHistPlot(Algorithm):
 
                 l_name, c_name = p_name.split("|")
 
-                l = copy(R.TLegend(0.1, 0.8, 0.9, 0.9))
+                l = copy(ROOT.TLegend(0.1, 0.8, 0.9, 0.9))
                 l.SetHeader(l_name)
 
-                c = copy(R.TCanvas(c_name, "", 900, 800))
+                c = copy(ROOT.TCanvas(c_name, "", 900, 800))
 
                 c.SetTickx()
                 c.SetTicky()
@@ -206,7 +209,7 @@ class Make1DHistPlot(Algorithm):
                         if mode == "stack" and not h_stack:
 
                             h_stack = copy(
-                                R.THStack(
+                                ROOT.THStack(
                                     "h_stack",
                                     f";{h.GetXaxis().GetTitle()};{h.GetYaxis().GetTitle()}",
                                 )
@@ -256,6 +259,8 @@ class Make1DHistPlot(Algorithm):
         # restructuring by putting the definition of the main object in the initialise function.
         
         self.store.save(self.name, canvas_collection)
+        for name, canvas in canvas_collection:
+            ROOT_utils.write(self.file, name, canvas)
 
     def get_var_dict(self, variable):
         """Build dictionary for variable attributes."""
@@ -312,12 +317,14 @@ class Make1DHistPlot(Algorithm):
 
     def make_hist(self, h_name, variable, folder):
         """Make histograms."""
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
 
         var = self.get_var_dict(variable)
 
         # Why copy the following object? Because there might be already an object
         # with the same name in the ROOT object list. Another way: h.SetDirectory(0)
-        h = copy(R.TH1F(h_name, h_name, var["n_bins"], var["x_low"], var["x_high"]))
+        h = copy(ROOT.TH1F(h_name, h_name, var["n_bins"], var["x_low"], var["x_high"]))
 
         h.GetXaxis().SetTitle(var["x_label"])
         h.GetYaxis().SetTitle(var["y_label"])

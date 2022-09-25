@@ -5,7 +5,6 @@ import sys
 import glob
 import numpy as np
 
-import ROOT
 from pyrate.core.Input import Input
 from pyrate.utils.functions import iterable
 
@@ -88,6 +87,8 @@ class ReaderROOT(Input):
             return
 
         # Load the next file
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
         self._f = ROOT.TFile.Open(self._files[self._files_index])
 
         if not self._f: return

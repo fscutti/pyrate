@@ -10,7 +10,6 @@ mySelection:
                 - "myCut1 && myCut2"
 
 """
-import sys
 
 from pyrate.core.Algorithm import Algorithm
 from pyrate.utils import functions as FN

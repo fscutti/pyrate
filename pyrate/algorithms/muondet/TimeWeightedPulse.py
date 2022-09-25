@@ -2,8 +2,6 @@
 """
 from copy import copy
 
-import ROOT as R
-
 from pyrate.core.Algorithm import Algorithm
 from pyrate.utils.enums import Pyrate
 
@@ -12,10 +10,11 @@ class TimeWeightedPulse(Algorithm):
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
+        import ROOT
 
         # PMT quantum efficiency given as a function of incident photon wavelength in nm.
         self.quantum_efficiency = copy(
-            R.TH1F("quantum_efficiency", "quantum_efficiency", 6, 200, 800)
+            ROOT.TH1F("quantum_efficiency", "quantum_efficiency", 6, 200, 800)
         )
         self.quantum_efficiency.Fill(250, 0)
         self.quantum_efficiency.Fill(350, 21)

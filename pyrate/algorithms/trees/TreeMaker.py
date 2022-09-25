@@ -60,7 +60,6 @@ https://root.cern/manual/trees/
 """
 
 import sys
-import ROOT
 from array import array
 
 from pyrate.core.Algorithm import Algorithm
@@ -105,6 +104,8 @@ class Branch:
 
     # def create(self, data, type_override=None):
     def create(self):
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
         # Check if what's being passed in is iterable (stored in array)
         # self.vector = FN.iterable(data)
         # Automatic type getting - WIP
@@ -218,6 +219,8 @@ class Tree:
             self.link_branch(branch)
 
     def create(self):
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
         """Actually makes the trees structure in the structure and adds all the
         branches into the tree. Typically called by the detector class
         """
@@ -281,6 +284,13 @@ class Tree:
             # Only do it if necessary
             if self.branches[branch].vector:
                 self.branches[branch].clear_vector()
+    
+    def write(self):
+        """ Calls the Write method
+        """
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
+        self.TTree.Write("", ROOT.TObject.kOverwrite)
 
     def remove_branch(self, branch):
         """Removes branch to the tree storage
@@ -382,8 +392,7 @@ class TreeMaker(Algorithm):
             self.tree.fill()
 
         # Write the objects to the file
-        self.tree.TTree.Write("", ROOT.TObject.kOverwrite)
-        # self.tree.TTree.Write()
+        self.tree.write()
 
         del self.tree.TTree
 

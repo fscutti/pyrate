@@ -21,8 +21,6 @@ The 'get' method looks across all stores at all states.
 """
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
-from pyrate.utils import enums
-
 
 class Algorithm:
     __slots__ = ["name", "config", "store", "logger", "_input", "_output"]

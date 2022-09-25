@@ -1,8 +1,5 @@
 """General utility functions"""
 
-import os
-
-
 def remove_duplicates(l):
     """Creates list from dictionary keys."""
     return list(dict.fromkeys(l))

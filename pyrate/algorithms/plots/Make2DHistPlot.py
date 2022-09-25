@@ -36,17 +36,16 @@ from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
 from pyrate.utils import ROOT_classes as CL
 
-import ROOT as R
-
-R.gStyle.SetOptStat(0)
-R.gROOT.SetBatch()
-
 
 class Make2DHistPlot(Algorithm):
     __slots__ = ()
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
+        ROOT.gStyle.SetOptStat(0)
+        ROOT.gROOT.SetBatch()
 
     def initialise(self):
         """Prepares histograms.
@@ -128,6 +127,8 @@ class Make2DHistPlot(Algorithm):
 
     def finalise(self):
         """Makes the plot."""
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
 
         plot_collection = {}
 
@@ -173,10 +174,10 @@ class Make2DHistPlot(Algorithm):
 
                 l_name, c_name = p_name.split("|")
 
-                l = copy(R.TLegend(0.1, 0.8, 0.9, 0.9))
+                l = copy(ROOT.TLegend(0.1, 0.8, 0.9, 0.9))
                 l.SetHeader(l_name)
 
-                c = copy(R.TCanvas(c_name, "", 900, 800))
+                c = copy(ROOT.TCanvas(c_name, "", 900, 800))
 
                 c.SetTickx()
                 c.SetTicky()
@@ -197,7 +198,7 @@ class Make2DHistPlot(Algorithm):
                         if mode == "stack" and not h_stack:
 
                             h_stack = copy(
-                                R.THStack(
+                                ROOT.THStack(
                                     "h_stack",
                                     f";{h.GetXaxis().GetTitle()};{h.GetYaxis().GetTitle()}",
                                 )
@@ -287,7 +288,7 @@ class Make2DHistPlot(Algorithm):
         # color = CL.Color(my_color["R"], my_color["G"], my_color["B"], f"{my_color['R'], my_color['G'], my_color['B']}")
         # setattr(R, color.name, color)
 
-        # _c = R.TColor()
+        # _c = ROOT.TColor()
         # color = _c.GetColor(my_color["R"], my_color["G"], my_color["B"])
         """
         return CL.ColorFinder(my_color["R"], my_color["G"], my_color["B"]).match()
@@ -315,11 +316,13 @@ class Make2DHistPlot(Algorithm):
 
     def make_hist(self, h_name, variable, folder):
         """Make histograms."""
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
 
         var = self.get_var_dict(variable)
 
         h = copy(
-            R.TH2F(
+            ROOT.TH2F(
                 h_name,
                 h_name,
                 var["n_bins_x"],

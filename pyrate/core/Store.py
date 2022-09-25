@@ -2,7 +2,6 @@
 The store is cleaned after every event/input iteration.
 """
 
-import sys
 from copy import copy
 
 from pyrate.utils import enums as EN
