@@ -19,7 +19,7 @@ input:
                 - $PYRATE/test/data/22-03-28_13-38-36_MUON_1730Test/1730Test-Board_2-001.dat
 
 configs:
-    - $PYRATE/config/MultiCHExample.yaml
+    - $PYRATE/config/example.yaml
 
 outputs:
     Trash:

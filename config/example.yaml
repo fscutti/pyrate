@@ -1,6 +1,11 @@
-# <channels>: [0, 1]
+# ---------------------------------
+# Example config file for Pyrate V2
+# ---------------------------------
+
+# Object duplication lists
 <boards>: [B0, B1, B2]
 <AverageWaveforms>: [AverageWaveform_B0_0, AverageWaveform_B1_0, AverageWaveform_B2_0]
+
 # -----------------------------------------------------------
 # Objects computed by algorithms
 # -----------------------------------------------------------
@@ -264,10 +269,9 @@ objects:
         input:
             waveform: CorrectedWaveform_<boards>_0
 
-        # -----------------------------------------------------------
-        # Trees
-        # -----------------------------------------------------------
-        #
+    # -----------------------------------------------------------
+    # Trees
+    # -----------------------------------------------------------
     Tree_<boards>_0:
         algorithm: TreeMaker
         filltype: event
