@@ -1,0 +1,28 @@
+[22-03-28_13-38-37] CONFIGURING 
+[22-03-28_13-38-37] Configuring digitisers 
+[22-03-28_13-38-37] Board 0 CAEN1730_PSD
+[22-03-28_13-38-38] Board 0::configure: true 
+[22-03-28_13-38-38] Board 1 CAEN1730_PSD
+[22-03-28_13-38-38] Board 1::configure: true 
+[22-03-28_13-38-38] Board 2 CAEN1730_ZLE
+[22-03-28_13-38-38] Board 2::configure: true 
+[22-03-28_13-38-38] PRERUN 
+[22-03-28_13-38-38] Board 0
+[22-03-28_13-38-39] Board 1
+[22-03-28_13-38-39] Board 2
+[22-03-28_13-38-39] STARTRUN 
+[22-03-28_13-38-40] Board 0: Start time 1648435120301719386 ns
+[22-03-28_13-38-40] Creating RawWriter for Board 0
+[22-03-28_13-38-40] Writing to file: /home/sabre/data/22-03-28_13-38-36_MUON_1743Test/1743Test-Board_0-001.dat 
+[22-03-28_13-38-40] Board 1: Start time 1648435120302670043 ns
+[22-03-28_13-38-40] Creating RawWriter for Board 1
+[22-03-28_13-38-40] Writing to file: /home/sabre/data/22-03-28_13-38-36_MUON_1743Test/1743Test-Board_1-001.dat 
+[22-03-28_13-38-40] Board 2: Start time 1648435120303430965 ns
+[22-03-28_13-38-40] Creating RawWriter for Board 2
+[22-03-28_13-38-40] Writing to file: /home/sabre/data/22-03-28_13-38-36_MUON_1743Test/1743Test-Board_2-001.dat 
+[22-03-28_13-38-40] RUNNING 
+[22-03-28_13-38-50] STOPPING 
+[22-03-28_13-38-50] Boards stopped
+[22-03-28_13-38-51] STOPPED 
+[22-03-28_13-38-51] Duration: 14 s
+[22-03-28_13-38-51] ==================================================================== 
