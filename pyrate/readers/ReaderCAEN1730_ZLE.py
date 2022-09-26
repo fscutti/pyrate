@@ -4,6 +4,7 @@ Binary data is written according to the scheme given in the ZLE manual
 """
 
 import os
+import sys
 import glob
 import numpy as np
 
@@ -41,6 +42,8 @@ class ReaderCAEN1730_ZLE(Input):
         for f in self.config["files"]:
             f = os.path.expandvars(f)
             self._files += sorted(glob.glob(f))
+        if len(self._files) == 0:
+            sys.exit(f"ERROR: in reader {self.name}, no files were found.")
 
         self._files_index = 0
         self._sizes = [os.path.getsize(f) for f in self._files]

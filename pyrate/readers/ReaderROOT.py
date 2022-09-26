@@ -1,6 +1,8 @@
 """ Reader of a ROOT file
 """
+
 import os
+import sys
 import sys
 import glob
 import numpy as np
@@ -52,6 +54,8 @@ class ReaderROOT(Input):
         for f in self.config["files"]:
             f = os.path.expandvars(f)
             self._files += sorted(glob.glob(f))
+        if len(self._files) == 0:
+            sys.exit(f"ERROR: in reader {self.name}, no files were found.")
 
         self._files_index = -1
         self._sizes = [os.path.getsize(f) for f in self._files]
