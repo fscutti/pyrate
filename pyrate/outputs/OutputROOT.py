@@ -33,6 +33,5 @@ class OutputROOT(Algorithm):
     def offload(self):
         self.is_loaded = False
         self.file.Close()
-        del self.file
 
 # EOF

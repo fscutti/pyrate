@@ -394,8 +394,6 @@ class TreeMaker(Algorithm):
         # Write the objects to the file
         self.tree.write()
 
-        del self.tree.TTree
-
     def _parse_tree_vars(self, variables):
         """Dedicated function to just parse the tree lists/dicts/strings"""
         if type(variables) == dict:

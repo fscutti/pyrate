@@ -157,7 +157,5 @@ class TGraphMaker(Algorithm):
             ROOT_utils.write(self.file, path, self.canvas)
 
         ROOT_utils.write(self.file, path, self.graph)
-        del self.graph
-        del self.canvas
 
 # EOF

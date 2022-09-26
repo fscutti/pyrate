@@ -96,7 +96,7 @@ class EventBuilder(Input):
             # Get the latest reader time stamp!
             if reader.hasEvent and (readerTime := reader.timestamp) < self._eventTime:
                 self._eventTime = readerTime
-                success = True                
+                success = True
 
         if success == False:
             # No more events!
