@@ -16,7 +16,7 @@ LONG_MAX = 2**64
 
 class ReaderCAEN1730_RAW(Input):
     __slots__ = ["_files", "_f", "_files_index", "_sizes", "size", "_bytes_read", 
-                 "_inEvent", "timeshift", "_eventWaveforms", "channels",
+                 "_inEvent", "_variables", "timeshift", "_eventWaveforms", "channels",
                  "_large_waveform_warning"]
 
     def __init__(self, name, config, store, logger):
@@ -25,16 +25,16 @@ class ReaderCAEN1730_RAW(Input):
         self.channels = 8
         self.timeshift = 0 if "timeshift" not in config else config["timeshift"]
         # Set the outputs manually
-        outputs = {}
+        self._variables = {}
         for ch in range(self.channels):
             output_format = "{name}_ch{ch}_{variable}" # Default formatting
             if "output" in config:
                 # The user has provided a custom output formatting
                 output_format = config["output"]
-            outputs.update({f"{ch}_timestamp": output_format.format(name=self.name, ch=ch, variable="timestamp"), 
+            self._variables.update({f"{ch}_timestamp": output_format.format(name=self.name, ch=ch, variable="timestamp"), 
                             f"{ch}_waveform": output_format.format(name=self.name, ch=ch, variable="waveform")})
 
-        self.output = outputs
+        self.output = self._variables.values()
 
         # Prepare all the files
         self.is_loaded = False
@@ -91,8 +91,8 @@ class ReaderCAEN1730_RAW(Input):
         if not skip:
             for ch in range(self.channels):
                 if ch in self._inEvent:
-                    self.store.put(f"{self.output[f'{ch}_timestamp']}", self._eventTime)
-                    self.store.put(f"{self.output[f'{ch}_waveform']}", np.array(self._eventWaveforms[ch], dtype="int32"))
+                    self.store.put(f"{self._variables[f'{ch}_timestamp']}", self._eventTime)
+                    self.store.put(f"{self._variables[f'{ch}_waveform']}", np.array(self._eventWaveforms[ch], dtype="int32"))
 
         # Get the next event
         if not self.read_next_event():

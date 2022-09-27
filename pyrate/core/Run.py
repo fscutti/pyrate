@@ -17,6 +17,8 @@ from pyrate.core.Store import Store
 from pyrate.utils import functions as FN
 from pyrate.utils import enums as EN
 
+LONG_MAX = 2**64
+
 class Run:
     def __init__(self, name, config):
         self.name = name
@@ -162,7 +164,7 @@ class Run:
             
             # Point all the alg outputs to the parent
             self.variables[obj_name] = obj_name
-            for _, output in new_node.algorithm.output.items():
+            for output in new_node.algorithm.output:
                 self.variables[output] = obj_name
             
             self.nodes[obj_name] = new_node
@@ -182,7 +184,6 @@ class Run:
         self.store.put("INPUT:name", self.nodes[self.input].algorithm.name)
         self.store.put("INPUT:config", self.nodes[self.input].algorithm.config)
         self.loop()
-
         emin = self.config["input"]["event_start"]
         enum = self.config["input"]["event_num"]
         if emin > 0:
@@ -205,7 +206,6 @@ class Run:
                 self.store.put("INPUT:name", self.nodes[self.input].algorithm.name)
                 self.store.put("INPUT:config", self.nodes[self.input].algorithm.config)
                 self.store.put("EventNumber", event_count + emin)
-                self.store.put("EventTimestamp", self.nodes[self.input].algorithm.timestamp)
 
                 # Run all the algorithms
                 self.loop()
@@ -238,9 +238,6 @@ class Run:
         # ----------------------------------------------------------------------
         # Output loop.
         # ----------------------------------------------------------------------
-
-        # REMOVE!
-        self.store.put("RUN", self)
         
         self.state = "finalise"
         self.store.put("INPUT:name", self.nodes[self.input].algorithm.name)

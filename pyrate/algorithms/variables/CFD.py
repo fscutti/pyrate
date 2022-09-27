@@ -74,8 +74,8 @@ class CFD(Algorithm):
             return
 
         self.store.put(self.name, self.CFDTimes[0])
-        self.store.put(f"{self.output['times']}", self.CFDTimes)
-        self.store.put(f"{self.output['trace']}", self.cfd)
+        self.store.put(f"{self.config['output']['times']}", self.CFDTimes)
+        self.store.put(f"{self.config['output']['trace']}", self.cfd)
 
     # Remove numpy dependence for speed and cross-check with more up to date code above
     @staticmethod

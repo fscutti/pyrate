@@ -60,10 +60,10 @@ class Moment(Algorithm):
                                             time_period=self.time_period)
 
         # self.store.put(self.name, moments)
-        self.store.put(f"{self.output['mean']}", mean)
-        self.store.put(f"{self.output['stddev']}", stddev)
-        self.store.put(f"{self.output['skew']}", skew)
-        self.store.put(f"{self.output['kurtosis']}", kurtosis)
+        self.store.put(f"{self.config['output']['mean']}", mean)
+        self.store.put(f"{self.config['output']['stddev']}", stddev)
+        self.store.put(f"{self.config['output']['skew']}", skew)
+        self.store.put(f"{self.config['output']['kurtosis']}", kurtosis)
 
     @staticmethod
     @numba.njit(cache=True)

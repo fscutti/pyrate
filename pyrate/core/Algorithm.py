@@ -38,9 +38,9 @@ class Algorithm:
             self.input = {}
         
         if "output" in self.config:
-            self.output = self.config["output"]
+            self.output = self.config["output"].values()
         else:
-            self.output = {}
+            self.output = set()
 
     def initialise(self, condition=None):
         """At this stage the method knows the current input."""
@@ -107,7 +107,7 @@ class Algorithm:
         if hasattr(self, "_output"):
             # Already has output set
             return
-        self._output = outputs
+        self._output = set(outputs)
 
 
 # EOF

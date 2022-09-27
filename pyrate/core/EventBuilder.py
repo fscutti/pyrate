@@ -30,11 +30,11 @@ class EventBuilder(Input):
             self.readers[name] = ReaderClass(name, reader_config, self.store, self.logger)
 
         # Set the event builder's outputs
-        variables = {}
+        variables = [f"{self.name}_EventTimestamp"]
         for reader in self.readers.values():
-            for _, var in reader.output.items():
+            for var in reader.output:
                 # can't use the key because it would clash
-                variables[var] = var
+                variables.append(var)
 
         self.output = variables
 
@@ -132,6 +132,7 @@ class EventBuilder(Input):
             # Update the EventBuilder's progress
             self._progress = current_progress
 
+        self.store.put(f"{self.name}_EventTimestamp", self.timestamp)
         return True
 
 # EOF
