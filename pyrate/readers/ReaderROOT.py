@@ -184,9 +184,9 @@ class ReaderROOT(Input):
         if "timestamp" in self.config:
             branch_name = self._variables[self.config["timestamp"]]
             self._tree.GetBranch(branch_name).GetEntry(self._idx)
-            self._eventTime = getattr(self._tree, branch_name)
+            self._eventID = getattr(self._tree, branch_name)
         else:
-            self._eventTime = self._idx
+            self._eventID = self._idx
         self._hasEvent = True
 
         self._events_read += 1

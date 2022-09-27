@@ -104,9 +104,6 @@ class Algorithm:
     @output.setter
     def output(self, outputs):
         """Setter method for output objects."""
-        if hasattr(self, "_output"):
-            # Already has output set
-            return
         self._output = set(outputs)
 
 

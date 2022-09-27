@@ -9,7 +9,7 @@
 from pyrate.core.Algorithm import Algorithm
 
 class Input(Algorithm):
-    __slots__ = ["_idx", "_eventTime", "is_loaded", "_progress", "_hasEvent"]
+    __slots__ = ["_eventID", "is_loaded", "_progress", "_hasEvent"]
 
     def skip_events(self, n):
         """ Skips an event - implemented however the author wants
@@ -22,22 +22,16 @@ class Input(Algorithm):
         pass
 
     @property
-    def timestamp(self):
+    def eventID(self):
         """ Returns the current event time
         """
-        return self._eventTime
+        return self._eventID
     
     @property
     def hasEvent(self):
-        """ Returns 
+        """ Returns whether the input current has an event
         """
         return self._hasEvent
-    
-    @Algorithm.output.setter
-    def output(self, outputs):
-        """ Re-usable setter for inputs
-        """
-        self._output = outputs
 
     @property
     def progress(self):

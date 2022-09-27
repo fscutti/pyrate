@@ -83,7 +83,7 @@ class ReaderWaveDump(Input):
 
         #Put the event on the store
         if not skip:
-            self.store.put(f"{self._variables[f'timestamp']}", self._eventTime)
+            self.store.put(f"{self._variables[f'timestamp']}", self._eventID)
             self.store.put(f"{self._variables[f'waveform']}", np.array(self._waveform, dtype="int32"))
 
         # Get the next event
@@ -102,7 +102,7 @@ class ReaderWaveDump(Input):
     def read_next_event(self):
         # Reset event
         # Declare all the variables
-        self._eventTime = LONG_MAX # Largest possible number, invalid value
+        self._eventID = LONG_MAX # Largest possible number, invalid value
         self._hasEvent = False
         self._waveform = []
 
@@ -136,11 +136,11 @@ class ReaderWaveDump(Input):
         # dc_offset = int(head7[:-1].split(":")[-1], 16) / 4     
 
         # Work out the eventTime, handling overflows
-        self._eventTime = (self._eventTimeOverflows * 2**31) + trigger_time_stamp
-        if self._eventTime < self._prevEventTime:
+        self._eventID = (self._eventTimeOverflows * 2**31) + trigger_time_stamp
+        if self._eventID < self._prevEventTime:
             self._eventTimeOverflows += 1
-            self._eventTime = (self._eventTimeOverflows * 2**31) + trigger_time_stamp
-        self._prevEventTime = self._eventTime
+            self._eventID = (self._eventTimeOverflows * 2**31) + trigger_time_stamp
+        self._prevEventTime = self._eventID
 
         i = 0
         while i < record_length and (value := self._f.readline()):

@@ -60,8 +60,7 @@ class Run:
         white = white % (Fore.WHITE, Fore.RESET)
         self.colors = {"blue": blue, "yellow": yellow, "green": green, "white": white}
         
-        # Set the run state and create the store
-        self.state = None
+        # Create the store
         self.store = Store(self.name)
 
         # -------------------
@@ -89,7 +88,6 @@ class Run:
         # -----------------------------------------
         # Explicitly declare what variables the run will put on the store
         self.variables["EventNumber"] = self.name
-        self.variables["EventTimestamp"] = self.name
 
         self.outputs = {}
         for output_name, output_config in self.config["outputs"].items():
@@ -113,7 +111,7 @@ class Run:
             self.outputs[output_name] = OutputClass(output_name, output_config, self.store, self.logger)
 
     def connect_node(self, obj_name):
-        """Connects the already created nodes in the dependency chain
+        """ Connects the already created nodes in the dependency chain
             Runs recursively
         """
         # Check if it's an input type or alg type
@@ -183,7 +181,7 @@ class Run:
         self.state = "initialise"
         self.store.put("INPUT:name", self.nodes[self.input].algorithm.name)
         self.store.put("INPUT:config", self.nodes[self.input].algorithm.config)
-        self.loop()
+        self.loop(state=self.state)
         emin = self.config["input"]["event_start"]
         enum = self.config["input"]["event_num"]
         if emin > 0:
@@ -208,7 +206,7 @@ class Run:
                 self.store.put("EventNumber", event_count + emin)
 
                 # Run all the algorithms
-                self.loop()
+                self.loop(state=self.state)
 
                 event_count += 1
                 yield 1
@@ -242,17 +240,17 @@ class Run:
         self.state = "finalise"
         self.store.put("INPUT:name", self.nodes[self.input].algorithm.name)
         self.store.put("INPUT:config", self.nodes[self.input].algorithm.config)
-        self.loop()
+        self.loop(state=self.state)
 
         for output in self.outputs:
             self.outputs[output].offload()
 
-    def loop(self):
+    def loop(self, state):
         """Loop over targets and calls them."""
         self._reset_node_called_status()
         for output in self.outputs:
             for target in self.outputs[output].targets:
-                self.call(target, state=self.state)
+                self.call(target, state=state)
         self.store.clear()
 
     def call(self, obj_name, state):
@@ -267,7 +265,7 @@ class Run:
                 for condition, dependencies in alg.input.items():
                     for d in dependencies:
                         self.call(self.variables[d], state)
-                    passed = getattr(alg, self.state)(condition)
+                    passed = getattr(alg, state)(condition)
 
                     if not passed:
                         break

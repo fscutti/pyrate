@@ -74,7 +74,7 @@ class EventBuilder(Input):
         # Parallel event building (just read everything as it comes)
         if "parallel" in self.config and self.config["parallel"] == True:
             success = False
-            self._eventTime = 0
+            self._eventID = 0
             for reader in self.readers.values():
                 success |= reader.get_event()
 
@@ -89,37 +89,37 @@ class EventBuilder(Input):
 
         # ------------------------------
         # Timestamp-based event building
-        self._eventTime = LONG_MAX # largest possible event time (uint64)
+        self._eventID = LONG_MAX # largest possible event time (uint64)
         deltaT = self.window # How far to look forwards
         success = False
         for reader in self.readers.values():
             # Get the latest reader time stamp!
-            if reader.hasEvent and (readerTime := reader.timestamp) < self._eventTime:
-                self._eventTime = readerTime
+            if reader.hasEvent and (readerTime := reader.eventID) < self._eventID:
+                self._eventID = readerTime
                 success = True
 
         if success == False:
             # No more events!
             return False
 
-        maxTime = self._eventTime + deltaT
+        maxTime = self._eventID + deltaT
         
         # Search for more event data in the valid block
         success = True
         while success:
             success = False
             for reader in self.readers.values():
-                if reader.hasEvent and reader.timestamp <= maxTime:
+                if reader.hasEvent and reader.eventID <= maxTime:
                     # Ok, we found a reader with data within the maxTime
 
-                    if reader.timestamp < (self._eventTime - deltaT):
+                    if reader.eventID < (self._eventID - deltaT):
                         # Uh oh, looks like we've gone back in time
-                        print(f"WARNING: The timestamp of reader {reader.name} ({reader.timestamp}) is more than {deltaT} before the event time {self._eventTime}.")
+                        print(f"WARNING: The timestamp of reader {reader.name} ({reader.eventID}) is more than {deltaT} before the event time {self._eventID}.")
 
                     # Check if we need to expand the maxTime based on this
-                    # reader's latest timestamp
-                    if((reader.timestamp + deltaT) > maxTime):
-                        maxTime = (reader.timestamp + deltaT)
+                    # reader's latest eventID
+                    if((reader.eventID + deltaT) > maxTime):
+                        maxTime = (reader.eventID + deltaT)
                     
                     # Now get the data from the reader
                     reader.get_event()
@@ -132,7 +132,7 @@ class EventBuilder(Input):
             # Update the EventBuilder's progress
             self._progress = current_progress
 
-        self.store.put(f"{self.name}_EventTimestamp", self.timestamp)
+        self.store.put(f"{self.name}_EventTimestamp", self.eventID)
         return True
 
 # EOF

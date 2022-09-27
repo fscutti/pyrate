@@ -91,7 +91,7 @@ class ReaderCAEN1730_ZLE(Input):
         if not skip:
             for ch in range(self.channels):
                 if ch in self._inEvent:
-                    self.store.put(f"{self._variables[f'{ch}_timestamp']}", self._eventTime)
+                    self.store.put(f"{self._variables[f'{ch}_timestamp']}", self._eventID)
                     self.store.put(f"{self._variables[f'{ch}_waveform']}", np.array(self._eventWaveforms[ch], dtype="int32"))
 
         # Get the next event
@@ -109,7 +109,7 @@ class ReaderCAEN1730_ZLE(Input):
 
     def read_next_event(self):
         # Reset event
-        self._eventTime = LONG_MAX
+        self._eventID = LONG_MAX
         self._hasEvent = False
         self._inEvent = {}
         self._eventWaveforms = {}
@@ -191,7 +191,7 @@ class ReaderCAEN1730_ZLE(Input):
                     self._large_waveform_warning = True
 
 
-        self._eventTime = 8*((pattern << 24) + TTT) + self.timeshift
+        self._eventID = 8*((pattern << 24) + TTT) + self.timeshift
         # Update the number of bytes read by the eventSize
         self._bytes_read += 4*eventSize
         # Update the progress

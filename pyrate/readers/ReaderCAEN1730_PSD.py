@@ -120,7 +120,7 @@ class ReaderCAEN1730_PSD(Input):
     def read_next_event(self):
         # Reset event
         # Declare all the variables
-        self._eventTime = LONG_MAX # Largest possible number, invalid value
+        self._eventID = LONG_MAX # Largest possible number, invalid value
         self._hasEvent = False
         self._inEvent = {}
         self._eventChTimes = {}
@@ -228,8 +228,8 @@ class ReaderCAEN1730_PSD(Input):
                 
                 # Find the smallest event channel time, and set it to the 
                 # reader's event time
-                if self._eventChTimes[ch] < self._eventTime:
-                    self._eventTime = self._eventChTimes[ch] + self.timeshift
+                if self._eventChTimes[ch] < self._eventID:
+                    self._eventID = self._eventChTimes[ch] + self.timeshift
 
                 # Check for extra large waveforms
                 if not self._large_waveform_warning and len(self._eventWaveforms[ch]) > MAX_TRACE_LENGTH:

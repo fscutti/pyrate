@@ -278,8 +278,7 @@ objects:
         input:
             vector<int>: {RawWaveform: <boards>_ch0_waveform}
             vector<double>: {CorrectedWaveform: CorrectedWaveform_<boards>_0}
-            long: {Timestamp: <boards>_ch0_timestamp,
-                   EventTimestamp: EventTimestamp}
+            long: {Timestamp: <boards>_ch0_timestamp}
             vector<double>:
                         - FFT_<boards>_0, Moments_<boards>_0
                         - {CFDTrace: CFDTrace_<boards>_0,
