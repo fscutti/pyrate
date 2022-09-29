@@ -292,13 +292,6 @@ class Tree:
         import ROOT
         self.TTree.Write("", ROOT.TObject.kOverwrite)
 
-    def remove_branch(self, branch):
-        """Removes branch to the tree storage
-        Does not remove the TBranch from the TTree as this isnt possible.
-        Won't be accessed anymore (hopefully)
-        """
-        del self.branches[branch.name]
-
     def set_branches(self, branch_names, status=1):
         """Sets the branch status of a list of branches"""
         for branch_name in branch_names:

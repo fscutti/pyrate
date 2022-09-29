@@ -10,6 +10,7 @@ class TimeWeightedPulse(Algorithm):
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
+        # Always avoid the top-level 'import ROOT'.
         import ROOT
 
         # PMT quantum efficiency given as a function of incident photon wavelength in nm.

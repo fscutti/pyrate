@@ -24,7 +24,7 @@ add_to_python_path()
 add_to_path()
 {
     export PATH=$1:$PATH
-    echo "  Added $1 to your PATH."
+    #echo "  Added $1 to your PATH."
 }
 
 ## ----------------
@@ -40,6 +40,8 @@ add_to_path()
 # add_to_python_path ${PYRATE}
 # add_to_python_path ${PYRATE}/pyrate
 # echo "  done."
+
+add_to_path ${PYRATE}/scripts
 
 # virtual environmens are very helpful for development
 # and cause 0 overhead; essentially just add another location
