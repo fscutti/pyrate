@@ -8,7 +8,7 @@
 | *** Variables *** |
 # this is how you translate from the environment. Note the '%'
 | ${PYRATE_BASE_DIR}        | %{PYRATE}  
-| ${APPLICATION}            | python3 ${PYRATE_BASE_DIR}/pyrate.py
+| ${APPLICATION}            | python3 ${PYRATE_BASE_DIR}/scripts/pyrate
 | ${MUONJOBFILE}            | ${PYRATE_BASE_DIR}/test/job_MuonDetTest.yaml
 | ${WAVEFORMALGFILE}        | ${PYRATE_BASE_DIR}/test/job_WaveformAlgorithmsTest.yaml
 
