@@ -50,7 +50,7 @@ class ReaderROOT(Input):
         output = {}
         output.update(self._variables)
         output.update(self._obj_variables)
-        self.output = {k:k for k in output}
+        self.output = output.keys()
 
     def _load_next_file(self):
         if self.is_loaded:
@@ -87,6 +87,8 @@ class ReaderROOT(Input):
         else:
             # We want all the variables from the tree
             for branch in branches:
+                from code import interact
+                interact(local=locals())
                 store_name = self._output_format.format(name=self.name, variable=branch)
                 self._variables[store_name] = branch
 
