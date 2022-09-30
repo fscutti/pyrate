@@ -9,10 +9,11 @@ import numpy as np
 from pyrate.core.Input import Input
 
 # Maximum length of the trace without a warning
+BIN_HEADER = 24
 MAX_TRACE_LENGTH = 50000
 LONG_MAX = 2**64
 
-class ReaderWaveDump(Input):
+class ReaderWaveDumpBinary(Input):
     __slots__ = ["_files", "_f", "_files_index", "_sizes", "size", "_bytes_read", 
                  "_variables", "_waveform", "timeshift", "_prevEventTime", 
                  "_eventTimeOverflows"]
@@ -59,7 +60,7 @@ class ReaderWaveDump(Input):
             return
 
         # Load the next file
-        self._f = open(self._files[self._files_index], "r")
+        self._f = open(self._files[self._files_index], "rb")
 
         if not self._f: return
         self.is_loaded = True
@@ -106,34 +107,34 @@ class ReaderWaveDump(Input):
         self._hasEvent = False
         self._waveform = []
 
-        head1 = self._f.readline()
+        head1 = self._f.read(4)
         if(head1 == ''): return False
-        head2 = self._f.readline()
+        head1 = int.from_bytes(head1, "little")
+        head2 = self._f.read(4)
         if(head2 == ''): return False
-        head3 = self._f.readline()
+        head2 = int.from_bytes(head2, "little")
+        head3 = self._f.read(4)
         if(head3 == ''): return False
-        head4 = self._f.readline()
+        head3 = int.from_bytes(head3, "little")
+        head4 = self._f.read(4)
         if(head4 == ''): return False
-        head5 = self._f.readline()
+        head4 = int.from_bytes(head4, "little")
+        head5 = self._f.read(4)
         if(head5 == ''): return False
-        head6 = self._f.readline()
+        head5 = int.from_bytes(head5, "little")
+        head6 = self._f.read(4)
         if(head6 == ''): return False
-        head7 = self._f.readline()
-        if(head7 == ''): return False
+        head6 = int.from_bytes(head6, "little")
 
-        self._bytes_read += (len(head1) + len(head2) + len(head3) + len(head4) 
-                                + len(head5) + len(head6) + len(head7))
-        
-        if head1[0] != 'R':
-            print(f"ERROR: in reader {self.name}, header misaligned in file {self.files[self._files_index]} after reading {self._bytes_read} bytes.")
+        self._bytes_read += BIN_HEADER
 
-        record_length = int(head1[:-1].split(":")[-1])
-        # board_id = int(head2[:-1].split(":")[-1])
-        # channel = int(head3[:-1].split(":")[-1])
-        # event_number = int(head4[:-1].split(":")[-1])
-        # pattern = int(head5[:-1].split(":")[-1], 16)
-        trigger_time_stamp = int(head6[:-1].split(":")[-1])
-        # dc_offset = int(head7[:-1].split(":")[-1], 16) / 4     
+        event_size = head1
+        record_length = (head1 - BIN_HEADER) // 2
+        # board_id = head2
+        # channel = head3
+        # event_number = head4
+        # pattern = head5
+        trigger_time_stamp = head6 
 
         # Work out the eventTime, handling overflows
         self._eventID = (self._eventTimeOverflows * 2**31) + trigger_time_stamp
@@ -143,9 +144,9 @@ class ReaderWaveDump(Input):
         self._prevEventTime = self._eventID
 
         i = 0
-        while i < record_length and (value := self._f.readline()):
+        while i < record_length and (value := self._f.read(2)):
             self._waveform.append(int(value))
-            self._bytes_read += len(value)
+            self._bytes_read += 2
             i += 1
  
         if i < record_length:
