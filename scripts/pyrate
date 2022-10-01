@@ -5,6 +5,7 @@ import argparse
 import yaml
 import cProfile
 import pstats
+import logging
 from datetime import datetime
 
 from pyrate.core.Job import Job
@@ -27,7 +28,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--logging_level",
+    "--log_level",
     "-l",
     help="logging level",
     required=False,
@@ -71,6 +72,17 @@ parser.add_argument(
     action="store", # store internally
 )
 
+parser.add_argument(
+    "--dump_objects",
+    "-d",
+    help="Specify the first event number (optional).",
+    required=False,
+    default=False,  # If not passed in
+    action="store", # store internally
+    nargs="?",      # allows for some args or None
+    const=True      # if -t there but no string pass in True
+)
+
 args = parser.parse_args()
 
 if __name__ == "__main__":
@@ -86,7 +98,13 @@ if __name__ == "__main__":
 
         j_config.update({"no_progress_bar": args.no_progress_bar})
 
-        j_log = args.logging_level
+        j_log = args.log_level
+
+        if "log_level" in args and args.log_level:
+            logging.basicConfig(level=args.log_level.upper())
+        else:
+            logger = logging.getLogger("pyrate")
+            logger.setLevel(logging.CRITICAL)
 
         job = Job(j_name, j_config, j_log, args)
 

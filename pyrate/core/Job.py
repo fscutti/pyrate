@@ -5,6 +5,7 @@ instances of a Run homogeneous in purpose and structure.
 import os
 import yaml
 import glob
+import logging
 
 import pprint
 
@@ -63,17 +64,23 @@ class Job:
             outputs[output_name]["path"] = path
 
         run_config = {"input": input, "outputs": outputs, "objects": objects}
+
         self.run = Run(self.name, run_config)
+        self.run.setup()
+
+        if self.run.logger.getEffectiveLevel() <= logging.DEBUG:
+            self.print_objects()
+        if "dump_objects" in self.args and self.args.dump_objects:
+            FN.dump_objects_to_yaml(objects, os.path.join(os.getcwd(), self.run.name + "_objects" + ".yaml"))
 
     def launch(self):
         """Launch Run objects. """
-        self.run.setup()
         self.run.run()
 
     def print_objects(self):
         """Prints out all objects"""
         pp = pprint.PrettyPrinter()
-        pp.pprint(self.job["configs"]["global"]["objects"])
+        pp.pprint(self.run.objects)
 
 
 # EOF

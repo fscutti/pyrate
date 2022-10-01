@@ -17,7 +17,6 @@ from pyrate.core.Store import Store
 from pyrate.utils import functions as FN
 from pyrate.utils import enums as EN
 
-LONG_MAX = 2**64
 
 class Run:
     def __init__(self, name, config):
@@ -45,6 +44,7 @@ class Run:
             logging.Formatter("[%(asctime)s %(name)-16s %(levelname)-7s]  %(message)s")
         )
         
+
         # the following two lines are temporary.
         self.logger = logging.getLogger("pyrate")
         self.logger.addHandler(fileHandler)
