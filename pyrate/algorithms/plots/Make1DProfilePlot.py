@@ -35,17 +35,16 @@ from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
 from pyrate.utils import ROOT_classes as CL
 
-import ROOT as R
-
-R.gStyle.SetOptStat(0)
-R.gROOT.SetBatch()
-
 
 class Make1DProfilePlot(Algorithm):
     __slots__ = ()
 
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
+        ROOT.gStyle.SetOptStat(0)
+        ROOT.gROOT.SetBatch()
 
     def initialise(self):
         """Prepares graphs.
@@ -127,6 +126,8 @@ class Make1DProfilePlot(Algorithm):
 
     def finalise(self):
         """Makes the plot."""
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
 
         plot_collection = {}
 
@@ -172,10 +173,10 @@ class Make1DProfilePlot(Algorithm):
 
                 l_name, c_name = p_name.split("|")
 
-                l = copy(R.TLegend(0.1, 0.8, 0.9, 0.9))
+                l = copy(ROOT.TLegend(0.1, 0.8, 0.9, 0.9))
                 l.SetHeader(l_name)
 
-                c = copy(R.TCanvas(p_name, "", 900, 800))
+                c = copy(ROOT.TCanvas(p_name, "", 900, 800))
 
                 c.SetTickx()
                 c.SetTicky()
@@ -248,7 +249,7 @@ class Make1DProfilePlot(Algorithm):
         # color = CL.Color(my_color["R"], my_color["G"], my_color["B"], f"{my_color['R'], my_color['G'], my_color['B']}")
         # setattr(R, color.name, color)
 
-        # _c = R.TColor()
+        # _c = ROOT.TColor()
         # color = _c.GetColor(my_color["R"], my_color["G"], my_color["B"])
         """
         return CL.ColorFinder(my_color["R"], my_color["G"], my_color["B"]).match()
@@ -276,11 +277,13 @@ class Make1DProfilePlot(Algorithm):
 
     def make_graph(self, g_name, variable, folder):
         """Make graphs."""
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
 
         var = self.get_var_dict(variable)
 
         g = copy(
-            R.TProfile(
+            ROOT.TProfile(
                 g_name,
                 g_name,
                 var["n_bins_x"],

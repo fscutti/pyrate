@@ -26,11 +26,11 @@
     Todo: Get baseline automatically for ZLE firmware
 
 """
-import numpy as np
-import numba
-from pyrate.core.Algorithm import Algorithm
 import sys
-
+import numba
+import numpy as np
+from pyrate.core.Algorithm import Algorithm
+from pyrate.utils.enums import Pyrate
 
 class BaselineReco(Algorithm):
     __slots__ = ()
@@ -80,9 +80,4 @@ class BaselineReco(Algorithm):
 
         return Baseline, StdDev, Delta
 
-
-
-
-
 # EOF
-

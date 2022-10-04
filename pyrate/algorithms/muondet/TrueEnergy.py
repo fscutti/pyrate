@@ -1,7 +1,5 @@
 """ Compute average energy in input bins.
 """
-import sys
-from copy import copy
 
 from pyrate.core.Algorithm import Algorithm
 
@@ -14,7 +12,7 @@ class TrueEnergy(Algorithm):
 
     def execute(self, condition=None):
 
-        te = self.store.get(self.config["etrue"])[0]
+        te = self.store.get(self.config["input"]["etrue"])[0]
 
         self.store.put(self.name, te)
 

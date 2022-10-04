@@ -28,12 +28,9 @@
 
 """
 import sys
-import numpy as np
-from pyrate.core.Algorithm import Algorithm
-import sys
-from scipy.ndimage.filters import uniform_filter1d
-from pyrate.utils.enums import Pyrate
 import numba
+from pyrate.core.Algorithm import Algorithm
+from pyrate.utils.enums import Pyrate
 
 
 class BaselineNaive(Algorithm):
@@ -74,6 +71,4 @@ class BaselineNaive(Algorithm):
 
         return Baseline
 
-
 # EOF
-

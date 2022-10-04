@@ -34,10 +34,10 @@
 
 """
 
+import numba
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
 from pyrate.utils.enums import Pyrate
-import numba
 
 class CFD(Algorithm):
     __slots__ = ("delay", "scale", "cfd_threshold", "cfd", "waveform", "waveform_delayed", "CFDTimes")
@@ -66,14 +66,16 @@ class CFD(Algorithm):
         if waveform is Pyrate.NONE:
             return
 
-        self.CFDTimes, self.cfd = self.CFDCalc(waveform=waveform, cfd = self.cfd, delay = self.delay, scale = self.scale, cfd_threshold = self.cfd_threshold)
+        self.CFDTimes, self.cfd = self.CFDCalc(waveform=waveform, cfd=self.cfd, 
+                                                delay=self.delay, scale=self.scale, 
+                                                cfd_threshold=self.cfd_threshold)
 
         if self.CFDTimes.size == 0:
             return
 
         self.store.put(self.name, self.CFDTimes[0])
-        self.store.put(f"{self.output['times']}", self.CFDTimes)
-        self.store.put(f"{self.output['trace']}", self.cfd)
+        self.store.put(f"{self.config['output']['times']}", self.CFDTimes)
+        self.store.put(f"{self.config['output']['trace']}", self.cfd)
 
     # Remove numpy dependence for speed and cross-check with more up to date code above
     @staticmethod

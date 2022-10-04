@@ -33,10 +33,10 @@
 """
 
 import sys
+import numba
+import numpy as np
 from pyrate.core.Algorithm import Algorithm
 from pyrate.utils.enums import Pyrate
-import numpy as np
-import numba
 
 wf_units = {"V": 1.0, "mV": 1e3, "uV": 1e6}
 
@@ -118,7 +118,8 @@ class CorrectedWaveform(Algorithm):
         
         # Flip the waveform if needed, and subtract baseline
         # corrected_waveform = self.conversion * self.polarity * (waveform - baseline)
-        corrected_waveform = self.CorrectedWaveformCalc(waveform=waveform, polarity=self.polarity, conversion=self.conversion, baseline=baseline)
+        corrected_waveform = self.CorrectedWaveformCalc(waveform=waveform, polarity=self.polarity, 
+                                                        conversion=self.conversion, baseline=baseline)
         self.store.put(self.name, corrected_waveform)
 
     @staticmethod
@@ -129,7 +130,7 @@ class CorrectedWaveform(Algorithm):
 
         # Flip the waveform if needed, and subtract baseline
         for i in range(len(waveform)):
-            corrected_waveform[i] = conversion * polarity * (waveform[i] - baseline)
+            corrected_waveform[i] = conversion*polarity*(waveform[i] - baseline)
 
         return corrected_waveform
 

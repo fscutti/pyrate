@@ -19,10 +19,10 @@
             window: Window_CHX
 """
 
+import numba
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
 from pyrate.utils.enums import Pyrate
-import numba
 
 
 class MeanTime(Algorithm):
@@ -51,7 +51,8 @@ class MeanTime(Algorithm):
             window_start = window[0]
             window_end = window[1]
 
-        MeanTime = self.MeanTimeCalc(waveform=waveform, window_start=window_start, window_end=window_end, sample_period=self.sample_period)
+        MeanTime = self.MeanTimeCalc(waveform=waveform, window_start=window_start,
+                                     window_end=window_end, sample_period=self.sample_period)
 
         self.store.put(self.name, MeanTime)
 
@@ -76,4 +77,3 @@ class MeanTime(Algorithm):
         return MeanTime
 
 # EOF
-

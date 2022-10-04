@@ -1,6 +1,5 @@
 """Utility classes."""
 
-import ROOT as R
 import numpy as np
 
 class Color(int):
@@ -9,8 +8,10 @@ class Color(int):
     """
 
     def __new__(cls, r, g, b, name=""):
-        self = int.__new__(cls, R.TColor.GetFreeColorIndex())
-        self.object = R.TColor(self, r, g, b, name, 1.0)
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
+        self = int.__new__(cls, ROOT.TColor.GetFreeColorIndex())
+        self.object = ROOT.TColor(self, r, g, b, name, 1.0)
         self.name = name
         return self
 
@@ -19,8 +20,10 @@ class ColorFinder:
     """Handles color matching with ROOT ones starting from an arbitrary pixel."""
 
     def __init__(self, r, g, b):
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
         self.my_color = np.array((r, g, b))
-        self._c = R.TColor()
+        self._c = ROOT.TColor()
 
     def match(self):
         """Find closest color within ROOT color wheel."""
@@ -40,14 +43,16 @@ class ColorFinder:
 
     def _init_wheel(self):
         """Initialise ROOT color wheel."""
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
 
         self._wheel = []
 
         colors = {
-            (-10, 15): [R.kRed, R.kBlue, R.kGreen, R.kMagenta, R.kCyan, R.kYellow],
-            (-9, 20): [R.kPink, R.kAzure, R.kSpring, R.kOrange, R.kViolet, R.kTeal],
-            (0, 1): [R.kBlack, R.kWhite],
-            (0, 4): [R.kGray],
+            (-10, 15): [ROOT.kRed, ROOT.kBlue, ROOT.kGreen, ROOT.kMagenta, ROOT.kCyan, ROOT.kYellow],
+            (-9, 20): [ROOT.kPink, ROOT.kAzure, ROOT.kSpring, ROOT.kOrange, ROOT.kViolet, ROOT.kTeal],
+            (0, 1): [ROOT.kBlack, ROOT.kWhite],
+            (0, 4): [ROOT.kGray],
         }
 
         for (shift, window), color_list in colors.items():
@@ -57,9 +62,9 @@ class ColorFinder:
                     [
                         np.array(
                             (
-                                R.gROOT.GetColor(c + i + shift).GetRed(),
-                                R.gROOT.GetColor(c + i + shift).GetGreen(),
-                                R.gROOT.GetColor(c + i + shift).GetBlue(),
+                                ROOT.gROOT.GetColor(c + i + shift).GetRed(),
+                                ROOT.gROOT.GetColor(c + i + shift).GetGreen(),
+                                ROOT.gROOT.GetColor(c + i + shift).GetBlue(),
                             )
                         )
                         for i in range(window)

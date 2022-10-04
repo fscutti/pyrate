@@ -1,280 +1,248 @@
-""" Reader of binary files from CAEN1730 digitizers using the zle firmware.
+""" Reader of binary files from CAEN1730 digitizers using the PSD firmware.
 This version of the reader uses memory mapping to read the file:
 https://docs.python.org/3.0/library/mmap.html.
 
 Binary data is written according to the scheme given in the PSD manual
 """
+
 import os
-import mmap
-import struct
-from pyrate.utils.enums import Pyrate
+import sys
+import glob
 import numpy as np
 
-from pyrate.core.Reader import Reader
+from pyrate.core.Input import Input
+from pyrate.utils.enums import Pyrate
 
+# Maximum length of the trace without a warning
+MAX_TRACE_LENGTH = 50000
+LONG_MAX = 2**64
 
-class ReaderCAEN1730_PSD(Reader):
-    __slots__ = [
-        "f",
-        "_mmf",
-        "_mmfSize",
-        "_eventPos",
-        "_readIdx",
-        "_coincWind",
-        "_hasSubEvent",
-        "_inSub",
-        "_subTime",
-        "_subChTimes",
-        "_subWaveforms",
-        "_inEvt",
-        "_evtTime",
-        "_evtTimeMax",
-        "_evtChTimes",
-        "_evtWaveforms",
-    ]
+class ReaderCAEN1730_PSD(Input):
+    __slots__ = ["_files", "_f", "_files_index", "_sizes", "size", "_bytes_read", 
+                 "_inEvent", "_variables", "_eventChTimes", "_eventWaveforms", 
+                 "_baseline", "_qLong", "_qShort", "channels", "timeshift", 
+                 "_large_waveform_warning"]
 
-    def __init__(self, name, config, store, logger, f_name, structure):
+    def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
-        self.f = f_name
 
-    def load(self):
+        self.channels = 8
+        self.timeshift = 0 if "timeshift" not in config else config["timeshift"]
+        # Set the outputs manually
+        self._variables = {}
+        for ch in range(self.channels):
+            output_format = "{name}_ch{ch}_{variable}" # Default formatting
+            if "output" in config:
+                # The user has provided a custom output formatting
+                output_format = config["output"]
+            self._variables.update({f"{ch}_timestamp": output_format.format(name=self.name, ch=ch, variable="timestamp"), 
+                            f"{ch}_waveform": output_format.format(name=self.name, ch=ch, variable="waveform"),
+                            f"{ch}_baseline": output_format.format(name=self.name, ch=ch, variable="baseline"),
+                            f"{ch}_qLong": output_format.format(name=self.name, ch=ch, variable="qLong"),
+                            f"{ch}_qShort": output_format.format(name=self.name, ch=ch, variable="qShort")})
+
+        self.output = self._variables.values()
+        
+        # Prepare all the files
+        self.is_loaded = False
+        self._files = []
+        for f in self.config["files"]:
+            f = os.path.expandvars(f)
+            self._files += sorted(glob.glob(f))
+        if len(self._files) == 0:
+            sys.exit(f"ERROR: in reader {self.name}, no files were found.")
+
+        self._files_index = 0
+        self._sizes = [os.path.getsize(f) for f in self._files]
+        self._bytes_read = 0
+        self.size = sum(self._sizes)
+        # Set the progress to 0, unless the files are empty
+        self._progress = 0 if self.size !=0 else 1
+
+        # Set the large waveform warning flag to false
+        self._large_waveform_warning = False
+
+        # Load the first file
+        self._load_next_file()
+
+    def _load_next_file(self):
+        if self.is_loaded:
+            self.offload()
+
+        # Check if there are more files
+        if self._files_index >= len(self._files):
+            return
+
+        # Load the next file
+        self._f = open(self._files[self._files_index], "rb")
+
+        if not self._f: return
         self.is_loaded = True
+        self._files_index += 1
 
-        self.f = open(self.f, "rb")
-        self._mmf = mmap.mmap(self.f.fileno(), length=0, access=mmap.ACCESS_READ)
-        self.f.close()
-
-        self._eventPos = []
-        self._hasSubEvent = False
-        self._mmfSize = self._mmf.size()
-
-        # TODO: Configure thie
-        self._coincWind = 1000
-
-        self._readIdx = -1
+        # Pull in the first event information, ready to go
+        self.read_next_event()
 
     def offload(self):
         self.is_loaded = False
-        self._mmf.close()
+        self._f.close()
 
-    def read(self, name):
+    def finalise(self, condition=None):
+        self.offload()
 
-        if name.startswith("EVENT:"):
-            if self._readIdx != self._idx:
-                self._read_event()
-                self._readIdx = self._idx
+    def get_event(self, skip=False):
+        if not self._hasEvent:
+            return False
 
-            # Split the request
-            path = self._break_path(name)
+        #Put the event on the store
+        if not skip:
+            for ch in range(self.channels):
+                if ch in self._inEvent:
+                    self.store.put(f"{self._variables[f'{ch}_timestamp']}", self._eventChTimes[ch])
+                    self.store.put(f"{self._variables[f'{ch}_waveform']}", np.array(self._eventWaveforms[ch], dtype="int32"))
+                    self.store.put(f"{self._variables[f'{ch}_baseline']}", self._baseline[ch])
+                    self.store.put(f"{self._variables[f'{ch}_qLong']}", self._qLong[ch])
+                    self.store.put(f"{self._variables[f'{ch}_qShort']}", self._qShort[ch])
 
-            # Get the event value
-            if path["variable"] == "timestamp":
-                value = self._evtTime
-            elif path["variable"] == "ch_timestamp":
-                value = self._get_timestamps(path["ch"])
-            elif path["variable"] == "waveform":
-                value = self._get_waveform(path["ch"])
+        # Get the next event
+        if not self.read_next_event():
+            self._load_next_file()
 
-            # Add the value to the transiant store
-            self.store.put(name, value)
-
-        elif name.startswith("INPUT:"):
-            pass
-
-    def set_n_events(self):
-        """Reads number of events using the last event header."""
-        # Seek to the start of the file
-        self._mmf.seek(0, 0)
-        self._n_events = 0
-
-        # Scan through the entire file
-        # TODO: This is hard to do without scanning through the entire file.  Skipping through like this will over estimate the number of events.
-        # TODO: The idea of a pyrate event is somewhat different from the idea of a digitizer event (especially between instances).  Need to discuss
-        while True:
-            # TODO: An alternate which gets the actual number of events.  Not very fast though
-            # self._eventPos.append(self._mmf.tell())
-            # self._read_event()
-            # self._n_events +=1
-            # if(self._mmf.tell() == self._mmfSize):
-            #    break
-
-            # Read in the event info from the header
-            self._eventPos.append(self._mmf.tell())
-            
-            while head1 := self._mmf.read(4):
-                head1 = int.from_bytes(head1, "little")
-                if (head1 & 0xFFFF0000) == 0xa0000000:
-                    break
-            else:
-                self._mmf.seek(0, 0)
-                return
-                # If we read something, increment the event counter and skip to the next event
-            self._n_events += 1
-            eventSize = head1 & 0b00001111111111111111111111111111
-
-            seekSize = 4 * (eventSize - 1)  # How far we need to jump
-            # Make sure we're not seeking beyond the EOF
-            if (self._mmf.tell() + seekSize) > self._mmfSize:
+        return True
+    
+    def skip_events(self, n):
+        """ Skips over n events
+        """
+        for i in range(n):
+            if not self.get_event(skip=True):
                 break
 
-            self._mmf.seek(seekSize, 1)
-
-        self._mmf.seek(0, 0)
-        # self._idx = 0
-        # self._readIdx = -1
-
-    def _break_path(self, path):
-        """Takes a path request from pyrate and splits it into a dictionary"""
-        splitPath = path.split(":")
-
-        ret = {}
-        ret["variable"] = splitPath[-1]
-        if len(splitPath) > 2:
-            ret["board"] = int(splitPath[1].split("_")[-1])
-            if len(splitPath) > 3:
-                ret["ch"] = int(splitPath[2].split("_")[-1])
-
-        return ret
-
-    def _get_waveform(self, ch):
-        """Reads variable from the event and puts it in the transient store."""
-        # If the channel is not in the event return an empty list
-        # ToDo: Confirm this behaviour in pyrate
-        if ch not in self._inEvt.keys():
-            return Pyrate.NONE
-
-        # Return the waveform and mark that this channel has been read
-        return np.array(self._evtWaveforms[ch], dtype="int32")
-
-    def _get_timestamps(self, ch):
-        # If the channel is not in the event return an empty list
-        # ToDo: Confirm this behaviour in pyrate
-        if ch not in self._inEvt.keys():
-            return Pyrate.NONE
-
-        # Return the waveform and mark that this channel has been read
-        return self._evtChTimes[ch]
-
-    def _read_event(self):
+    def read_next_event(self):
         # Reset event
-        self._evtTime = 2 ** 64
-        self._evtTimeMax = 2 ** 64
-        self._inEvt = {}
-        self._evtChTimes = {}
-        self._evtWaveforms = {}
+        # Declare all the variables
+        self._eventID = LONG_MAX # Largest possible number, invalid value
+        self._hasEvent = False
+        self._inEvent = {}
+        self._eventChTimes = {}
+        self._eventWaveforms = {}
+        self._baseline = {}
+        self._qShort = {}
+        self._qLong = {}
 
-        self._AddSubEvent()
-
-        while True:
-            if self._read_sub_event() == False:
-                break
-
-            if self._AddSubEvent() == False:
-                break
-
-    def _AddSubEvent(self):
-        # Return false if there's no sub event
-        if self._hasSubEvent == False:
-            return False
-
-        # Return false if the subevent isn't in the coincidence window
-        if self._subTime > self._evtTime + self._coincWind:
-            return False
-
-        # Return false if a channel is already present in the event
-        for i in range(16):
-            if i in self._inSub.keys() and i in self._inEvt.keys():
-                return False
-
-        # Otherwise, add the subevent to the event
-        if self._subTime < self._evtTime:
-            self._evtTime = self._subTime
-
-        if (
-            self._subTime + self._coincWind > self._evtTimeMax
-            or self._evtTimeMax == 2 ** 64
-        ):
-            self._evtTimeMax = self._subTime + self._coincWind
-            if self._evtTimeMax < 0:
-                self._evtTimeMax = 2 ** 64
-
-        for i in range(16):
-            if i in self._inSub.keys():
-                self._inEvt[i] = True
-                self._evtChTimes[i] = self._subChTimes[i]
-                self._evtWaveforms[i] = self._subWaveforms[i]
-
-        # Reset the subevent
-        self._hasSubEvent = False
-
-    def _read_sub_event(self):
-        # self._mmf.seek(self._eventPos[self._idx],0)
-        self._hasSubEvent = True
-        # Read in the event info from the header
-        while head1 := self._mmf.read(4):
+        # Read in the event information
+        # Need to keep reading till we get head1
+        while head1 := self._f.read(4):
             head1 = int.from_bytes(head1, "little")
             if (head1 & 0xFFFF0000) == 0xa0000000:
                 break
         else:
-            self._mmf.seek(0, 0)
-            return
+            return False
 
-        head2 = self._mmf.read(4)
-        head2 = int.from_bytes(head2, "little")
-        head3 = self._mmf.read(4)
-        head3 = int.from_bytes(head3, "little")
-        head4 = self._mmf.read(4)
-        head4 = int.from_bytes(head4, "little")
+        head2 = self._f.read(4)
+        if(head2 == bytes()):
+            return False
+        head2 = int.from_bytes(head2,"little")
 
+        head3 = self._f.read(4)
+        if(head3 == bytes()):
+            return False
+        head3 = int.from_bytes(head3,"little")
+
+        head4 = self._f.read(4)
+        if(head4 == bytes()):
+            return False
+        head4 = int.from_bytes(head4,"little")
+
+        # print(head1, head2, head3, head4)
+
+        # The event size as a longword, x4 for in bytes
         eventSize = head1 & 0b00001111111111111111111111111111
-        dualChannelMask = head2 & 0b11111111
+        dualChannelMask =  (head2 & 0b11111111)
         evtCount = head3 & 0b00000000111111111111111111111111
 
-        self._subTime = 2 ** 64
-        self._inSub = {}
-        self._subChTimes = {}
-        self._subWaveforms = {}
-        # Scan through the channel headers
-        for i in range(8):
+        #Scan through the channel headers
+        for i in range(self.channels):
             if dualChannelMask & (1 << i):
-                chHead1 = self._mmf.read(4)
+                chHead1 = self._f.read(4)
+                if (chHead1 == bytes()):
+                    return False
                 chHead1 = int.from_bytes(chHead1, "little")
-                chHead2 = self._mmf.read(4)
+
+                chHead2 = self._f.read(4)
+                if (chHead2 == bytes()):
+                    return False              
                 chHead2 = int.from_bytes(chHead2, "little")
+
+                dualTrace =       (chHead2 & 0b10000000000000000000000000000000) >> 31
+                chargeEnabled =   (chHead2 & 0b01000000000000000000000000000000) >> 30
+                timeEnabled =     (chHead2 & 0b00100000000000000000000000000000) >> 29
+                extrasEnabled =   (chHead2 & 0b00010000000000000000000000000000) >> 28
+                samplesEnabled =  (chHead2 & 0b00001000000000000000000000000000) >> 27
+                extrasOpEnabled = (chHead2 & 0b00000100000000000000000000000000) >> 26
+                extrasWord =      (chHead2 & 0b00000011100000000000000000000000) >> 23
 
                 aggregateSize = chHead1 & 0b00000000001111111111111111111111
                 recordSize = chHead2 & 0b00000000000000001111111111111111
 
-                chTime = self._mmf.read(4)
+                chTime = self._f.read(4)
+                if (chTime == bytes()):
+                    return False
                 chTime = int.from_bytes(chTime, "little")
                 ch = 2 * i + ((chTime & 0b10000000000000000000000000000000) >> 31)
 
-                self._subWaveforms[ch] = []
-                self._inSub[ch] = True
-                recordSize = int(recordSize * 8 / 2)
+                self._eventWaveforms[ch] = []
+                self._inEvent[ch] = True
+                recordSize = int(recordSize *8/2)
                 for j in range(recordSize):
-                    sample = self._mmf.read(4)
-                    sample = int.from_bytes(sample, "little")
-                    self._subWaveforms[ch].append(
-                        (sample & 0b00000000000000000011111111111111)
-                    )
-                    self._subWaveforms[ch].append(
-                        (sample & 0b00111111111111110000000000000000) >> 16
-                    )
+                    sample = self._f.read(4)
+                    sample = int.from_bytes(sample,"little")
+                    self._eventWaveforms[ch].append((sample & 0b00000000000000000011111111111111))
+                    self._eventWaveforms[ch].append((sample & 0b00111111111111110000000000000000) >> 16)
 
-                extras = self._mmf.read(4)
+                extras = self._f.read(4)
+                if(extras == bytes()):
+                    return False
                 extras = int.from_bytes(extras, "little")
-                charge = self._mmf.read(4)
+
+                charge = self._f.read(4)
+                if(charge == bytes()):
+                    return False
                 charge = int.from_bytes(charge, "little")
 
                 qLong = (charge & 0b11111111111111110000000000000000) >> 16
-                qShrt = charge & 0b00000000000000000111111111111111
+                qShort = charge & 0b00000000000000000111111111111111
+                self._qLong[ch] = qLong
+                self._qShort[ch] = qShort
+
+                if extrasWord == 0b000:
+                    self._baseline[ch] = (extras & 0b00000000000000001111111111111111) / 4 # divide by 4 as per manual
+                else:
+                    self._baseline[ch] = Pyrate.NONE
+
                 timeHi = (extras & 0b11111111111111110000000000000000) << 15
                 timeLo = chTime & 0b01111111111111111111111111111111
-                self._subChTimes[ch] = timeHi + timeLo
+                self._eventChTimes[ch] = timeHi + timeLo
 
-                if self._subChTimes[ch] < self._subTime:
-                    self._subTime = self._subChTimes[ch]
+                # Convert to ns
+                self._eventChTimes[ch] = 2*self._eventChTimes[ch]
+                
+                # Find the smallest event channel time, and set it to the 
+                # reader's event time
+                if self._eventChTimes[ch] < self._eventID:
+                    self._eventID = self._eventChTimes[ch] + self.timeshift
 
+                # Check for extra large waveforms
+                if not self._large_waveform_warning and len(self._eventWaveforms[ch]) > MAX_TRACE_LENGTH:
+                    print(f"WARNING: Extra large waveform detected in {self.name}, channel {i} has length {len(self._eventWaveforms[ch])}.\n"
+                           "Double check the reader matches the firmware")
+                    self._large_waveform_warning = True
+
+        # Update the number of bytes read by the eventSize
+        self._bytes_read += 4*eventSize
+        # Update the progress
+        self._progress = self._bytes_read / self.size
+        self._hasEvent = True
+
+        return True
 
 # EOF

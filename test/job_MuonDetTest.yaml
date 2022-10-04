@@ -1,0 +1,53 @@
+input:
+    event_start: 0
+    event_num: -1
+
+    Neutron:
+        algorithm: EventBuilder
+        parallel: True
+        gamma_nT:
+            reader: ReaderROOT
+            files:
+                - $PYRATE/test/data/gamma_pos5_test.root
+            tree: nT
+        gamma_TotT:
+            reader: ReaderROOT
+            files:
+                - $PYRATE/test/data/gamma_pos5_test.root
+            tree: TotT
+        photon_nT:
+            reader: ReaderROOT
+            files:
+                - $PYRATE/test/data/gamma_pos5_test.root
+            tree: nT
+        photon_TotT:
+            reader: ReaderROOT
+            files:
+                - $PYRATE/test/data/gamma_pos5_test.root
+            tree: TotT
+        neutron_nT:
+            reader: ReaderROOT
+            files:
+                - $PYRATE/test/data/neutron_pos5_test.root
+            tree: nT
+        neutron_TotT:
+            reader: ReaderROOT
+            files:
+                - $PYRATE/test/data/neutron_pos5_test.root
+            tree: TotT
+
+configs:
+    - $PYRATE/config/muondet/objects.yaml
+    - $PYRATE/config/muondet/analysis.yaml
+
+outputs:
+    MuonDetTest:
+        algorithm: OutputROOT
+        path: $PYRATE/test
+        format: root
+        targets:
+            - gamma_muonDetTest
+            - neutron_muonDetTest
+            - photon_muonDetTest
+
+# EOF

@@ -24,7 +24,7 @@ add_to_python_path()
 add_to_path()
 {
     export PATH=$1:$PATH
-    echo "  Added $1 to your PATH."
+    #echo "  Added $1 to your PATH."
 }
 
 ## ----------------
@@ -41,20 +41,7 @@ add_to_path()
 # add_to_python_path ${PYRATE}/pyrate
 # echo "  done."
 
-## ---------------------------------------------
-## Add pyrate/scripts directory to PATH
-## ---------------------------------------------
-#echo "  Add scripts to PATH."
-#add_to_path ${PYRATE}/scripts
-#echo "  done."
-
-export DAQ_SCRIPTS=$(pwd)/scripts
-if [ -n "${PATH}" ]; then
-    export PATH=${DAQ_SCRIPTS}:${PATH}
-else
-    export PATH=${DAQ_SCRIPTS}
-fi
-
+add_to_path ${PYRATE}/scripts
 
 # virtual environmens are very helpful for development
 # and cause 0 overhead; essentially just add another location

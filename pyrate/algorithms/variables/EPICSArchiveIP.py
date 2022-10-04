@@ -18,7 +18,6 @@
           timestamp: EVENT:board_0:ch_0:ch_timestamp
 """
 
-import numpy as np
 from pyrate.core.Algorithm import Algorithm
 from pyrate.utils.enums import Pyrate
 

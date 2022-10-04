@@ -1,18 +1,14 @@
 """ .
 """
 import os
-import sys
 from copy import copy
 
 import numpy as np
-from scipy import stats
 
 from pyrate.core.Algorithm import Algorithm
 
 from pyrate.utils import strings as ST
 from pyrate.utils import functions as FN
-
-import ROOT as R
 
 
 class Make1DGraph(Algorithm):
@@ -100,6 +96,8 @@ class Make1DGraph(Algorithm):
 
     def finalise(self, condition=None):
         """Makes the plot."""
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
 
         if "gather" in self.config["algorithm"]:
             gather = self.config["algorithm"]["gather"]
@@ -140,7 +138,7 @@ class Make1DGraph(Algorithm):
 
                         if not p_entry in p_collection:
                             p_collection[p_entry] = {
-                                "canvas": R.TCanvas(p_name, "", 900, 800),
+                                "canvas": ROOT.TCanvas(p_name, "", 900, 800),
                                 "graphs": [],
                             }
 
@@ -180,7 +178,7 @@ class Make1DGraph(Algorithm):
 
                 p_name = p_dict["canvas"].GetName()
 
-                h_stack = copy(R.THStack(p_name, p_name))
+                h_stack = copy(ROOT.THStack(p_name, p_name))
 
                 for h in p_dict["graphs"]:
                     h_stack.Add(h)
@@ -205,8 +203,9 @@ class Make1DGraph(Algorithm):
         self.store.put(self.name, plots, "PERM")
 
     def prepare_graph(self, g_name, g_attributes):
-
-        g = copy(R.TGraphErrors(R.Int_t(g_attributes[0])))
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
+        g = copy(ROOT.TGraphErrors(ROOT.Int_t(g_attributes[0])))
 
         g.SetName(g_name)
         g.SetTitle("")
@@ -293,18 +292,19 @@ class Make1DGraph(Algorithm):
         return f"{iname}:{histogram}"
 
     def get_ROOT_colors(self, my_color):
-
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
         ROOT_color_name = "kBlack"
         ROOT_color_mod = ""
         color = 1
 
         if "+" in my_color:
             ROOT_color_name, ROOT_color_mod = my_color.split("+")
-            color = getattr(R, ROOT_color_name) + R.Int_t(ROOT_color_mod)
+            color = getattr(R, ROOT_color_name) + ROOT.Int_t(ROOT_color_mod)
 
         elif "-" in my_color:
             ROOT_color_name, ROOT_color_mod = my_color.split("-")
-            color = getattr(R, ROOT_color_name) - R.Int_t(ROOT_color_mod)
+            color = getattr(R, ROOT_color_name) - ROOT.Int_t(ROOT_color_mod)
         else:
             color = getattr(R, my_color)
 

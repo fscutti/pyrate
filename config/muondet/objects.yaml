@@ -1,243 +1,265 @@
---- 
 # -----------------------------------------------------------
 # Objects computed by algorithms
 # -----------------------------------------------------------
 
+<input>: [gamma, photon, neutron]
+
 objects:
-     # -----------------------------------------------------------
-     # Variables
-     # -----------------------------------------------------------
-     
-     simWaveforms:
-       algorithm: SimulatedWaveformsBuilder
-       input:
-         time: EVENT:nT:timePMT_hits
-         energy: EVENT:nT:photonEnPMT_hits
-         hits_x_positions: EVENT:nT:xPMT_hits
-         hits_y_positions: EVENT:nT:yPMT_hits
-         hits_z_positions: EVENT:nT:zPMT_hits
-    
+    # -----------------------------------------------------------
+    # Variables
+    # -----------------------------------------------------------
 
-     # Waveforms
-     # -----------------------------------------------------------
-     wfPMT8:
-       algorithm: SimulatedWaveformsGetter
-       pmt_name: PMT8
-       input:
-           waveform_map: simWaveforms
-
-     wfPMT9:
-       algorithm: SimulatedWaveformsGetter
-       pmt_name: PMT9
-       input:
-           waveform_map: simWaveforms
-
-     wfPMT12:
-       algorithm: SimulatedWaveformsGetter
-       pmt_name: PMT12
-       input:
-           waveform_map: simWaveforms
-
-     wfPMT13:
-       algorithm: SimulatedWaveformsGetter
-       pmt_name: PMT13
-       input:
-           waveform_map: simWaveforms
+    <input>_simWaveforms:
+        algorithm: SimulatedWaveformsBuilder
+        input:
+            time: <input>_nT_timePMT_hits
+            energy: <input>_nT_photonEnPMT_hits
+            hits_x_positions: <input>_nT_xPMT_hits
+            hits_y_positions: <input>_nT_yPMT_hits
+            hits_z_positions: <input>_nT_zPMT_hits
 
 
-     # Energies
-     # -----------------------------------------------------------
-     numPhotonsPMT8:
-         algorithm: TimeWeightedPulse
-         only_photons: True
-         input:
-             waveform: wfPMT8
+    # Waveforms
+    # -----------------------------------------------------------
+    <input>_wfPMT8:
+        algorithm: SimulatedWaveformsGetter
+        pmt_name: PMT8
+        input:
+            waveform_map: <input>_simWaveforms
+        output:
+            energy: <input>_wfPMT8_energy
+            time: <input>_wfPMT8_time
 
-     numPhotonsPMT9:
-         algorithm: TimeWeightedPulse
-         only_photons: True
-         input:
-             waveform: wfPMT9
+    <input>_wfPMT9:
+        algorithm: SimulatedWaveformsGetter
+        pmt_name: PMT9
+        input:
+            waveform_map: <input>_simWaveforms
+        output:
+            energy: <input>_wfPMT9_energy
+            time: <input>_wfPMT9_time
 
-     numPhotonsPMT12:
-         algorithm: TimeWeightedPulse
-         only_photons: True
-         input:
-             waveform: wfPMT12
-     
-     numPhotonsPMT13:
-         algorithm: TimeWeightedPulse
-         only_photons: True
-         input:
-             waveform: wfPMT13
+    <input>_wfPMT12:
+        algorithm: SimulatedWaveformsGetter
+        pmt_name: PMT12
+        input:
+            waveform_map: <input>_simWaveforms
+        output:
+            energy: <input>_wfPMT12_energy
+            time: <input>_wfPMT12_time
 
-     measEnergyPMT8:
-         algorithm: TimeWeightedPulse
-         input: 
-             waveform: wfPMT8
-
-     measEnergyPMT9:
-         algorithm: TimeWeightedPulse
-         input: 
-             waveform: wfPMT9
-     
-     measEnergyPMT12:
-         algorithm: TimeWeightedPulse
-         input: 
-             waveform: wfPMT12
-
-     measEnergyPMT13:
-         algorithm: TimeWeightedPulse
-         input: 
-             waveform: wfPMT13
-
-     muonDetEnergy:
-         algorithm: MuonDetCharge
-         format: ROOT
-         input:
-             edep: EVENT:nT:edepScint
+    <input>_wfPMT13:
+        algorithm: SimulatedWaveformsGetter
+        pmt_name: PMT13
+        input:
+            waveform_map: <input>_simWaveforms
+        output:
+            energy: <input>_wfPMT13_energy
+            time: <input>_wfPMT13_time
 
 
-     trueParticleEnergy:
-         algorithm: TrueEnergy
-         input:
-             etrue: EVENT:nT:ekin_particle
-         
-     xParticleHitPos:
-       algorithm: ParticleHitPosition
-       coordinate: x
-       input:
-           xpos: EVENT:TotT:XPosTot
-           ypos: EVENT:TotT:YPosTot
-           zpos: EVENT:TotT:ZPosTot
+    # Energies
+    # -----------------------------------------------------------
+    <input>_numPhotonsPMT8:
+        algorithm: TimeWeightedPulse
+        only_photons: True
+        input:
+            waveform: <input>_wfPMT8
 
-     yParticleHitPos:
-       algorithm: ParticleHitPosition
-       coordinate: y
-       input:
-           xpos: EVENT:TotT:XPosTot
-           ypos: EVENT:TotT:YPosTot
-           zpos: EVENT:TotT:ZPosTot
+    <input>_numPhotonsPMT9:
+        algorithm: TimeWeightedPulse
+        only_photons: True
+        input:
+            waveform: <input>_wfPMT9
 
-     # -----------------------------------------------------------
-     # Histograms
-     # -----------------------------------------------------------
-     #
+    <input>_numPhotonsPMT12:
+        algorithm: TimeWeightedPulse
+        only_photons: True
+        input:
+            waveform: <input>_wfPMT12
 
+    <input>_numPhotonsPMT13:
+        algorithm: TimeWeightedPulse
+        only_photons: True
+        input:
+            waveform: <input>_wfPMT13
 
-     # -----------------------------------------------------------
-     # Plots
-     # -----------------------------------------------------------
-     # WARNING: there is a bug in Make1DHistPlot ovewriting instances
-     # of plots in the internal dictionary. This is happening because
-     # different canvases have the same name. 
-     muonDetPlot1D:
+    <input>_measEnergyPMT8:
+        algorithm: TimeWeightedPulse
+        input: 
+            waveform: <input>_wfPMT8
 
-         algorithm: Make1DHistPlot
-         overlay: variables
+    <input>_measEnergyPMT9:
+        algorithm: TimeWeightedPulse
+        input: 
+            waveform: <input>_wfPMT9
 
-         input:
-             folders:
-                 main/pmt_variables1:
-                     regions: muonDetParticlePos5, muonDetParticlePos1
-                     variables:
-                       - measEnergyPMT8, 30, 0., 4e-6, "# of photons", "Entries", "R:0.|G:1.0| B:0."
-                       - measEnergyPMT12, 30, 0., 4e-6, "# of photons", "Entries", "R:1.0| G:1.| B:0."
-                 
-                 main/pmt_variables2:
-                     regions: muonDetParticlePos5
-                     variables:
-                       - measEnergyPMT9, 30, 0., 4e-6, "# of photons", "Entries", "R:0.6| G:0.6| B:0.2"
-                       - measEnergyPMT13, 30, 0., 4e-6, "# of photons", "Entries", "R:1.0| G:0.8| B:0.2"
-                 
-                 main:
-                     regions: muonDetParticlePos5
-                     variables:
-                       - measEnergyPMT12, 30, 0., 4e-6, "# of photons", "Entries", "R:0.7|G:0.0|B:0.1"
-                       - measEnergyPMT13, 30, 0., 4e-6, "# of photons", "Entries", "R:.2|G:.2|B:0.6"
-                            
-                 main:
-                     regions: muonDetParticlePos5
-                     variables:
-                       - measEnergyPMT8, 30, 0., 4e-6, "# of photons", "Entries", "R:.2|G:.6|B:.6"
-                       - measEnergyPMT13, 30, 0., 4e-6, "# of photons", "Entries", "R:.1|G:1.0|B:.0"
-                 
-                 main:
-                     regions: muonDetParticlePos5
-                     variables:
-                       - measEnergyPMT8, 30, 0., 4e-6, "# of photons", "Entries","R:0.6| G:0.6| B:0.2" 
-                       - measEnergyPMT13, 30, 0., 4e-6, "# of photons", "Entries","R:0.1| G:1.0| B:0.1" 
+    <input>_measEnergyPMT12:
+        algorithm: TimeWeightedPulse
+        input: 
+            waveform: <input>_wfPMT12
+
+    <input>_measEnergyPMT13:
+        algorithm: TimeWeightedPulse
+        input: 
+            waveform: <input>_wfPMT13
+
+    <input>_muonDetEnergy:
+        algorithm: MuonDetCharge
+        format: ROOT
+        input:
+            edep: <input>_nT_edepScint
 
 
-     
-     muonDetPlot2D:
-         algorithm: Make2DHistPlot
-         overlay: regions
+    <input>_trueParticleEnergy:
+        algorithm: TrueEnergy
+        input:
+            etrue: <input>_nT_ekin_particle
+        
+    <input>_xParticleHitPos:
+        algorithm: ParticleHitPosition
+        coordinate: x
+        input:
+            xpos: <input>_TotT_XPosTot
+            ypos: <input>_TotT_YPosTot
+            zpos: <input>_TotT_ZPosTot
 
-         input:
-             folders:
-               main/pmt_variables1:
-                   regions: muonDetParticlePos5, muonDetParticlePos1
-                   variables:
-                     - measEnergyPMT8, measEnergyPMT12, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.|G:1.0| B:0."
-                     - measEnergyPMT12, measEnergyPMT13, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:1.0| G:1.| B:0."
-               
-               main/pmt_variables2:
-                   regions: muonDetParticlePos5
-                   variables:
-                     - measEnergyPMT8, measEnergyPMT12, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.6| G:0.6| B:0.2"
-                     - measEnergyPMT9, measEnergyPMT13, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:1.0| G:0.8| B:0.2"
-               
-               main:
-                   regions: muonDetParticlePos5
-                   variables:
-                     - measEnergyPMT9, measEnergyPMT13, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.7|G:0.0|B:0.1"
-               
-               main:
-                   regions: muonDetParticlePos5
-                   variables:
-                     - measEnergyPMT8, measEnergyPMT9, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:.2|G:.2|B:0.6"
-               
-               main:
-                   regions: muonDetParticlePos5
-                   variables:
-                     - measEnergyPMT9, measEnergyPMT12, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:.2|G:.6|B:.6" 
-     
-     
-     
-     muonDetPlotProfile1D:
-         algorithm: Make1DProfilePlot
-         overlay: regions
+    <input>_yParticleHitPos:
+        algorithm: ParticleHitPosition
+        coordinate: y
+        input:
+            xpos: <input>_TotT_XPosTot
+            ypos: <input>_TotT_YPosTot
+            zpos: <input>_TotT_ZPosTot
 
-         input:
-             folders:
-             
-               main/pmt_variables1:
-                   regions: muonDetParticlePos5, muonDetParticlePos1
-                   variables:
-                     - measEnergyPMT8, numPhotonsPMT8, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.|G:1.0| B:0."
-                     - measEnergyPMT12, numPhotonsPMT12, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:1.0| G:1.| B:0."
-               
-               main/pmt_variables2:
-                   regions: muonDetParticlePos5
-                   variables:
-                     - measEnergyPMT8, numPhotonsPMT8, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.6| G:0.6| B:0.2"
-                     - measEnergyPMT9, numPhotonsPMT9, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:1.0| G:0.8| B:0.2"
-               
-               main:
-                   regions: muonDetParticlePos5
-                   variables:
-                     - measEnergyPMT9, numPhotonsPMT9, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.7|G:0.0|B:0.1"
-               
-               main:
-                   regions: muonDetParticlePos5
-                   variables:
-                     - measEnergyPMT8, numPhotonsPMT8, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:.2|G:.2|B:0.6", input
-               
-               main:
-                   regions: muonDetParticlePos5
-                   variables:
-                     - measEnergyPMT9, numPhotonsPMT9, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:.2|G:.6|B:.6" 
-     
-     
-# EOF
+    # -----
+    # Trees
+    # -----
+    <input>_muonDetTest:
+        algorithm: TreeMaker
+        filltype: event
+        input:
+            vector<double>: [<input>_wfPMT8_energy, <input>_wfPMT9_energy, 
+                             <input>_wfPMT12_energy, <input>_wfPMT13_energy]
+            double: [<input>_numPhotonsPMT8, <input>_numPhotonsPMT9, <input>_numPhotonsPMT12, 
+                     <input>_numPhotonsPMT13, <input>_measEnergyPMT8, <input>_measEnergyPMT9, 
+                     <input>_measEnergyPMT12, <input>_measEnergyPMT13, <input>_muonDetEnergy, 
+                     <input>_trueParticleEnergy, <input>_xParticleHitPos, <input>_yParticleHitPos]
+
+
+
+
+    # -----------------------------------------------------------
+    # Histograms
+    # -----------------------------------------------------------
+    #
+
+
+    # -----------------------------------------------------------
+    # Plots
+    # -----------------------------------------------------------
+    # WARNING: there is a bug in Make1DHistPlot ovewriting instances
+    # of plots in the internal dictionary. This is happening because
+    # different canvases have the same name. 
+    muonDetPlot1D:
+        algorithm: Make1DHistPlot
+        overlay: variables
+        input:
+            folders:
+                main/pmt_variables1:
+                    regions: muonDetParticlePos5, muonDetParticlePos1
+                    variables:
+                    - measEnergyPMT8, 30, 0., 4e-6, "# of photons", "Entries", "R:0.|G:1.0| B:0."
+                    - measEnergyPMT12, 30, 0., 4e-6, "# of photons", "Entries", "R:1.0| G:1.| B:0."
+                
+                main/pmt_variables2:
+                    regions: muonDetParticlePos5
+                    variables:
+                    - measEnergyPMT9, 30, 0., 4e-6, "# of photons", "Entries", "R:0.6| G:0.6| B:0.2"
+                    - measEnergyPMT13, 30, 0., 4e-6, "# of photons", "Entries", "R:1.0| G:0.8| B:0.2"
+                
+                main:
+                    regions: muonDetParticlePos5
+                    variables:
+                    - measEnergyPMT12, 30, 0., 4e-6, "# of photons", "Entries", "R:0.7|G:0.0|B:0.1"
+                    - measEnergyPMT13, 30, 0., 4e-6, "# of photons", "Entries", "R:.2|G:.2|B:0.6"
+                    
+                main:
+                    regions: muonDetParticlePos5
+                    variables:
+                    - measEnergyPMT8, 30, 0., 4e-6, "# of photons", "Entries", "R:.2|G:.6|B:.6"
+                    - measEnergyPMT13, 30, 0., 4e-6, "# of photons", "Entries", "R:.1|G:1.0|B:.0"
+                
+                main:
+                    regions: muonDetParticlePos5
+                    variables:
+                    - measEnergyPMT8, 30, 0., 4e-6, "# of photons", "Entries","R:0.6| G:0.6| B:0.2" 
+                    - measEnergyPMT13, 30, 0., 4e-6, "# of photons", "Entries","R:0.1| G:1.0| B:0.1" 
+
+
+
+    muonDetPlot2D:
+        algorithm: Make2DHistPlot
+        overlay: regions
+        input:
+            folders:
+                main/pmt_variables1:
+                    regions: muonDetParticlePos5, muonDetParticlePos1
+                    variables:
+                    - measEnergyPMT8, measEnergyPMT12, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.|G:1.0| B:0."
+                    - measEnergyPMT12, measEnergyPMT13, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:1.0| G:1.| B:0."
+                
+                main/pmt_variables2:
+                    regions: muonDetParticlePos5
+                    variables:
+                    - measEnergyPMT8, measEnergyPMT12, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.6| G:0.6| B:0.2"
+                    - measEnergyPMT9, measEnergyPMT13, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:1.0| G:0.8| B:0.2"
+                
+                main:
+                    regions: muonDetParticlePos5
+                    variables:
+                    - measEnergyPMT9, measEnergyPMT13, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:0.7|G:0.0|B:0.1"
+                
+                main:
+                    regions: muonDetParticlePos5
+                    variables:
+                    - measEnergyPMT8, measEnergyPMT9, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:.2|G:.2|B:0.6"
+                
+                main:
+                    regions: muonDetParticlePos5
+                    variables:
+                    - measEnergyPMT9, measEnergyPMT12, 30, 0., 4e-6, 30, 0., 4e-6, "Energy [MeV]", "Energy [MeV]", "R:.2|G:.6|B:.6" 
+
+    muonDetPlotProfile1D:
+        algorithm: Make1DProfilePlot
+        overlay: regions
+        input:
+            folders:
+                main/pmt_variables1:
+                    regions: muonDetParticlePos5, muonDetParticlePos1
+                    variables:
+                    - measEnergyPMT8, numPhotonsPMT8, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.|G:1.0| B:0."
+                    - measEnergyPMT12, numPhotonsPMT12, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:1.0| G:1.| B:0."
+                
+                main/pmt_variables2:
+                    regions: muonDetParticlePos5
+                    variables:
+                    - measEnergyPMT8, numPhotonsPMT8, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.6| G:0.6| B:0.2"
+                    - measEnergyPMT9, numPhotonsPMT9, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:1.0| G:0.8| B:0.2"
+                
+                main:
+                    regions: muonDetParticlePos5
+                    variables:
+                    - measEnergyPMT9, numPhotonsPMT9, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:0.7|G:0.0|B:0.1"
+                
+                main:
+                    regions: muonDetParticlePos5
+                    variables:
+                    - measEnergyPMT8, numPhotonsPMT8, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:.2|G:.2|B:0.6", input
+                
+                main:
+                    regions: muonDetParticlePos5
+                    variables:
+                    - measEnergyPMT9, numPhotonsPMT9, 30, 0., 4e-6, 0., 30., "Energy [MeV]", "# photons", "R:.2|G:.6|B:.6" 
+
+    # EOF

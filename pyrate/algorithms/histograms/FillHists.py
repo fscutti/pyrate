@@ -1,8 +1,6 @@
 """ Fill ROOT histograms. 
 """
 
-import ROOT as R
-
 from pyrate.core.Algorithm import Algorithm
 
 
@@ -13,8 +11,10 @@ class FillHists(Algorithm):
         super().__init__(name, config, store, logger)
 
     def initialise(self):
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
         # print("This is FillHists: ",self._store.objects)
-        histogram = R.TH1F("TestHist", "TestHist", 10, 0, 10)
+        histogram = ROOT.TH1F("TestHist", "TestHist", 10, 0, 10)
         self.store.put("filledHists", histogram, "PERM")
         # print("This is FillHists: ",self._store.objects)
 

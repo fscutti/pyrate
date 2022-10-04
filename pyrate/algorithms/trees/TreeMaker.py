@@ -60,7 +60,6 @@ https://root.cern/manual/trees/
 """
 
 import sys
-import ROOT as R
 from array import array
 
 from pyrate.core.Algorithm import Algorithm
@@ -105,6 +104,8 @@ class Branch:
 
     # def create(self, data, type_override=None):
     def create(self):
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
         # Check if what's being passed in is iterable (stored in array)
         # self.vector = FN.iterable(data)
         # Automatic type getting - WIP
@@ -114,7 +115,7 @@ class Branch:
         # else:
         #     self.datatype, self.nptype = python_to_root_type(data)
         if self.vector:
-            self.data = R.vector(_Type[self.datatype]["vector"])()
+            self.data = ROOT.vector(_Type[self.datatype]["vector"])()
             self.invalid_value = array(_Type[self.datatype]["python"])
         else:
             self.data = array(_Type[self.datatype]["python"], [0])
@@ -218,12 +219,14 @@ class Tree:
             self.link_branch(branch)
 
     def create(self):
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
         """Actually makes the trees structure in the structure and adds all the
         branches into the tree. Typically called by the detector class
         """
         # Make sure we're linked to the correct file
         self.outfile.cd()
-        self.TTree = R.TTree(self.name, self.name)
+        self.TTree = ROOT.TTree(self.name, self.name)
         # self.TTree.SetMaxTreeSize((int(1 * MB)))
         self.created = True
 
@@ -281,13 +284,13 @@ class Tree:
             # Only do it if necessary
             if self.branches[branch].vector:
                 self.branches[branch].clear_vector()
-
-    def remove_branch(self, branch):
-        """Removes branch to the tree storage
-        Does not remove the TBranch from the TTree as this isnt possible.
-        Won't be accessed anymore (hopefully)
+    
+    def write(self):
+        """ Calls the Write method
         """
-        del self.branches[branch.name]
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
+        self.TTree.Write("", ROOT.TObject.kOverwrite)
 
     def set_branches(self, branch_names, status=1):
         """Sets the branch status of a list of branches"""
@@ -309,14 +312,7 @@ class TreeMaker(Algorithm):
     def __init__(self, name, config, store, logger):
         super().__init__(name, config, store, logger)
 
-    @property
-    def input(self):
-        """Getter method for input objects."""
-        if self._input == {}:
-            return {None: ""}
-        return self._input
-
-    @input.setter
+    @Algorithm.input.setter
     def input(self, config_input):
         """Sets the input approrpriately for TreeMaker"""
         if hasattr(self, "_input"):
@@ -330,16 +326,14 @@ class TreeMaker(Algorithm):
 
     def initialise(self, condition=None):
         """Defines a tree dictionary."""
-        out_file = self.store.get(f"OUTPUT:{self.name}")
-        self.file = out_file
+        self.file = self.store.get(f"OUTPUT:{self.name}")
 
         name = self.name.split(":")[0]
         t_path = self.config["path"] if "path" in self.config else ""
         event_based = False if self.config["filltype"] == "single" else True
 
-        self.tree = Tree(
-            name, out_file, path=t_path, event=event_based, create_now=True
-        )
+        self.tree = Tree(name, self.file, path=t_path, event=event_based, 
+                         create_now=True)
 
         for datatype, variables in self.config["input"].items():
             # New check to handle lists of vars
@@ -372,10 +366,6 @@ class TreeMaker(Algorithm):
             # Save all the values into the Tree
             self.tree.fill()
 
-            # some line like that to indicate that the writer has to
-            # call write on the object.
-            self.store.save(self.name, enums.Pyrate.WRITTEN)
-
     def finalise(self, condition=None):
         """Fill in the single/run-based variables"""
         # Fill all the branches in the trees if they're run-based
@@ -394,12 +384,8 @@ class TreeMaker(Algorithm):
             # Save all the values into the Tree
             self.tree.fill()
 
-        # Write the objects to the file - this is the most important step
-        self.file.Write("", R.TObject.kOverwrite)
-
-        # Store itself on the store with SKIP_WRITE code to show we have nothing
-        # to return.
-        self.store.save(self.name, enums.Pyrate.WRITTEN)
+        # Write the objects to the file
+        self.tree.write()
 
     def _parse_tree_vars(self, variables):
         """Dedicated function to just parse the tree lists/dicts/strings"""

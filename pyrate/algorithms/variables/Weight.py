@@ -5,9 +5,6 @@ from copy import copy
 
 from pyrate.core.Algorithm import Algorithm
 
-import ROOT as R
-
-
 class Weight(Algorithm):
     __slots__ = ()
 
@@ -15,7 +12,8 @@ class Weight(Algorithm):
         super().__init__(name, config, store, logger)
 
     def execute(self):
-
+        # Always avoid the top-level 'import ROOT'.
+        import ROOT
         weight = 1
 
         if "value" in self.config:
@@ -33,7 +31,7 @@ class Weight(Algorithm):
                 # Note that this is an operation on the PERM store, so it will be
                 # executed only one time throughout the Run, even if this is the execute
                 # method of the Algorithm.
-                file_calib = R.TFile.Open(
+                file_calib = ROOT.TFile.Open(
                     os.path.join(
                         self.config["applycalib"]["filepath"],
                         self.config["applycalib"]["filename"],

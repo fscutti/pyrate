@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 
+import os
 import argparse
 import yaml
 import cProfile
 import pstats
+import logging
 from datetime import datetime
 
 from pyrate.core.Job import Job
+import pyrate.utils.functions as FN
 
 parser = argparse.ArgumentParser(description="Command line options for pyrate")
 
@@ -25,7 +28,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--logging_level",
+    "--log_level",
     "-l",
     help="logging level",
     required=False,
@@ -52,19 +55,41 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--alg_timing",
-    "-a",
-    help="Print out to a log file the average timing for algs in config",
+    "--event_num",
+    "-n",
+    help="Specify how many events to process (optional).",
     required=False,
-    default=False,
-    action="store",
-    nargs="?",
-    const=True
+    default=None,   # If not passed in
+    action="store", # store internally
+)
+
+parser.add_argument(
+    "--event_start",
+    "-s",
+    help="Specify the first event number (optional).",
+    required=False,
+    default=None,   # If not passed in
+    action="store", # store internally
+)
+
+parser.add_argument(
+    "--dump_objects",
+    "-d",
+    help="Specify the first event number (optional).",
+    required=False,
+    default=False,  # If not passed in
+    action="store", # store internally
+    nargs="?",      # allows for some args or None
+    const=True      # if -t there but no string pass in True
 )
 
 args = parser.parse_args()
 
 if __name__ == "__main__":
+    # Check if PYRATE is in the environment, if not add it
+    if "PYRATE" not in os.environ:
+        FN.add_pyrate_to_env()
+
     for j_file in args.job_config:
 
         j_name = j_file.split("/")[-1].split(".")[0]
@@ -73,11 +98,15 @@ if __name__ == "__main__":
 
         j_config.update({"no_progress_bar": args.no_progress_bar})
 
-        j_config.update({"alg_timing": args.alg_timing})
+        j_log = args.log_level
 
-        j_log = args.logging_level
+        if "log_level" in args and args.log_level:
+            logging.basicConfig(level=args.log_level.upper())
+        else:
+            logger = logging.getLogger("pyrate")
+            logger.setLevel(logging.CRITICAL)
 
-        job = Job(j_name, j_config, j_log)
+        job = Job(j_name, j_config, j_log, args)
 
         if args.timing:
             with cProfile.Profile() as pr:

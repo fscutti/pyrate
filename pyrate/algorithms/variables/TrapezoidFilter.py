@@ -25,10 +25,10 @@
             waveform: CorrectedWaveform_CHX
 """
 
+import numba
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
 from pyrate.utils.enums import Pyrate
-import numba
 
 class TrapezoidFilter(Algorithm):
     __slots__ = ("rise", "gap", "period", "tau", "zeropole", "traplen", "M", "dn0", "dn1", "dn2", "dn3")
@@ -68,7 +68,8 @@ class TrapezoidFilter(Algorithm):
 
         waveform_len = waveform.size
 
-        trap = self.TrapCalc(waveform = waveform, rise = self.rise, gap = self.gap, M = self.M, waveform_len = waveform_len)
+        trap = self.TrapCalc(waveform=waveform, rise=self.rise, gap=self.gap, M=self.M, 
+                             waveform_len=waveform_len)
 
         self.store.put(f"{self.name}", trap)
 

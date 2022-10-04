@@ -1,12 +1,8 @@
 """ Build simulated waveform.
 """
-import sys
-from copy import copy
-
-import numpy as np
 
 from pyrate.core.Algorithm import Algorithm
-
+from pyrate.utils.enums import Pyrate
 
 class SimulatedWaveformsBuilder(Algorithm):
     __slots__ = ("pmt_map", "pmt_intervals", "pc_width", "pc_depth")
@@ -65,6 +61,9 @@ class SimulatedWaveformsBuilder(Algorithm):
 
         energy_hits = self.store.get(self.config["input"]["energy"])
         time_hits = self.store.get(self.config["input"]["time"])
+
+        if x_hits is Pyrate.NONE or y_hits is Pyrate.NONE or z_hits is Pyrate.NONE:
+            return
 
         for pmt, position in self.pmt_intervals.items():
             for idxHit, (x, y, z) in enumerate(zip(x_hits, y_hits, z_hits)):

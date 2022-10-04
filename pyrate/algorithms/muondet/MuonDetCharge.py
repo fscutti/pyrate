@@ -1,7 +1,5 @@
 """ Computation of energy deposited.
 """
-import sys
-from copy import copy
 
 from pyrate.core.Algorithm import Algorithm
 

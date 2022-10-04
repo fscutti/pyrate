@@ -1,12 +1,18 @@
 """General utility functions"""
 
-import os
-
-
 def remove_duplicates(l):
     """Creates list from dictionary keys."""
     return list(dict.fromkeys(l))
 
+
+def read_list(input):
+    """ Parses a pyrate yaml config list
+    """
+    if type(input) == str:
+        return get_items(input)
+    elif type(input) != list:
+        return [input]
+    return input
 
 def get_items(s, no_duplicates=True):
     """Gets comma-separated items in a string as a list."""

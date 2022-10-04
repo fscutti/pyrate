@@ -1,7 +1,5 @@
 """ Compute average energy in input bins.
 """
-import sys
-from copy import copy
 
 from pyrate.core.Algorithm import Algorithm
 

@@ -1,0 +1,321 @@
+# ---------------------------------
+# Example config file for Pyrate V2
+# ---------------------------------
+
+# Object duplication lists
+<boards>: [B0, B1, B2]
+<AverageWaveforms>: [AverageWaveform_B0_0, AverageWaveform_B1_0, AverageWaveform_B2_0]
+
+# -----------------------------------------------------------
+# Objects computed by algorithms
+# -----------------------------------------------------------
+
+objects:
+
+    BaselineDynamic_<boards>_0:
+        algorithm: BaselineDynamic
+        samples: 40
+        threshold: 20
+        input:
+            waveform: <boards>_ch0_waveform
+
+    BaselineNaive_<boards>_0:
+        algorithm: BaselineNaive
+        samples: 40
+        input:
+            waveform: <boards>_ch0_waveform
+
+    CorrectedWaveform_<boards>_0:
+        algorithm: CorrectedWaveform
+        vpp: 2.5
+        adcrange: 16384
+        polarity: neg
+        units: mV
+        input:
+            waveform: <boards>_ch0_waveform
+            baseline: BaselineNaive_<boards>_0
+
+    AverageWaveform_<boards>_0:
+        algorithm: AverageWaveform
+        input:
+            waveform: CorrectedWaveform_<boards>_0
+
+        # -----------------------------------------------------------
+        # Window algorithms
+        # -----------------------------------------------------------
+
+    TotalWindow:
+        algorithm: Window
+        window: full
+
+    PulseWindow_<boards>_0:
+        algorithm: Window
+        left: -50
+        right: 0
+        input:
+            pivot: PulseStart_<boards>_0
+
+    PromptWindow_<boards>_0:
+        algorithm: Window
+        left: -10
+        right: 0
+        input:
+            pivot: PeakLocation_<boards>_0
+
+    DelayedWindow_<boards>_0:
+        algorithm: Window
+        left: 0
+        right: 20
+        pivot index: end
+        input:
+            pivot: PromptWindow_<boards>_0
+
+        # -----------------------------------------------------------
+        # Variables
+        # -----------------------------------------------------------
+
+    PeakHeight_<boards>_0:
+        algorithm: PeakHeight
+        window: true
+        input:
+            waveform: CorrectedWaveform_<boards>_0
+            window: TotalWindow
+
+    PeakLocation_<boards>_0:
+        algorithm: PeakLocation
+        window: true
+        input:
+            waveform: CorrectedWaveform_<boards>_0
+            window: TotalWindow
+    
+    ChargeConstant:
+        algorithm: ChargeConstant
+        impedance: 50
+        rate: 500e6
+        unit: pC
+        waveform_unit: mV
+    
+    PulseSum_<boards>_0:
+        algorithm: Sum
+        input:
+            waveform: CorrectedWaveform_<boards>_0
+            window: PulseWindow_<boards>_0
+
+    PromptCharge_<boards>_0:
+        algorithm: Charge
+        impedance: 50
+        rate: 500e6
+        unit: pC
+        waveform_unit: mV
+        input:
+            waveform: CorrectedWaveform_<boards>_0
+            window: PromptWindow_<boards>_0
+
+    DelayedCharge_<boards>_0:
+        algorithm: Charge
+        impedance: 50
+        rate: 500e6
+        unit: pC
+        waveform_unit: mV
+        input:
+            waveform: CorrectedWaveform_<boards>_0
+            window: DelayedWindow_<boards>_0
+
+    TotalCharge_<boards>_0:
+        algorithm: Charge
+        impedance: 50
+        rate: 500e6
+        unit: pC
+        waveform_unit: mV
+        input:
+            waveform: CorrectedWaveform_<boards>_0
+            window: TotalWindow
+
+    PulseCharge_<boards>_0:
+        algorithm: Charge
+        impedance: 50
+        rate: 500e6
+        unit: pC
+        waveform_unit: mV
+        input:
+            waveform: CorrectedWaveform_<boards>_0
+            window: PulseWindow_<boards>_0
+
+    PulseStart_<boards>_0:
+        algorithm:  CFD
+        delay: 5
+        scale: 1
+        cfd_threshold: 15
+        input:
+            waveform: CorrectedWaveform_<boards>_0
+        output:
+            times: PulseCFDTimes_<boards>_0
+            trace: PulseCFDTrace_<boards>_0
+
+    TrapezoidWaveform_<boards>_0:
+        algorithm: TrapezoidFilter
+        rise: 10
+        gap: 10
+        rate: 500e6
+        tau: 2e-6
+        zeropole: true
+        input:
+            waveform: CorrectedWaveform_<boards>_0
+
+    CFD_<boards>_0:
+        algorithm: CFD
+        delay: 5
+        scale: 1
+        cfd_threshold: 10
+        savecfd: True
+        input:
+            waveform: TrapezoidWaveform_<boards>_0
+        output:
+            times: CFDTimes_<boards>_0
+            trace: CFDTrace_<boards>_0
+
+    PromptDelayChargeRatio_<boards>_0:
+        algorithm: Ratio
+        input:
+            numerator: PromptCharge_<boards>_0
+            denominator: DelayedCharge_<boards>_0
+
+    MeanTime_<boards>_0:
+        algorithm: MeanTime
+        rate: 500e6
+        input:
+            waveform: CorrectedWaveform_<boards>_0
+            window: PulseWindow_<boards>_0
+
+    PromptDelayChargeRatioCalculator_<boards>_0:
+        algorithm: Calculator
+        equation: A+(A+B)*(C+D)
+        input:
+            variables:
+                # A: 1
+                # B: 11.5
+                # C: PromptCharge_<boards>_0
+                # D: 3e-1
+                - "A = 1; B = 11.5; C = PromptCharge_<boards>_0; D = 3e-1"
+
+    PulseTime_ns_<boards>_0:
+        algorithm: TimeConverter
+        rate: 500e6
+        unit: ns
+        input:
+            sample_number: PulseStart_<boards>_0
+
+    TimeDifference_B01:
+        algorithm: Difference
+        input:
+            x1: LeadingEdge_B0_0
+            x2: LeadingEdge_B1_0
+    
+    TimeDifference_B02:
+        algorithm: Difference
+        input:
+            x1: LeadingEdge_B0_0
+            x2: LeadingEdge_B2_0
+    
+    TimeDifference_B12:
+        algorithm: Difference
+        input:
+            x1: LeadingEdge_B1_0
+            x2: LeadingEdge_B2_0
+
+    Moments_<boards>_0:
+        algorithm: Moment
+        rate: 500e6
+        input:
+            waveform: CorrectedWaveform_<boards>_0
+            window: TotalWindow
+        output:
+            mean: Mean_<boards>_0
+            stddev: Stddev_<boards>_0
+            skew: Skew_<boards>_0
+            kurtosis: Kurtosis_<boards>_0
+
+    DAMAX1_<boards>_0:
+        algorithm: DAMAX1
+        rate: 500e6
+        cfd_delay: 10
+        input:
+            waveform: CorrectedWaveform_<boards>_0
+            pulse_start: PulseStart_<boards>_0
+
+    DAMAX2_<boards>_0:
+        algorithm: DAMAX2
+        rate: 500e6
+        cfd_delay: 10
+        input:
+            waveform: CorrectedWaveform_<boards>_0
+            pulse_start: PulseStart_<boards>_0
+
+    FFT_<boards>_0:
+        algorithm: FFT
+        rate: 500e6
+        bins: 100
+        input:
+            waveform: CorrectedWaveform_<boards>_0
+            window: PulseWindow_<boards>_0
+        output:
+            frequencies: FFT_<boards>_0_Frequencies
+            amplitudes: FFT_<boards>_0_Amplitudes
+
+    LeadingEdge_<boards>_0:
+        algorithm: LeadingEdgeThreshold
+        offset: 5
+        threshold: 5
+        input:
+            waveform: CorrectedWaveform_<boards>_0
+
+    # -----------------------------------------------------------
+    # Trees
+    # -----------------------------------------------------------
+    Tree_<boards>_0:
+        algorithm: TreeMaker
+        filltype: event
+        input:
+            vector<int>: {RawWaveform: <boards>_ch0_waveform}
+            vector<double>: {CorrectedWaveform: CorrectedWaveform_<boards>_0}
+            long: {Timestamp: <boards>_ch0_timestamp}
+            vector<double>:
+                        - FFT_<boards>_0, Moments_<boards>_0
+                        - {CFDTrace: CFDTrace_<boards>_0,
+                            CFDTimes: CFDTimes_<boards>_0}
+                        - {FFT_Amplitudes: FFT_<boards>_0_Amplitudes,
+                            FFT_Frequencies: FFT_<boards>_0_Frequencies}
+            double:
+                -   BaselineDynamic_<boards>_0, BaselineNaive_<boards>_0,
+                    PromptDelayChargeRatioCalculator_<boards>_0, CFD_<boards>_0,
+                    PulseCharge_<boards>_0, TotalCharge_<boards>_0
+                -   {DAMAX1: DAMAX1_<boards>_0, DAMAX2: DAMAX2_<boards>_0}
+                -   LeadingEdge_<boards>_0, MeanTime_<boards>_0
+                -   {Mean: Mean_<boards>_0,
+                        Stddev: Stddev_<boards>_0,
+                        Skew: Skew_<boards>_0,
+                        Kurtosis: Kurtosis_<boards>_0}
+                -   PeakHeight_<boards>_0, PeakLocation_<boards>_0, PulseStart_<boards>_0,
+                    PulseTime_ns_<boards>_0, PromptDelayChargeRatio_<boards>_0,
+                    PulseSum_<boards>_0
+
+    MultiBoard:
+        algorithm: TreeMaker
+        filltype: event
+        input:
+            float: 
+                - TimeDifference_B01
+                - TimeDifference_B12
+                - TimeDifference_B02
+
+    Constants:
+        algorithm: TreeMaker
+        filltype: single
+        input:
+            double: ChargeConstant
+
+    AverageWaveforms:
+        algorithm: TGraphMaker
+        path: MyTGraphs
+        input:
+            y: $AverageWaveforms$

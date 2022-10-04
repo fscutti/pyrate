@@ -22,11 +22,11 @@
             window: Window_CHX
 """
 
+import math
+import numba
 import numpy as np
 from pyrate.core.Algorithm import Algorithm
 from pyrate.utils.enums import Pyrate
-import numba
-import math
 
 class Moment(Algorithm):
     __slots__ = ("mode", "time_period", "times")
@@ -55,13 +55,15 @@ class Moment(Algorithm):
             window_start = window[0]
             window_end = window[1]
 
-        mean, stddev, skew, kurtosis = self.MomentsCalc(waveform = waveform, window_start = window_start, window_end = window_end, window_size=window_size, time_period=self.time_period)
+        mean, stddev, skew, kurtosis = self.MomentsCalc(waveform=waveform, window_start=window_start, 
+                                            window_end=window_end, window_size=window_size, 
+                                            time_period=self.time_period)
 
         # self.store.put(self.name, moments)
-        self.store.put(f"{self.output['mean']}", mean)
-        self.store.put(f"{self.output['stddev']}", stddev)
-        self.store.put(f"{self.output['skew']}", skew)
-        self.store.put(f"{self.output['kurtosis']}", kurtosis)
+        self.store.put(f"{self.config['output']['mean']}", mean)
+        self.store.put(f"{self.config['output']['stddev']}", stddev)
+        self.store.put(f"{self.config['output']['skew']}", skew)
+        self.store.put(f"{self.config['output']['kurtosis']}", kurtosis)
 
     @staticmethod
     @numba.njit(cache=True)
