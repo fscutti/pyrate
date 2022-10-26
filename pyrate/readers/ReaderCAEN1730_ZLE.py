@@ -15,7 +15,7 @@ MAX_TRACE_LENGTH = 50000
 LONG_MAX = 2**64
 
 class ReaderCAEN1730_ZLE(Input):
-    __slots__ = ["_files", "_f", "_files_index", "_sizes", "size", "_bytes_read", 
+    __slots__ = ["_f", "_files_index", "_size", "_bytes_read", 
                  "_inEvent", "_variables", "timeshift", "_eventWaveforms", "channels",
                  "_large_waveform_warning"]
 
@@ -36,21 +36,25 @@ class ReaderCAEN1730_ZLE(Input):
 
         self.output = self._variables.values()
 
-        # Prepare all the files
         self.is_loaded = False
+        self._init_files()
+
+        # Prepare all the files
+        """
         self._files = []
         for f in self.config["files"]:
             f = os.path.expandvars(f)
             self._files += sorted(glob.glob(f))
         if len(self._files) == 0:
             sys.exit(f"ERROR: in reader {self.name}, no files were found.")
+        """
 
         self._files_index = 0
-        self._sizes = [os.path.getsize(f) for f in self._files]
+        #self._sizes = [os.path.getsize(f) for f in self._files]
         self._bytes_read = 0
-        self.size = sum(self._sizes)
+        #self.size = sum(self._sizes)
         # Set the progress to 0, unless the files are empty
-        self._progress = 0 if self.size !=0 else 1
+        self._progress = 0 if self._size !=0 else 1
 
         # Set the large waveform warning flag to false
         self._large_waveform_warning = False
@@ -195,7 +199,7 @@ class ReaderCAEN1730_ZLE(Input):
         # Update the number of bytes read by the eventSize
         self._bytes_read += 4*eventSize
         # Update the progress
-        self._progress = self._bytes_read / self.size
+        self._progress = self._bytes_read / self._size
         self._hasEvent = True
 
         return True

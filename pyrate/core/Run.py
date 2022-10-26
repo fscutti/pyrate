@@ -27,7 +27,7 @@ class Run:
         self.outputs = None
 
     def setup(self):
-        """First instance of 'private' members."""        
+        """First instance of 'private' members."""
 
         # -----------------------------------------------------------------------
         # At this point the Run object should have inputs/objects/outputs
@@ -43,7 +43,6 @@ class Run:
         fileHandler.setFormatter(
             logging.Formatter("[%(asctime)s %(name)-16s %(levelname)-7s]  %(message)s")
         )
-        
 
         # the following two lines are temporary.
         self.logger = logging.getLogger("pyrate")
@@ -59,7 +58,7 @@ class Run:
         green = green % (Fore.GREEN, Fore.RESET)
         white = white % (Fore.WHITE, Fore.RESET)
         self.colors = {"blue": blue, "yellow": yellow, "green": green, "white": white}
-        
+
         # Create the store
         self.store = Store(self.name)
 
@@ -67,7 +66,9 @@ class Run:
         # Load the input name
         # -------------------
         # Only allow for one input - take the first input if given two
-        self.input = [s for s in self.config["input"] if s != "event_start" and s != "event_num"][0]
+        self.input = [
+            s for s in self.config["input"] if s != "event_start" and s != "event_num"
+        ][0]
 
         # ------------------------------------
         # Load the objects: algorithms / input
@@ -79,7 +80,7 @@ class Run:
         self.variables = {}
 
         # instantiate all algorithms - even those not needed
-        self.create_node(self.name)     # Create a run node
+        self.create_node(self.name)  # Create a run node
         for object_name in self.objects:
             self.create_node(object_name)
 
@@ -104,15 +105,19 @@ class Run:
                         targets.append(object_name)
                 if not success:
                     # This target couldn't be added
-                    sys.exit(f"ERROR: in run {self.name}, target '{target}' doesn't match any of the objects in the loaded configs.")
+                    sys.exit(
+                        f"ERROR: in run {self.name}, target '{target}' doesn't match any of the objects in the loaded configs."
+                    )
 
             output_config["targets"] = targets
             OutputClass = FN.class_factory(output_config["algorithm"])
-            self.outputs[output_name] = OutputClass(output_name, output_config, self.store, self.logger)
+            self.outputs[output_name] = OutputClass(
+                output_name, output_config, self.store, self.logger
+            )
 
     def connect_node(self, obj_name):
-        """ Connects the already created nodes in the dependency chain
-            Runs recursively
+        """Connects the already created nodes in the dependency chain
+        Runs recursively
         """
         # Check if it's an input type or alg type
         if self.nodes[obj_name].algorithm is not None:
@@ -123,8 +128,12 @@ class Run:
                         try:
                             # Set this current node as the parent to the dependency
                             if d not in self.variables:
-                                sys.exit(f"ERROR: variable '{d}' not found in the configurations or input variables.")
-                            self.connect_node(self.variables[d]).parent = self.nodes[obj_name]
+                                sys.exit(
+                                    f"ERROR: variable '{d}' not found in the configurations or input variables."
+                                )
+                            self.connect_node(self.variables[d]).parent = self.nodes[
+                                obj_name
+                            ]
                         except anytreeExceptions.LoopError:
                             sys.exit(
                                 f"ERROR: circular node detected between {d} and {obj_name}"
@@ -147,7 +156,7 @@ class Run:
 
         # Create a new node
         new_node = Node(obj_name, algorithm=None, was_called=False)
-        
+
         # Ignore things that get variables from the run itself
         if obj_name == self.name:
             self.nodes[obj_name] = new_node
@@ -158,13 +167,15 @@ class Run:
             obj_config = self.objects[obj_name]
             algorithm_name = obj_config["algorithm"]
             AlgorithmClass = FN.class_factory(algorithm_name)
-            new_node.algorithm = AlgorithmClass(obj_name, obj_config, self.store, self.logger)
-            
+            new_node.algorithm = AlgorithmClass(
+                obj_name, obj_config, self.store, self.logger
+            )
+
             # Point all the alg outputs to the parent
             self.variables[obj_name] = obj_name
             for output in new_node.algorithm.output:
                 self.variables[output] = obj_name
-            
+
             self.nodes[obj_name] = new_node
             return
 
@@ -192,8 +203,8 @@ class Run:
         # Event loop.
         # ---------------------------------------------------------------
         def gen_execute():
-            """ Custom dummy generator function for the execute loop to allow
-                progress bar functionality
+            """Custom dummy generator function for the execute loop to allow
+            progress bar functionality
             """
             event_count = 0
             while self.nodes[self.input].algorithm.get_event():
@@ -215,28 +226,30 @@ class Run:
         # tqdm iterator for the rate and timing
         sbar = tqdm(gen_execute(), position=0, leave=True)
         # tqdm progress bar
-        bar_format = bar_format="{l_bar}{bar}|{n}/{total_fmt}% [{elapsed}<{remaining}]"
+        bar_format = (
+            bar_format
+        ) = "{l_bar}{bar}|{n}/{total_fmt}% [{elapsed}<{remaining}]"
         pbar = tqdm(total=100, position=1, leave=True, bar_format=bar_format)
         count = 0
-        prev_time = 0 # allows us to update with time
+        prev_time = 0  # allows us to update with time
         for _ in sbar:
             # Update the bar every second
-            if ((now:=time.time()) - prev_time) > 1:
+            if ((now := time.time()) - prev_time) > 1:
                 if enum < 0:
                     progress = self.nodes[self.input].algorithm.progress
                 else:
-                    progress = count / enum 
+                    progress = count / enum
                 pbar.n = round(progress * 100)
                 pbar.refresh()
                 prev_time = now
             count += 1
-        pbar.n = 100    # set the bar to 100% complete
+        pbar.n = 100  # set the bar to 100% complete
         pbar.refresh()
 
         # ----------------------------------------------------------------------
         # Output loop.
         # ----------------------------------------------------------------------
-        
+
         self.state = "finalise"
         self.store.put("INPUT:name", self.nodes[self.input].algorithm.name)
         self.store.put("INPUT:config", self.nodes[self.input].algorithm.config)
@@ -271,5 +284,6 @@ class Run:
                         break
 
             node.was_called = True
+
 
 # EOF

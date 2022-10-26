@@ -7,9 +7,30 @@
 """
 
 from pyrate.core.Algorithm import Algorithm
+import glob
+import os
+import sys
 
 class Input(Algorithm):
-    __slots__ = ["_eventID", "is_loaded", "_progress", "_hasEvent"]
+    __slots__ = ["_eventID", "is_loaded", "_progress", "_hasEvent", "_files", "_size"]
+
+
+    def _init_files(self):
+
+        if not "files" in self.config:
+            sys.exit(f"ERROR: {self.name} is trying to collect files but the path has not been specified.")
+
+        self._files = []
+        for f in self.config["files"]:
+
+            f = os.path.expandvars(f)
+            self._files += sorted(glob.glob(f))
+
+        if not self._files:
+            sys.exit(f"ERROR: in reader {self.name}, no files were found.")
+
+        self._size = sum([os.path.getsize(f) for f in self._files])
+
 
     def skip_events(self, n):
         """ Skips an event - implemented however the author wants
