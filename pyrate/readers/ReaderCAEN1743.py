@@ -23,7 +23,7 @@ class ReaderCAEN1743(Reader):
         "_lastTime",
         "_overflowCount",
         "_evtWaveforms",
-        "_evtChTimes"
+        "_evtChTimes",
     ]
 
     def __init__(self, name, config, store, logger, f_name, structure):
@@ -33,10 +33,10 @@ class ReaderCAEN1743(Reader):
     def load(self):
         self.is_loaded = True
         self._f = open(self._fName, "rb")
-        self._fSize = os.path.getsize(self._fName);
+        self._fSize = os.path.getsize(self._fName)
         self._readIdx = -1
-        self._lastTime = 0;
-        self._overflowCount = 0;
+        self._lastTime = 0
+        self._overflowCount = 0
 
     def offload(self):
         self.is_loaded = False
@@ -74,12 +74,12 @@ class ReaderCAEN1743(Reader):
             # Read in the event info from the header
             while head1 := self._f.read(4):
                 head1 = int.from_bytes(head1, "little")
-                if (head1 & 0xFFFF0000) == 0xa0000000:
+                if (head1 & 0xFFFF0000) == 0xA0000000:
                     break
             else:
                 self._f.seek(0, 0)
                 return
-            
+
             # If we read something, increment the event counter and skip to the next event
             self._n_events += 1
             eventSize = head1 & 0b00001111111111111111111111111111
@@ -89,7 +89,7 @@ class ReaderCAEN1743(Reader):
                 break
 
             self._f.seek(seekSize, 1)
-            
+
         self._f.seek(0, 0)
 
     def _break_path(self, path):
@@ -125,15 +125,15 @@ class ReaderCAEN1743(Reader):
 
     def _read_event(self):
         # Reset event
-        self._evtTime = 2 ** 64
+        self._evtTime = 2**64
         self._inEvt = {}
         self._evtWaveforms = {}
         self._evtChTimes = {}
-        
+
         # Check for a valid event start and read the header
         while head1 := self._f.read(4):
             head1 = int.from_bytes(head1, "little")
-            if (head1 & 0xFFFF0000) == 0xa0000000:
+            if (head1 & 0xFFFF0000) == 0xA0000000:
                 break
         else:
             self._f.seek(0, 0)
@@ -145,26 +145,26 @@ class ReaderCAEN1743(Reader):
         head3 = int.from_bytes(head3, "little")
         head4 = self._f.read(4)
         head4 = int.from_bytes(head4, "little")
-        
+
         # Read in the event info from the header words
         eventSize = head1 & 0b00001111111111111111111111111111
         boardID = head2 & 0b11111000000000000000000000000000
-        groupMask = head2 & 0b11111111        
-        evtCount = head3 & 0b00000000111111111111111111111111        
-        #TTT = head4
-        #self._evtTime = (pattern << 24) + TTT
-        
+        groupMask = head2 & 0b11111111
+        evtCount = head3 & 0b00000000111111111111111111111111
+        # TTT = head4
+        # self._evtTime = (pattern << 24) + TTT
+
         # Figure out what channels are in the event
         numGroups = 0
         for i in range(8):
             if groupMask & (1 << i):
                 numGroups += 1
-                self._inEvt[2*i] = True
-                self._evtWaveforms[2*i] = []
-                self._evtChTimes[2*i] =  2 ** 64
-                self._inEvt[2*i + 1] = True
-                self._evtWaveforms[2*i + 1] = []
-                self._evtChTimes[2*i+1] =  2 ** 64
+                self._inEvt[2 * i] = True
+                self._evtWaveforms[2 * i] = []
+                self._evtChTimes[2 * i] = 2**64
+                self._inEvt[2 * i + 1] = True
+                self._evtWaveforms[2 * i + 1] = []
+                self._evtChTimes[2 * i + 1] = 2**64
 
         recordSize = int((eventSize - 4) / numGroups)
         # Read in the waveform data
@@ -173,26 +173,31 @@ class ReaderCAEN1743(Reader):
                 for j in range(recordSize):
                     sample = self._f.read(4)
                     sample = int.from_bytes(sample, "little")
-                    sample0 = (sample & 0b00000000000000000000111111111111)
+                    sample0 = sample & 0b00000000000000000000111111111111
                     sample1 = (sample & 0b00000000111111111111000000000000) >> 12
-                    other   = (sample & 0b11111111000000000000000000000000) >> 24
+                    other = (sample & 0b11111111000000000000000000000000) >> 24
                     # Note: Every 17th word is not a waveform sample
-                    if(j % 17 != 0):                    
-                        self._evtWaveforms[2*i + 0].append(sample0 + 2048);
-                        self._evtWaveforms[2*i + 1].append(sample1 + 2048);
-                    elif (j >= 14 and j <= 18):
-                        self._evtChTimes[2*i + 0] = (other << 8*(j-14));
-                        self._evtChTimes[2*i + 1] = (other << 8*(j-14));
-        
+                    if j % 17 != 0:
+                        self._evtWaveforms[2 * i + 0].append(sample0 + 2048)
+                        self._evtWaveforms[2 * i + 1].append(sample1 + 2048)
+                    elif j >= 14 and j <= 18:
+                        self._evtChTimes[2 * i + 0] = other << 8 * (j - 14)
+                        self._evtChTimes[2 * i + 1] = other << 8 * (j - 14)
+
         for i in range(15):
-            if(i in self._evtChTimes):
-                #Handle overflows
-                self._evtChTimes[i] = self._evtChTimes[i] + self._overflowCount*0b10000000000000000000000000000000000000000;
-                self._evtChTimes[i] = 5* self._evtChTimes[i];
-                if(self._evtChTimes[i] < self._evtTime):
+            if i in self._evtChTimes:
+                # Handle overflows
+                self._evtChTimes[i] = (
+                    self._evtChTimes[i]
+                    + self._overflowCount * 0b10000000000000000000000000000000000000000
+                )
+                self._evtChTimes[i] = 5 * self._evtChTimes[i]
+                if self._evtChTimes[i] < self._evtTime:
                     self._evtTime = self._evtChTimes[i]
-        if(self._evtTime < self._lastTime):
+        if self._evtTime < self._lastTime:
             self._overflowCount += 1
 
         self._lastTime = self._evtTime
+
+
 # EOF

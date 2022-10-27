@@ -3,6 +3,7 @@
 
 import os
 import sys
+import glob
 import re
 import json
 import yaml
@@ -18,12 +19,14 @@ from copy import deepcopy
 from pyrate.utils.ROOT_utils import _Type
 import pyrate.utils.strings as ST
 
+
 def modus_ponens(p, q):
     """Implements the modus ponens logic table: p -> q."""
     if p:
         return q
     else:
         return not p
+
 
 def is_float(v):
     """Checks if value string is a number."""
@@ -34,8 +37,10 @@ def is_float(v):
     except ValueError:
         return False
 
+
 def add_pyrate_to_env():
-    os.environ["PYRATE"] = os.path.abspath(os.path.join(pyrate.__file__ ,"../.."))
+    os.environ["PYRATE"] = os.path.abspath(os.path.join(pyrate.__file__, "../.."))
+
 
 def find_env(path, env="PYRATE"):
     """Checks existence of environment variable in path and eventually replaces it."""
@@ -43,7 +48,7 @@ def find_env(path, env="PYRATE"):
         env_path = os.environ.get(env)
         if not env_path:
             # env hasn't been set, let's get it internally
-            env_path = os.path.abspath(os.path.join(pyrate.__file__ ,"../.."))
+            env_path = os.path.abspath(os.path.join(pyrate.__file__, "../.."))
         path = path.replace(env, env_path)
     return path
 
@@ -72,6 +77,17 @@ def find_files(paths, env=None):
     return files
 
 
+def collect_files(path):
+
+    files = []
+    for f in path:
+
+        f = os.path.expandvars(f)
+        files += sorted(glob.glob(f))
+
+    return files
+
+
 def get_nested_values(d):
     """Returns a generator over all values of a nested dictionary."""
     for v in d.values():
@@ -80,10 +96,11 @@ def get_nested_values(d):
         else:
             yield v
 
+
 def expand_nested_values(d):
-    """ Returns a generator like get_nested_values, but handles all iterables 
-        instead of just dictionaries. Stops when the last interable contains
-        not more iterables
+    """Returns a generator like get_nested_values, but handles all iterables
+    instead of just dictionaries. Stops when the last interable contains
+    not more iterables
     """
     if iterable(d) and not isinstance(d, str):
         # Ok still dealing with an indexable object (but not a string)
@@ -281,9 +298,10 @@ def iterable(obj):
     else:
         return True
 
+
 def class_factory(class_name):
-    """ Gets a pyrate class, assumes that the class has the same name as
-        the module
+    """Gets a pyrate class, assumes that the class has the same name as
+    the module
     """
     for module in sys.modules:
         if class_name == module.split(".")[-1]:
@@ -295,8 +313,11 @@ def class_factory(class_name):
                     f"ERROR: {err}\n Unable to import input '{class_name}' from module '{module}'\n"
                     "Check that the class and module have the same name, and is added the nearest __init__.py"
                 )
-    sys.exit(f"ERROR: Unable to import input '{class_name}' from pyrate\n"
-              "Check that the class and module have the same name, and is added the nearest __init__.py")
+    sys.exit(
+        f"ERROR: Unable to import input '{class_name}' from pyrate\n"
+        "Check that the class and module have the same name, and is added the nearest __init__.py"
+    )
+
 
 def expand_tags(configs):
     """Searches all configs, finds all valid <tags> and replaces and expands
@@ -493,24 +514,28 @@ def expand_tags(configs):
     # Return the expanded configs
     return configs
 
+
 def find_all_tags(s):
     """Finds all valid tags in the <> <<>> and $$ forms"""
     return re.findall("<.*?>(?!>)", s) + re.findall("\$.*?\$", s)
+
 
 def strip_tag(tag):
     """strips a tag of its tag chars < > and $"""
     return tag.replace("<", "").replace(">", "").replace("$", "")
 
+
 def strip_all_tags(tags):
     """strips all tags in a list"""
     return [strip_tag(t) for t in tags]
 
+
 def dump_objects_to_yaml(config, filepath):
-    """ Dumps the objects config to a yaml file
-        Typicall takes in the global objects config dictionary
+    """Dumps the objects config to a yaml file
+    Typicall takes in the global objects config dictionary
     """
-    with open(filepath, 'w') as f:
-        yaml.dump(config, f, 
-        default_flow_style=False, indent=4, explicit_start=True)
+    with open(filepath, "w") as f:
+        yaml.dump(config, f, default_flow_style=False, indent=4, explicit_start=True)
+
 
 # EOF

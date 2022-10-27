@@ -263,7 +263,7 @@ class ReaderBlueTongueMMAP(Reader):
         value = self._get_items(items_number, items_type)
 
         if "raw_waveform" in name:
-            value = np.array(value, dtype='int32')
+            value = np.array(value, dtype="int32")
         else:
             value = value[0]
 

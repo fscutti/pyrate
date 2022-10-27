@@ -9,10 +9,14 @@ import numpy as np
 from pyrate.core.Input import Input
 from pyrate.utils.functions import iterable
 
+from pyrate.utils import functions as FN
+
 
 class ReaderROOT(Input):
     __slots__ = [
         "_f",
+        "_files",
+        "_size",
         "_files_index",
         "_idx",
         "_tree",
@@ -34,24 +38,14 @@ class ReaderROOT(Input):
             self._output_format = self.config["output"]
 
         self.is_loaded = False
-        self._init_files()
 
-        # Prepare all the files
-        # ---------------------
-        """
-        self._files = []
-        for f in self.config["files"]:
-            f = os.path.expandvars(f)
-            self._files += sorted(glob.glob(f))
-        if len(self._files) == 0:
+        self._files = FN.collect_files(config["files"])
+        if not self._files:
             sys.exit(f"ERROR: in reader {self.name}, no files were found.")
-        """
+
+        self._size = sum([os.path.getsize(f) for f in self._files])
 
         self._files_index = 0
-        #self._sizes = [os.path.getsize(f) for f in self._files]
-        #self.size = sum(self._sizes)
-
-
 
         # Set the progress to 0, unless the files are empty
         self._progress = 0 if self._size != 0 else 1

@@ -97,7 +97,9 @@ class ReaderWaveCatcherMMAP(Reader):
 
                 range_value = self._mmf.readline().decode("utf-8")
 
-                value = np.array([float(s) for s in range_value.split(" ")[:-1]], dtype='int32')
+                value = np.array(
+                    [float(s) for s in range_value.split(" ")[:-1]], dtype="int32"
+                )
 
             else:
                 pos_variable = self._mmf.find(variable.encode("utf-8"))
